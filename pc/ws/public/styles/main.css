@@ -1,0 +1,218 @@
+* {
+    box-sizing: border-box;
+    user-select: none;
+  }
+
+.formattedTextSpoiler {
+    display: inline-block;
+    background-color: #202225;
+    color: #00000000;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all .1s ease;
+}
+
+.formattedTextSpoilerShown {
+    background-color: #ffffff1a;
+    color: #dcddde;
+    cursor: default;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+body {
+    background-color: rgb(32, 34, 37);
+    margin: 0px;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+input[type=submit], button {
+    border: none;
+    cursor: pointer;
+    font-style: italic + bold;
+}
+
+/*
+input[type=submit], button {
+    border: none;
+    border-radius: 2px;
+    background-color: #4a4c6b;
+    transition-duration: 100ms;
+    color: #d3d5eb;
+    padding: 5px;
+    cursor: pointer;
+}
+
+input[type=submit]:hover, button:hover {
+    background-color: #5d5f80;
+}
+
+input[type=submit]:active, button:active {
+    background-color: #7d7fa5;
+}
+
+input[type=text], input[type=password] {
+    background-color: #494a61;
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 2px;
+    color: white;
+}
+
+input[type=text]:active, input[type=password]:active {
+    border: 1px solid #0095eb;
+}
+
+input[type=text]::placeholder input[type=password]::placeholder {
+    color: #71738a;
+}
+
+.errorText {
+    color: hsl(359, calc(var(--saturation-factor, 1) * 82.6%), 59.4%);
+    font-size: larger;
+    font-weight: bold;
+}
+
+select {
+    background-color: rgb(73, 74, 97);
+    border-radius: 2px;
+    padding: 5px;
+    border: none;
+    color: white;
+}
+
+select::backdrop {
+    background-color: rgb(73, 74, 97);
+    color: rgb(168, 170, 202);
+}
+
+select::-webkit-scrollbar {
+    display: none;
+}*/
+
+.yes > * {
+    border: steelblue 2px solid;
+    display: flexbox;
+    flex-direction: column;
+}
+
+.serverHeader {
+    color: white;
+    flex: 0 1 auto;
+}
+
+table td, table th {
+    vertical-align: top;
+}
+
+.sendMessage {
+    background-color: #40444b;
+    margin: 0px 10px 15px 10px;
+    height: 40px;
+    border-radius: 7px;
+    text-align: left;
+}
+
+.sendMessage input[type="text"] {
+    background-color: #40444b;
+    height: 100%;
+    width: 100%;
+    border: none;
+    border-radius: 7px;
+}
+
+.sendMessage input[type="text"]:active {
+    border: none;
+}
+
+
+.buttonChatAction {
+    background-color: #4f545c;
+    color: #fff;
+    margin-right: 8px;
+    padding: 2px 16px;
+    height: 20px;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.buttonChatAction:hover, .buttonChatAction:active {
+    background-color: #72767d;
+}
+
+.buttonChatActionRed {
+    background-color: #ed4245;
+    color: #fff;
+    margin-right: 8px;
+    padding: 2px 16px;
+    height: 20px;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.buttonChatActionRed:hover {
+    background-color: #c03537;
+}
+.buttonChatActionRed:active {
+    background-color: #a12d2f;
+}
+
+.logMessage {
+    text-align: left;
+    color: white;
+    font-family: Consolas;
+    font-size: 11px;
+}
+
+.logMessage::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.logMessage img {
+    display: inline-block;
+    position: relative;
+    top: 8px;
+    left: 12px;
+}
+
+.logMessage p {
+    display: inline-block;
+    margin-left: -20px;
+    font-weight:normal;
+    color: #d7d6d9;
+}
+
+.log::-webkit-scrollbar {
+    width: 5px;
+}
+
+/* Handle */
+.log:hover::-webkit-scrollbar-thumb {
+    background: rgb(46, 48, 53); 
+    border-radius: 10px;
+}
+
+.log {
+    background-color: #070707;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+.dhflsfsdhfjiosdifjsdf h2 {
+    color: #d7d6d9;
+    text-align: left;
+    margin: 0px;
+    font-size: 20px;
+    margin: 5px 5px 5px 15px;
+}

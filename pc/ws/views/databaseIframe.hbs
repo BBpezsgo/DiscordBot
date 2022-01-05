@@ -1,0 +1,72 @@
+<div style="background-color: #18191c; color: #b9bbbe; width: 100%; height: 100%; overflow-y: scroll;" class="databaseMain">
+    {{dataBasic.money}} 💵<br>
+    Szín: <div
+        style="border: #fff2 1px solid; width: 16px; height: 16px; background-color: {{dataBasic.color}}; display: inline-block; border-radius: 3px; transform: translate(0px, 3px)">
+    </div>
+    <br><div style="color: #fff; font-size: 600; font-weight: bold; display: inline;">Rang </div>({{dataBasic.score}} 🍺)
+    <div style="margin-left: 10px;">
+        {{score.rankName}}
+        {{score.rankIcon}}
+    </div>
+    <div id="myProgress">
+        <div id="myBar">0%</div>
+    </div>
+
+    <ul class="databaseTreeView">
+        <li><span class="caret">Hátizsák</span>
+            <ul class="nested">
+                <li>{{dataBackpacks.crates}} 🧱</li>
+                <li>{{dataBackpacks.gifts}} 🎁</li>
+                <li>{{dataBackpacks.getGift}} 🎀</li>
+                <li>{{dataBackpacks.tickets}} 🎟️</li>
+                <li><span class="caret">Sorsjegyek</span>
+                    <ul class="nested">
+                        <li>{{dataBackpacks.luckyCards.small}} 💶</li>
+                        <li>{{dataBackpacks.luckyCards.medium}} 💷</li>
+                        <li>{{dataBackpacks.luckyCards.large}} 💴</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<script>
+    var toggler = document.getElementsByClassName("caret");
+    var i;
+
+    for (i = 0; i < toggler.length; i++) {
+        toggler[i].addEventListener("click", function () {
+            this.parentElement.querySelector(".nested").classList.toggle("active");
+            this.classList.toggle("caret-down");
+        });
+    }
+</script>
+
+<script>
+    document.body.onload = function () { move({{ score.percent }})}
+
+    var i = 0;
+    function move(percent) {
+        if (i == 0) {
+            i = 1;
+            var elem = document.getElementById("myBar");
+            var width = 0;
+            var id = setInterval(frame, 10);
+            var lastWidth = width;
+            function frame() {
+                if (width >= percent) {
+                    clearInterval(id);
+                    i = 0;
+                } else {
+                    width += (percent - width) * 0.05;
+                    width = Math.min(Math.floor(width * 50) / 50, percent)
+                    if (lastWidth == width) { width = percent }
+                    elem.style.width = width + "%";
+                    elem.innerHTML = Math.floor(width) + "%";
+                    lastWidth = width
+                }
+            }
+        }
+    }
+</script>

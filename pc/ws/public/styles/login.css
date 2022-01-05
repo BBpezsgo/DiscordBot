@@ -1,0 +1,43 @@
+.loginInput {
+    font-weight: 400;
+    transition: border-color .2s ease-in-out;
+    padding: 10px;
+    height: 40px;
+    font-size: 16px;
+    border-radius: 3px;
+    color: #dcddde;
+    border: 1px solid #00004d;
+    background-color: #36393f;
+    width: 100%;
+}
+
+.loginInput:focus {
+    border: 1px solid #00aff4;
+}
+
+.loginButton {
+    color: #fff;
+    font-size: 16px;
+    line-height: 24px;
+    margin-bottom: 8px;
+    width: 100%;
+    height: 44px;
+    min-width: 130px;
+    min-height: 44px;
+    padding: 2px 16px;
+    color: #fff;
+    background-color: #5865f2;
+    border: none;
+    cursor: pointer;
+    margin-top: 16px;
+    transition-duration: 200ms;
+    border-radius: 3px;
+}
+
+.loginButton:hover {
+    background-color: #4752c4;
+}
+
+.loginButton:active {
+    background-color: #3c45a5;
+}

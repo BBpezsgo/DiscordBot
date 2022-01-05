@@ -1,0 +1,65 @@
+.server {
+    width: 48px;
+    cursor: pointer;
+    flex: content;
+}
+
+.server > img {
+    width: 100%;
+    border-radius: 50%;
+    transition-duration: 200ms;
+}
+
+.server > img:hover {
+    border-radius: 20%;
+}
+
+.server > img:active {
+    transition-duration: 0ms;
+    transform: translate(0px, 1px);
+}
+
+
+
+.serverHome {
+    width: 48px;
+    cursor: pointer;
+    flex: content;
+}
+
+.serverHome > img {
+    width: 100%;
+    border-radius: 50%;
+    transition-duration: 200ms;
+    background-color: #36393f;
+    margin-bottom: 8px;
+}
+
+.serverHome > img:hover {
+    border-radius: 30%;
+    background-color: #5865f2;
+}
+
+.serverHome > img:active {
+    transition-duration: 0ms;
+    transform: translate(0px, 1px);
+}
+
+.serverHomeSelected {
+    width: 48px;
+    cursor: pointer;
+    flex: content;
+}
+
+.serverHomeSelected > img {
+    width: 100%;
+    transition-duration: 200ms;
+    margin-bottom: 8px;
+    border-radius: 30%;
+    background-color: #5865f2;
+}
+
+.serverHomeSelected > img:active {
+    transition-duration: 0ms;
+    transform: translate(0px, 1px);
+}

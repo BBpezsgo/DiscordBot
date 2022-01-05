@@ -1,0 +1,167 @@
+<iframe style="display: none;" name="dummyframe" id="dummyframe"></iframe>
+
+<table cellspacing="0" cellpadding="0"
+    style="display: flexbox; flex-direction: row; overflow: hidden; height: 100%; border: none;">
+
+    <th style="background-color: #202225; width: 32px; border: none;">
+        <div class="serverList" style="flex: content;">
+            <div class="serverHome" style="margin: 4px 10px 4px 12px;" onclick="SelectHome()">
+                <img src="home.png">
+            </div>
+            <div style="margin: 0 0 8px; justify-content: center; width: 72px; text-align: center;">
+                <div style="margin: auto; height: 2px; width: 32px; border-radius: 1px; background-color:#ffffff0f; "></div>
+            </div>
+            {{#each servers}}
+            <div id="{{this.id}}" class="server" onclick="SelectGuild(this.id)" style="margin: 4px 10px 4px 12px;">
+                <img src="{{this.iconUrl}}">
+            </div>
+            {{/each}}
+        </div>
+    </th>
+    <th style="background-color: #2f3136; text-align:left; display: flexbox; flex-flow: row; border: none;">
+        <div class="serverHeader"
+            style=" width: 240px; height: 48px; border-bottom: 2px #000 solid; text-align: center;">
+            <div style="position: relative; top: 12px; font-size: 17px;">{{selectedServer.name}}</div>
+        </div>
+        <!--<img width="100%" height="100px" src="{{selectedServer.banner}}" style="flex: 0 1 auto;">-->
+        <div id="channellist" class="channelList" style="flex: 0 1 40px;height: calc(100% - 44px - 61px);">
+            <div style="height: 5px;"></div>
+            {{#each chans}}
+            <div id="{{this.id}}" class="{{this.channelType}}{{this.selected}}{{this.insideGroup}}"
+                onclick="SelectChannel(this.id)">
+                <div style="transform: translate(0px, -10px); font-weight: normal;">
+                    <img src="{{this.type}}.png" style="display: inline-block; margin-left: 5px;" width="18px"
+                        height="17px">
+                    <p style="display: inline-block;text-align: left; transform: translate(0px, -3px)">
+                    <div class="groupArrow" style="position:absolute; top: 22px; left: 5px;"></div>{{this.name}}
+                    </p>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        <div class="statusPanel" style="background-color: #000; height: 61px;">
+            <img src="{{client.avatar}}" width="32px" height="32px" style="position: relative; top: 10px; left: 10px;">
+            <div
+                style="border-radius: 8px; width: 16px; height: 16px; position:relative; top: 5px; left: -1px; background-color: #202225; display: inline-block; z-index: 9; margin: -8px">
+            </div>
+            <img src="online.png" width="10px" height="10px"
+                style="position: relative; top: 10px; left: -9px; z-index: 10;">
+            <div style="color: white; position: relative; left: -4px; top: -8px; display: inline-block;">
+                {{client.username}}</div>
+            <div style="color: gray; position: relative; left: 50px; top: -8px; font-size: 12px;">
+                #{{client.discriminator}}
+            </div>
+        </div>
+    </th>
+    <th style="width:100%; height: 100%; border: none;">
+        <div class="serverMessagesPanel" style="height: 100%;">
+            <table cellspacing="0" cellpadding="0" style="width: 100%; overflow:auto;height: 100%;">
+                <tr>
+                    <div class="channelHeader"
+                        style="text-align: left; height: 48px; background-color: #36393f; border-bottom: 2px #000 solid; padding: 0px 8px;">
+                        <svg width="24" height="24" style="color: rgb(114 118 125); margin: 11px;">
+                            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 9L8.35045 15H14.3504L15.4104 9H9.41045Z">
+                            </path>
+                        </svg>
+                        <div style=" font-weight: normal;display: inline-block; color: white; top: -16px; left: -4px; position: relative;">{{selectedChannel.name}}</div>
+                        <div style="height: 24px; width: 1px; background-color: #444; display: inline-block; margin: 12px;"></div>
+                        <div  class="styledtext" style="overflow: hidden;white-space: nowrap;text-overflow:ellipsis; display: inline-block; color: gray; font-weight: normal; top: -16px; left: -4px; position: relative; width: 400px;">{{selectedChannel.description}}</div>
+                    </div>
+                </tr>
+                <tr>
+                    <th style="background-color: #36393f;">
+                        <div id="messages" class="messages" style="overflow-y: scroll; height: calc(100% - 110px);">
+                            <div class="userChatDescription"
+                                style="margin: 16px; width: calc(100% - 32px); height:196px; text-align: left;">
+                                <div style="width: 68px;
+                                    height: 68px;
+                                    margin-top: 16px;
+                                    border-radius: 50%;
+                                    background-color: rgb(79 84 92);
+                                    background-image: url(img0.png);
+                                    background-repeat: no-repeat;
+                                    background-position: 50%;"></div>
+                                <h1 style="margin: 8px 0px; color: #fff;  font-weight: normal;">A(z) {{selectedChannel.name}} üdvözöl!</h1>
+                                <div style="height: 60px; color: #b9bbbe; font-weight: normal;">
+                                    Ez a(z) #{{selectedChannel.name}} csatorna kezdete.
+                                    <div style="margin-top: 16px;">
+                                        <form action="/fetchChannelMessages" method="post" target="dummyframe" style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
+                                            <input type="hidden" name="token" value="{{token}}">
+                                            <input type="hidden" name="id" value="{{selectedChannel.id}}">
+                                            <input type="submit" value="Fetch Messages" class="buttonChatAction">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {{#each messages}}
+                            <div class="message">
+                                <div style="float: left; width: 60px;">
+                                    <img style="border-radius: 50%;" width="48" height="48"
+                                        src="{{this.author.avatar}}">
+                                </div>
+                                <div style="height: fit-content;float: right; width: calc(100% - 60px);">
+                                    <div style="height: fit-content; width: 100%; text-align: left;">
+                                        <div style="display: inline-block; color: #fff; margin-right: 3px">
+                                            {{this.author.username}}</div>
+                                        <div style="display: inline-block; color: #72767d; font-weight:normal;">
+                                            {{this.time}}</div>
+                                        <div class="styledtext"
+                                            style="user-select:text; height: fit-content; display: block; font-weight:normal; color: #d7d6d9;">
+                                            {{this.context}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        <div>
+                            <form action="/sendMessage" method="post" target="dummyframe" class="sendMessage">
+                                <input type="hidden" name="token" value="{{token}}">
+                                <input type="hidden" name="server" value="{{selectedServer.id}}">
+                                <input type="hidden" name="channel" value="{{selectedChannel.id}}">
+                                <input type="text" name="text" placeholder="Üzenet: #{{selectedChannel.name}}">
+                            </form>
+                        </div>
+                    </th>
+                    <th style="width: 240px; background-color: #2f3136; text-align: left;">
+                        <div class="usersList">
+                            <div style="color: gray; text-align: left; padding: 24px 8px 0px 16px;">Tagok</div>
+                            <div>
+                                {{#each members}}
+                                <div class="member" style="text-align: left;">
+                                    <div style="position: relative; top: 5px; left: -10px; display: inline-block;">
+                                        <img src="{{this.status}}.png" width="10px" height="10px"
+                                            style="position: relative; top: 0px; left: 36px; z-index: 10;">
+                                        <img src="{{this.avatar}}" width="32px" height="32px" style="border-radius: 50%;">
+                                        <div
+                                            style="border-radius: 8px; width: 16px; height: 16px; position:relative; top: -5px; left: -8px; background-color: #202225; display: inline-block; z-index: 9; margin: -8px">
+                                        </div>
+                                    </div>
+                                    <div
+                                        style="color: #fff;color: {{this.displayColor}};display: inline-block; height: 100%; top: -5px; left: -3px; position: relative;">
+                                        {{this.displayName}}</div>
+                                </div>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+            </table>
+        </div>
+    </th>
+</table>
+
+<script>
+
+    setTimeout(scrollToBottom(document.getElementById('messages')), 1000);
+    setTimeout(() => { document.getElementById('messages').style.scrollBehavior = 'smooth' }, 1100)
+
+    /**
+    * @param {HTMLElement} element
+    */
+    function scrollToBottom(element) {
+        element.scrollTo(0, element.scrollHeight);
+    }
+
+</script>
