@@ -129,17 +129,6 @@ const Color = {
     DarkPink: "#ad1457"
 }
 
-const readline = require('readline')
-
-let request = require(`request`);
-const { send } = require('process')
-const { number } = require('assert-plus')
-function download(url) {
-    request.get(url)
-        .on('error', console.error)
-        .pipe(fs.createWriteStream('meme.png'));
-}
-
 /**
  * @type {GameMap}
  */
@@ -2154,95 +2143,9 @@ async function readIncomingDatas(_data) {
         console.log(inputPieces)
         console.log(channelId)
 
-        let channel = Discord.Channel
-        channel = bot.channels.cache.get(channelId).send(messageText).then(() => {
+        bot.channels.cache.get(channelId).send(messageText).then(() => {
             logToFile("ΣÜzenet elküldve")
         })
-        /*} else if (data.includes('READSCORES')) {
-            let finalOutputData = ''
-            finalOutputData += 'δDAY' + dataBot.day + '\n'
-            const memberList = ['726127512521932880', '551299555698671627', '494126778336411648', '750748417373896825', '575727604708016128', '504304776033468438', '638644689507057683', '591218715803254784', '583709720834080768', '415078291574226955']
-            for (let i = 0; i < memberList.length; i++) {
-                try {
-                    const member = bot.users.cache.get(memberList[i])
-                    if (member) { if (scores[member.id]) {
-                        finalOutputData += 'δSTARTSCORESDATA' + member.id + '\n'
-                        finalOutputData += 'δSCORESDATAscoreĂ' + scores[member.id].score + '\n'
-                        finalOutputData += 'δSCORESDATAmoneyĂ' + scores[member.id].money + '\n'
-                        finalOutputData += 'δSCORESDATAcratesĂ' + scores[member.id].crates + '\n'
-                        finalOutputData += 'δSCORESDATAgiftsĂ' + scores[member.id].gifts + '\n'
-                        finalOutputData += 'δSCORESDATAdayĂ' + scores[member.id].day + '\n'
-                        finalOutputData += 'δSCORESDATAgetGiftĂ' + scores[member.id].getGift + '\n'
-                        finalOutputData += 'δSCORESDATAusernameĂ' + scores[member.id].username + '\n'
-                        finalOutputData += 'δSCORESDATAsmallLuckyCardĂ' + scores[member.id].smallLuckyCard + '\n'
-                        finalOutputData += 'δSCORESDATAmediumLuckyCardĂ' + scores[member.id].mediumLuckyCard + '\n'
-                        finalOutputData += 'δSCORESDATAlargeLuckyCardĂ' + scores[member.id].largeLuckyCard + '\n'
-                        finalOutputData += 'δSCORESDATAhaveMoneyMakerĂ' + scores[member.id].haveMoneyMaker + '\n'
-                        finalOutputData += 'δSCORESDATAmoneyMakerLevelĂ' + scores[member.id].moneyMakerLevel + '\n'
-                        finalOutputData += 'δSCORESDATAmoneyMakerNameĂ' + scores[member.id].moneyMakerName + '\n'
-                        finalOutputData += 'δSCORESDATAmoneyMakerDayĂ' + scores[member.id].moneyMakerDay + '\n'
-                        finalOutputData += 'δSCORESDATAstickersMemeĂ' + scores[member.id].stickersMeme + '\n'
-                        finalOutputData += 'δSCORESDATAstickersMusicĂ' + scores[member.id].stickersMusic + '\n'
-                        finalOutputData += 'δSCORESDATAstickersYoutubeĂ' + scores[member.id].stickersYoutube + '\n'
-                        finalOutputData += 'δSCORESDATAstickersMessageĂ' + scores[member.id].stickersMessage + '\n'
-                        finalOutputData += 'δSCORESDATAchallengeDayĂ' + scores[member.id].challengeDay + '\n'
-                        finalOutputData += 'δSCORESDATAchallengeWeekĂ' + scores[member.id].challengeWeek + '\n'
-                        finalOutputData += 'δSCORESDATAdayChallengeAĂ' + scores[member.id].dayChallengeA + '\n'
-                        finalOutputData += 'δSCORESDATAdayChallengeBĂ' + scores[member.id].dayChallengeB + '\n'
-                        finalOutputData += 'δSCORESDATAdayChallengeCĂ' + scores[member.id].dayChallengeC + '\n'
-                        finalOutputData += 'δSCORESDATAweekChallengeAĂ' + scores[member.id].weekChallengeA + '\n'
-                        finalOutputData += 'δSCORESDATAweekChallengeBĂ' + scores[member.id].weekChallengeB + '\n'
-                        finalOutputData += 'δSCORESDATAweekChallengeCĂ' + scores[member.id].weekChallengeC + '\n'
-                        finalOutputData += 'δSCORESDATAstickersChallengeĂ' + scores[member.id].stickersChallenge + '\n'
-                        finalOutputData += 'δSCORESDATAstickersCommandĂ' + scores[member.id].stickersCommand + '\n'
-                        finalOutputData += 'δSCORESDATAstickersTipĂ' + scores[member.id].stickersTip + '\n'
-                        finalOutputData += 'δENDSCORESDATA'
-                    }}
-                } catch (error) {
-                    logToFile(FileDebugType.error + error)
-                    log(ERROR + ": " + error)
-                }
-            }
-            logToFile(finalOutputData)
-        } else if (data.includes('SEND')) {
-            if (data.includes('MONEY')) {
-                let id = ''
-                let value = 0
-                id = data.split("|")[1]
-                value = data.split("|")[2]
-                console.log(data)
-                console.log("Money")
-                console.log(id)
-                console.log(value)
-    
-                const member = bot.users.cache.get(id)
-                console.log(member.username)
-    
-                console.log(scores[member.id].money)
-                scores[member.id].money += parseInt(value)
-                console.log(scores[member.id].money)
-                
-                logToFile("MONEYADDED|" + member.username + "|" + value)
-            }
-            if (data.includes('XP')) {
-                let id = ''
-                let value = 0
-                id = data.split("|")[1]
-                value = data.split("|")[2]
-                console.log(data)
-                console.log("Score")
-                console.log(id)
-                console.log(value)
-    
-                const member = bot.users.cache.get(id)
-                console.log(member.username)
-    
-                console.log(scores[member.id].score)
-                scores[member.id].score += parseInt(value)
-                console.log(scores[member.id].score)
-    
-                logToFile("XPADDED|" + member.username + "|" + value)
-            }*/
     } else if (data.includes('REACT')) {
         let messageId = ''
         let reactIco = ''
@@ -2398,7 +2301,7 @@ bot.once('ready', async () => { //Ready
          */
         const listOfMessageAll = []
 
-        const fileContent = fs.readFileSync('C:/Users/bazsi/Desktop/Discord/processedNewsMessageIDs.txt', 'utf-8')
+        const fileContent = fs.readFileSync('./processedNewsMessageIDs.txt', 'utf-8')
         const listOfProcessedMessageIDs = fileContent.split('\n')
 
         messages.forEach((message) => {
@@ -2417,9 +2320,9 @@ bot.once('ready', async () => { //Ready
         log(`Received ${listOfMessage.length} news`)
 
         if (newsSaveProcessedMessages == true) {
-            await fs.writeFileSync('C:/Users/bazsi/Desktop/Discord/processedNewsMessageIDs.txt', '')
+            await fs.writeFileSync('./processedNewsMessageIDs.txt', '')
             listOfMessageAll.forEach(async (message) => {
-                await fs.appendFileSync('C:/Users/bazsi/Desktop/Discord/processedNewsMessageIDs.txt', `\n${message.id}`)
+                await fs.appendFileSync('./processedNewsMessageIDs.txt', `\n${message.id}`)
             })
         }
 
@@ -2742,13 +2645,13 @@ bot.on('message', async message => { //Message
 
     //#region News
     if (message.channel.id == incomingNewsChannel) {
-        const fileContent = fs.readFileSync('C:/Users/bazsi/Desktop/Discord/processedNewsMessageIDs.txt', 'utf-8')
+        const fileContent = fs.readFileSync('./processedNewsMessageIDs.txt', 'utf-8')
         const listOfProcessedMessageIDs = fileContent.split('\n')
 
         if (listOfProcessedMessageIDs.includes(message.id) == false) {
             processNewsMessage(message)
             if (newsSaveProcessedMessages == true) {
-                await fs.appendFileSync('C:/Users/bazsi/Desktop/Discord/processedNewsMessageIDs.txt', `\n${message.id}`)
+                await fs.appendFileSync('./processedNewsMessageIDs.txt', `\n${message.id}`)
             }
         }
 

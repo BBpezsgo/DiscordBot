@@ -1,4 +1,3 @@
-const { date } = require('assert-plus')
 const Discord = require('discord.js')
 const fs = require('fs')
 let scores = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
@@ -26,10 +25,8 @@ function dayName(dayOfWeek) {
 function toDateString(date) {
     return date.getFullYear().toString() + ':' + date.getMonth().toString() + ':' + date.getDate().toString()
 }
-function resetScores() {
+function resetDatabase() {
     fs.writeFile('scores.json', JSON.stringify(scores), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
-}
-function resetBusiness() {
     fs.writeFile('./database/businesses.json', JSON.stringify(businesses), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
 }
 /**
@@ -46,7 +43,7 @@ function businessAddToMemory(sender) {
         businesses[sender.id].businessIndex = 0;
     };
 
-    resetBusiness()
+    resetDatabase()
 }
 /**
 * @param {Discord.User} sender
@@ -77,7 +74,7 @@ function businessAddToMemoryDetails(sender) {
         businesses[sender.id].businessUses.day = dayOfYear;
     };
 
-    resetBusiness()
+    resetDatabase()
 }
 /**
  * @returns {string}
@@ -289,8 +286,7 @@ module.exports = (channel, sender, isPrivate) => {
                         businesses[sender.id].businessIndex = 0
                         channel.send('> \\💥 **A biznisz megszüntetve**')
                     }
-                    resetScores()
-                    resetBusiness()
+                    resetDatabase()
                     embedMessage.reactions.removeAll()
                 }).catch(() => {
                     embedMessage.reactions.removeAll()
@@ -389,6 +385,5 @@ module.exports = (channel, sender, isPrivate) => {
         }
     }
 
-    resetScores()
-    resetBusiness()
+    resetDatabase()
 }
