@@ -241,7 +241,7 @@ bot.on('error', error => {
     log(ERROR + ': ' + error);
 });
 
-bot.on('debug', _debug => {
+bot.on('debug', debug => {
     statesManager.ProcessDebugMessage(debug)
     const translatedDebug = TranslateMessage(debug)
 
