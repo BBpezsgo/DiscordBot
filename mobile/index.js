@@ -264,9 +264,9 @@ bot.on('invalidated', () => {
 });
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
-    log(ERROR + ': Lecsatlakozva');
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
+    log(ERROR + ': Lecsatlakozva');
 });
 
 bot.on('shardReady', (shardID) => {
@@ -279,8 +279,8 @@ bot.on('shardReconnecting', (shardID) => {
 });
 
 bot.on('shardResume', (shardID, replayedEvents) => {
-    log(SHARD & ': Folytatás: ' + replayedEvents.toString())
     statesManager.shardCurrentlyLoading = false
+    log(SHARD & ': Folytatás: ' + replayedEvents.toString())
 });
 
 bot.on('raw', async event => {
@@ -310,52 +310,21 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
 });
 
 bot.ws.on('READY', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.ready:" + shardID)
 });
 
 bot.ws.on('RESUMED', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.resumed:" + shardID)
 });
 
 bot.ws.on('PRESENCE_UPDATE', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.presenceUpdate:" + shardID)
 });
 
 bot.ws.on('VOICE_SERVER_UPDATE', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.VoiceServerUpdate:" + data)
 });
 
 bot.ws.on('VOICE_STATE_UPDATE', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.VoiceStateUpdate:" + data)
 });
 
 bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => {
-    if (voiceStateNew.connection === null) {
-        logToFile(FileDebugType.debug + "voiceStateUpdate: connection.status:4" +
-            ";connection.voice.deaf:false" +
-            ";connection.voice.mute:false" +
-            ";connection.voice.speaking:false" +
-            ";connection.voice.streaming:false")
-    } else {
-        let voiceSpeaking = ''
-        let voiceStreaming = ''
-        if (voiceStateNew.connection.voice.speaking === null) {
-            voiceSpeaking = "null"
-        } else {
-            voiceSpeaking = voiceStateNew.connection.voice.speaking.toString()
-        }
-        if (voiceStateNew.connection.voice.streaming === null) {
-            voiceStreaming = "null"
-        } else {
-            voiceStreaming = voiceStateNew.connection.voice.streaming.toString()
-        }
-
-        logToFile(FileDebugType.debug + "voiceStateUpdate: connection.status:" + voiceStateNew.connection.status.toString() +
-            ";connection.voice.deaf:" + voiceStateNew.connection.voice.deaf.toString() +
-            ";connection.voice.mute:" + voiceStateNew.connection.voice.mute.toString() +
-            ";connection.voice.speaking:" + voiceSpeaking +
-            ";connection.voice.streaming:" + voiceStreaming)
-    }
 });
 
 //#endregion
