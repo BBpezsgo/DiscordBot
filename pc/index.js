@@ -6,6 +6,7 @@ const CommandXp = require('./commands/database/xp')
 const CommandShop = require('./commands/database/shop')
 const CommandGoHome = require('./commands/database/goHome')
 const CommandBusiness = require('./commands/database/businees')
+
 const { LogManager } = require('./functions/log.js')
 const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
@@ -556,22 +557,22 @@ function addXp(user, channel, ammount) {
 //#region Listener-ek
 
 bot.on('reconnecting', () => {
-    log(INFO & ': Újracsatlakozás...');
+    log(INFO + ': Újracsatlakozás...');
     logToFile(FileDebugType.debug + 'reconnecting')
 });
 
 bot.on('disconnect', () => {
-    log(ERROR & ': Megszakadt a kapcsolat!');
+    log(ERROR + ': Megszakadt a kapcsolat!');
     logToFile(FileDebugType.debug + 'disconnect')
 });
 
 bot.on('resume', () => {
-    log(INFO & ': Folytatás');
+    log(INFO + ': Folytatás');
     logToFile(FileDebugType.debug + 'resume')
 });
 
 bot.on('error', error => {
-    log(ERROR & ': ' + error);
+    log(ERROR + ': ' + error);
     logToFile(FileDebugType.debug + 'error:' + error)
 });
 
@@ -792,7 +793,7 @@ bot.on('debug', debug => {
 });
 
 bot.on('warn', warn => {
-    log(WARNING & ': ' + warn);
+    log(WARNING + ': ' + warn);
     logToFile(FileDebugType.warning + 'warn:' + warn)
 });
 
@@ -861,7 +862,7 @@ bot.on('raw', async event => {
 });
 
 bot.on('rateLimit', (RateLimitData) => {
-    log(DEBUG + ': rateLimit: ' + RateLimitData.limit + '; timeout: ' + RateLimitData.timeout + '; route: "' + RateLimitData.route + '"; method: "' + RateLimitData.method + '"; path: "' + RateLimitData.path + '"');
+    //log(DEBUG + ': rateLimit: ' + RateLimitData.limit + '; timeout: ' + RateLimitData.timeout + '; route: "' + RateLimitData.route + '"; method: "' + RateLimitData.method + '"; path: "' + RateLimitData.path + '"');
     logToFile(FileDebugType.debug + 'rateLimit:' + RateLimitData.limit + '; timeout: ' + RateLimitData.timeout + '; route: ' + RateLimitData.route + '; method: ' + RateLimitData.method + '; path: ' + RateLimitData.path)
 });
 
