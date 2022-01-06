@@ -1,7 +1,7 @@
 //#region Imports, variables
 
 console.clear()
-console.log('NodeJS: Loading...\x1b[0m')
+console.log('[NodeJS]: Betöltés...\x1b[0m')
 
 const CommandWeather = require('./commands/weather')
 const CommandHelp = require('./commands/help')
@@ -701,7 +701,7 @@ bot.once('ready', async () => { //Ready
         description: 'Békéscsaba időjárása'
     })
 
-    console.log('\x1b[1mClient: Ready\x1b[0m')
+    log(DONE + ': A BOT kész!')
 });
 
 /**
@@ -784,8 +784,6 @@ function processNewsMessage(message) {
     } else if (message.author.id == '802864713323118603') {
         embed.setAuthor(ConvertNewsIdToName(message.author.id), message.author.displayAvatarURL())
         if (message.embeds.length == 1) {
-            console.log(message.embeds[0])
-
             let content = message.content.replace('@Free Games Ping', '')
             let title = ''
             let url = ''
@@ -851,8 +849,6 @@ function processNewsMessage(message) {
         embed.setURL(url)
 
         if (message.embeds.length == 1) {
-            console.log(message.embeds[0])
-
             const embed2 = message.embeds[0]
 
             if (embed2.image != null) {
@@ -863,11 +859,6 @@ function processNewsMessage(message) {
             }
         }
         role = '902878964438143026'
-    }
-
-
-    if (message.embeds.length > 0) {
-        console.log(message.embeds[0])
     }
 
     listOfNews.push(new NewsMessage(embed, role, message))
@@ -893,7 +884,7 @@ bot.on('ready', () => { //Change status
             lastNoNews = false
         } else if (lastNoNews == false) {
             lastNoNews = true
-            console.log('All news are processed.')
+            log(DONE + ': Minden hír közzétéve')
         }
 
     }, 2000);
@@ -1249,11 +1240,10 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
     channel.send({ content: "> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**", components: [row] });
 }
 
-console.log('Node: Loaded\x1b[0m')
 try {
     bot.login(token)
 } catch (err) {
-    console.log('Error: ' + err)
+    log(ERROR + ': ' + err)
 }
 
 //#region News
