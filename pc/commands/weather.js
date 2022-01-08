@@ -2,11 +2,8 @@ const Discord = require('discord.js')
 const MoonPhase = require('moonphase-js')
 const weather1 = require('weather-js')
 const weather2 = require('nodejs-weather-app');
-const { date } = require('assert-plus');
-const { Parser } = require('xml2js');
 const fs = require('fs')
-//const HtmlToImage = require('node-html-to-image')
-//const rawRadarHtml = fs.readFileSync('./radars.html', 'utf-8').replace('\n', '')
+const request = require("request");
 
 const sunDatasRaw = fs.readFileSync('C:/Users/bazsi/Desktop/Discord/Helper/output.txt').toString().split("|")
 const Dawn = sunDatasRaw[0]
@@ -448,6 +445,96 @@ function GetReadableNumber(value) {
     return Math.floor(value * 10) / 10;
 }
 
+function GetPollutionIndex(type, value) {
+    if (type == 0) { //CO
+        return '⚫'
+        if (value < 0) {
+            return '🟢'
+        } else if (value < 0) {
+            return '🟡'
+        } else if (value < 0) {
+            return '🟠'
+        } else {
+            return '🔴'
+        }
+    } else if (type == 1) { //NO
+        return '⚫'
+
+        if (value < 0) {
+            return '🟢'
+        } else if (value < 0) {
+            return '🟡'
+        } else if (value < 0) {
+            return '🟠'
+        } else {
+            return '🔴'
+        }
+    } else if (type == 2) { //NO2
+        if (value < 0) {
+            return '🟢'
+        } else if (value < 25) {
+            return '🟡'
+        } else if (value < 75) {
+            return '🟠'
+        } else {
+            return '🔴'
+        }
+    } else if (type == 3) { //O3
+        if (value < 500) {
+            return '🔵'
+        } else if (value < 750) {
+            return '🟣'
+        } else {
+            return '🟤'
+        }
+    } else if (type == 4) { //SO2
+        if (value < 25) {
+            return '🟢'
+        } else if (value < 50) {
+            return '🟡'
+        } else if (value < 75) {
+            return '🟠'
+        } else {
+            return '🔴'
+        }
+    } else if (type == 5) { //PM2.5
+        if (value < 250) {
+            return '🟢'
+        } else if (value < 500) {
+            return '🟡'
+        } else if (value < 1000) {
+            return '🟠'
+        } else {
+            return '🔴'
+        }
+    } else if (type == 6) { //PM10
+        return '⚫'
+
+        if (value < 0) {
+            return '🟢'
+        } else if (value < 0) {
+            return '🟡'
+        } else if (value < 0) {
+            return '🟠'
+        } else {
+            return '🔴'
+        }
+    } else if (type == 7) { //NH3
+        return '⚫'
+
+        if (value < 0) {
+            return '🟢'
+        } else if (value < 0) {
+            return '🟡'
+        } else if (value < 0) {
+            return '🟠'
+        } else {
+            return '🔴'
+        }
+    }
+    return '⚫'
+}
+
 /**
  * @param {any} data0 msn data
  * @param {any} data1 openweather data
@@ -455,7 +542,7 @@ function GetReadableNumber(value) {
  * @param {number} index 0 | 1 | 2 | 3
  * @returns {Discord.MessageEmbed}
  */
-function getEmbed(data0, data1, data2, index) {
+function getEmbed(data0, data1, data2, index, data3) {
     var current = data0[0].current;
     const embed = new Discord.MessageEmbed()
         .setColor(0x00AE86)
@@ -523,6 +610,15 @@ function getEmbed(data0, data1, data2, index) {
                 `\\🏙️ ${unixToTime(data1.sys.sunrise)}\n` +
                 `\\🌆 ${unixToTime(data1.sys.sunset)}\n` +
                 `\\🌃 ${Dusk}` +
+                '\n**Levegőminőség:**\n' +
+                'CO: \\' + GetPollutionIndex(0, data3.co) + ' ' + data3.co + ' μg/m³' +
+                '\nNO: \\' + GetPollutionIndex(1, data3.no) + ' ' + data3.no + ' μg/m³' +
+                '\nNO₂: \\' + GetPollutionIndex(2, data3.no2) + ' ' + data3.no2 + ' μg/m³' +
+                '\nO₃: \\' + GetPollutionIndex(3, data3.o3) + ' ' + data3.o3 + ' μg/m³' +
+                '\nSO₂: \\' + GetPollutionIndex(4, data3.so2) + ' ' + data3.so2 + ' μg/m³' +
+                '\nPM₂.₅: \\' + GetPollutionIndex(5, data3.pm2_5) + ' ' + data3.pm2_5 + ' μg/m³' +
+                '\nPM₁₀: \\' + GetPollutionIndex(6, data3.pm10) + ' ' + data3.pm10 + ' μg/m³' +
+                '\nNH₃: \\' + GetPollutionIndex(7, data3.nh3) + ' ' + data3.nh3 + ' μg/m³' +
                 '\n\n**Előrejelzés:**')
         if (ImgExists(skyImgName) === true) {
             const attachment = new Discord.MessageAttachment('./commands/weatherImages/' + skyImgName + '.jpg', skyImgName + '.jpg');
@@ -665,12 +761,6 @@ module.exports = async (channel, sender) => {
      */
     const msg = await channel.send('> **Betöltés...**')
 
-    /*HtmlToImage({
-        output: './image.jpg',
-        html: rawRadarHtml,
-        type: 'jpeg'
-    }).then(async () => {
-        console.log('The image was created successfully!')*/
     try {
         await weather1.find({ search: searchFor, degreeType: 'C' }, function (err, result) {
             if (err) {
@@ -678,11 +768,34 @@ module.exports = async (channel, sender) => {
                 return
             }
             weather2.getWeather("bekescsaba").then(async val => {
-                weatherData0 = result
-                weatherData1 = val
-                weatherData2 = m
+                let url = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=cf3d32578d8e60b1da132b482d2ce5b7'
 
-                channel.send(getEmbed(weatherData0, weatherData1, weatherData2, 3))
+                request(url, function (err, response, body) {
+
+                    // On return, check the json data fetched
+                    if (err) {
+                        msg.edit('> \\❌ ' + err.toString)
+                    } else {
+                        let weather = JSON.parse(body)
+                        weatherData0 = result
+                        weatherData1 = val
+                        weatherData2 = m
+                        const weatherData3 = weather.list[0].components
+                        let embed = getEmbed(weatherData0, weatherData1, weatherData2, 3, weatherData3)
+                        //let skyTxt = weatherData0[0].current.skytext
+                        //        const skyImgName = weatherSkytextImgName(skyTxt, unixToTime(weatherData1.sys.sunset).split(':')[0], unixToTime(weatherData1.sys.sunrise).split(':')[0], weatherData1.clouds.all)
+                        //if (ImgExists(skyImgName) === true) {
+                        //            const attachment = new Discord.MessageAttachment('./commands/weatherImages/' + skyImgName + '.jpg', skyImgName + '.jpg');
+                        //            embed.setImage('attachment://'+ skyImgName + '.jpg')
+
+                        //                channel.send({embeds:[ embed ], attachments: [attachment]})
+                        //} else {
+                        //            embed.addField('ImgCode', skyImgName, false)
+                        channel.send({ embed })
+                        //}
+                        msg.delete();
+                    }
+                })
             });
         });
     } catch (error) {
