@@ -4,8 +4,9 @@ const weather1 = require('weather-js')
 const weather2 = require('nodejs-weather-app');
 const fs = require('fs')
 const request = require("request");
+const { openweatherToken } = require('../config.json')
 
-const sunDatasRaw = fs.readFileSync('C:/Users/bazsi/Desktop/Discord/Helper/output.txt').toString().split("|")
+const sunDatasRaw = fs.readFileSync('./Helper/output.txt').toString().split("|")
 const Dawn = sunDatasRaw[0]
 const Dusk = sunDatasRaw[3]
 
@@ -410,20 +411,6 @@ function weatherPressureIcon(pressureValue) {
     }
     return pressureicon
 }
-/**
-* @param {number} length
-* @param {string} char
-*/
-function Characters(length, char) {
-    let finalSpaceText = ''
-    for (let l = 0; l < length; l++) {
-        finalSpaceText += char
-    }
-    return finalSpaceText
-}
-function getGraphTemp(temp, maxmin) {
-    return Math.floor(temp / maxmin * 10)
-}
 
 /**
  * @param {number[]} values 
@@ -759,47 +746,38 @@ module.exports = async (channel, sender) => {
     /**
      * @type {Discord.Message}
      */
-    const msg = await channel.send('> **Betöltés...**')
+    const msg = await channel.send('> \\⌛ **Betöltés...**')
 
     try {
         await weather1.find({ search: searchFor, degreeType: 'C' }, function (err, result) {
             if (err) {
-                msg.edit('> \\❌ ' + err.toString())
+                msg.edit('> \\❌ **MSN Error:** ' + err.toString())
                 return
             }
             weather2.getWeather("bekescsaba").then(async val => {
-                let url = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=cf3d32578d8e60b1da132b482d2ce5b7'
+                let url = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + openweatherToken
 
                 request(url, function (err, response, body) {
-
-                    // On return, check the json data fetched
                     if (err) {
-                        msg.edit('> \\❌ ' + err.toString)
+                        msg.edit('> \\❌ **OpenWeatherMap Error:** ' + err.toString)
                     } else {
-                        let weather = JSON.parse(body)
-                        weatherData0 = result
-                        weatherData1 = val
-                        weatherData2 = m
-                        const weatherData3 = weather.list[0].components
-                        let embed = getEmbed(weatherData0, weatherData1, weatherData2, 3, weatherData3)
-                        //let skyTxt = weatherData0[0].current.skytext
-                        //        const skyImgName = weatherSkytextImgName(skyTxt, unixToTime(weatherData1.sys.sunset).split(':')[0], unixToTime(weatherData1.sys.sunrise).split(':')[0], weatherData1.clouds.all)
-                        //if (ImgExists(skyImgName) === true) {
-                        //            const attachment = new Discord.MessageAttachment('./commands/weatherImages/' + skyImgName + '.jpg', skyImgName + '.jpg');
-                        //            embed.setImage('attachment://'+ skyImgName + '.jpg')
-
-                        //                channel.send({embeds:[ embed ], attachments: [attachment]})
-                        //} else {
-                        //            embed.addField('ImgCode', skyImgName, false)
-                        channel.send({ embed })
-                        //}
-                        msg.delete();
+                        try {
+                            let weather = JSON.parse(body)
+                            weatherData0 = result
+                            weatherData1 = val
+                            weatherData2 = m
+                            const weatherData3 = weather.list[0].components
+                            let embed = getEmbed(weatherData0, weatherData1, weatherData2, 3, weatherData3)
+                            channel.send({ embed })
+                            msg.delete();
+                        } catch (error) {
+                            msg.edit('> \\❌ **OpenWeatherMap Error:** ' + error.toString())
+                        }
                     }
                 })
             });
         });
     } catch (error) {
-        msg.edit('> \\❌ ' + error.toString())
+        msg.edit('> \\❌ **MSN Error:** ' + error.toString())
     }
-    //})
 }

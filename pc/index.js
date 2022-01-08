@@ -2268,7 +2268,6 @@ bot.once('ready', async () => { //Ready
     dataBot.day = dayOfYear
     fs.writeFile('./database/bot.json', JSON.stringify(dataBot), (err) => { if (err) { log(ERROR & ': ' & err.message, 37) }; });
 
-    console.clear()
     log(DONE + ': A BOT kész!')
 
     for (let i = 0; i < dayOfYear - lastDay; i++) {

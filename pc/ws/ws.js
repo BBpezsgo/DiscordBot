@@ -42,8 +42,8 @@ class WebSocket {
 
         this.registerRoots()
 
-        this.server = this.app.listen(port, () => {
-            logManager.Log(SERVER + ': ' + 'Listening on port ' + this.server.address().port, true)
+        this.server = this.app.listen(port, "127.0.0.1", () => {
+            logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true)
         })
         this.server.on('error', (err) => {
             logManager.Log(ERROR + ': ' + err, true)
