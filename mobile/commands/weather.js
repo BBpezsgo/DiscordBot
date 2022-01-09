@@ -4,6 +4,7 @@ const weather1 = require('weather-js')
 const weather2 = require('nodejs-weather-app');
 const fs = require('fs')
 const request = require("request");
+const { openweatherToken } = require('../config.json')
 
 /**
  * @description msn data
@@ -764,7 +765,7 @@ module.exports = async (channel, sender) => {
                 return
             }
             weather2.getWeather("bekescsaba").then(async val => {
-                let url = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=5e261ed018ea33db8fd55a0df98b6134'
+                let url = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + openweatherToken
 
                 request(url, function (err, response, body) {
 
