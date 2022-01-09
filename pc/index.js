@@ -197,6 +197,9 @@ function saveUserToMemoryAll(user, username) {
     if (!dataBackpacks[user.id].tickets) {
         dataBackpacks[user.id].tickets = 0
     }
+    if (!dataBackpacks[user.id].quizTokens) {
+        dataBackpacks[user.id].quizTokens = 0
+    }
     if (!dataBackpacks[user.id].luckyCards) {
         dataBackpacks[user.id].luckyCards = {}
     }
@@ -1305,6 +1308,7 @@ function commandStore(message, sender, isPrivate) {
     var gifts = dataBackpacks[sender.id].gifts
     var tickets = dataBackpacks[sender.id].tickets
     var getGifts = dataBackpacks[sender.id].getGift
+    var quizTokens = dataBackpacks[sender.id].quizTokens
     var smallLuckyCard = dataBackpacks[sender.id].luckyCards.small
     var mediumLuckyCard = dataBackpacks[sender.id].luckyCards.medium
     var largeLuckyCard = dataBackpacks[sender.id].luckyCards.large
@@ -1318,6 +1322,7 @@ function commandStore(message, sender, isPrivate) {
             '> \\🧱 ' + crates + ' láda\n' +
             '> \\🎁 ' + gifts + ' ajándék\n' +
             '> \\🎟️ ' + tickets + ' kupon\n' +
+            '> \\🎫 ' + quizTokens + ' Quiz Token\n' +
             '> \\🧰 ' + dayCrates + ' napi láda'
             , false)
         .addField('Sorsjegyek', '> \\💶 ' + smallLuckyCard + ' Black Jack\n> \\💷 ' + mediumLuckyCard + ' Buksza\n> \\💴 ' + largeLuckyCard + ' Fáraók Kincse', false)
