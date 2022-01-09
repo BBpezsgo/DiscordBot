@@ -23,12 +23,16 @@ let weatherData1
  */
 let weatherData2
 
+/**@param {string} dayOfWeek @returns {string} */
 function dayName(dayOfWeek) {
     while (dayOfWeek > 6) {
         dayOfWeek -= 7
     }
+    while (dayOfWeek < 0) {
+        dayOfWeek += 7
+    }
     let dayName = '???'
-    let days = ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'];
+    const days = ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'];
     dayName = days[dayOfWeek];
     return dayName
 }
@@ -627,8 +631,7 @@ function getEmbed(data0, data1, data2, index, data3) {
         const tempMaxValue = data0[0].forecast[0].high;
         const tempMaxIcon = weatherTempIcon(tempMaxValue);
 
-        embed
-            .addField(dayName(new Date().getDay() - 1),
+        embed.addField(dayName(new Date().getDay() - 1),
                 `\\💧 - %\n` +
                 `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
                 `${skyIcon} ${skyTxt}\n` +
@@ -761,18 +764,18 @@ module.exports = async (channel, sender) => {
                     if (err) {
                         msg.edit('> \\❌ **OpenWeatherMap Error:** ' + err.toString)
                     } else {
-                        try {
+                        //try {
                             let weather = JSON.parse(body)
                             weatherData0 = result
                             weatherData1 = val
                             weatherData2 = m
                             const weatherData3 = weather.list[0].components
                             let embed = getEmbed(weatherData0, weatherData1, weatherData2, 3, weatherData3)
-                            channel.send({ embed })
+                            channel.send({embeds: [ embed ]})
                             msg.delete();
-                        } catch (error) {
-                            msg.edit('> \\❌ **OpenWeatherMap Error:** ' + error.toString())
-                        }
+                        //} catch (error) {
+                        //    msg.edit('> \\❌ **OpenWeatherMap Error:** ' + error.toString())
+                        //}
                     }
                 })
             });

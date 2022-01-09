@@ -175,8 +175,6 @@ function abbrev(num) {
  */
 async function execute(channel, sender) {
     try {
-        scores = await JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'));
-
         const userColor = scores[sender.id].color
 
         if (userColor === "#ff0000") {
@@ -221,13 +219,15 @@ async function execute(channel, sender) {
             .addField(rankName,'\\' + xpRankIcon(score) + ' ' + progressBar + ' \\❔')
             .setColor(userColor)
             .setFooter(abbrev(score) + ' / ' + abbrev(next) + '\nKell még: 🍺' + abbrev(next - score) + ' xp')
-        channel.send(embed);
+        channel.send({embeds: [embed]});
     } catch (error) {
+        const filter = (reaction, user) => {
+            return ['🔄'].includes(reaction.emoji.name) && user.id === sender.id;
+        };
         channel.send('> \\❌ ' + error.toString()).then(message => {
             message.react('🔄');
 
-            message.awaitReactions((reaction, user) => (user.bot === false) && (reaction.emoji.name == '🔄'),
-                { max: 1, time: 5000 }).then(collected => {
+            message.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] }).then(collected => {
                     if (collected.first().emoji.name == '🔄') {
                         execute(channel, sender)
                     };

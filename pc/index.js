@@ -46,9 +46,10 @@ const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
 
 loadingProcess('Bővítmények, változók betöltése...')
 const Discord = require('discord.js')
+const { MessageActionRow, MessageButton } = require('discord.js');
 const { perfix, token } = require('./config.json')
-const bot = new Discord.Client()
-require('discord-buttons')(bot);
+const bot = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
+//require('discord-buttons')(bot);
 statesManager.botLoaded = true
 
 let userstats = JSON.parse(fs.readFileSync('./database/userstats.json', 'utf-8'))
@@ -66,7 +67,7 @@ database.dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json',
 
 const ytdl = require('ytdl-core')
 
-const disbut = require('discord-buttons');
+//const disbut = require('discord-buttons');
 
 const dayOfYear = Math.floor(
     (
@@ -547,7 +548,7 @@ function addXp(user, channel, ammount) {
             .addField('Jutalmad', addMoney.toString() + '\\💵', true)
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/clinking-beer-mugs_1f37b.png')
             .setColor(Color.Highlight)
-        channel.send(embed)
+        channel.send({embeds: [ embed ]})
     }
 
     saveDatabase()
@@ -1193,7 +1194,7 @@ async function playAudio(message) {
             .setThumbnail(info.videoDetails.thumbnails[0].url)
             .addField('Csatorna', info.videoDetails.author.name, true)
             .addField('Hossz', musicGetLengthText(info.videoDetails.lengthSeconds), true)
-        message.channel.send('> **\\✔️ Most hallható: \\🎧**', embed)
+        message.channel.send('> **\\✔️ Most hallható: \\🎧**', {embeds: [ embed ]})
         statesManager.ytdlCurrentlyPlayingText = info.videoDetails.title
         statesManager.ytdlCurrentlyPlayingUrl = link
         return true
@@ -1343,7 +1344,7 @@ function commandStore(message, sender, isPrivate) {
         }
     }
 
-    message.channel.send({ embed }).then(embedMessage => {
+    message.channel.send({embeds: [ embed ]}).then(embedMessage => {
         if (isPrivate === true) return;
         if (crates > 0) { embedMessage.react('🧱') };
         if (gifts > 0) { embedMessage.react('🎁') };
@@ -1353,8 +1354,11 @@ function commandStore(message, sender, isPrivate) {
         if (largeLuckyCard > 0) { embedMessage.react('💴') };
         if (dayCrates > 0) { embedMessage.react('🧰') };
 
-        embedMessage.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '🎁' || reaction.emoji.name == '🧱' || reaction.emoji.name == '🎀' || reaction.emoji.name == '💶' || reaction.emoji.name == '💷' || reaction.emoji.name == '💴' || reaction.emoji.name == '🧰'),
-            { max: 1, time: 30000 }).then(collected => {
+        const filter = (reaction, user) => {
+            return ['🧱', '🎁', '🎀', '💶', '💷', '💴', '🧰'].includes(reaction.emoji.name) && user.id == message.author.id;
+        };
+
+        embedMessage.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] }).then(collected => {
                 if (collected.first().emoji.name == '🧱') {
                     dataBackpacks[sender.id].crates -= 1
                     { //Láda kinyitása
@@ -1416,9 +1420,9 @@ function commandStore(message, sender, isPrivate) {
                     }
 
                     if (val === 0) {
-                        message.channel.send('> \\💶 Kaptál:  **semmit**')
+                        message.channel.send('> \\💶 Nyertél:  **semmit**')
                     } else {
-                        message.channel.send('> \\💶 Kaptál:  **\\💵' + val + '** pénzt')
+                        message.channel.send('> \\💶 Nyertél:  **\\💵' + val + '** pénzt')
                     }
                 } else if (collected.first().emoji.name == '💷') {
                     dataBackpacks[sender.id].luckyCards.medium -= 1
@@ -1431,9 +1435,9 @@ function commandStore(message, sender, isPrivate) {
                     }
 
                     if (val === 0) {
-                        message.channel.send('> \\💷 Kaptál:  **semmit**')
+                        message.channel.send('> \\💷 Nyertél:  **semmit**')
                     } else {
-                        message.channel.send('> \\💷 Kaptál:  **\\💵' + val + '** pénzt')
+                        message.channel.send('> \\💷 Nyertél:  **\\💵' + val + '** pénzt')
                     }
                 } else if (collected.first().emoji.name == '💴') {
                     dataBackpacks[sender.id].luckyCards.large -= 1
@@ -1446,9 +1450,9 @@ function commandStore(message, sender, isPrivate) {
                     }
 
                     if (val === 0) {
-                        message.channel.send('> \\💴 Kaptál:  **semmit**')
+                        message.channel.send('> \\💴 Nyertél:  **semmit**')
                     } else {
-                        message.channel.send('> \\💴 Kaptál:  **\\💵' + val + '** pénzt')
+                        message.channel.send('> \\💴 Nyertél:  **\\💵' + val + '** pénzt')
                     }
 
                 } else if (collected.first().emoji.name == '🧰') {
@@ -1640,7 +1644,7 @@ async function commandMusicList(message) {
                 embed.addField(info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
             })
         });
-        message.channel.send('> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', embed)
+        message.channel.send('> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', {embeds: [ embed ]})
     }
 }
 
@@ -1698,7 +1702,7 @@ function commandProfil(message, sender) {
             '> \\🎴 card-0c: 0\n' +
             '> \\🧧 card-1a: 0'
         )
-    message.channel.send(embed);
+    message.channel.send({embeds: [ embed ]});
 }
 
 function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue) {
@@ -1714,7 +1718,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
         .setDescription(`\\✔️  **${addXpValue}\\🍺**\n\\❌ **-${removeXpValue}\\🍺**`)
         .addField(`${titleText}`, `${optionText}`)
 
-    bot.channels.cache.get('799340273431478303').send(embed).then(message => {
+    bot.channels.cache.get('799340273431478303').send({embeds: [ embed ]}).then(message => {
         message.channel.send('> <@&799342836931231775>')
         for (let i = 0; i < optionEmojis.length; i++) {
             if (optionEmojis[i].includes('<')) {
@@ -1754,7 +1758,7 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
         .setTitle('Szavazás!')
         .addField(`${titleText}`, `${optionText}`);
 
-    bot.channels.cache.get('795935090026086410').send(embed).then(message => {
+    bot.channels.cache.get('795935090026086410').send({embeds: [ embed ]}).then(message => {
         message.channel.send('> <@&795935996982198272>')
         for (let i = 0; i < optionEmojis.length; i++) {
             if (optionEmojis[i].includes('<')) {
@@ -1774,7 +1778,7 @@ function quizDone(correctText) {
         .setDescription(`A helyes válasz: **${correctText}**!`)
         .setFooter('A nyertesek, minnél előbb megkapját a jutalmat, aki pedig rosszul tippelt, annak levonásra kerül az összeg.')
 
-    bot.channels.cache.get('799340273431478303').send(embed).then(message => {
+    bot.channels.cache.get('799340273431478303').send({embeds: [ embed ]}).then(message => {
         message.channel.send('> <@&799342836931231775>')
     })
 }
@@ -1812,7 +1816,190 @@ function DateToString(date) {
     }
 }
 
-bot.on('clickButton', async (button) => {
+bot.on('interactionCreate', async interaction => {
+    if (interaction.isCommand()) {
+        if (interaction.commandName === 'ping') {
+            await interaction.reply('Pong!');
+        }
+    } else if (interaction.isButton()) {
+        try {
+            if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
+                interaction.reply('> \\❗ **Ez nem a tied!**', true)
+                return;
+            }
+        } catch (error) { }
+
+        let isOnPhone = false
+        let isInDebugMode = false
+        let playerIndex = 0
+
+        if (interaction.component.customId === 'sendHelp') {
+            const thisIsPrivateMessage = interaction.channel.type === 'DM'
+            CommandHelp(interaction.channel, interaction.user, thisIsPrivateMessage)
+    
+            interaction.deleteReply()
+            button.message.delete()
+    
+            return;
+        }
+
+        if (interaction.component.customId.startsWith('game')) {
+            if (gameMap == null) {
+                interaction.reply('> \\❗ **Nincs létrehozva játék!**', true)
+            } else {
+                if (interaction.component.customId === 'gameW') {
+                    gameMap.players[playerIndex].direction = Direction.Up
+                    if (playerCanMoveToHere(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y - 1, gameMap) === true) {
+                        gameMap.players[playerIndex].y -= 1
+                    }
+                    gameResetCameraPos(isOnPhone, interaction.user)
+    
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+
+                } else if (interaction.component.customId === 'gameA') {
+                    gameMap.players[playerIndex].direction = Direction.Left
+                    if (playerCanMoveToHere(gameMap.players[playerIndex].x - 1, gameMap.players[playerIndex].y, gameMap) === true) {
+                        gameMap.players[playerIndex].x -= 1
+                    }
+                    gameResetCameraPos(isOnPhone, interaction.user)
+    
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+
+                } else if (interaction.component.customId === 'gameS') {
+                    gameMap.players[playerIndex].direction = Direction.Down
+                    if (playerCanMoveToHere(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y + 1, gameMap) === true) {
+                        gameMap.players[playerIndex].y += 1
+                    }
+                    gameResetCameraPos(isOnPhone, interaction.user)
+    
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+
+                } else if (interaction.component.customId === 'gameD') {
+                    gameMap.players[playerIndex].direction = Direction.Right
+                    if (playerCanMoveToHere(gameMap.players[playerIndex].x + 1, gameMap.players[playerIndex].y, gameMap) === true) {
+                        gameMap.players[playerIndex].x += 1
+                    }
+                    gameResetCameraPos(isOnPhone, interaction.user)
+    
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+
+                } else if (interaction.component.customId === 'gameHit') {
+                    /**
+                     * @type {MapPoint}
+                     */
+                    let mapPoint
+                    if (gameMap.players[playerIndex].direction === Direction.Up) {
+                        mapPoint = getMapPoint(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y - 1, gameMap)
+                    } else if (gameMap.players[playerIndex].direction === Direction.Right) {
+                        mapPoint = getMapPoint(gameMap.players[playerIndex].x + 1, gameMap.players[playerIndex].y, gameMap)
+                    } else if (gameMap.players[playerIndex].direction === Direction.Down) {
+                        mapPoint = getMapPoint(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y + 1, gameMap)
+                    } else if (gameMap.players[playerIndex].direction === Direction.Left) {
+                        mapPoint = getMapPoint(gameMap.players[playerIndex].x - 1, gameMap.players[playerIndex].y, gameMap)
+                    }
+    
+                    if (mapPoint.object !== null) {
+                        /**
+                         * @type {MapObject}
+                         */
+                        let breakableObj
+                        breakableObj = mapPoint.object
+                        breakableObj.breakValue -= 1
+                        if (breakableObj.breakValue <= 0) {
+                            if (breakableObj.type === MapObjectType.bamboo) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 1)
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.blossom) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.cactus) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.cherryBlossom) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.hibiscus) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.igloo) {
+    
+                            } else if (breakableObj.type === MapObjectType.mushroom) {
+    
+                            } else if (breakableObj.type === MapObjectType.palm) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 3)
+                            } else if (breakableObj.type === MapObjectType.plant) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.rice) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 2)
+                            } else if (breakableObj.type === MapObjectType.rose) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.spruce) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 4)
+                            } else if (breakableObj.type === MapObjectType.sunflower) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.tanabataTree) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 2)
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            } else if (breakableObj.type === MapObjectType.tree) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 4)
+                            } else if (breakableObj.type === MapObjectType.tulip) {
+                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                            }
+                            mapPoint.object = null
+                        }
+                    }
+    
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+
+                } else if (interaction.component.customId === 'gameUse') {
+    
+                } else if (interaction.component.customId === 'gameSwitchPhone') {
+                    for (let i = 0; i < gameUserSettings.length; i++) {
+                        if (gameUserSettings[i].userId === interaction.user.id) {
+                            if (isOnPhone === true) {
+                                gameUserSettings[i].isOnPhone = false
+                            } else {
+                                gameUserSettings[i].isOnPhone = true
+                            }
+                        }
+                    }
+    
+                    if (getGameUserSettings(interaction.user.id) !== null) {
+                        isOnPhone = getGameUserSettings(interaction.user.id).isOnPhone
+                    }
+    
+                    gameResetCameraPos(isOnPhone, interaction.user)
+    
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+    
+                    log(gameUserSettings);
+                } else if (interaction.component.customId === 'gameSwitchDebug') {
+                    for (let i = 0; i < gameUserSettings.length; i++) {
+                        if (gameUserSettings[i].userId === interaction.user.id) {
+                            if (isInDebugMode === true) {
+                                gameUserSettings[i].isInDebugMode = false
+                            } else {
+                                gameUserSettings[i].isInDebugMode = true
+                            }
+                        }
+                    }
+    
+                    if (getGameUserSettings(interaction.user.id) !== null) {
+                        isInDebugMode = getGameUserSettings(interaction.user.id).isInDebugMode
+                    }
+    
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+    
+                    log(gameUserSettings);
+                } else if (interaction.component.customId === 'gameRestart') {
+                    gameMap = createGame(50, 50)
+                    connectTogame(interaction.user)
+                    gameResetCameraPos(isOnPhone, interaction.user)
+    
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                }
+            }
+            return;
+        }
+    }
+});
+bot.on('clickMenu', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
             button.reply.send('> \\❗ **Ez nem a tied!**', true)
@@ -1838,16 +2025,8 @@ bot.on('clickButton', async (button) => {
     try {
         playerIndex = getPlayerIndex(button.clicker.user.id)
     } catch (error) { }
-
-    if (button.id === 'sendHelp') {
-        const thisIsPrivateMessage = button.channel.type === 'dm'
-        CommandHelp(button.channel, button.clicker.user, thisIsPrivateMessage)
-
-        button.reply.defer()
-        button.message.delete()
-
-        return;
-    } else if (button.id === 'mailFolderMain') {
+    
+    if (button.id === 'mailFolderMain') {
         const message = getMailMessage(button.clicker.user, 0)
         button.message.edit({ embed: message.embed, component: message.actionRows[0] })
     } else if (button.id === 'mailFolderInbox') {
@@ -1895,154 +2074,7 @@ bot.on('clickButton', async (button) => {
             editingMail.message.channel.send('\\❌ **A levelet nem sikerült elküldeni**')
         }
     }
-    if (button.id.startsWith('game')) {
-        if (gameMap == null) {
-            button.channel.send('> \\❗ **Nincs létrehozva játék!**', true)
-        } else {
-            if (button.id === 'gameW') {
-                gameMap.players[playerIndex].direction = Direction.Up
-                if (playerCanMoveToHere(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y - 1, gameMap) === true) {
-                    gameMap.players[playerIndex].y -= 1
-                }
-                gameResetCameraPos(isOnPhone, button.clicker.user)
 
-                resetGameMessage(button.clicker.user, button.message, isOnPhone, isInDebugMode)
-            } else if (button.id === 'gameA') {
-                gameMap.players[playerIndex].direction = Direction.Left
-                if (playerCanMoveToHere(gameMap.players[playerIndex].x - 1, gameMap.players[playerIndex].y, gameMap) === true) {
-                    gameMap.players[playerIndex].x -= 1
-                }
-                gameResetCameraPos(isOnPhone, button.clicker.user)
-
-                resetGameMessage(button.clicker.user, button.message, isOnPhone, isInDebugMode)
-            } else if (button.id === 'gameS') {
-                gameMap.players[playerIndex].direction = Direction.Down
-                if (playerCanMoveToHere(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y + 1, gameMap) === true) {
-                    gameMap.players[playerIndex].y += 1
-                }
-                gameResetCameraPos(isOnPhone, button.clicker.user)
-
-                resetGameMessage(button.clicker.user, button.message, isOnPhone, isInDebugMode)
-            } else if (button.id === 'gameD') {
-                gameMap.players[playerIndex].direction = Direction.Right
-                if (playerCanMoveToHere(gameMap.players[playerIndex].x + 1, gameMap.players[playerIndex].y, gameMap) === true) {
-                    gameMap.players[playerIndex].x += 1
-                }
-                gameResetCameraPos(isOnPhone, button.clicker.user)
-
-                resetGameMessage(button.clicker.user, button.message, isOnPhone, isInDebugMode)
-            } else if (button.id === 'gameHit') {
-                /**
-                 * @type {MapPoint}
-                 */
-                let mapPoint
-                if (gameMap.players[playerIndex].direction === Direction.Up) {
-                    mapPoint = getMapPoint(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y - 1, gameMap)
-                } else if (gameMap.players[playerIndex].direction === Direction.Right) {
-                    mapPoint = getMapPoint(gameMap.players[playerIndex].x + 1, gameMap.players[playerIndex].y, gameMap)
-                } else if (gameMap.players[playerIndex].direction === Direction.Down) {
-                    mapPoint = getMapPoint(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y + 1, gameMap)
-                } else if (gameMap.players[playerIndex].direction === Direction.Left) {
-                    mapPoint = getMapPoint(gameMap.players[playerIndex].x - 1, gameMap.players[playerIndex].y, gameMap)
-                }
-
-                if (mapPoint.object !== null) {
-                    /**
-                     * @type {MapObject}
-                     */
-                    let breakableObj
-                    breakableObj = mapPoint.object
-                    breakableObj.breakValue -= 1
-                    if (breakableObj.breakValue <= 0) {
-                        if (breakableObj.type === MapObjectType.bamboo) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 1)
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.blossom) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.cactus) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.cherryBlossom) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.hibiscus) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.igloo) {
-
-                        } else if (breakableObj.type === MapObjectType.mushroom) {
-
-                        } else if (breakableObj.type === MapObjectType.palm) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 3)
-                        } else if (breakableObj.type === MapObjectType.plant) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.rice) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 2)
-                        } else if (breakableObj.type === MapObjectType.rose) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.spruce) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 4)
-                        } else if (breakableObj.type === MapObjectType.sunflower) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.tanabataTree) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 2)
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        } else if (breakableObj.type === MapObjectType.tree) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 4)
-                        } else if (breakableObj.type === MapObjectType.tulip) {
-                            addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
-                        }
-                        mapPoint.object = null
-                    }
-                }
-
-                resetGameMessage(button.clicker.user, button.message, isOnPhone, isInDebugMode)
-            } else if (button.id === 'gameUse') {
-
-            } else if (button.id === 'gameSwitchPhone') {
-                for (let i = 0; i < gameUserSettings.length; i++) {
-                    if (gameUserSettings[i].userId === button.clicker.user.id) {
-                        if (isOnPhone === true) {
-                            gameUserSettings[i].isOnPhone = false
-                        } else {
-                            gameUserSettings[i].isOnPhone = true
-                        }
-                    }
-                }
-
-                if (getGameUserSettings(button.clicker.user.id) !== null) {
-                    isOnPhone = getGameUserSettings(button.clicker.user.id).isOnPhone
-                }
-
-                gameResetCameraPos(isOnPhone, button.clicker.user)
-
-                resetGameMessage(button.clicker.user, button.message, isOnPhone, isInDebugMode)
-
-                log(gameUserSettings);
-            } else if (button.id === 'gameSwitchDebug') {
-                for (let i = 0; i < gameUserSettings.length; i++) {
-                    if (gameUserSettings[i].userId === button.clicker.user.id) {
-                        if (isInDebugMode === true) {
-                            gameUserSettings[i].isInDebugMode = false
-                        } else {
-                            gameUserSettings[i].isInDebugMode = true
-                        }
-                    }
-                }
-
-                if (getGameUserSettings(button.clicker.user.id) !== null) {
-                    isInDebugMode = getGameUserSettings(button.clicker.user.id).isInDebugMode
-                }
-
-                resetGameMessage(button.clicker.user, button.message, isOnPhone, isInDebugMode)
-
-                log(gameUserSettings);
-            } else if (button.id === 'gameRestart') {
-                gameMap = createGame(50, 50)
-                connectTogame(button.clicker.user)
-                gameResetCameraPos(isOnPhone, button.clicker.user)
-
-                resetGameMessage(button.clicker.user, button.message, isOnPhone, isInDebugMode)
-            }
-        }
-    }
     if (button.id.startsWith('pollOption')) {
         const optionIndex = button.id.replace('pollOption', '')
         try {
@@ -2125,11 +2157,6 @@ bot.on('clickButton', async (button) => {
     button.reply.defer()
 });
 
-bot.on('clickMenu', async (menu) => {
-    menu.message.channel.send(menu.id)
-    menu.reply.defer()
-})
-
 async function readIncomingDatas(_data) {
     let data = ''
     data = _data
@@ -2179,22 +2206,6 @@ const getApp = (guildId) => {
     }
     return app
 }
-
-bot.ws.on('INTERACTION_CREATE', async (interaction) => {
-    const command = interaction.data.name.toLowerCase()
-
-    if (command == 'ping') {
-        bot.api.interactions(interaction.id, interaction.token).callback.post({
-            data: {
-                type: 4,
-                data: {
-                    content: 'pong',
-                },
-            },
-        })
-    }
-    console.log(interaction)
-})
 
 /**
  * @param {string} id
@@ -2520,13 +2531,13 @@ bot.on('ready', () => { //Change status
             const newsChannel = bot.channels.cache.get(processedNewsChannel)
             const embed = newsMessage.embed
             if (newsMessage.NotifyRoleId.length == 0) {
-                newsChannel.send({ embed }).then((result) => {
+                newsChannel.send({embeds: [ embed ]}).then((result) => {
                     newsMessage.message.delete()
                 }).catch((err) => {
 
                 });
             } else {
-                newsChannel.send(`<@&${newsMessage.NotifyRoleId}>`, { embed }).then((result) => {
+                newsChannel.send(`<@&${newsMessage.NotifyRoleId}>`, {embeds: [ embed ]}).then((result) => {
                     newsMessage.message.delete()
                 }).catch((err) => {
 
@@ -2807,7 +2818,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                 'Mód: ' + bot.shard.mode
             )
         }
-        message.channel.send({ embed })
+        message.channel.send({embeds: [ embed ]})
         userstatsSendCommand(sender)
         return;
     };
@@ -2849,6 +2860,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     }
 
     if (command === `test`) {
+        /*
         const button0 = new disbut.MessageButton()
             .setLabel("This is a button!")
             .setID("myid0")
@@ -2878,6 +2890,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
         userstatsSendCommand(sender)
         return
+        */
     }
 
     const currEditingMailI = getCurrentlyEditingMailIndex(sender.id)
@@ -2973,7 +2986,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                                 .setAuthor(sender.username, sender.displayAvatarURL())
                                 .setTitle('\\✔️ ' + giftableMember.username.toString() + ' megajándékozva.')
                                 .setColor(Color.Highlight)
-                            message.channel.send({ embed });
+                            message.channel.send({embeds: [ embed ]});
                             message.mentions.users.first().send('> **\\✨ ' + sender.username + ' megajándékozott! \\🎆**');
                             saveDatabase()
                         }
@@ -2983,13 +2996,13 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                                 .setAuthor(sender.username, sender.displayAvatarURL())
                                 .setTitle('\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod.')
                                 .setColor(Color.Error)
-                            message.channel.send({ embed });
+                            message.channel.send({embeds: [ embed ]});
                         } else {
                             const embed = new Discord.MessageEmbed()
                                 .setAuthor(sender.username, sender.displayAvatarURL())
                                 .setTitle('\\❌ Nincs ajándékod, amit odaadhatnál.')
                                 .setColor(Color.Error)
-                            message.channel.send({ embed });
+                            message.channel.send({embeds: [ embed ]});
                         }
                     }
                 } catch (error) {
@@ -3056,7 +3069,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                     '>  \\📊  `.poll wyr`'
                 )
                 .setColor(Color.Highlight)
-            message.channel.send({ embed })
+            message.channel.send({embeds: [ embed ]})
         } else {
             message.channel.send('> \\⛔ **Ezt a parancsot te nem használhatod!**')
         }
@@ -3104,13 +3117,14 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         }
 
         const _message = getGameMessage(sender, false, false)
-        message.channel.send({ embed: _message.embed, components: _message.actionRows }).then(msg => {
+        message.channel.send({ embeds: [_message.embed], components: _message.actionRows }).then(msg => {
             allGameMessages.push(new savedGameMessage(msg, sender))
         })
         return
     }
 
     if (command.startsWith('test')) {
+        /*
         const aaaaaaaaaaaa = command.split('|')
         const title = aaaaaaaaaaaa[1]
         const texts = aaaaaaaaaaaa[2].split(';')
@@ -3119,10 +3133,12 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             message.channel.send("> Az opciók száma nem lehet több 5-nél")
             return
         }
+        */
 
         /**
          * @type {disbut.MessageButton[]}
          */
+        /*
         let buttons = []
         for (let i = 0; i < icons.length; i++) {
             const icon = icons[i];
@@ -3151,13 +3167,16 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             addNewPoll(msg.id, title, texts, icons)
         })
         return
+        */
     }
 
-    const button1 = new disbut.MessageButton()
+    const helpButton = new MessageButton()
         .setLabel("Help")
-        .setID("sendHelp")
-        .setStyle("blurple");
-    message.channel.send("> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**", button1);
+        .setCustomId("sendHelp")
+        .setStyle("PRIMARY");
+    const helpRow = new MessageActionRow()
+        .addComponents(helpButton)
+    message.channel.send("> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**", {components: [helpRow]});
 }
 
 loadingProcess('Belépés...')
@@ -3756,53 +3775,53 @@ function getGameMessage(user, isOnPhone, isInDebugMode) {
     const playerIndex = getPlayerIndex(user.id)
     const playerDirection = gameMap.players[playerIndex].direction
 
-    const buttonW = new disbut.MessageButton()
+    const buttonW = new MessageButton()
         .setLabel("  ↑  ")
-        .setID("gameW")
-        .setStyle("grey");
-    const buttonA = new disbut.MessageButton()
+        .setCustomId("gameW")
+        .setStyle("SECONDARY");
+    const buttonA = new MessageButton()
         .setLabel(" ←")
-        .setID("gameA")
-        .setStyle("grey");
-    const buttonS = new disbut.MessageButton()
+        .setCustomId("gameA")
+        .setStyle("SECONDARY");
+    const buttonS = new MessageButton()
         .setLabel("  ↓  ")
-        .setID("gameS")
-        .setStyle("grey");
-    const buttonD = new disbut.MessageButton()
+        .setCustomId("gameS")
+        .setStyle("SECONDARY");
+    const buttonD = new MessageButton()
         .setLabel(" →")
-        .setID("gameD")
-        .setStyle("grey");
-    const buttonHit = new disbut.MessageButton()
+        .setCustomId("gameD")
+        .setStyle("SECONDARY");
+    const buttonHit = new MessageButton()
         .setLabel("👊")
-        .setID("gameHit")
-        .setStyle("grey");
-    const buttonUse = new disbut.MessageButton()
+        .setCustomId("gameHit")
+        .setStyle("SECONDARY");
+    const buttonUse = new MessageButton()
         .setLabel("🤚")
-        .setID("gameUse")
-        .setStyle("grey");
-    const buttonSwitchPhone = new disbut.MessageButton()
+        .setCustomId("gameUse")
+        .setStyle("SECONDARY");
+    const buttonSwitchPhone = new MessageButton()
         .setLabel("📱 Telefonon vagyok")
-        .setID("gameSwitchPhone")
-        .setStyle("grey");
-    const buttonSwitchDebug = new disbut.MessageButton()
+        .setCustomId("gameSwitchPhone")
+        .setStyle("SECONDARY");
+    const buttonSwitchDebug = new MessageButton()
         .setLabel("📟")
-        .setID("gameSwitchDebug")
-        .setStyle("grey");
-    const buttonRestart = new disbut.MessageButton()
+        .setCustomId("gameSwitchDebug")
+        .setStyle("SECONDARY");
+    const buttonRestart = new MessageButton()
         .setLabel("↺")
-        .setID("gameRestart")
-        .setStyle("red");
+        .setCustomId("gameRestart")
+        .setStyle("DANGER");
 
 
 
     if (playerDirection === Direction.Up) {
-        buttonW.setStyle("blurple")
+        buttonW.setStyle("PRIMARY")
     } else if (playerDirection === Direction.Left) {
-        buttonA.setStyle("blurple")
+        buttonA.setStyle("PRIMARY")
     } else if (playerDirection === Direction.Down) {
-        buttonS.setStyle("blurple")
+        buttonS.setStyle("PRIMARY")
     } else if (playerDirection === Direction.Right) {
-        buttonD.setStyle("blurple")
+        buttonD.setStyle("PRIMARY")
     }
 
     if (isOnPhone === true) {
@@ -3812,14 +3831,14 @@ function getGameMessage(user, isOnPhone, isInDebugMode) {
     }
 
     if (getGameUserSettings(user.id).isInDebugMode === true) {
-        buttonSwitchDebug.setStyle("blurple")
+        buttonSwitchDebug.setStyle("PRIMARY")
     } else {
-        buttonSwitchDebug.setStyle("grey")
+        buttonSwitchDebug.setStyle("SECONDARY")
     }
 
-    const row0 = new disbut.MessageActionRow()
+    const row0 = new MessageActionRow()
         .addComponents(buttonUse, buttonW, buttonHit, buttonSwitchPhone)
-    const row1 = new disbut.MessageActionRow()
+    const row1 = new MessageActionRow()
         .addComponents(buttonA, buttonS, buttonD, buttonSwitchDebug, buttonRestart)
 
     return new GameMessage(getGameEmbed(user, isOnPhone, isInDebugMode), [row0, row1])
@@ -3830,15 +3849,17 @@ function getGameMessage(user, isOnPhone, isInDebugMode) {
  * @param {Discord.Message} message
  * @param {boolean} isOnPhone
  * @param {boolean} isInDebugMode
+ * @param {Discord.ButtonInteraction<Discord.CacheType>} integration
  */
-function resetGameMessage(user, message, isOnPhone, isInDebugMode) {
+function resetGameMessage(user, message, isOnPhone, isInDebugMode, integration) {
     log('resetGameMessage.isOnPhone: ' + isOnPhone)
 
     for (let i = 0; i < allGameMessages.length; i++) {
         const savedGameMsg = allGameMessages[i];
 
         const _message = getGameMessage(savedGameMsg.user, isOnPhone, isInDebugMode)
-        savedGameMsg.message.edit({ embed: _message.embed, components: _message.actionRows })
+        savedGameMsg.message.edit({ embeds: [_message.embed], components: _message.actionRows })
+        integration.update({ embeds: [_message.embed], components: _message.actionRows })
     }
 }
 
@@ -4164,7 +4185,7 @@ function getCurrentlyEditingMailIndex(userId) {
  */
 function commandMail(sender, channel) {
     const message = getMailMessage(sender)
-    channel.send(message.embed, message.actionRows[0])
+    channel.send({embeds: [ message.embed ], components: message.actionRows[0]} )
 }
 
 /**

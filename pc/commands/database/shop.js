@@ -202,45 +202,20 @@ function getEmbedMessage(sender, menuIndex) {
  * @param {Discord.Channel} channel
  * @param {Discord.User} sender
  * @param {Discord.Message} embedMessage
+ * @param {number} currentMenuIndex
  * @param {Discord.GuildMember} senderMember
  */
 function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, senderMember) {
     var money = dataBasic[sender.id].money;
 
-    embedMessage.awaitReactions((reaction, user) => user.id == sender.id && (
-        reaction.emoji.name == '🎁' ||
-        reaction.emoji.name == '🧱' ||
-        reaction.emoji.name == '🎟️' ||
-        reaction.emoji.name == '🧻' ||
-        reaction.emoji.name == '💶' ||
-        reaction.emoji.name == '💷' ||
-        reaction.emoji.name == '💴' ||
-        reaction.emoji.name == '⬛' ||
-        reaction.emoji.name == '🟥' ||
-        reaction.emoji.name == '🟨' ||
-        reaction.emoji.name == '🟦' ||
-        reaction.emoji.name == '🟧' ||
-        reaction.emoji.name == '🟪' ||
-        reaction.emoji.name == '🟩' ||
-        reaction.emoji.name == '🟫' ||
-        reaction.emoji.name == '⬜' ||
-        reaction.emoji.name == '🎨' ||
-        reaction.emoji.name == '🛒' ||
-        reaction.emoji.name == '🍀' ||
-        reaction.emoji.name == '◀️' ||
-        reaction.emoji.name == '❌' ||
-        reaction.emoji.name == '🖍️' ||
-        reaction.emoji.name == '🛍️' ||
-        reaction.emoji.name == '🔴' ||
-        reaction.emoji.name == '🟡' ||
-        reaction.emoji.name == '🔵' ||
-        reaction.emoji.name == '🟠' ||
-        reaction.emoji.name == '🟣' ||
-        reaction.emoji.name == '🟢' ||
-        reaction.emoji.name == '🟤' ||
-        reaction.emoji.name == '⚫' ||
-        reaction.emoji.name == '🚫'
-    ), { max: 1, time: 900000 }).then(async collected => {
+    const filter = (reaction, user) => {
+        return ['🎁', '🧱', '🎟️', '🧻', '💶', '💷', '💴', '⬛',
+                '🟥', '🟨', '🟦', '🟧', '🟪', '🟩', '🟫', '⬜',
+                '🎨', '🛒', '🍀', '◀️', '❌', '🖍️', '🛍️', '🔴',
+                '🟡', '🔵', '🟠', '🟣', '🟢', '🟤', '⚫', '🚫',].includes(reaction.emoji.name) && user.id === sender.id;
+    };
+
+    embedMessage.awaitReactions({ filter, max: 1, time: 900000, errors: ['time'] }).then(async collected => {
             if (collected.first().emoji.name == '🧱') {
                 if (money >= 2099) {
                     dataBasic[sender.id].money -= 2099
@@ -434,34 +409,34 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
             saveDatabase(channel)
 
             if (collected.first().emoji.name == '🎨') {
-                embedMessage.edit(getEmbedMessage(sender, 3)).then(msg00 => {
+                embedMessage.edit({embeds: [getEmbedMessage(sender, 3)]}).then(msg00 => {
                     embedMessage.react('🖍️')
                     embedMessage.react('🛍️')
-                    embedMessage.react('❌')
                     embedMessage.react('◀️')
+                    embedMessage.react('❌')
                     awaitReactionsThis(msg00, sender, channel, 3, senderMember)
                 })
             } else if (collected.first().emoji.name == '🛒') {
-                embedMessage.edit(getEmbedMessage(sender, 1)).then(msg00 => {
+                embedMessage.edit({embeds: [getEmbedMessage(sender, 1)]}).then(msg00 => {
                     if (money >= 2099) { embedMessage.react('🧱'); }
                     if (money >= 3999) { embedMessage.react('🎁'); }
                     if (money >= 8999) { embedMessage.react('🎟️'); }
                     if (money >= 799) { embedMessage.react('🧻'); }
-                    embedMessage.react('❌')
                     embedMessage.react('◀️')
+                    embedMessage.react('❌')
                     awaitReactionsThis(msg00, sender, channel, 1, senderMember)
                 })
             } else if (collected.first().emoji.name == '🍀') {
-                embedMessage.edit(getEmbedMessage(sender, 2)).then(msg00 => {
+                embedMessage.edit({embeds: [getEmbedMessage(sender, 2)]}).then(msg00 => {
                     if (money >= 1999) { embedMessage.react('💶'); }
                     if (money >= 3599) { embedMessage.react('💷'); }
                     if (money >= 6999) { embedMessage.react('💴'); }
-                    embedMessage.react('❌')
                     embedMessage.react('◀️')
+                    embedMessage.react('❌')
                     awaitReactionsThis(msg00, sender, channel, 2, senderMember)
                 })
             } else if (collected.first().emoji.name == '◀️') {
-                embedMessage.edit(getEmbedMessage(sender, 0)).then(msg00 => {
+                embedMessage.edit({embeds: [getEmbedMessage(sender, 0)]}).then(msg00 => {
                     msg00.react('🛒');
                     msg00.react('🍀');
                     msg00.react('🎨');
@@ -469,9 +444,9 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                     awaitReactionsThis(msg00, sender, channel, 0, senderMember)
                 })
             } else if (collected.first().emoji.name == '❌') {
-                embedMessage.edit(getEmbedMessage(sender, -1))
+                embedMessage.edit({embeds: [getEmbedMessage(sender, -1)]})
             } else if (collected.first().emoji.name == '🖍️') {
-                embedMessage.edit(getEmbedMessage(sender, 5)).then(msg00 => {
+                embedMessage.edit({embeds: [getEmbedMessage(sender, 5)]}).then(msg00 => {
                     if (money >= 2999) { embedMessage.react('🔴'); }
                     if (money >= 2999) { embedMessage.react('🟡'); }
                     if (money >= 2999) { embedMessage.react('🔵'); }
@@ -480,12 +455,12 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                     if (money >= 3499) { embedMessage.react('🟢'); }
                     if (money >= 9) { embedMessage.react('⚫'); }
                     if (money >= 3999) { embedMessage.react('🚫'); }
-                    embedMessage.react('❌')
                     embedMessage.react('◀️')
+                    embedMessage.react('❌')
                     awaitReactionsThis(msg00, sender, channel, 5, senderMember)
                 })
             } else if (collected.first().emoji.name == '🛍️') {
-                embedMessage.edit(getEmbedMessage(sender, 4)).then(msg00 => {
+                embedMessage.edit({embeds: [getEmbedMessage(sender, 4)]}).then(msg00 => {
                     if (money >= 99) { embedMessage.react('⬛'); }
                     if (money >= 1499) { embedMessage.react('🟥'); }
                     if (money >= 1499) { embedMessage.react('🟨'); }
@@ -495,14 +470,14 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                     if (money >= 2499) { embedMessage.react('🟩'); }
                     if (money >= 2999) { embedMessage.react('🟫'); }
                     if (money >= 3299) { embedMessage.react('⬜'); }
-                    embedMessage.react('❌')
                     embedMessage.react('◀️')
+                    embedMessage.react('❌')
                     awaitReactionsThis(msg00, sender, channel, 4, senderMember)
                 })
             } else {
                 try {
                     collected.first().users.remove(sender.id)
-                    embedMessage.edit(getEmbedMessage(sender, currentMenuIndex)).then(msg00 => {
+                    embedMessage.edit({embeds: [getEmbedMessage(sender, currentMenuIndex)]}).then(msg00 => {
                         awaitReactionsThis(msg00, sender, channel, currentMenuIndex, senderMember)
                     })
                 } catch (error) {
@@ -511,7 +486,7 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
             }
     }).catch(() => {
         embedMessage.reactions.removeAll();
-        embedMessage.edit(getEmbedMessage(sender, -1))
+        embedMessage.edit({embeds: [getEmbedMessage(sender, -1)]})
     });
 }
 
@@ -523,7 +498,7 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
 module.exports = (channel, sender, senderMember) => {
     var money = dataBasic[sender.id].money;
 
-    channel.send(getEmbedMessage(sender, 0)).then(embedMessage => {
+    channel.send({embeds:[getEmbedMessage(sender, 0)]}).then(embedMessage => {
 
         embedMessage.react('🛒');
         embedMessage.react('🍀');

@@ -137,10 +137,10 @@ function getEmbedMessage(menuIndex, guildId, isPrivate) {
 * @param {number} currentMenuIndex
 */
 async function awaitReactionsThis(embedMessage, currentMenuIndex, sender) {
-    embedMessage.awaitReactions((reaction, user) => user.id == sender.id && (
-        reaction.emoji.name == '➡️' ||
-        reaction.emoji.name == '⬅️'
-    ), { max: 1, time: 900000 }).then(async collected => {
+    const filter = (reaction, user) => {
+        return ['➡️', '⬅️'].includes(reaction.emoji.name) && user.id === sender.id;
+    };
+    embedMessage.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] }).then(async collected => {
         let newMenuIndex = currentMenuIndex
         if (collected.first().emoji.name == '➡️') {
             if (currentMenuIndex < maxMenuIndex) {
@@ -152,11 +152,11 @@ async function awaitReactionsThis(embedMessage, currentMenuIndex, sender) {
             }
         }
         await collected.first().users.remove(sender.id)
-        await embedMessage.edit(getEmbedMessage(newMenuIndex, embedMessage.guild.id))
+        await embedMessage.edit({embeds: [getEmbedMessage(newMenuIndex, embedMessage.guild.id)]})
         awaitReactionsThis(embedMessage, newMenuIndex, sender)
     }).catch(() => {
         embedMessage.reactions.removeAll();
-        embedMessage.edit(getEmbedMessage(-1, embedMessage.guild.id))
+        embedMessage.edit({embeds:[getEmbedMessage(-1, embedMessage.guild.id)]})
     });
 }
 
@@ -167,7 +167,7 @@ async function awaitReactionsThis(embedMessage, currentMenuIndex, sender) {
 */
 module.exports = (channel, sender, isPrivate) => {
     if (isPrivate) {
-        channel.send(getEmbedMessage(0, '0', true));
+        channel.send({embeds: [ getEmbedMessage(0, '0', true)] });
     } else {
         if (channel.guild.id === '737954264386764812') {
             /**
@@ -180,7 +180,7 @@ module.exports = (channel, sender, isPrivate) => {
                 ruleMessage2 = ruleChannel.messages.cache.get('843874885436571739')
             })
         }
-        channel.send(getEmbedMessage(0, channel.guild.id, false)).then(embedMessage => {
+        channel.send({embeds: [ getEmbedMessage(0, channel.guild.id, false) ]}).then(embedMessage => {
             embedMessage.react('⬅️')
             embedMessage.react('➡️')
             awaitReactionsThis(embedMessage, 0, sender)
