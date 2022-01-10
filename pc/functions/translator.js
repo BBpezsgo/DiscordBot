@@ -21,6 +21,8 @@ function TranslateMessage(message) {
             return null
         } else if (message.startsWith('[WS => Manager] Session Limit Information')) {
             return null
+        } else if (message.startsWith('[WS => Shard 0] [CONNECTED] Took')) {
+            return new TranslateResult(message, "Csatlakozva " + message.replace('[WS => Shard 0] [CONNECTED] Took ', '') + ' alatt', SHARD, false, groupNames.shard)
         } else if (message.startsWith('[WS => Manager] Spawning shards: ')) {
             return new TranslateResult(message, "Shard-ok létrehozása...", DEBUG, false, groupNames.manager)
         } else if (message.startsWith('[WS => Shard 0] [CONNECT]')) {
