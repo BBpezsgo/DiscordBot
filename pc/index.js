@@ -170,7 +170,6 @@ let currentlyWritingEmails = []
 const listOfNews = []
 const incomingNewsChannel = '902894789874311198'
 const processedNewsChannel = '746266528508411935'
-const newsSaveProcessedMessages = true
 
 loadingProcess('Betöltés...')
 
@@ -2312,36 +2311,16 @@ bot.once('ready', async () => { //Ready
          * @type {[Discord.Message]}
          */
         const listOfMessage = []
-        /**
-         * @type {[Discord.Message]}
-         */
-        const listOfMessageAll = []
-
-        const fileContent = fs.readFileSync('./processedNewsMessageIDs.txt', 'utf-8')
-        const listOfProcessedMessageIDs = fileContent.split('\n')
 
         messages.forEach((message) => {
-            if (listOfProcessedMessageIDs.includes(message.id) == false) {
-                listOfMessage.push(message)
-            }
-            listOfMessageAll.push(message)
+            listOfMessage.push(message)
         })
-
-
 
         listOfMessage.reverse()
         listOfMessage.forEach(message => {
             processNewsMessage(message)
         })
         log(`Received ${listOfMessage.length} news`)
-
-        if (newsSaveProcessedMessages == true) {
-            await fs.writeFileSync('./processedNewsMessageIDs.txt', '')
-            listOfMessageAll.forEach(async (message) => {
-                await fs.appendFileSync('./processedNewsMessageIDs.txt', `\n${message.id}`)
-            })
-        }
-
     })
 
     logToFile('PONG')
@@ -2661,15 +2640,7 @@ bot.on('message', async message => { //Message
 
     //#region News
     if (message.channel.id == incomingNewsChannel) {
-        const fileContent = fs.readFileSync('./processedNewsMessageIDs.txt', 'utf-8')
-        const listOfProcessedMessageIDs = fileContent.split('\n')
-
-        if (listOfProcessedMessageIDs.includes(message.id) == false) {
-            processNewsMessage(message)
-            if (newsSaveProcessedMessages == true) {
-                await fs.appendFileSync('./processedNewsMessageIDs.txt', `\n${message.id}`)
-            }
-        }
+        processNewsMessage(message)
 
         log(`Received a news message`)
     }

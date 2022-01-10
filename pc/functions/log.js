@@ -1,11 +1,4 @@
-const backgroundColor = '\033[40m'
 const fontColor = '\033[37m'
-const errorMessageFontColor = '\033[31m'
-const warningMessageFontColor = '\033[33m'
-const infoMessageFontColor = '\033[34m'
-const shardMessageFontColor = '\033[35m'
-const debugMessageFontColor = '\033[30m'
-const doneMessageFontColor = '\033[32m'
 const timestampForeColor = '\033[30m'
 
 const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'

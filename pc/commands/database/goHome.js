@@ -1,10 +1,10 @@
 const Discord = require('discord.js')
-const fs = require('fs')
+const fs = require('fs')/*
 let scores = JSON.parse(fs.readFileSync('scores.json', 'utf-8'))
 
 function resetScores() {
     fs.writeFile('scores.json', JSON.stringify(scores), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
-}
+}*/
 
  /**
  * @param {Discord.Channel} channel
@@ -12,7 +12,7 @@ function resetScores() {
  * @param {Discord.Guild} _guild
  */
 module.exports = async (sender, _guild, channel) => {
-    if (scores[sender.id].haveHome === false) {
+    /*if (scores[sender.id].haveHome === false) {
         let guild = Discord.Guild
         guild = _guild
         let homeChannel = await guild.channels.create('🏠-otthon', {
@@ -34,5 +34,5 @@ module.exports = async (sender, _guild, channel) => {
         homeChannel.send('> \\👋 **Üdd az otthonodban!** \\🏠\n> Ide nyugodtan irogathatsz parancsokat anélkül, hogy ezzel bárkit is zavarnál.')
     } else {
         channel.send('> \\❌ **Már van otthonod!**')
-    }
+    }*/
 }

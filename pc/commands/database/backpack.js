@@ -1,6 +1,5 @@
 const Discord = require('discord.js')
 const fs = require('fs')
-const database = require('mime-db')
 
 let dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
 let dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
@@ -106,7 +105,7 @@ function log(message) {
 }
 
 /**
-* @param {Discord.Message} channel
+* @param {Discord.Message} message
 * @param {Discord.User} sender
 * @param {boolean} isPrivate
 */
@@ -124,7 +123,7 @@ module.exports = (message, sender, isPrivate) => {
 
     const embed = new Discord.MessageEmbed()
         .setAuthor(sender.username, sender.displayAvatarURL())
-        .setTitle('Hátizsák')
+        .setTitle('Hátizasák')
         .addField('Pénz', '\\💵 ' + abbrev(money), false)
         .addField('Alap cuccok',
             '> \\🧱 ' + crates + ' láda\n' +
@@ -155,9 +154,9 @@ module.exports = (message, sender, isPrivate) => {
             }
         }
     }
-
-    message.channel.send({ embed }).then(embedMessage => {
-        if (isPrivate === true) return;
+    
+    message.channel.send({ embeds: [embed] }).then(embedMessage => {
+        if (isPrivate === true) return; 
         if (crates > 0) { embedMessage.react('🧱') };
         if (gifts > 0) { embedMessage.react('🎁') };
         if (getGifts > 0) { embedMessage.react('🎀') };
@@ -166,8 +165,14 @@ module.exports = (message, sender, isPrivate) => {
         if (largeLuckyCard > 0) { embedMessage.react('💴') };
         if (dayCrates > 0) { embedMessage.react('🧰') };
 
-        embedMessage.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '🎁' || reaction.emoji.name == '🧱' || reaction.emoji.name == '🎀' || reaction.emoji.name == '💶' || reaction.emoji.name == '💷' || reaction.emoji.name == '💴' || reaction.emoji.name == '🧰'),
-            { max: 1, time: 30000 }).then(collected => {
+        const filter = (reaction, user) => {
+            return ['🧱', '🎁', '🎀', '💶', '💷', '💴', '🧰'].includes(reaction.emoji.name) && user.id == sender.id;
+        };
+
+        console.log(embedMessage)
+
+        embedMessage.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] }).then(collected => {
+            console.log(collected)
                 if (collected.first().emoji.name == '🧱') {
                     dataBackpacks[sender.id].crates -= 1
                     { //Láda kinyitása

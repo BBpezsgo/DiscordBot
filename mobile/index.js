@@ -683,6 +683,7 @@ bot.once('ready', async () => { //Ready
         listOfMessage.forEach(message => {
             processNewsMessage(message)
         })
+        log(`Received ${listOfMessage.length} news`)
     })
 
     const guild = bot.guilds.cache.get('737954264386764812')
