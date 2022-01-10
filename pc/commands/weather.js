@@ -6,9 +6,17 @@ const fs = require('fs')
 const request = require("request");
 const { openweatherToken } = require('../config.json')
 
-const sunDatasRaw = fs.readFileSync('./Helper/output.txt').toString().split("|")
-const Dawn = sunDatasRaw[0]
-const Dusk = sunDatasRaw[3]
+let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
+if (fs.existsSync('./Helper/output.txt') == true) {
+    dataToAvoidErrors_SunDatasRaw = fs.readFileSync('./Helper/output.txt').toString().split("|")
+    dataToAvoidErrors_Dawn = sunDatasRaw[0]
+    dataToAvoidErrors_Dusk = sunDatasRaw[3]
+} else {
+    dataToAvoidErrors_Dawn = ''
+    dataToAvoidErrors_Dusk = ''
+}
+const Dawn = dataToAvoidErrors_Dawn
+const Dusk = dataToAvoidErrors_Dusk
 
 /**
  * @description msn data
