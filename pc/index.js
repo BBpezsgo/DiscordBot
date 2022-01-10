@@ -1721,7 +1721,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
         .setTitle('Quiz!')
         .setDescription(
             `\\✔️  **${addXpValue}\\🍺** és **${addToken}\\🎫**\n` +
-            `\\❌ **-${removeXpValue}\\🍺** és **${removeToken}\\🎫**\n` +
+            `\\❌ **-${removeXpValue}\\🍺** és **-${removeToken}\\🎫**\n` +
             `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
             )
         .addField(`${titleText}`, `${optionText}`)
@@ -1780,15 +1780,66 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
 
 }
 
-function quizDone(correctText) {
-    const embed = new Discord.MessageEmbed()
-        .setColor(Color.Pink)
-        .setTitle('Quiz...')
-        .setDescription(`A helyes válasz: **${correctText}**!`)
-        .setFooter('A nyertesek, minnél előbb megkapját a jutalmat, aki pedig rosszul tippelt, annak levonásra kerül az összeg.')
+/**@param {string} quizMessageId @param {number} correctIndex */
+async function quizDone(quizMessageId, correctIndex) {
 
-    bot.channels.cache.get('799340273431478303').send({embeds: [ embed ]}).then(message => {
-        message.channel.send('> <@&799342836931231775>')
+    /**@type {Discord.TextChannel} */
+    const channel = bot.channels.cache.get('799340273431478303')
+    channel.messages.fetch({ limit: 10 }).then(async (messages) => {
+        const message = messages.get(quizMessageId)
+        /**@type {string[]} */
+        const answersEmoji = []
+        const variableHAHA = message.embeds[0].fields[0].value.split('\n')
+        variableHAHA.forEach(element => {
+            const gfgfdgdfgdf = element.replace('>', '').trimStart().split(' ')[0]
+            if (gfgfdgdfgdf.includes('🎯')) { } else {
+                answersEmoji.push(gfgfdgdfgdf)
+            }
+        })
+        const correctAnswer =  message.embeds[0].fields[0].value.split('\n')[correctIndex].replace('>', '').trimStart()
+        const correctAnswerEmoji = correctAnswer.split(' ')[0]
+        const correctAnswerText = correctAnswer.replace(correctAnswerEmoji, '').trimStart()
+        const awardAdd0 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
+        const awardAdd1 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
+        const awardRemove0 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
+        const awardRemove1 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
+        message.reactions.resolve('🎯').users.fetch().then(async (userList0) => {
+            /**@type {string[]} */
+            const usersWithCorrectAnswer = []
+            /**@type {string[]} */
+            const usersWithWrongAnswer = []
+            const usersWithMultiplier = userList0.map((user) => user.id)
+
+            const members = bot.guilds.cache.get('737954264386764812').members
+            let finalText = '**A helyes válasz: ' + correctAnswerEmoji + ' ' + correctAnswerText + '**'
+
+            for (let i = 0; i < answersEmoji.length; i++) {
+                const currentAnswerEmoji = answersEmoji[i];
+                await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(userList1 => {
+                    const users = userList1.map((user) => user.id)
+                    for (let i = 0; i < users.length; i++) {
+                        const userId = users[i]
+                        if (userId == bot.user.id) { continue }
+                        if (currentAnswerEmoji == correctAnswerEmoji) {
+                            usersWithCorrectAnswer.push(userId)
+                            if (usersWithMultiplier.includes(userId) && members.cache.get(userId).roles.cache.has('929443006627586078') && members.cache.get(userId).roles.cache.has('929443558040166461') && members.cache.get(userId).roles.cache.has('929443627527180288') && members.cache.get(userId).roles.cache.has('929443673077329961')) {
+                                finalText += '\n> <@!' + userId + '> nyert ' + (parseInt(awardAdd0) * 2) + '\\🍺t és ' + (parseInt(awardAdd1) * 2) + '\\🎫t'
+                            } else {
+                                finalText += '\n> <@!' + userId + '> nyert ' + (awardAdd0) + '\\🍺t és ' + (awardAdd1) + '\\🎫t'
+                            }
+                        } else {
+                            usersWithWrongAnswer.push(userId)
+                            if (usersWithMultiplier.includes(userId) && members.cache.get(userId).roles.cache.has('929443006627586078') && members.cache.get(userId).roles.cache.has('929443558040166461') && members.cache.get(userId).roles.cache.has('929443627527180288') && members.cache.get(userId).roles.cache.has('929443673077329961')) {
+                                finalText += '\n> <@!' + userId + '> veszített ' + (parseInt(awardRemove0) * 2) + '\\🍺t és ' + (parseInt(awardRemove1) * 2) + '\\🎫t'
+                            } else {
+                                finalText += '\n> <@!' + userId + '> veszített ' + (awardRemove0) + '\\🍺t és ' + (awardRemove1) + '\\🎫t'
+                            }
+                        }
+                    }
+                });
+            }
+            bot.channels.cache.get('799340273431478303').send(finalText + '\n\n||\\⚠️ Ez ALFA verzió! A hibát itt jelentsd: <#930166957062357062> ||')
+        });
     })
 }
 //#endregion
@@ -3045,8 +3096,17 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             .setColor(Color.Highlight)
         message.channel.send({embeds: [ embed ]})
         return;
+    } else if (command.startsWith(`quizdone help`)) {
+        userstatsSendCommand(sender)
+        const embed = new Discord.MessageEmbed()
+            .addField('Quizdone szintaxis',
+                '.quizdone messageId correctIndex(0 - ...)'
+            )
+            .setColor(Color.Highlight)
+        message.channel.send({embeds: [ embed ]})
+        return;
     } else if (command.startsWith(`quizdone `)) {
-        quizDone(command.replace(`quizdone `, ''))
+        quizDone(command.replace(`quizdone `, '').split(' ')[0], command.replace(`quizdone `, '').split(' ')[1])
         userstatsSendCommand(sender)
         return
     } else if (command.startsWith(`poll simple\n`)) {
