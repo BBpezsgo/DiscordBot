@@ -26,7 +26,7 @@ function toDateString(date) {
     return date.getFullYear().toString() + ':' + date.getMonth().toString() + ':' + date.getDate().toString()
 }
 function resetDatabase() {
-    fs.writeFile('scores.json', JSON.stringify(scores), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/basic.json', JSON.stringify(scores), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
     fs.writeFile('./database/businesses.json', JSON.stringify(businesses), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
 }
 /**
@@ -245,7 +245,7 @@ module.exports = (channel, sender, isPrivate) => {
                     'Kb ennyit tudsz beszedni: \\💵' + addMoney)
             }
         }
-        channel.send({ embed }).then(embedMessage => {
+        channel.send({ embeds: [embed] }).then(embedMessage => {
             if (isPrivate === true) return;
             if (uprageCost > 0) { if (money >= uprageCost) { embedMessage.react('⬆️'); }; }
             if (addMoney > 0) { embedMessage.react('💰'); }
@@ -323,7 +323,7 @@ module.exports = (channel, sender, isPrivate) => {
                     '> **Ár:** 36800 \\💵\n' +
                     '> **Haszonszerzés:** Ha megoldasz egy matematikai műveletet, azonnal termel hasznot. Naponta maximum 3-szor lehet használni!\n' +
                     '> **Maximum szint:** 3')
-            channel.send({ embed }).then(embedMessage => {
+            channel.send({ embeds: [embed] }).then(embedMessage => {
                 if (money >= 21300) { embedMessage.react('🚗'); }
                 if (money >= 7100) { embedMessage.react('📠'); }
                 if (money >= 11200) { embedMessage.react('⚙️'); }
