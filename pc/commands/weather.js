@@ -40,8 +40,10 @@ function dayName(dayOfWeek) {
         dayOfWeek += 7
     }
     let dayName = '???'
-    const days = ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'];
-    dayName = days[dayOfWeek];
+    try {
+        let days = ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'];
+        dayName = days[dayOfWeek];
+    } catch { }
     return dayName
 }
 /**
@@ -50,67 +52,65 @@ function dayName(dayOfWeek) {
  * @returns {string} Emoji
  */
 function weatherSkytextIcon(skyTxt, useMoon) {
-    let skyIcon = ''
     if (skyTxt === 'Mostly Cloudy') {
-        skyIcon = '\\🌥️'
+        return '\\☁️'
     } else if (skyTxt === 'Cloudy') {
-        skyIcon = '\\☁️'
+        return '\\☁️'
     } else if (skyTxt === 'Partly Sunny') {
-        skyIcon = '\\⛅'
+        return '\\⛅'
     } else if (skyTxt === 'Sunny') {
-        skyIcon = '\\☀️'
+        return '\\☀️'
     } else if (skyTxt === 'Rain') {
-        skyIcon = '\\🌧️'
+        return '\\🌧️'
     } else if (skyTxt === 'Fog') {
-        skyIcon = '\\🌫️'
+        return '\\🌫️'
     } else if (skyTxt === 'Rain Showers') {
-        skyIcon = '\\🌦️'
+        return '\\🌧️'
     } else if (skyTxt === 'Light Rain') {
-        skyIcon = '\\🌦️'
+        return '\\🌦️'
     } else if (skyTxt === 'Clear') {
-        skyIcon = '\\☀️';
         if (useMoon === true) {
             var hour = new Date().getHours()
             if (hour > 0 && hour < 6) {
-                skyIcon = '\\🌙'
+                return '\\🌙'
             } else if (hour < 15) {
-                skyIcon = '\\☀️'
+                return '\\☀️'
             } else if (hour < 16) {
-                skyIcon = '\\🌙'
+                return '\\🌙'
             } else {
-                skyIcon = '\\🌙'
+                return '\\🌙'
             } 
         }
+        return '\\☀️'
     } else if (skyTxt === 'Mostly Clear') {
-        skyIcon = '\\🌤️';
         if (useMoon === true) {
             var hour = new Date().getHours()
             if (hour > 0 && hour < 6) {
-                skyIcon = '\\🌙'
+                return '\\🌙'
             } else if (hour < 15) {
-                skyIcon = '\\🌤️'
+                return '\\🌤️'
             } else if (hour < 16) {
-                skyIcon = '\\🌙'
+                return '\\🌙'
             } else {
-                skyIcon = '\\🌙'
+                return '\\🌙'
             }
         }
+        return '\\🌤️'
     } else if (skyTxt === 'T-Storms') {
-        skyIcon = '\\⛈️'
+        return '\\⛈️'
     } else if (skyTxt === 'Snow') {
-        skyIcon = '\\🌨️'
+        return '\\🌨️'
     } else if (skyTxt === 'Light Snow') {
-        skyIcon = '\\🌨️'
+        return '\\🌨️'
     } else if (skyTxt === 'Mostly Sunny') {
-        skyIcon = '\\🌤️'
+        return '\\🌤️'
     } else if (skyTxt === 'Light Rain and Snow') {
-        skyIcon = '\\🌧️'
+        return '\\🌧️'
     } else if (skyTxt === 'Partly Cloudy') {
-        skyIcon = '\\⛅'
-    } else {
-        skyIcon = '\\🌍'
-    };
-    return skyIcon
+        return '\\⛅'
+    }
+
+    return '\\🌍'
 }
 /**
  * 
@@ -218,127 +218,120 @@ function ImgExists(name) {
     }
 }
 function weatherSkytxt(skyTxt) {
-    let _skyTxt = ''
-    _skyTxt = skyTxt
     if (skyTxt === 'Mostly Cloudy') {
-        _skyTxt = 'Többnyire felhős';
+        return 'Többnyire felhős';
     } else if (skyTxt === 'Cloudy') {
-        _skyTxt = 'Felhős';
+        return 'Felhős';
     } else if (skyTxt === 'Partly Sunny') {
-        _skyTxt = 'Részben derült';
+        return 'Részben derült';
     } else if (skyTxt === 'Sunny') {
-        _skyTxt = 'Derült';
+        return 'Derült';
     } else if (skyTxt === 'Rain') {
-        _skyTxt = 'Eső';
+        return 'Eső';
     } else if (skyTxt === 'Fog') {
-        _skyTxt = 'Köd';
+        return 'Köd';
     } else if (skyTxt === 'Rain Showers') {
-        _skyTxt = 'Zápor';
+        return 'Zápor';
     } else if (skyTxt === 'Light Rain') {
-        _skyTxt = 'Könnyű eső';
+        return 'Könnyű eső';
     } else if (skyTxt === 'Clear') {
-        _skyTxt = 'Derült';
+        return 'Derült';
     } else if (skyTxt === 'T-Storms') {
-        _skyTxt = 'Vihar';
+        return 'Vihar';
     } else if (skyTxt === 'Snow') {
-        _skyTxt = 'Havazás';
+        return 'Havazás';
     } else if (skyTxt === 'Light Snow') {
-        _skyTxt = 'Könnyű havazás';
+        return 'Könnyű havazás';
     } else if (skyTxt === 'Mostly Sunny') {
-        _skyTxt = 'Nagy részben derült';
+        return 'Nagy részben derült';
     } else if (skyTxt === 'Light Rain and Snow') {
-        _skyTxt = 'Havaseső';
+        return 'Havaseső';
     } else if (skyTxt === 'Mostly Clear') {
-        _skyTxt = 'Nagy részben derült';
+        return 'Nagy részben derült';
     } else if (skyTxt === 'Partly Cloudy') {
-        _skyTxt = 'Nagy részben felhős';
+        return 'Nagy részben felhős';
     }
-    return _skyTxt
+
+    return skyTxt
 }
 function weatherWindIcon(windValue) {
-    let windIcon = ''
     if (windValue < 7) {
-        windIcon = '\\〰️';
+        return '\\〰️';
     } else if (windValue < 16) {
-        windIcon = '\\🍃';
+        return '\\🍃';
     } else if (windValue < 40) {
-        windIcon = '\\💨';
+        return '\\💨';
     } else {
-        windIcon = '\\🌪️';
-    };
-    return windIcon
+        return '\\🌪️';
+    }
 }
 function weatherTempIcon(tempValue) {
-    let tempIcon = ''
     if (tempValue < 0) {
-        tempIcon = '\\❄️';
+        return '\\❄️';
     } else if (tempValue < 10) {
-        tempIcon = '\\🥶';
+        return '\\🥶';
     } else if (tempValue < 15) {
-        tempIcon = '\\😐';
+        return '\\😐';
     } else if (tempValue < 20) {
-        tempIcon = '\\😐';
+        return '\\😐';
     } else if (tempValue < 25) {
-        tempIcon = '\\🙂';
+        return '\\🙂';
     } else if (tempValue < 30) {
-        tempIcon = '\\🥵';
+        return '\\🥵';
     } else {
-        tempIcon = '\\🔥';
-    };
-    return tempIcon
+        return '\\🔥';
+    }
 }
 function weatherMoonIcon(moonText) {
-    let moonIcon = moonText
     if (moonText === 'New Moon') {
-        moonIcon = '\\🌑';
+        return '\\🌑';
     } else if (moonText === 'Waxing Crescent') {
-        moonIcon = '\\🌒';
+        return '\\🌒';
     } else if (moonText === 'First Quarter') {
-        moonIcon = '\\🌓';
+        return '\\🌓';
     } else if (moonText === 'Waxing Gibbous') {
-        moonIcon = '\\🌔';
+        return '\\🌔';
     } else if (moonText === 'Full Moon') {
-        moonIcon = '\\🌕';
+        return '\\🌕';
     } else if (moonText === 'Waning Gibbous') {
-        moonIcon = '\\🌖';
+        return '\\🌖';
     } else if (moonText === 'Third Quarter') {
-        moonIcon = '\\🌗';
+        return '\\🌗';
     } else if (moonText === 'Waning Crescent') {
-        moonIcon = '\\🌘';
-    };
-    return moonIcon
+        return '\\🌘';
+    }
+
+    return '?'
 }
 function weatherMoonText(moonText) {
-    let moonTxt = moonText
     if (moonText === 'New Moon') {
-        moonTxt = 'Újhold';
+        return 'Újhold';
     } else if (moonText === 'Waxing Crescent') {
-        moonTxt = 'Sarlóhold';
+        return 'Sarlóhold';
     } else if (moonText === 'First Quarter') {
-        moonTxt = 'Első negyed';
+        return 'Első negyed';
     } else if (moonText === 'Waxing Gibbous') {
-        moonTxt = 'Dagadóhold';
+        return 'Dagadóhold';
     } else if (moonText === 'Full Moon') {
-        moonTxt = 'Telihold';
+        return 'Telihold';
     } else if (moonText === 'Waning Gibbous') {
-        moonTxt = 'Csökkenőhold';
+        return 'Csökkenőhold';
     } else if (moonText === 'Third Quarter') {
-        moonTxt = 'Utolsó negyed';
+        return 'Utolsó negyed';
     } else if (moonText === 'Waning Crescent') {
-        moonTxt = 'Öreghold';
-    };
-    return moonTxt
+        return 'Öreghold';
+    }
+
+    return '?'
 }
 function weatherHumidityIcon(humidityValue) {
-    let humidityIcon = ''
     if (humidityValue < 40) {
-        humidityIcon = '\\🌵';
+        return '\\🌵'
     } else if (humidityValue < 60) {
-        humidityIcon = '\\🙂';
+        return '\\🙂'
     } else {
-        humidityIcon = '\\🌫️';
+        return '\\🌫️'
     }
-    return humidityIcon
 }
 /**
  * @param {string} icon Emoji 
@@ -374,7 +367,8 @@ function weatherThumbnailUrl(icon) {
         thumbnailUrl = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/cloud-with-lightning-and-rain_26c8.png';
     } else if (icon === '🌨️') {
         thumbnailUrl = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/cloud-with-snow_1f328.png';
-    };
+    }
+
     return thumbnailUrl
 }
 function DirectionNameToArrow(dirName) {
@@ -394,9 +388,9 @@ function DirectionNameToArrow(dirName) {
         return '⇗'
     } else if (dirName === "Northwest") {
         return '⇘'
-    } else {
-        return dirName
     }
+    
+    return '?'
 }
 /**
 * @param {number} unixValue
@@ -409,19 +403,17 @@ function unixToTime(unixValue) {
     return formattedTime
 }
 function weatherPressureIcon(pressureValue) {
-    let pressureicon = ''
     if (pressureValue < 980) {
-        pressureicon = '\\🔷';
+        return '\\🔷';
     } else if (pressureValue < 1008) {
-        pressureicon = '\\🔹';
+        return '\\🔹';
     } else if (pressureValue < 1019) {
-        pressureicon = '\\⬛';
+        return '\\⬛';
     } else if (pressureValue < 1026) {
-        pressureicon = '\\🔸';
+        return '\\🔸';
     } else {
-        pressureicon = '\\🔶';
+        return '\\🔶';
     }
-    return pressureicon
 }
 
 /**
@@ -593,23 +585,19 @@ function getEmbed(data0, data1, data2, index, data3) {
         }
 
         embed
-            .setTitle(`**${skyTxt}**`)
-            .setDescription(`\\💧 ${data0[0].forecast[1].precip} %\n` +
+            .setTitle(`**${skyTxt}** ||(${data1.weather[0].description})|||| (${data1.weather[0].id})||`)
+            .setDescription(
                 `\\☁️ ${data1.clouds.all} %\n` +
+                `\\💧 ${data0[0].forecast[1].precip} % csapadék\n` +
                 `${humidityIcon} ${humidityValue} % páratartalom\n` +
                 `${tempIcon} ${tempMinValue} - ${tempValue} - ${tempMaxValue} °C (Hőérzet: ${tempFeelslikeValue} °C)\n` +
                 `${windIcon} ${windDirection} (${data1.wind.deg}°) ${windValue} km/h szél\n` +
                 `\\🌬️ ${windGustValue} km/h széllökés\n` +
-                `${weatherPressureIcon(data1.main.pressure)} ${data1.main.pressure} pHa\n` +
-                `\\👁️ ${visibilityValue} km\n` +
-                `${alertIcon} ${alert}\n` +
-                `${weatherMessageIcon} ${weatherMessage}\n\n` +
-                `${moonIcon} ${moonText} (${Math.floor(data2[1].illum * 100)} %-a látható)\n\n` +
-                `\\🌇 ${Dawn}\n` +
-                `\\🏙️ ${unixToTime(data1.sys.sunrise)}\n` +
-                `\\🌆 ${unixToTime(data1.sys.sunset)}\n` +
-                `\\🌃 ${Dusk}` +
-                '\n**Levegőminőség:**\n' +
+                `${weatherPressureIcon(data1.main.pressure)} ${data1.main.pressure} pHa légnyomás\n` +
+                `\\👁️ ${visibilityValue} km látótávolság\n` +
+
+                '\n\n**Levegőminőség:**\n\n' +
+
                 'CO: \\' + GetPollutionIndex(0, data3.co) + ' ' + data3.co + ' μg/m³' +
                 '\nNO: \\' + GetPollutionIndex(1, data3.no) + ' ' + data3.no + ' μg/m³' +
                 '\nNO₂: \\' + GetPollutionIndex(2, data3.no2) + ' ' + data3.no2 + ' μg/m³' +
@@ -618,11 +606,20 @@ function getEmbed(data0, data1, data2, index, data3) {
                 '\nPM₂.₅: \\' + GetPollutionIndex(5, data3.pm2_5) + ' ' + data3.pm2_5 + ' μg/m³' +
                 '\nPM₁₀: \\' + GetPollutionIndex(6, data3.pm10) + ' ' + data3.pm10 + ' μg/m³' +
                 '\nNH₃: \\' + GetPollutionIndex(7, data3.nh3) + ' ' + data3.nh3 + ' μg/m³' +
+                
+                '\n\n**Egyéb:**\n\n' +
+
+                `${moonIcon} ${moonText} (${Math.floor(data2[1].illum * 100)} %-a látható)\n` +
+                `\\🌇 ${Dawn}\n` +
+                `\\🏙️ ${unixToTime(data1.sys.sunrise)}\n` +
+                `\\🌆 ${unixToTime(data1.sys.sunset)}\n` +
+                `\\🌃 ${Dusk}\n\n` +
+                `${alertIcon} ${alert}\n` +
+                `${weatherMessageIcon} ${weatherMessage}` +
+
                 '\n\n**Előrejelzés:**')
         if (ImgExists(skyImgName) === true) {
-            const attachment = new Discord.MessageAttachment('./commands/weatherImages/' + skyImgName + '.jpg', skyImgName + '.jpg');
             embed
-                .attachFiles(attachment)
                 .setImage('attachment://' + skyImgName + '.jpg')
         } else {
             embed
@@ -639,7 +636,8 @@ function getEmbed(data0, data1, data2, index, data3) {
         const tempMaxValue = data0[0].forecast[0].high;
         const tempMaxIcon = weatherTempIcon(tempMaxValue);
 
-        embed.addField(dayName(new Date().getDay() - 1),
+        embed
+            .addField(dayName(new Date().getDay() - 1),
                 `\\💧 - %\n` +
                 `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
                 `${skyIcon} ${skyTxt}\n` +
@@ -752,15 +750,13 @@ module.exports = async (channel, sender) => {
         new MoonPhase(addDays(new Date(year, month, day), 3))
     ]
 
-    const searchFor = 'Békéscsaba, HU'
-
     /**
      * @type {Discord.Message}
      */
     const msg = await channel.send('> \\⌛ **Betöltés...**')
 
     try {
-        await weather1.find({ search: searchFor, degreeType: 'C' }, function (err, result) {
+        await weather1.find({ search: 'Békéscsaba, HU', degreeType: 'C' }, function (err, result) {
             if (err) {
                 msg.edit('> \\❌ **MSN Error:** ' + err.toString())
                 return
@@ -772,18 +768,22 @@ module.exports = async (channel, sender) => {
                     if (err) {
                         msg.edit('> \\❌ **OpenWeatherMap Error:** ' + err.toString)
                     } else {
-                        //try {
-                            let weather = JSON.parse(body)
-                            weatherData0 = result
-                            weatherData1 = val
-                            weatherData2 = m
-                            const weatherData3 = weather.list[0].components
-                            let embed = getEmbed(weatherData0, weatherData1, weatherData2, 3, weatherData3)
-                            channel.send({embeds: [ embed ]})
-                            msg.delete();
-                        //} catch (error) {
-                        //    msg.edit('> \\❌ **OpenWeatherMap Error:** ' + error.toString())
-                        //}
+                        let weather = JSON.parse(body)
+                        weatherData0 = result
+                        weatherData1 = val
+                        weatherData2 = m
+                        const weatherData3 = weather.list[0].components
+                        let embed = getEmbed(weatherData0, weatherData1, weatherData2, 3, weatherData3)
+                        
+                        const skyImgName = weatherSkytextImgName(weatherData0[0].current.skytext, unixToTime(weatherData1.sys.sunset).split(':')[0], unixToTime(weatherData1.sys.sunrise).split(':')[0], weatherData1.clouds.all)
+                        if (ImgExists(skyImgName) === true) {
+                            const attachment = new Discord.MessageAttachment('./commands/weatherImages/' + skyImgName + '.jpg', skyImgName + '.jpg');
+                            channel.send({ embeds: [embed], files: [attachment] })
+                        } else {
+                            channel.send({ embeds: [embed] })
+                        }
+
+                        msg.delete();
                     }
                 })
             });
