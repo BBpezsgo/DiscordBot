@@ -2483,6 +2483,15 @@ function processNewsMessage(message) {
             }
         }
         role = '902878964438143026'
+    } else {
+        if (message.author.bot == false && message.author.system == false) {
+            const senderMember = message.guild.members.cache.get(message.author.id)
+            if (senderMember != undefined) {
+                embed.setAuthor(senderMember.displayName, message.author.displayAvatarURL())
+            } else {
+                embed.setAuthor(message.author.username, message.author.displayAvatarURL())
+            }
+        }
     }
 
     listOfNews.push(new NewsMessage(embed, role, message))
@@ -2515,17 +2524,11 @@ bot.on('ready', () => { //Change status
             const newsChannel = bot.channels.cache.get(processedNewsChannel)
             const embed = newsMessage.embed
             if (newsMessage.NotifyRoleId.length == 0) {
-                newsChannel.send({embeds: [ embed ]}).then((result) => {
-                    newsMessage.message.delete()
-                }).catch((err) => {
-
-                });
+                newsChannel.send({ embeds: [ embed ] })
+                    .then(() => { newsMessage.message.delete() })
             } else {
-                newsChannel.send(`<@&${newsMessage.NotifyRoleId}>`, {embeds: [ embed ]}).then((result) => {
-                    newsMessage.message.delete()
-                }).catch((err) => {
-
-                });
+                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [ embed ] })
+                    .then(() => { newsMessage.message.delete() })
             }
         }
 
