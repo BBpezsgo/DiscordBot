@@ -1709,21 +1709,26 @@ function commandProfil(message, sender) {
     message.channel.send({embeds: [ embed ]});
 }
 
-function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue) {
+function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken) {
     const optionEmojis = listOfOptionEmojis.toString().replace(' ', '').split(';')
     const optionTexts = listOfOptionText.toString().replace(' ', '').split(';')
     let optionText = ''
     for (let i = 0; i < optionTexts.length; i++) {
-        optionText += `${optionEmojis[i]}  ${optionTexts[i]}\n`
+        optionText += `> ${optionEmojis[i]}  ${optionTexts[i]}\n`
     }
     const embed = new Discord.MessageEmbed()
         .setColor(Color.Pink)
         .setTitle('Quiz!')
-        .setDescription(`\\✔️  **${addXpValue}\\🍺**\n\\❌ **-${removeXpValue}\\🍺**`)
+        .setDescription(
+            `\\✔️  **${addXpValue}\\🍺** és **${addToken}\\🎫**\n` +
+            `\\❌ **-${removeXpValue}\\🍺** és **${removeToken}\\🎫**\n` +
+            `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
+            )
         .addField(`${titleText}`, `${optionText}`)
 
-    bot.channels.cache.get('799340273431478303').send({embeds: [ embed ]}).then(message => {
+    bot.channels.cache.get('760804414205591585').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&799342836931231775>')
+        message.react('🎯')
         for (let i = 0; i < optionEmojis.length; i++) {
             if (optionEmojis[i].includes('<')) {
                 message.react(optionEmojis[i].split(':')[2].replace('>', ''))
@@ -3021,8 +3026,24 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     if (command.startsWith(`quiz\n`)) {
         const msgArgs = command.toString().replace(`quiz\n`, '').split('\n')
-        quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4])
+        quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
         userstatsSendCommand(sender)
+        return;
+    } else if (command.startsWith(`quiz help`)) {
+        userstatsSendCommand(sender)
+        const embed = new Discord.MessageEmbed()
+            .addField('Quiz szintaxis',
+                '.quiz\n' +
+                'Cím\n' +
+                'Opció;Opció;Opció\n' + 
+                '💥;💥;💥\n' +
+                '5000 (add XP)\n' +
+                '2500 (remove XP)\n' +
+                '10 (add Token)\n' +
+                '5 (remove Token)'
+            )
+            .setColor(Color.Highlight)
+        message.channel.send({embeds: [ embed ]})
         return;
     } else if (command.startsWith(`quizdone `)) {
         quizDone(command.replace(`quizdone `, ''))
