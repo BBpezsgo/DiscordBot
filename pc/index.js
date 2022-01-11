@@ -49,7 +49,6 @@ const Discord = require('discord.js')
 const { MessageActionRow, MessageButton } = require('discord.js');
 const { perfix, token } = require('./config.json')
 const bot = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
-//require('discord-buttons')(bot);
 statesManager.botLoaded = true
 
 let userstats = JSON.parse(fs.readFileSync('./database/userstats.json', 'utf-8'))
@@ -67,8 +66,6 @@ database.dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json',
 
 const ytdl = require('ytdl-core')
 
-//const disbut = require('discord-buttons');
-
 const dayOfYear = Math.floor(
     (
         (new Date()) - (new Date(new Date().getFullYear(), 0, 0))
@@ -84,8 +81,6 @@ let musicArray = []
 let musicFinished = true
 
 const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
-
-let lastInput = ''
 
 const activities_list = [
     "GTA V",
@@ -104,17 +99,6 @@ const activities_list = [
     "Genshin Impact",
     "Valoriant"
 ];
-
-const FileDebugType = {
-    simple: "SIMPLE",
-    warning: "WARNING",
-    error: "ERROR",
-    debug: "DEBUG",
-    discordMessage: "DISCORDMESSAGE",
-    discordMessageDelete: "DISCORDMESSAGEDELETE",
-    discordReactionAdd: "DISCORDREACT",
-    discordReactionRemove: "DISCORDREACTDELETE"
-}
 
 const Color = {
     Error: "#ed4245",
@@ -428,25 +412,7 @@ async function logMessage(message, username, private = false.valueOf, author) {
             log(`<${username}> - ${message.content}`, 0)
         }
 
-        logToFile(FileDebugType.discordMessage + username + "Ϊ" +
-            message.content + "Ϊ" +
-            message.author.avatarURL({ format: 'png', size: 64 }) + "Ϊ" +
-            message.id + "Ϊ" +
-            message.channel.id + "Ϊ" +
-            message.guild.id + "Ϊ" +
-            author.id
-        )
-
     } else {
-
-        logToFile(FileDebugType.discordMessage + username + "Ϊ" +
-            message.content + "Ϊ" +
-            message.author.avatarURL({ format: 'png', size: 64 }) + "Ϊ" +
-            message.id + "Ϊ" +
-            000000000000000000 + "Ϊ" +
-            000000000000000000 + "Ϊ" +
-            author.id
-        )
 
         if (message.channel.guild) {
             log(`<${username}> - ${message.content}`, 0)
@@ -462,24 +428,6 @@ async function logMessage(message, username, private = false.valueOf, author) {
 */
 function logToFile(data) {
     return;
-    let text = ''
-    text = data
-    if (data === '') text = null
-    if (data === ' ') text = null
-    if (!data) text = null
-    let hour = new Date().getHours();
-    let minute = new Date().getMinutes();
-    if (minute < 10) {
-        minute = '0' + new Date().getMinutes();
-    };
-    let seconds = new Date().getSeconds();
-    if (seconds < 10) {
-        seconds = '0' + new Date().getSeconds();
-    };
-    const timeStamp = hour + ':' + minute + ':' + seconds
-    let asfasfasdf = ""
-    asfasfasdf = "\n¶" + timeStamp + "»" + text + "»"
-    fs.appendFile('out.txt', asfasfasdf, function (err) { if (err) return log(err); });
 }
 
 /**
@@ -561,22 +509,18 @@ function addXp(user, channel, ammount) {
 
 bot.on('reconnecting', () => {
     log(INFO + ': Újracsatlakozás...');
-    logToFile(FileDebugType.debug + 'reconnecting')
 });
 
 bot.on('disconnect', () => {
     log(ERROR + ': Megszakadt a kapcsolat!');
-    logToFile(FileDebugType.debug + 'disconnect')
 });
 
 bot.on('resume', () => {
     log(INFO + ': Folytatás');
-    logToFile(FileDebugType.debug + 'resume')
 });
 
 bot.on('error', error => {
     log(ERROR + ': ' + error);
-    logToFile(FileDebugType.debug + 'error:' + error)
 });
 
 bot.on('debug', debug => {
@@ -587,234 +531,24 @@ bot.on('debug', debug => {
     if (translatedDebug.secret == true) return;
 
     log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText)
-
-    /*
-    if (debug.startsWith('Provided token: ')) { } else {
-        logToFile(FileDebugType.debug + debug)
-        if (debug.startsWith('Preparing to connect to the gateway...')) {
-            loadingProcess('Csatlakozás...')
-            //logToFile(FileDebugType.debug + "Client: Csatlakozás...")
-            log()
-        } else if (debug.startsWith('[WS => Manager] Fetched Gateway Information')) {
-        } else if (debug.startsWith('[WS => Manager] Session Limit Information')) {
-        } else if (debug.startsWith('[WS => Manager] Spawning shards: ')) {
-            loadingProcess('Shard-ok létrehozása')
-            //logToFile(FileDebugType.debug + "WebSocket: Shard-ok létrehozása...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [CONNECT]')) {
-            loadingProcess('Csatlakozva')
-            //logToFile(FileDebugType.debug + "Shard: Csatlakozva")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] Setting a HELLO timeout for ')) {
-            loadingProcess('\'HELLO\' időtúllépés beállítása')
-            //logToFile(FileDebugType.debug + "Shard: 'HELLO' időtúllépés beállítása...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [CONNECTED] wss://gateway.discord.gg/?v=6&encoding=json in ')) {
-            loadingProcess('Csatlakozva a szerverhez')
-            //logToFile(FileDebugType.debug + "Shard: Csatlakozva a szerverhez")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] Clearing the HELLO timeout.')) {
-            loadingProcess('\'HELLO\' időtúllépés törölve')
-            //logToFile(FileDebugType.debug + "Shard: 'HELLO' időtúllépés törölve")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] Setting a heartbeat interval for ')) {
-            loadingProcess('\'heartbeat\' beállítása')
-            //logToFile(FileDebugType.debug + "Shard: 'heartbeat' beállítása..")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [IDENTIFY] Shard 0/1')) {
-            loadingProcess('Shard ellenőrizve')
-            //logToFile(FileDebugType.debug + "Shard: Shard ellenőrizve")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [READY] Session ')) {
-            loadingProcess('Szerver kész')
-            //logToFile(FileDebugType.debug + "Shard: A szerver kész")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [ReadyHeartbeat] Sending a heartbeat.')) {
-            loadingProcess('\'heartbeat\' küldése')
-            //logToFile(FileDebugType.debug + "Shard: 'heartbeat' küldése...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] Shard received all its guilds. Marking as fully ready.')) {
-            loadingProcess('Befejezés')
-            //logToFile(FileDebugType.debug + "Shard: Befejezés...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] Heartbeat acknowledged, latency of ')) {
-            //logToFile("Ω" + ping)
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [HeartbeatTimer] Sending a heartbeat.')) {
-            log()
-        } else if (debug.startsWith('[WS => Manager] Couldn\'t reconnect or fetch information about the gate')) {
-            log(ERROR + ': Nem sikerült újracsatlakozni.')
-            //logToFile(FileDebugType.error + 'WebSocket: Nem sikerült újracsatlakozni')
-        } else if (debug.startsWith('[WS => Manager] Possible network error occurred. Retrying in 5s...')) {
-            //logToFile(FileDebugType.debug + "WebSocket: Újracsatlakozás 5s múlva...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [DESTROY]')) {
-            //logToFile(FileDebugType.warning + 'Shard: Shard törölve.')
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] Tried to send packet \'{')) {
-            log(ERROR + ': Nem sikerült elküldeni a csomagot.')
-            //logToFile(FileDebugType.error + 'Shard: Nem sikerült elküldeni a csomagot')
-        } else if (debug.startsWith('[WS => Shard 0] Shard was destroyed but no WebSocket connection was present! Reconnecting...')) {
-            //logToFile(FileDebugType.warning + 'Shard: A Shard törölve, de nincs WebSocket csatlakozás! Újracsatlakozás...')
-            log()
-        } else if (debug.startsWith('[WS => Manager] Manager was destroyed. Called by:')) {
-            log(WARNING + ': A Kezelő törölve.')
-            //logToFile(FileDebugType.error + 'WebSocket: Nem sikerült csatlakozni')
-        } else if (debug.startsWith('[WS => Shard 0] [CLOSE]')) {
-            //logToFile(FileDebugType.warning + 'Shard: Kilépés...')
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] Clearing the heartbeat interval.')) {
-            log()
-            //logToFile(FileDebugType.warning + 'Shard: \'heartbeat\' időtúllépés törölve')
-        } else if (debug.startsWith('[WS => Shard 0] Session ID is present, attempting an immediate reconnect...')) {
-            //logToFile(FileDebugType.debug + 'Shard: A szerver ID az azonnali újracsatlakozásra törekszik...')
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] WS State: CLOSED')) {
-            //logToFile(FileDebugType.warning + 'Shard: Kilépve')
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] A connection object was found. Cleaning up before continuing.')) {
-            //logToFile(FileDebugType.debug + "Shard: Tisztítás, mielőtt folytatnánk...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] WS State: CONNECTING')) {
-            //logToFile(FileDebugType.debug + "Shard: Csatlakozás...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] Failed to connect to the gateway, requeueing...')) {
-            //logToFile(FileDebugType.warning + 'Shard: Nem sikerült csatlakozni, újrapróbálkozás...')
-            log()
-        } else if (debug.startsWith('[WS => Manager] Shard Queue Size: 1; continuing in 5 seconds...')) {
-            //logToFile(FileDebugType.debug + "WebSocket: Shard Sor Mérete: 1, folytatás 5s múlva...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [RESUME]')) {
-            //logToFile(FileDebugType.debug + "Shard: Folytatás...")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [RESUMED]')) {
-            //logToFile(FileDebugType.debug + "Shard: Folytatva")
-            log()
-        } else if (debug.startsWith('[WS => Shard 0] [ResumeHeartbeat] Sending a heartbeat')) {
-            log(DONE + ':  Csatlakozva')
-            //logToFile(FileDebugType.debug + "Shard: \'heartbeat\' küldése folytatva")
-        } else if (debug.startsWith('[WS => Shard 0] [INVALID SESSION] Resumable: false.')) {
-            log(ERROR + ': Érvénytelen session. Nem folytatható.')
-            //logToFile(FileDebugType.error + 'Shard: Érvénytelen session. Nem folytatható.')
-        } else if (debug.startsWith('[WS => Shard 0] An open connection was found, attempting an immediate identify.')) {
-            log(SHARD + ': Egy nyitott csatlakozást észleltünk, azonnali azonosítás megpróbálása...')
-            //logToFile(FileDebugType.warning + 'Shard: Egy nyitott csatlakozást észleltünk, azonnali azonosítás megpróbálása...')
-        } else if (debug.startsWith('[WS => Shard 0] [RECONNECT] Discord asked us to reconnect')) {
-            log(SHARD + ': Újracsatlakozás... A Discord arra kért minket, hogy csatlakozzunk újra.')
-            //logToFile(FileDebugType.warning + 'Shard: Újracsatlakozás... A Discord arra kért minket, hogy csatlakozzunk újra.')
-        } else if (debug.startsWith('429 hit on route /gateway/bot')) {
-            log(ERROR + ': Shard spam!')
-            //logToFile(FileDebugType.error + 'WebSocket: Shard spam!')
-        } else if (debug.startsWith('[VOICE (') && debug.includes(')]: [WS] >> {')) {
-            //logToFile(FileDebugType.debug + "ytdl: Kommunikálás a szerverrel...")
-            log('')
-        } else if (debug.includes('Ready with authentication details:')) {
-            //logToFile(FileDebugType.debug + "ytdl: Hitelesítés kész")
-            log('')
-        } else if (debug.startsWith('[VOICE (') && debug.includes(')]: [WS] << {')) {
-            //logToFile(FileDebugType.debug + "ytdl: A szerverrel való kapcsolat megfelelő")
-            log('')
-        } else if (debug.includes(')]: Sending voice state update: {')) {
-            //logToFile(FileDebugType.debug + "ytdl: Hangállapot-frissítés küldése...")
-            log('')
-        } else if (debug.includes('received voice state update:')) {
-            //logToFile(FileDebugType.debug + "ytdl: Hangállapot-frissítés kész")
-            log('')
-        } else if (debug.includes('connection? true')) {
-            //logToFile(FileDebugType.debug + "ytdl: Kapcsolat: Kész")
-            log('')
-        } else if (debug.includes('Setting sessionID')) {
-            //logToFile(FileDebugType.debug + "ytdl: Szerver azonosító kész")
-            log('')
-        } else if (debug.includes('Authenticated with sessionID')) {
-            //logToFile(FileDebugType.debug + "ytdl: A szerver azonosítóval hitelesítve")
-            log('')
-        } else if (debug.includes('received voice server')) {
-            //logToFile(FileDebugType.debug + "ytdl: Fogadott hangszerver")
-            log('')
-        } else if (debug.includes('voiceServer guild')) {
-            //logToFile(FileDebugType.debug + "ytdl: voiceServer guild")
-            log('')
-        } else if (debug.includes(')]: Token "')) {
-            //logToFile(FileDebugType.debug + "ytdl: Token")
-            log('')
-        } else if (debug.includes('Endpoint resolved as')) {
-            //logToFile(FileDebugType.debug + "ytdl: Végpont feloldva")
-            log('')
-        } else if (debug.includes('Connect triggered')) {
-            //logToFile(FileDebugType.debug + "ytdl: Csatlakozás előkészítve")
-            log('')
-        } else if (debug.includes('connect requested')) {
-            //logToFile(FileDebugType.debug + "ytdl: Csatlakozás...")
-            log('')
-        } else if (debug.includes(')]: [WS] connecting,')) {
-            //logToFile(FileDebugType.debug + "ytdl: Csatlakozás...")
-            log('')
-        } else if (debug.includes(')]: [WS] opened at gateway')) {
-            //logToFile(FileDebugType.debug + "ytdl: Csatlakozás...")
-            log('')
-        } else if (debug.includes(')]: Selecting the')) {
-            //logToFile(FileDebugType.debug + "ytdl: Csatlakozás...")
-            log('')
-        } else if (debug.includes(')]: [UDP] created socket')) {
-            //logToFile(FileDebugType.debug + "ytdl: [UDP] created socket")
-            log('')
-        } else if (debug.includes(' Sending IP discovery packet: ')) {
-            //logToFile(FileDebugType.debug + "ytdl: Sending IP discovery packet...")
-            log('')
-        } else if (debug.includes('Successfully sent IP discovery packet')) {
-            //logToFile(FileDebugType.debug + "ytdl: Successfully sent IP discovery packet")
-            log('')
-        } else if (debug.includes(')]: [UDP] message: ')) {
-            //logToFile(FileDebugType.debug + "ytdl: [UDP] message")
-            log('')
-        } else if (debug.includes(')]: [UDP] << {')) {
-            //logToFile(FileDebugType.debug + "ytdl: Videó betöltése...")
-            log('')
-        } else if (debug.includes('Connection clean up')) {
-            //logToFile(FileDebugType.debug + "ytdl: A kapcsolat tisztítása...")
-            log('')
-        } else if (debug.includes('[WS] shutdown requested')) {
-            //logToFile(FileDebugType.debug + "ytdl: Lecsatlakozás...")
-            log('')
-        } else if (debug.includes('[WS] reset requested')) {
-            //logToFile(FileDebugType.debug + "ytdl: Visszaállítás...")
-            log('')
-        } else if (debug.includes('[WS] closed')) {
-            //logToFile(FileDebugType.debug + "ytdl: Kilépve")
-            log('')
-        } else if (debug.includes(')]: Error [WS_NOT_OPEN]: Websocket not open to send')) {
-            //logToFile(FileDebugType.error + "ytdl: A Websocket nem nyitott küldésre")
-        } else if (debug.includes(')]: [UDP] >> ERROR: Error: send')) {
-            //logToFile(FileDebugType.error + "ytdl: Küldési hiba")
-        } else {
-            log(DEBUG + ': ' + debug, 37)
-            //logToFile(FileDebugType.simple + debug)
-        }
-    };
-    */
 });
 
 bot.on('warn', warn => {
     log(WARNING + ': ' + warn);
-    logToFile(FileDebugType.warning + 'warn:' + warn)
 });
 
 bot.on('shardError', (error, shardID) => {
     log(ERROR + ': shardError: ' + error);
-    logToFile(FileDebugType.error + 'shardError[' + shardID + ']:' + error)
 });
 
 bot.on('invalidated', () => {
     log(ERROR + ': Érvénytelen');
-    logToFile(FileDebugType.debug + 'invalidated')
 });
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
     log(ERROR + ': Lecsatlakozva');
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
-    logToFile(FileDebugType.debug + 'shardDisconnect[' + shardID + ']:' + colseEvent.reason + 'Ϊ' + colseEvent.wasClean.toString())
 });
 
 bot.on('shardReady', (shardID) => {
@@ -822,24 +556,20 @@ bot.on('shardReady', (shardID) => {
     const quizChannel = mainGuild.channels.cache.get('799340273431478303')
     quizChannel.messages.fetch()
     statesManager.shardCurrentlyLoading = false
-    logToFile(FileDebugType.debug + 'shardReady[' + shardID + ']')
 });
 
 bot.on('shardReconnecting', (shardID) => {
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Újracsatlakozás...'
-    logToFile(FileDebugType.debug + 'shardReconnecting[' + shardID + ']')
 });
 
 bot.on('shardResume', (shardID, replayedEvents) => {
     log(SHARD & ': Folytatás: ' + replayedEvents.toString())
     statesManager.shardCurrentlyLoading = false
-    logToFile(FileDebugType.debug + 'shardResume[' + shardID + ']:' + replayedEvents.toString())
 });
 
 bot.on('raw', async event => {
     log(DEBUG & ': raw');
-    logToFile(FileDebugType.debug + 'RAW' + event.toString())
 
     return
 
@@ -866,80 +596,44 @@ bot.on('raw', async event => {
 
 bot.on('rateLimit', (RateLimitData) => {
     //log(DEBUG + ': rateLimit: ' + RateLimitData.limit + '; timeout: ' + RateLimitData.timeout + '; route: "' + RateLimitData.route + '"; method: "' + RateLimitData.method + '"; path: "' + RateLimitData.path + '"');
-    logToFile(FileDebugType.debug + 'rateLimit:' + RateLimitData.limit + '; timeout: ' + RateLimitData.timeout + '; route: ' + RateLimitData.route + '; method: ' + RateLimitData.method + '; path: ' + RateLimitData.path)
 });
 
 bot.on('close', () => {
     log(SHARD & ': close');
-    logToFile(FileDebugType.debug + 'close')
 });
 
 bot.on('destroyed', () => {
     log(SHARD & ': destroyed');
-    logToFile(FileDebugType.debug + 'destroyed')
 });
 
 bot.on('invalidSession', () => {
     log(SHARD & ': invalidSession');
-    logToFile(FileDebugType.debug + 'invalidSession')
 });
 bot.on('allReady', () => {
     log(SHARD & ': allReady');
-    logToFile(FileDebugType.debug + 'allReady')
 });
 
 bot.on('presenceUpdate', (oldPresence, newPresence) => {
     log(DEBUG & ': newStatus: ' + newPresence.status.toString());
-    logToFile(FileDebugType.debug + 'presenceUpdate:' + newPresence.status.toString())
 })
 
 bot.ws.on('READY', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.ready:" + shardID)
 })
 
 bot.ws.on('RESUMED', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.resumed:" + shardID)
 })
 
 bot.ws.on('PRESENCE_UPDATE', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.presenceUpdate:" + shardID)
 })
 
 bot.ws.on('VOICE_SERVER_UPDATE', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.VoiceServerUpdate:" + data)
 })
 
 bot.ws.on('VOICE_STATE_UPDATE', (data, shardID) => {
-    logToFile(FileDebugType.debug + "ws.VoiceStateUpdate:" + data)
 })
 
 bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => {
-    if (voiceStateNew.connection === null) {
-        logToFile(FileDebugType.debug + "voiceStateUpdate: connection.status:4" +
-            ";connection.voice.deaf:false" +
-            ";connection.voice.mute:false" +
-            ";connection.voice.speaking:false" +
-            ";connection.voice.streaming:false")
-    } else {
-        let voiceSpeaking = ''
-        let voiceStreaming = ''
-        if (voiceStateNew.connection.voice.speaking === null) {
-            voiceSpeaking = "null"
-        } else {
-            voiceSpeaking = voiceStateNew.connection.voice.speaking.toString()
-        }
-        if (voiceStateNew.connection.voice.streaming === null) {
-            voiceStreaming = "null"
-        } else {
-            voiceStreaming = voiceStateNew.connection.voice.streaming.toString()
-        }
-
-        logToFile(FileDebugType.debug + "voiceStateUpdate: connection.status:" + voiceStateNew.connection.status.toString() +
-            ";connection.voice.deaf:" + voiceStateNew.connection.voice.deaf.toString() +
-            ";connection.voice.mute:" + voiceStateNew.connection.voice.mute.toString() +
-            ";connection.voice.speaking:" + voiceSpeaking +
-            ";connection.voice.streaming:" + voiceStreaming)
-    }
+    
 })
 //#endregion
 //#region Commands
@@ -2217,48 +1911,6 @@ bot.on('clickMenu', async (button) => {
     button.reply.defer()
 });
 
-async function readIncomingDatas(_data) {
-    let data = ''
-    data = _data
-    if (data.includes('ά')) {
-        let channelId = ''
-        let messageText = ''
-        const inputPieces = data.split('ά')
-        channelId = inputPieces[0].substring(1)
-        messageText = inputPieces[1]
-
-        console.log(data)
-        console.log(inputPieces)
-        console.log(channelId)
-
-        bot.channels.cache.get(channelId).send(messageText).then(() => {
-            logToFile("ΣÜzenet elküldve")
-        })
-    } else if (data.includes('REACT')) {
-        let messageId = ''
-        let reactIco = ''
-        messageId = data.replace('REACT', '').split("|")[1]
-        reactIco = data.replace('REACT', '').split("|")[2]
-        console.log(messageId)
-        console.log(reactIco)
-    } else if (data.includes('PING')) {
-        logToFile('PONG')
-    } else if (data.includes('GETINFO')) {
-        try {
-            await logToFile(FileDebugType.debug + "READYAT" + bot.readyTimestamp)
-            if (bot.shard !== null) {
-                await logToFile(FileDebugType.debug + "SHARD.COUNT" + bot.shard.count)
-                await logToFile(FileDebugType.debug + "SHARD.MODE" + bot.shard.mode.toString())
-                await logToFile(FileDebugType.debug + "SHARD.PARENTPORT" + bot.shard.parentPort.toString())
-            }
-            await logToFile(FileDebugType.debug + "WS.GATEWAY" + bot.ws.gateway)
-            await logToFile(FileDebugType.debug + "WS.STATUS" + bot.ws.status)
-        } catch (error) {
-            await logToFile(FileDebugType.error + error.message)
-        }
-        logToFile(FileDebugType.debug + "GETINFOEND")
-    }
-}
 const getApp = (guildId) => {
     const app = bot.api.applications(bot.user.id)
     if (guildId) {
@@ -2559,19 +2211,6 @@ bot.on('ready', () => { //Change status
         bot.user.setActivity(activities_list[index]);
     }, 10000);
     setInterval(() => {
-        try {
-            const input = fs.readFileSync('in.txt', 'utf-8')
-            if (input === lastInput) { } else {
-                readIncomingDatas(input)
-
-                lastInput = input
-            }
-        }
-        catch (err) {
-            logToFile(FileDebugType.error + err)
-            console.log(err)
-        }
-
         if (listOfNews.length > 0) {
             const newsMessage = listOfNews.shift()
             /**
@@ -2592,10 +2231,7 @@ bot.on('ready', () => { //Change status
 })
 bot.on('message', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
-    if (message.author.bot && thisIsPrivateMessage === false) {
-        logToFile(FileDebugType.discordMessage + bot.user.username + "Ϊ" + message.content + "Ϊ" + bot.user.avatarURL({ format: 'png', size: 64 }) + "Ϊ" + message.id + "Ϊ" + message.channel.id + "Ϊ" + message.guild.id)
-        return
-    }
+    if (message.author.bot && thisIsPrivateMessage === false) return
     if (!message.type) return
     let args = message.content.substring(perfix.length).split(' ')
     let sender = message.author
@@ -2741,9 +2377,7 @@ bot.on('message', async message => { //Message
     }
 })
 bot.on('messageReactionRemove', (messageReaction, user) => { //React
-    logToFile(FileDebugType.discordReactionRemove + messageReaction.message.id + "Ϊ" + messageReaction.emoji.name + "Ϊ" + user.id)
-
-    if (user.bot) { return }
+    if (user.bot) return
 
     if (!dataUsernames[user.id]) {
         dataUsernames[user.id] = {}
@@ -2752,9 +2386,7 @@ bot.on('messageReactionRemove', (messageReaction, user) => { //React
     dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
 })
 bot.on('messageReactionAdd', (messageReaction, user) => { //React
-    logToFile(FileDebugType.discordReactionAdd + messageReaction.message.id + "Ϊ" + messageReaction.emoji.name + "Ϊ" + user.id)
-
-    if (user.bot) { return }
+    if (user.bot) return
 
     if (!dataUsernames[user.id]) {
         dataUsernames[user.id] = {}
@@ -2763,7 +2395,6 @@ bot.on('messageReactionAdd', (messageReaction, user) => { //React
     dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
 })
 bot.on('messageDelete', (message) => { //React
-    logToFile(FileDebugType.discordMessageDelete + message.id)
 })
 
 /**
