@@ -1,5 +1,7 @@
 //#region Imports, variables
 
+
+
 const CommandWeather = require('./commands/weather')
 const CommandHelp = require('./commands/help')
 const CommandXp = require('./commands/database/xp')
@@ -22,6 +24,13 @@ function log(message = '') {
     logManager.Log(message, false)
 }
 
+const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
+const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
+const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + '\033[37m' + ']'
+const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
+const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
+const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
+
 const consoleWidth = 80 - 2
 
 const fs = require('fs')
@@ -36,13 +45,6 @@ const listOfUserIDs = ['726127512521932880',
     '575727604708016128', '583709720834080768',
     '415078291574226955', '750748417373896825',
     '504304776033468438', '551299555698671627']
-
-const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
-const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
-const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + '\033[37m' + ']'
-const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
-const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
-const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
 
 loadingProcess('Bővítmények, változók betöltése...')
 const Discord = require('discord.js')
@@ -82,6 +84,8 @@ let musicFinished = true
 
 const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
 
+
+
 const activities_list = [
     "GTA V",
     "Minecraft",
@@ -98,7 +102,7 @@ const activities_list = [
     "Warzone 2100",
     "Genshin Impact",
     "Valoriant"
-];
+]
 
 const Color = {
     Error: "#ed4245",
@@ -115,45 +119,38 @@ const Color = {
     DarkPink: "#ad1457"
 }
 
-/**
- * @type {GameMap}
- */
+const readline = require('readline')
+const abbrev = require('./functions/abbrev')
+
+//#region Game Variables
+/** @type {GameMap} */
 let gameMap = null
 
-/**
- * @type {number}
- */
+/** @type {number} */
 let gameCameraX = 0
 
-/**
- * @type {number}
- */
+/** @type {number} */
 let gameCameraY = 0
 
-/**
- * @type {GameUserSettings[]}
- */
+/** @type {GameUserSettings[]} */
 let gameUserSettings = []
 
 
-/**
- * @type {savedGameMessage[]}
- */
+/** @type {savedGameMessage[]} */
 let allGameMessages = []
+//#endregion
 
-/**
- * @type {CurrentlyWritingMail[]}
- */
+/** @type {CurrentlyWritingMail[]} */
 let currentlyWritingEmails = []
 
 //#endregion
 
-/**
- * @type [NewsMessage]
- */
+/** @type [NewsMessage] */
 const listOfNews = []
 const incomingNewsChannel = '902894789874311198'
 const processedNewsChannel = '746266528508411935'
+
+
 
 loadingProcess('Betöltés...')
 
@@ -325,38 +322,6 @@ function reloadDatabase() {
     } catch (error) {
         log(error.message)
     }
-}
-
-function abbrev(num) {
-    if (!num || isNaN(num)) return "0";
-    if (typeof num === "string") num = parseInt(num);
-    let decPlaces = Math.pow(10, 1);
-    var abbrev = ["E", "m", "M", "b", "B", "tr", "TR", "qa", "QA", "qi", "QI", "sx", "SX", "sp", "SP"];
-    for (var i = abbrev.length - 1; i >= 0; i--) {
-        var size = Math.pow(10, (i + 1) * 3);
-        if (size <= num) {
-            num = Math.round((num * decPlaces) / size) / decPlaces;
-            if (num == 1000 && i < abbrev.length - 1) {
-                num = 1;
-                i++;
-            }
-            num += abbrev[i];
-            break;
-        }
-    }
-    return num;
-}
-
-/**
- * Shorten text.
- * @param {string} text Text to shorten 
- * @param {number} len Max Length
- * @returns {string}
- */
-function shorten(text, len) {
-    if (typeof text !== "string") return "";
-    if (text.length <= len) return text;
-    return text.substr(0, len).trim() + "...";
 }
 
 /**
@@ -1753,6 +1718,25 @@ bot.on('interactionCreate', async interaction => {
         }
     }
 });
+
+readline.emitKeypressEvents(process.stdin);
+process.stdin.setRawMode(true);
+process.stdin.on('keypress', (str, key) => {
+    if (key.ctrl && key.name === 'c') {
+        bot.destroy()
+        process.exit()
+    } else if (key.ctrl && key.name === 't') {
+        let x = ''
+        uptimeTimes.forEach((time) => {
+            if (time == true) {
+                x += 'X'
+            } else {
+                x += 'O'
+            }
+        })
+    }
+});
+
 bot.on('clickMenu', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {

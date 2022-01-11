@@ -1,6 +1,6 @@
 config.json
-database
-database-copy
+source/database
+source/database-copy
 node_modules
 package-lock.json
 package.json

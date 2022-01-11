@@ -1,14 +1,18 @@
 //#region Imports, variables
 
 console.clear()
-console.log('[NodeJS]: Betöltés...\x1b[0m')
 
 const CommandWeather = require('./commands/weather')
 const CommandHelp = require('./commands/help')
 
+
+
+
+
 const { LogManager } = require('./functions/log.js')
 const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
+
 
 const logManager = new LogManager()
 const statesManager = new StatesManager()
@@ -27,23 +31,58 @@ const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
 const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
 const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
 
+const consoleWidth = 80 - 2
+
+
+
 /**
  * @type {string[]}
  */
-let listOfHelpRequiestUsers = [];
+let listOfHelpRequiestUsers = []
+
+
+
+
+
+
+
 
 const Discord = require("discord.js");
 const { MessageActionRow, MessageButton } = require('discord.js');
 const { perfix, token } = require('./config.json')
-const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES"] })
+const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const ytdl = require('ytdl-core')
+
+
+
+
+
+
+
+
 
 //const WS = require('./ws/ws')
 //var ws = new WS('1234', 5665, bot)
 
-const ytdl = require('ytdl-core')
-
 let musicArray = []
 let musicFinished = true
+
+
 
 let lastNoNews = false
 
@@ -55,7 +94,15 @@ const activities_list = [
     "Facebook",
     "Instagram",
     "Wiki"
-];
+]
+
+
+
+
+
+
+
+
 
 const Color = {
     Error: "#ed4245",
@@ -73,54 +120,25 @@ const Color = {
 }
 
 const readline = require('readline')
+const abbrev = require('./functions/abbrev')
+
+
+
+
+
 
 //#endregion
 
-/**
- * @type [NewsMessage]
- */
+/** @type [NewsMessage] */
 const listOfNews = []
 const incomingNewsChannel = '902894789874311198'
 const processedNewsChannel = '746266528508411935'
-/**
- * @type [boolean]
- */
+/** @type [boolean] */
 const uptimeTimes = []
 let uptimeSaved = true
 
+
 //#region Functions
-
-function abbrev(num) {
-    if (!num || isNaN(num)) return "0";
-    if (typeof num === "string") num = parseInt(num);
-    let decPlaces = Math.pow(10, 1);
-    var abbrev = ["E", "m", "M", "b", "B", "tr", "TR", "qa", "QA", "qi", "QI", "sx", "SX", "sp", "SP"];
-    for (var i = abbrev.length - 1; i >= 0; i--) {
-        var size = Math.pow(10, (i + 1) * 3);
-        if (size <= num) {
-            num = Math.round((num * decPlaces) / size) / decPlaces;
-            if (num == 1000 && i < abbrev.length - 1) {
-                num = 1;
-                i++;
-            }
-            num += abbrev[i];
-            break;
-        }
-    }
-    return num;
-}
-
-/**
- * Shorten text.
- * @param {string} text Text to shorten
- * @param {number} len Max Length
- * @returns {string}
- */
-function shorten(text, len) {
-    if (typeof text !== "string") return "";
-    if (text.length <= len) return text;
-    return text.substr(0, len).trim() + "...";
-}
 
 /**
 * @param {Discord.Message} message The message context
@@ -192,7 +210,7 @@ bot.on('interactionCreate', interaction => {
     if (interaction.isButton()) {
         if (interaction.customId === 'sendHelp') {
             const thisIsPrivateMessage = interaction.message.channel.type === 'dm'
-            CommandHelp(interaction.message.channel, interaction.user, thisIsPrivateMessage)
+            CommandHelp(interaction.message.channel, interaction.user, thisIsPrivateMessage, true)
 
             //interaction.deferReply()
             interaction.message.delete()
@@ -648,7 +666,7 @@ bot.on('clickButton', async (button) => {
 
     if (button.id === 'sendHelp') {
         const thisIsPrivateMessage = button.channel.type === 'dm'
-        CommandHelp(button.channel, button.clicker.user, thisIsPrivateMessage)
+        CommandHelp(button.channel, button.clicker.user, thisIsPrivateMessage, true)
 
         button.reply.defer()
         button.message.delete()
@@ -1179,10 +1197,10 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
             '> ᲼  └\\🔷: Nagyon alacsomy')
         return
     } else if (command === `help`) { // /help parancs
-        CommandHelp(channel, sender, thisIsPrivateMessage)
+        CommandHelp(channel, sender, thisIsPrivateMessage, true)
         return
     } else if (command === `?`) { // /help parancs
-        CommandHelp(channel, sender, thisIsPrivateMessage)
+        CommandHelp(channel, sender, thisIsPrivateMessage, true)
         return
     }
 
