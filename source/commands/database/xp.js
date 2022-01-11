@@ -1,6 +1,5 @@
 const Discord = require('discord.js')
 const fs = require('fs');
-const { send } = require('process');
 let scores = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'));
 
 let coloredProgressBarPart = '⬜'
@@ -169,13 +168,10 @@ function abbrev(num) {
     return num;
 }
 
- /**
- * @param {Discord.Channel} channel
- * @param {Discord.User} sender
- */
-async function execute(channel, sender) {
+ /** @param {Discord.CommandInteraction<Discord.CacheType>} command */
+async function execute(command) {
     try {
-        const userColor = scores[sender.id].color
+        const userColor = scores[command.user.id].color
 
         if (userColor === "#ff0000") {
             coloredProgressBarPart = '🟥'
@@ -193,7 +189,7 @@ async function execute(channel, sender) {
             coloredProgressBarPart = '🟫'
         }
 
-        var score = scores[sender.id].score
+        var score = scores[command.user.id].score
         var rankName = xpRankText(score)
         var next = xpRankNext(score)
 
@@ -213,36 +209,19 @@ async function execute(channel, sender) {
         }
 
         const embed = new Discord.MessageEmbed()
-            .setAuthor(sender.username, sender.displayAvatarURL())
+            .setAuthor(command.user.username, command.user.displayAvatarURL())
             .setTitle('Rang')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/beer-mug_1f37a.png')
             .addField(rankName,'\\' + xpRankIcon(score) + ' ' + progressBar + ' \\❔')
             .setColor(userColor)
             .setFooter(abbrev(score) + ' / ' + abbrev(next) + '\nKell még: 🍺' + abbrev(next - score) + ' xp')
-        channel.send({embeds: [embed]});
+        command.reply({embeds: [embed]});
     } catch (error) {
-        const filter = (reaction, user) => {
-            return ['🔄'].includes(reaction.emoji.name) && user.id === sender.id;
-        };
-        channel.send('> \\❌ ' + error.toString()).then(message => {
-            message.react('🔄');
-
-            message.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] }).then(collected => {
-                    if (collected.first().emoji.name == '🔄') {
-                        execute(channel, sender)
-                    };
-                    message.reactions.removeAll();
-                }).catch(() => {
-                    message.reactions.removeAll();
-                });
-        });
+        command.reply('> \\❌ ' + error.toString())
     }
 }
 
  /**
- * @param {Discord.Channel} channel
- * @param {Discord.User} sender
+ * @param {Discord.CommandInteraction<Discord.CacheType>} command
  */
-module.exports = (channel, sender) => {
-    execute(channel, sender)
-}
+module.exports = (command) => { execute(command) }

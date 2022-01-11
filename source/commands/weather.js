@@ -734,10 +734,9 @@ function addDays(date, days) {
 }
 
 /**
-* @param {Discord.Channel} channel
-* @param {Discord.User} sender
+ * @param {Discord.CommandInteraction<Discord.CacheType>} command
 */
-module.exports = async (channel, sender) => {
+module.exports = async (command) => {
 
     const year = new Date().getFullYear()
     const month = new Date().getMonth() + 1
@@ -750,15 +749,12 @@ module.exports = async (channel, sender) => {
         new MoonPhase(addDays(new Date(year, month, day), 3))
     ]
 
-    /**
-     * @type {Discord.Message}
-     */
-    const msg = await channel.send('> \\⌛ **Betöltés...**')
+    await command.deferReply()
 
     try {
         await weather1.find({ search: 'Békéscsaba, HU', degreeType: 'C' }, function (err, result) {
             if (err) {
-                msg.edit('> \\❌ **MSN Error:** ' + err.toString())
+                command.editReply('> \\❌ **MSN Error:** ' + err.toString())
                 return
             }
             weather2.getWeather("bekescsaba").then(async val => {
@@ -766,7 +762,7 @@ module.exports = async (channel, sender) => {
 
                 request(url, function (err, response, body) {
                     if (err) {
-                        msg.edit('> \\❌ **OpenWeatherMap Error:** ' + err.toString)
+                        command.editReply('> \\❌ **OpenWeatherMap Error:** ' + err.toString)
                     } else {
                         let weather = JSON.parse(body)
                         weatherData0 = result
@@ -778,17 +774,15 @@ module.exports = async (channel, sender) => {
                         const skyImgName = weatherSkytextImgName(weatherData0[0].current.skytext, unixToTime(weatherData1.sys.sunset).split(':')[0], unixToTime(weatherData1.sys.sunrise).split(':')[0], weatherData1.clouds.all)
                         if (ImgExists(skyImgName) === true) {
                             const attachment = new Discord.MessageAttachment('./commands/weatherImages/' + skyImgName + '.jpg', skyImgName + '.jpg');
-                            channel.send({ embeds: [embed], files: [attachment] })
+                            command.editReply({ embeds: [embed], files: [attachment] })
                         } else {
-                            channel.send({ embeds: [embed] })
+                            command.editReply({ embeds: [embed] })
                         }
-
-                        msg.delete();
                     }
                 })
             });
         });
     } catch (error) {
-        msg.edit('> \\❌ **MSN Error:** ' + error.toString())
+        command.editReply('> \\❌ **MSN Error:** ' + error.toString())
     }
 }

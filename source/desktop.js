@@ -1492,9 +1492,7 @@ async function quizDone(quizMessageId, correctIndex) {
 
 bot.on('interactionCreate', async interaction => {
     if (interaction.isCommand()) {
-        if (interaction.commandName === 'ping') {
-            await interaction.reply('Pong!');
-        }
+        processApplicationCommand(interaction)
     } else if (interaction.isButton()) {
         try {
             if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
@@ -1858,16 +1856,51 @@ const getApp = (guildId) => {
     return app
 }
 
+async function RemoveAllCommands() {
+    const guild = bot.guilds.cache.get('737954264386764812')
+    const guildCommands = guild.commands
+    await guildCommands.fetch()
+    guildCommands.cache.forEach(async (val, key) => {
+        await guildCommands.delete(val)
+    });
+        
+    const appCommands = bot.application?.commands
+    await appCommands.fetch()
+    appCommands.cache.forEach(async (val, key) => {
+        await appCommands.delete(val)
+    });
+        
+}
+
 bot.once('ready', async () => { //Ready
-    const commands = await getApp('737954264386764812').commands.get()
+    //const commands = await getApp('737954264386764812').commands.get()
     //log(commands)
 
-    await getApp('737954264386764812').commands.post({
-        data: {
-            name: 'ping',
-            description: 'A simple ping command'
-        },
-    })
+    const { SlashCommandBuilder } = require('@discordjs/builders');
+
+    const commandPing = new SlashCommandBuilder()
+        .setName('ping')
+        .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e');
+    const commandWeather = new SlashCommandBuilder()
+        .setName('weather')
+        .setDescription('Békéscsaba időjárása');
+    const commandXp = new SlashCommandBuilder()
+        .setName('xp')
+        .setDescription('Rangod');
+    const commandDev = new SlashCommandBuilder()
+        .setName('dev')
+        .setDescription('Fejlesztői segítség');
+
+    //await RemoveAllCommands()
+
+    const guildCommands = bot.guilds.cache.get('737954264386764812').commands
+
+    const appCommands = bot.application?.commands
+    
+    guildCommands?.create(commandPing.toJSON())
+    guildCommands?.create(commandWeather.toJSON())
+    guildCommands?.create(commandXp.toJSON())
+    guildCommands?.create(commandDev.toJSON())
 
     const lastDay = dataBot.day
     dataBot.day = dayOfYear
@@ -2285,12 +2318,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     //#region Enabled in dm
 
-    if (command === `xp`) {
-        CommandXp(message.channel, sender)
-        userstatsSendCommand(sender)
-        return;
-    };
-
     if (command === `crate all`) {
         commandAllCrate(message, sender)
         userstatsSendCommand(sender)
@@ -2321,83 +2348,19 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         return;
     };
 
-    if (command === `ping`) {
-        var WsStatus = "Unknown"
-        if (bot.ws.status === 0) {
-            WsStatus = "Kész"
-        } else if (bot.ws.status === 1) {
-            WsStatus = "Csatlakozás"
-        } else if (bot.ws.status === 2) {
-            WsStatus = "Újracsatlakozás"
-        } else if (bot.ws.status === 3) {
-            WsStatus = "Tétlen"
-        } else if (bot.ws.status === 4) {
-            WsStatus = "Majdnem kész"
-        } else if (bot.ws.status === 5) {
-            WsStatus = "Lecsatlakozba"
-        } else if (bot.ws.status === 6) {
-            WsStatus = "Várakozás guild-okra"
-        } else if (bot.ws.status === 7) {
-            WsStatus = "Azonosítás"
-        } else if (bot.ws.status === 8) {
-            WsStatus = "Folytatás"
-        }
-        const embed = new Discord.MessageEmbed()
-            .setTitle('Pong!')
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
-            .setColor(Color.Highlight)
-            .addField('\\🖥️ BOT:',
-                'Készen áll: ' + DateToString(bot.readyAt) + '\n' +
-                'Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
-                'Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
-            )
-            .addField('\\📡 WebSocket:',
-                'Átjáró: ' + bot.ws.gateway + '\n' +
-                'Ping: ' + bot.ws.ping + ' ms\n' +
-                'Státusz: ' + WsStatus
-            )
-        if (bot.shard != null) {
-            embed.addField('Shard:',
-                'Fő port: ' + bot.shard.parentPort + '\n' +
-                'Mód: ' + bot.shard.mode
-            )
-        }
-        message.channel.send({embeds: [ embed ]})
-        userstatsSendCommand(sender)
-        return;
-    };
-
     if (command === `pms`) {
         CommandBusiness(message.channel, sender, thisIsPrivateMessage)
         userstatsSendCommand(sender)
         return;
     };
 
-    if (command === `weather`) {
-        CommandWeather(message.channel, sender)
-        userstatsSendCommand(sender)
-        return
-    } else if (command === `weather help`) {
-        message.channel.send('**Időjárás jelzések**\n' +
-            '> \\💧: Eső valószínűsége\n' +
-            '> \\☁️: Az ég felhővel borított része\n' +
-            '> \\🌇: Hajnal\n' +
-            '> \\🏙️: Napkelte\n' +
-            '> \\🌆: Napnyugta\n' +
-            '> \\🌃: Alkonyat\n' +
-            '> \\⬛: Légnyomás\n' +
-            '>   ├\\🔶: Nagyon magas\n' +
-            '>   ├\\🔸: Magas\n' +
-            '>   ├\\🔹: Alacsony\n' +
-            '>   └\\🔷: Nagyon alacsomy')
-
-        userstatsSendCommand(sender)
-        return
-    } else if (command === `help`) { // /help parancs
+    if (command === `help`) { // /help parancs
         CommandHelp(message.channel, sender, thisIsPrivateMessage)
         userstatsSendCommand(sender)
         return
-    } else if (command === `?`) { // /help parancs
+    }
+    
+    if (command === `?`) { // /help parancs
         CommandHelp(message.channel, sender, thisIsPrivateMessage)
         userstatsSendCommand(sender)
         return
@@ -2628,21 +2591,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         poll(msgArgs[0], msgArgs[1], msgArgs[2], true)
         userstatsSendCommand(sender)
         return
-    } else if (command === `dev`) {
-        if (sender.id === '726127512521932880') {
-            userstatsSendCommand(sender)
-            const embed = new Discord.MessageEmbed()
-                .addField('Fejlesztői parancsok',
-                    '> \\❔  `.quiz`\n' +
-                    '>  \\📊  `.poll simple`\n' +
-                    '>  \\📊  `.poll wyr`'
-                )
-                .setColor(Color.Highlight)
-            message.channel.send({embeds: [ embed ]})
-        } else {
-            message.channel.send('> \\⛔ **Ezt a parancsot te nem használhatod!**')
-        }
-        return
     }
 
     if (command === `music skip`) { //Music
@@ -2746,6 +2694,85 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     const helpRow = new MessageActionRow()
         .addComponents(helpButton)
     message.channel.send("> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**", {components: [helpRow]});
+}
+
+/**@param {Discord.CommandInteraction<Discord.CacheType>} command */
+function processApplicationCommand(command) {
+
+    if (command.commandName === `xp`) {
+        CommandXp(command)
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName == `ping`) {
+        var WsStatus = "Unknown"
+        if (bot.ws.status === 0) {
+            WsStatus = "Kész"
+        } else if (bot.ws.status === 1) {
+            WsStatus = "Csatlakozás"
+        } else if (bot.ws.status === 2) {
+            WsStatus = "Újracsatlakozás"
+        } else if (bot.ws.status === 3) {
+            WsStatus = "Tétlen"
+        } else if (bot.ws.status === 4) {
+            WsStatus = "Majdnem kész"
+        } else if (bot.ws.status === 5) {
+            WsStatus = "Lecsatlakozba"
+        } else if (bot.ws.status === 6) {
+            WsStatus = "Várakozás guild-okra"
+        } else if (bot.ws.status === 7) {
+            WsStatus = "Azonosítás"
+        } else if (bot.ws.status === 8) {
+            WsStatus = "Folytatás"
+        }
+        const embed = new Discord.MessageEmbed()
+            .setTitle('Pong!')
+            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
+            .setColor(Color.Highlight)
+            .addField('\\🖥️ BOT:',
+                'Készen áll: ' + DateToString(bot.readyAt) + '\n' +
+                'Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
+                'Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
+            )
+            .addField('\\📡 WebSocket:',
+                'Átjáró: ' + bot.ws.gateway + '\n' +
+                'Ping: ' + bot.ws.ping + ' ms\n' +
+                'Státusz: ' + WsStatus
+            )
+        if (bot.shard != null) {
+            embed.addField('Shard:',
+                'Fő port: ' + bot.shard.parentPort + '\n' +
+                'Mód: ' + bot.shard.mode
+            )
+        }
+        command.reply({embeds: [ embed ]})
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `weather`) {
+        CommandWeather(command)
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `dev`) {
+        if (command.user.id === '726127512521932880') {
+            userstatsSendCommand(command.user)
+            const embed = new Discord.MessageEmbed()
+                .addField('Fejlesztői parancsok',
+                    '> \\❔  `.quiz`\n' +
+                    '>  \\📊  `.poll simple`\n' +
+                    '>  \\📊  `.poll wyr`'
+            )
+                .setColor(Color.Highlight)
+            command.reply({ embeds: [embed], ephemeral: true })
+        } else {
+            command.reply({ content: '> \\⛔ **Ezt a parancsot te nem használhatod!**', ephemeral: true })
+        }
+        return
+    }
 }
 
 loadingProcess('Belépés...')

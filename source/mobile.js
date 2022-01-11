@@ -209,7 +209,6 @@ bot.on('interactionCreate', interaction => {
 
             return;
         }
-
     } else if (true) {
         if (interaction.commandName == 'ping') {
             processCommand(null, false, interaction.member, 'ping', interaction.channel, interaction)

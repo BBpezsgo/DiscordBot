@@ -112,13 +112,13 @@ function getEmbedMessage(menuIndex, guildId, isPrivate, isMobile) {
                 .setTitle('Parancsok')
                 .addField('Alap',
                     '>  \\ℹ    `.help` Segítség kérése a parancsok iránt.\n' +
-                    '>  \\⛅  `.weather` Békéscsaba időjárása.\n' +
-                    '>     └`.weather help` Időjárás jelzések\n' +
-                    '>  \\🏓  `.ping` A BOT ping-elése, avagy megnézni hogy most épp online e.\n' +
+                    '>  \\⛅  `/weather` Békéscsaba időjárása.\n' +
+                    //'>     └`.weather help` Időjárás jelzések\n' +
+                    '>  \\🏓  `/ping` A BOT ping-elése, avagy megnézni hogy most épp online e.\n' +
                     '>  \\📯  `.mail` E-mailek megtekintése vagy írása.'
                 )
                 .addField('Pénzek',
-                    '>  \\🍺   `.xp` Rangod.\n' +
+                    '>  \\🍺   `/xp` Rangod.\n' +
                     '>  \\💼  `.store` A hátizsákod tartalmának megtekintése. \\⛔ **Korlátozott** \\⛔\n' +
                     '>  \\🧰  `.napi` Napi láda kinyitása.\n' +
                     '>    └    `.napi all` Az összes napi láda kinyitása.\n' +
