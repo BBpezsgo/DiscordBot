@@ -35,16 +35,14 @@ const consoleWidth = 80 - 2
 
 const fs = require('fs')
 
-/**
- * @type {string[]}
- */
+/** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-const listOfUserIDs = ['726127512521932880',
-    '591218715803254784', '494126778336411648',
-    '575727604708016128', '583709720834080768',
-    '415078291574226955', '750748417373896825',
-    '504304776033468438', '551299555698671627']
+const listOfUserIDs = [
+    '726127512521932880', '591218715803254784', '494126778336411648',
+    '575727604708016128', '583709720834080768', '415078291574226955',
+    '750748417373896825', '504304776033468438', '551299555698671627'
+]
 
 loadingProcess('Bővítmények, változók betöltése...')
 const Discord = require('discord.js')
@@ -68,13 +66,7 @@ database.dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json',
 
 const ytdl = require('ytdl-core')
 
-const dayOfYear = Math.floor(
-    (
-        (new Date()) - (new Date(new Date().getFullYear(), 0, 0))
-    ) / (
-        1000 * 60 * 60 * 24
-    )
-)
+const dayOfYear = Math.floor(((new Date()) - (new Date(new Date().getFullYear(), 0, 0))) / (1000 * 60 * 60 * 24))
 
 const WS = require('./ws/ws')
 var ws = new WS('1234', 5665, bot, logManager, database)
@@ -120,7 +112,9 @@ const Color = {
 }
 
 const readline = require('readline')
-const abbrev = require('./functions/abbrev')
+const { abbrev } = require('./functions/abbrev')
+const { DateToString } = require('./functions/dateToString')
+const { DateToStringNews, ConvertNewsIdToName, NewsMessage } = require('./functions/news')
 
 //#region Game Variables
 /** @type {GameMap} */
@@ -386,13 +380,6 @@ async function logMessage(message, username, private = false.valueOf, author) {
         }
     };
 
-}
-
-/**
-* @param {string} data
-*/
-function logToFile(data) {
-    return;
 }
 
 /**
@@ -1503,38 +1490,6 @@ async function quizDone(quizMessageId, correctIndex) {
 }
 //#endregion
 
-/**
- * @param {Date} date
- */
-function DateToString(date) {
-    var now = new Date(Date.now())
-    if (now.getFullYear() == date.getFullYear()) {
-        if (now.getMonth() == date.getMonth()) {
-            if (now.getDay() == date.getDay()) {
-                if (now.getHours() == date.getHours()) {
-                    if (now.getMinutes() == date.getMinutes()) {
-                        if (now.getSeconds() == date.getSeconds()) {
-                            return "most"
-                        } else {
-                            return (now.getSeconds() - date.getSeconds()) + " másodperce"
-                        }
-                    } else {
-                        return (now.getMinutes() - date.getMinutes()) + " perce"
-                    }
-                } else {
-                    return (now.getHours() - date.getHours()) + " órája"
-                }
-            } else {
-                return (now.getDay() - date.getDay()) + " napja"
-            }
-        } else {
-            return (now.getMonth() - date.getMonth()) + " hónapja"
-        }
-    } else {
-        return (now.getFullYear() - date.getFullYear()) + " éve"
-    }
-}
-
 bot.on('interactionCreate', async interaction => {
     if (interaction.isCommand()) {
         if (interaction.commandName === 'ping') {
@@ -1903,63 +1858,6 @@ const getApp = (guildId) => {
     return app
 }
 
-/**
- * @param {string} id
- * @returns {string}
- */
-function ConvertNewsIdToName(id) {
-    if (id == '802864588877856789') {
-        return 'Crossout - Bejelentés'
-    } else if (id == '802864713323118603') {
-        return 'Ingyenes Játékok'
-    } else if (id == '813398275305898014') {
-        return 'Warzone 2100 - Bejelentés'
-    } else if (id == '875340034537062400') {
-        return 'Minecraft - Frissítés'
-    } else {
-        return id
-    }
-}
-
-/**
- * @param {Date} date
- * @returns {string}
- */
-function DateToStringNews(date) {
-    let str = ''
-    str += date.getFullYear() + '.'
-    let monthStr = (date.getMonth() + 1) + '.'
-    if (monthStr == '1') {
-        monthStr = 'Jan.'
-    } else if (monthStr == '2') {
-        monthStr = 'Febr.'
-    } else if (monthStr == '3') {
-        monthStr = 'Márc.'
-    } else if (monthStr == '4') {
-        monthStr = 'Ápr.'
-    } else if (monthStr == '5') {
-        monthStr = 'Máj.'
-    } else if (monthStr == '6') {
-        monthStr = 'Jún.'
-    } else if (monthStr == '7') {
-        monthStr = 'Júl.'
-    } else if (monthStr == '8') {
-        monthStr = 'Aug.'
-    } else if (monthStr == '9') {
-        monthStr = 'Szept.'
-    } else if (monthStr == '10') {
-        monthStr = 'Okt.'
-    } else if (monthStr == '11') {
-        monthStr = 'Nov.'
-    } else if (monthStr == '12') {
-        monthStr = 'Dec.'
-    }
-    str += ' ' + monthStr
-    str += ' ' + date.getDate() + '.'
-    str += ' ' + date.getHours() + ':' + date.getMinutes()
-    return str
-}
-
 bot.once('ready', async () => { //Ready
     const commands = await getApp('737954264386764812').commands.get()
     //log(commands)
@@ -1986,13 +1884,11 @@ bot.once('ready', async () => { //Ready
                 const userMoneyFinal = userMoney - finalTax
                 log("[" + userMoney + " ---1%-->" + finalTax + " ======>" + userMoneyFinal + "]")
                 database.dataBasic[element].money = userMoneyFinal
-                logToFile("TAX:" + database.dataBasic[element].username + "   " + userMoney + " ===[" + finalTax + "]===>" + database.dataBasic[element].money)
             } catch (error) {
                 log(ERROR + ': ' + error)
             }
         }
         log("Mindenki megadózva")
-        logToFile("TAX COMPLETED")
     }
     savePollDefaults()
     saveDatabase()
@@ -2014,8 +1910,6 @@ bot.once('ready', async () => { //Ready
         })
         log(`Received ${listOfMessage.length} news`)
     })
-
-    logToFile('PONG')
 })
 
 /**
@@ -4170,20 +4064,4 @@ class CurrentlyWritingMail {
     }
 }
 
-//#endregion
-
-//#region News
-
-class NewsMessage {
-    /**
-     * @param {Discord.MessageEmbed} embed
-     * @param {string} NotifyRoleId
-     * @param {Discord.Message} message
-    */
-    constructor(embed, NotifyRoleId, message) {
-        this.embed = embed;
-        this.NotifyRoleId = NotifyRoleId;
-        this.message = message;
-    }
-}
 //#endregion
