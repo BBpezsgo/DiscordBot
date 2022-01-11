@@ -1062,20 +1062,20 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
             .setColor(Color.Highlight)
             .addField('\\🖥️ BOT:',
-                '\\⛔ **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
-                'Készen áll: ' + DateToString(bot.readyAt) + '\n' +
-                'Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
-                'Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
+                '> \\⛔ **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
+                '> Készen áll: ' + DateToString(bot.readyAt) + '\n' +
+                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
+                '> Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
             )
             .addField('\\📡 WebSocket:',
-                'Átjáró: ' + bot.ws.gateway + '\n' +
-                'Ping: ' + bot.ws.ping + ' ms\n' +
-                'Státusz: ' + WsStatus
+                '> Átjáró: ' + bot.ws.gateway + '\n' +
+                '> Ping: ' + bot.ws.ping + ' ms\n' +
+                '> Státusz: ' + WsStatus
             )
         if (bot.shard != null) {
             embed.addField('Shard:',
-                'Fő port: ' + bot.shard.parentPort + '\n' +
-                'Mód: ' + bot.shard.mode
+                '> Fő port: ' + bot.shard.parentPort + '\n' +
+                '> Mód: ' + bot.shard.mode
             )
         }
         if (interaction == null) {
