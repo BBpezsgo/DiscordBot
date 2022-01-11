@@ -642,6 +642,32 @@ bot.on('clickMenu', async (menu) => {
 });
 
 bot.once('ready', async () => { //Ready
+    const { SlashCommandBuilder } = require('@discordjs/builders');
+
+    const commandPing = new SlashCommandBuilder()
+        .setName('ping')
+        .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e');
+    const commandWeather = new SlashCommandBuilder()
+        .setName('weather')
+        .setDescription('Békéscsaba időjárása');
+    const commandXp = new SlashCommandBuilder()
+        .setName('xp')
+        .setDescription('Rangod');
+    const commandDev = new SlashCommandBuilder()
+        .setName('dev')
+        .setDescription('Fejlesztői segítség');
+
+    //await RemoveAllCommands()
+
+    const guildCommands = bot.guilds.cache.get('737954264386764812').commands
+
+    const appCommands = bot.application?.commands
+    
+    guildCommands?.create(commandPing.toJSON())
+    guildCommands?.create(commandWeather.toJSON())
+    guildCommands?.create(commandXp.toJSON())
+    guildCommands?.create(commandDev.toJSON())
+
     const channel = bot.channels.cache.get(incomingNewsChannel)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
         /**
@@ -658,22 +684,6 @@ bot.once('ready', async () => { //Ready
             processNewsMessage(message)
         })
         log(`Received ${listOfMessage.length} news`)
-    })
-
-    const guild = bot.guilds.cache.get('737954264386764812')
-    let commands
-    if (guild) {
-        commands = guild.commands
-    } else {
-        commands = bot.application?.commands
-    }
-    commands?.create({
-        name: 'ping',
-        description: 'A BOT ping-elése, avagy megnézni hogy most épp elérhető e'
-    })
-    commands?.create({
-        name: 'weather',
-        description: 'Békéscsaba időjárása'
     })
 
     log(DONE + ': A BOT kész!')
