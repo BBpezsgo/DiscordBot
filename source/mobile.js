@@ -437,7 +437,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
             )
         .addField(`${titleText}`, `${optionText}`)
 
-    bot.channels.cache.get('760804414205591585').send({ embeds: [embed] }).then(message => {
+    bot.channels.cache.get('799340273431478303').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&799342836931231775>')
         message.react('🎯')
         for (let i = 0; i < optionEmojis.length; i++) {
