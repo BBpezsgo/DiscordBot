@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption } = require('@discordjs/builders');
+const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, SlashCommandStringOption } = require('@discordjs/builders');
 const { Client } = require('discord.js')
 
 /**@param {Client} bot */
@@ -33,7 +33,7 @@ function CreateCommands(bot) {
     const commandNapi = new SlashCommandBuilder()
         .setName('napi')
         .setDescription('Napi láda kinyitása')
-        .addIntegerOption(commandCrateSub)
+        .addIntegerOption(commandNapiSub)
     const commandProfil = new SlashCommandBuilder()
         .setName('profil')
         .setDescription('Statisztikák és matricák megtekintése')
@@ -43,6 +43,46 @@ function CreateCommands(bot) {
     const commandShop = new SlashCommandBuilder()
         .setName('bolt')
         .setDescription('Itt elköltheted a pénzed')
+
+    const commandQuizSub3 = new SlashCommandIntegerOption()
+        .setName('add_xp')
+        .setDescription('🍺 mennyiség ha jól válaszol')
+        .setRequired(true)
+    const commandQuizSub4 = new SlashCommandIntegerOption()
+        .setName('remove_xp')
+        .setDescription('🍺 mennyiség ha rosszul válaszol')
+        .setRequired(true)
+    const commandQuizSub5 = new SlashCommandIntegerOption()
+        .setName('add_token')
+        .setDescription('🎫 mennyiség ha jól válaszol')
+        .setRequired(true)
+    const commandQuizSub6 = new SlashCommandIntegerOption()
+        .setName('remove_token')
+        .setDescription('🎫 mennyiség ha rosszul válaszol')
+        .setRequired(true)
+    const commandQuizSub0 = new SlashCommandStringOption()
+        .setName('title')
+        .setDescription('A kérdés')
+        .setRequired(true)
+    const commandQuizSub1 = new SlashCommandStringOption()
+        .setName('options')
+        .setDescription('Opció;Opció;Opció')
+        .setRequired(true)
+    const commandQuizSub2 = new SlashCommandStringOption()
+        .setName('option_emojis')
+        .setDescription('💥;💥;💥')
+        .setRequired(true)
+    const commandQuiz = new SlashCommandBuilder()
+        .setName('quiz')
+        .setDescription('Quiz')
+        .addStringOption(commandQuizSub0)
+        .addStringOption(commandQuizSub1)
+        .addStringOption(commandQuizSub2)
+        .addIntegerOption(commandQuizSub3)
+        .addIntegerOption(commandQuizSub4)
+        .addIntegerOption(commandQuizSub5)
+        .addIntegerOption(commandQuizSub6)
+
     const guildCommands = bot.guilds.cache.get('737954264386764812').commands
     guildCommands?.create(commandPing.toJSON())
     guildCommands?.create(commandWeather.toJSON())
@@ -54,6 +94,7 @@ function CreateCommands(bot) {
     guildCommands?.create(commandProfil.toJSON())
     guildCommands?.create(commandBackpack.toJSON())
     guildCommands?.create(commandShop.toJSON())
+    guildCommands?.create(commandQuiz.toJSON())
 }
 
 /**@param {Client} bot */

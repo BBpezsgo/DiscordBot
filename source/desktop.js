@@ -2844,6 +2844,17 @@ async function processApplicationCommand(command) {
         userstatsSendCommand(command.user)
         return
     }
+
+    if (command.commandName === `quiz`) {
+        try {
+            quiz(command.options.getString("title"), command.options.getString("options"), command.options.getString("option_emojis"), command.options.getInteger("add_xp"), command.options.getInteger("remove_xp"), command.options.getInteger("add_token"), command.options.getInteger("remove_token"))
+            command.reply({content: '> \\✔️ **Kész**', ephemeral: true})
+        } catch (error) {
+            command.reply({content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true})
+        }
+        userstatsSendCommand(command.user)
+        return
+    }
 }
 
 loadingProcess('Belépés...')
