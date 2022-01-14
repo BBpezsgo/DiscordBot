@@ -9,6 +9,8 @@ const CommandHelp = require('./commands/help')
 
 
 
+const { CreateCommands, DeleteCommands } = require('./functions/commands')
+
 const { LogManager } = require('./functions/log.js')
 const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
@@ -24,12 +26,7 @@ function log(message = '') {
     logManager.Log(message, false)
 }
 
-const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
-const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
-const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + '\033[37m' + ']'
-const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
-const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
-const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
+const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesMobile} = require('./functions/enums.js')
 
 const consoleWidth = 80 - 2
 
@@ -84,31 +81,6 @@ let musicFinished = true
 
 let lastNoNews = false
 
-const activities_list = [
-    "Manga",
-    "Discord.js documentation",
-    "Reddit",
-    "Twitter",
-    "Facebook",
-    "Instagram",
-    "Wiki"
-]
-
-const Color = {
-    Error: "#ed4245",
-    ErrorLight: "#f57531",
-    Warning: "#faa81a",
-    Done: "#3ba55d",
-    White: "#dcddde",
-    Silver: "#b9bbbe",
-    Gray: "#8e9297",
-    DimGray: "#72767d",
-    Highlight: "#5865f2",
-    Purple: "#9b59b6",
-    Pink: "#e91e63",
-    DarkPink: "#ad1457"
-}
-
 const readline = require('readline')
 const abbrev = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
@@ -125,9 +97,6 @@ const { DateToStringNews, ConvertNewsIdToName, NewsMessage } = require('./functi
 const listOfNews = []
 const incomingNewsChannel = '902894789874311198'
 const processedNewsChannel = '746266528508411935'
-/** @type [boolean] */
-const uptimeTimes = []
-let uptimeSaved = true
 
 
 //#region Functions
@@ -187,32 +156,12 @@ async function logMessage(message, username, private = false.valueOf, author) {
 }
 
 //#endregion
-setInterval(() => {
-    if (uptimeSaved == false) {
-        uptimeTimes.push(true)
-    } else {
-        uptimeTimes.push(false)
-    }
-    log('newUptimeTime')
-}, 60000)
+
 //#region Listener-ek
 
 bot.on('interactionCreate', interaction => {
-    console.log(interaction)
-    if (interaction.isButton()) {
-        if (interaction.customId === 'sendHelp') {
-            const thisIsPrivateMessage = interaction.message.channel.type === 'dm'
-            CommandHelp(interaction.message.channel, interaction.user, thisIsPrivateMessage, true)
-
-            //interaction.deferReply()
-            interaction.message.delete()
-
-            return;
-        }
-    } else if (true) {
-        if (interaction.commandName == 'ping') {
-            processCommand(null, false, interaction.member, 'ping', interaction.channel, interaction)
-        }
+    if (interaction.isCommand()) {
+        processApplicationCommand(interaction)
     }
 });
 
@@ -222,15 +171,6 @@ process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && key.name === 'c') {
         bot.destroy()
         process.exit()
-    } else if (key.ctrl && key.name === 't') {
-        let x = ''
-        uptimeTimes.forEach((time) => {
-            if (time == true) {
-                x += 'X'
-            } else {
-                x += 'O'
-            }
-        })
     }
 });
 
@@ -642,31 +582,11 @@ bot.on('clickMenu', async (menu) => {
 });
 
 bot.once('ready', async () => { //Ready
-    const { SlashCommandBuilder } = require('@discordjs/builders');
-
-    const commandPing = new SlashCommandBuilder()
-        .setName('ping')
-        .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e');
-    const commandWeather = new SlashCommandBuilder()
-        .setName('weather')
-        .setDescription('Békéscsaba időjárása');
-    const commandXp = new SlashCommandBuilder()
-        .setName('xp')
-        .setDescription('Rangod');
-    const commandDev = new SlashCommandBuilder()
-        .setName('dev')
-        .setDescription('Fejlesztői segítség');
-
-    //await RemoveAllCommands()
-
-    const guildCommands = bot.guilds.cache.get('737954264386764812').commands
-
-    const appCommands = bot.application?.commands
-    
-    guildCommands?.create(commandPing.toJSON())
-    guildCommands?.create(commandWeather.toJSON())
-    guildCommands?.create(commandXp.toJSON())
-    guildCommands?.create(commandDev.toJSON())
+    if (false) {
+        await DeleteCommands(bot)
+    } else {
+        CreateCommands(bot)
+    }
 
     const channel = bot.channels.cache.get(incomingNewsChannel)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
@@ -860,8 +780,8 @@ function processNewsMessage(message) {
 
 bot.on('ready', () => { //Change status
     setInterval(() => {
-        const index = Math.floor(Math.random() * (activities_list.length - 1) + 1);
-        bot.user.setActivity(activities_list[index], { type: 3, browser: "DISCORD IOS" });
+        const index = Math.floor(Math.random() * (activitiesMobile.length - 1) + 1);
+        bot.user.setActivity(activitiesMobile[index], { type: 3, browser: "DISCORD IOS" });
     }, 10000);
     setInterval(() => {
         if (listOfNews.length > 0) {
@@ -884,7 +804,7 @@ bot.on('ready', () => { //Change status
     }, 2000);
 });
 
-bot.on('message', async message => { //Message
+bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
     if (message.author.bot && thisIsPrivateMessage === false) { return }
     if (!message.type) return
@@ -1006,114 +926,11 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     //#region Enabled in dm
 
-    if (command === `xp`) {
-        channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return;
-    };
-
-    if (command === `crate all`) {
-        channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return;
-    };
-
-    if (command === `napi all`) {
-        channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return;
-    };
-
-    if (command == `napi`) {
-        channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return;
-    };
-
-    if (command === `profil`) {
-        channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return;
-    };
-
-    if (command === `store`) {
-        channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return;
-    };
-
-    if (command === `ping`) {
-        var WsStatus = "Unknown"
-        if (bot.ws.status === 0) {
-            WsStatus = "Kész"
-        } else if (bot.ws.status === 1) {
-            WsStatus = "Csatlakozás"
-        } else if (bot.ws.status === 2) {
-            WsStatus = "Újracsatlakozás"
-        } else if (bot.ws.status === 3) {
-            WsStatus = "Tétlen"
-        } else if (bot.ws.status === 4) {
-            WsStatus = "Majdnem kész"
-        } else if (bot.ws.status === 5) {
-            WsStatus = "Lecsatlakozba"
-        } else if (bot.ws.status === 6) {
-            WsStatus = "Várakozás guild-okra"
-        } else if (bot.ws.status === 7) {
-            WsStatus = "Azonosítás"
-        } else if (bot.ws.status === 8) {
-            WsStatus = "Folytatás"
-        }
-        const embed = new Discord.MessageEmbed()
-            .setTitle('Pong!')
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
-            .setColor(Color.Highlight)
-            .addField('\\🖥️ BOT:',
-                '> \\⛔ **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
-                '> Készen áll: ' + DateToString(bot.readyAt) + '\n' +
-                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
-                '> Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
-            )
-            .addField('\\📡 WebSocket:',
-                '> Átjáró: ' + bot.ws.gateway + '\n' +
-                '> Ping: ' + bot.ws.ping + ' ms\n' +
-                '> Státusz: ' + WsStatus
-            )
-        if (bot.shard != null) {
-            embed.addField('Shard:',
-                '> Fő port: ' + bot.shard.parentPort + '\n' +
-                '> Mód: ' + bot.shard.mode
-            )
-        }
-        if (interaction == null) {
-            channel.send({ embeds: [embed] })
-        } else {
-            interaction.reply({ embeds: [embed] })
-        }
-        return;
-    };
-
     if (command === `pms`) {
         channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
         return;
     };
-
-    if (command === `weather`) {
-        CommandWeather(channel, sender)
-        return
-    } else if (command === `weather help`) {
-        channel.send('**Időjárás jelzések**\n' +
-            '> ᲼\\💧: Eső valószínűsége\n' +
-            '> ᲼\\☁️: Az ég felhővel borított része\n' +
-            '> ᲼\\🏙️: Napkelte\n' +
-            '> ᲼\\🌆: Napnyugta\n' +
-            '> ᲼\\⬛: Légnyomás\n' +
-            '> ᲼  ├\\🔶: Nagyon magas\n' +
-            '> ᲼  ├\\🔸: Magas\n' +
-            '> ᲼  ├\\🔹: Alacsony\n' +
-            '> ᲼  └\\🔷: Nagyon alacsomy')
-        return
-    } else if (command === `help`) { // /help parancs
-        CommandHelp(channel, sender, thisIsPrivateMessage, true)
-        return
-    } else if (command === `?`) { // /help parancs
-        CommandHelp(channel, sender, thisIsPrivateMessage, true)
-        return
-    }
-
+    
     if (command === `test`) {
         const button0 = new disbut.MessageButton()
             .setLabel("This is a button!")
@@ -1152,11 +969,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
     //#endregion
 
     //#region Disabled in dm
-
-    if (command === `bolt`) {
-        channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return
-    }
 
     if (command.startsWith(`gift `)) {
         channel.send('> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
@@ -1205,20 +1017,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
         const msgArgs = command.toString().replace(`poll wyr\n`, '').split('\n')
         poll(msgArgs[0], msgArgs[1], msgArgs[2], true)
         return
-    } else if (command === `dev`) {
-        if (sender.id === '726127512521932880') {
-            const embed = new Discord.MessageEmbed()
-                .addField('Fejlesztői parancsok',
-                    '> \\❔  `.quiz`\n' +
-                    '>  \\📊  `.poll simple`\n' +
-                    '>  \\📊  `.poll wyr`'
-                )
-                .setColor(Color.Highlight)
-            channel.send({ embeds: [embed] })
-        } else {
-            channel.send('> \\⛔ **Ezt a parancsot te nem használhatod!**')
-        }
-        return
     }
 
     if (command === `music skip`) { //Music
@@ -1246,15 +1044,112 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     //#endregion
 
-    const row = new MessageActionRow()
-        .addComponents(
-            new MessageButton()
-                .setCustomId('sendHelp')
-                .setLabel('Help')
-                .setStyle('PRIMARY'),
-        );
+    channel.send("> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**");
+}
 
-    channel.send({ content: "> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**", components: [row] });
+/**@param {Discord.CommandInteraction<Discord.CacheType>} command */
+async function processApplicationCommand(command) {
+
+    if (command.commandName === `xp`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return
+    }
+
+    if (command.commandName == `ping`) {
+        var WsStatus = "Unknown"
+        if (bot.ws.status === 0) {
+            WsStatus = "Kész"
+        } else if (bot.ws.status === 1) {
+            WsStatus = "Csatlakozás"
+        } else if (bot.ws.status === 2) {
+            WsStatus = "Újracsatlakozás"
+        } else if (bot.ws.status === 3) {
+            WsStatus = "Tétlen"
+        } else if (bot.ws.status === 4) {
+            WsStatus = "Majdnem kész"
+        } else if (bot.ws.status === 5) {
+            WsStatus = "Lecsatlakozba"
+        } else if (bot.ws.status === 6) {
+            WsStatus = "Várakozás guild-okra"
+        } else if (bot.ws.status === 7) {
+            WsStatus = "Azonosítás"
+        } else if (bot.ws.status === 8) {
+            WsStatus = "Folytatás"
+        }
+        const embed = new Discord.MessageEmbed()
+            .setTitle('Pong!')
+            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
+            .setColor(Color.Highlight)
+            .addField('\\🖥️ BOT:',
+                '> \\⛔ **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
+                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
+                '> Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
+            )
+            .addField('\\📡 WebSocket:',
+                '> Átjáró: ' + bot.ws.gateway + '\n' +
+                '> Ping: ' + bot.ws.ping + ' ms\n' +
+                '> Státusz: ' + WsStatus
+            )
+        if (bot.shard != null) {
+            embed.addField('Shard:',
+                '> Fő port: ' + bot.shard.parentPort + '\n' +
+                '> Mód: ' + bot.shard.mode
+            )
+        }
+        command.reply({embeds: [ embed ]})
+        return
+    }
+
+    if (command.commandName === `weather`) {
+        CommandWeather(command)
+        return
+    }
+
+    if (command.commandName === `dev`) {
+        if (command.user.id === '726127512521932880') {
+            const embed = new Discord.MessageEmbed()
+                .addField('Fejlesztői parancsok',
+                    '> \\❔  `.quiz`\n' +
+                    '>  \\📊  `.poll simple`\n' +
+                    '>  \\📊  `.poll wyr`'
+            )
+                .setColor(Color.Highlight)
+            command.reply({ embeds: [embed], ephemeral: true })
+        } else {
+            command.reply({ content: '> \\⛔ **Nincs jogosultságod a parancs használatához!**', ephemeral: true })
+        }
+        return
+    }
+
+    if (command.commandName === `help`) {
+        command.reply({ embeds: [CommandHelp(false, true)]})
+        return
+    }
+
+    if (command.commandName === `crate`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return
+    }
+
+    if (command.commandName === `napi`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return;
+    }
+
+    if (command.commandName === `profil`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return;
+    }
+
+    if (command.commandName === `store`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return
+    }
+
+    if (command.commandName === `bolt`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return
+    }
 }
 
 try {

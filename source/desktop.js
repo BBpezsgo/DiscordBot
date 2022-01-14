@@ -6,8 +6,10 @@ const CommandWeather = require('./commands/weather')
 const CommandHelp = require('./commands/help')
 const CommandXp = require('./commands/database/xp')
 const CommandShop = require('./commands/database/shop')
-const CommandGoHome = require('./commands/database/goHome')
 const CommandBusiness = require('./commands/database/businees')
+
+const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./commands/database/xpFunctions')
+const { CreateCommands, DeleteCommands } = require('./functions/commands')
 
 const { LogManager } = require('./functions/log.js')
 const { TranslateMessage } = require('./functions/translator.js')
@@ -17,6 +19,16 @@ const { databaseManager } = require('./functions/databaseManager.js')
 const logManager = new LogManager()
 const statesManager = new StatesManager()
 
+const ColorRoles = {
+	red: "850016210422464534",
+	yellow: "850016458544250891",
+	blue: "850016589155401758",
+	orange: "850016531848888340",
+	green: "850016722039078912",
+	purple: "850016668352643072",
+	invisible: "850016786186371122"
+}
+
 /**
 * @param {string} message
 */
@@ -24,12 +36,7 @@ function log(message = '') {
     logManager.Log(message, false)
 }
 
-const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
-const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
-const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + '\033[37m' + ']'
-const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
-const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
-const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
+const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, usersWithTax} = require('./functions/enums.js')
 
 const consoleWidth = 80 - 2
 
@@ -38,22 +45,15 @@ const fs = require('fs')
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-const listOfUserIDs = [
-    '726127512521932880', '591218715803254784', '494126778336411648',
-    '575727604708016128', '583709720834080768', '415078291574226955',
-    '750748417373896825', '504304776033468438', '551299555698671627'
-]
-
 loadingProcess('Bővítmények, változók betöltése...')
 const Discord = require('discord.js')
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
 const { perfix, token } = require('./config.json')
 const bot = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
 statesManager.botLoaded = true
 
 let userstats = JSON.parse(fs.readFileSync('./database/userstats.json', 'utf-8'))
 
-let dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
 let dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8'))
 let dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
 let dataUsernames = JSON.parse(fs.readFileSync('./database/userNames.json', 'utf-8'))
@@ -75,41 +75,6 @@ let musicArray = []
 let musicFinished = true
 
 const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
-
-
-
-const activities_list = [
-    "GTA V",
-    "Minecraft",
-    "Fortnite",
-    "Mindustry",
-    "GTA IV",
-    "CS:GO",
-    "Terrira",
-    "Crossout",
-    "Apex Legends",
-    "Factorio",
-    "World of Tanks",
-    "Warthunder",
-    "Warzone 2100",
-    "Genshin Impact",
-    "Valoriant"
-]
-
-const Color = {
-    Error: "#ed4245",
-    ErrorLight: "#f57531",
-    Warning: "#faa81a",
-    Done: "#3ba55d",
-    White: "#dcddde",
-    Silver: "#b9bbbe",
-    Gray: "#8e9297",
-    DimGray: "#72767d",
-    Highlight: "#5865f2",
-    Purple: "#9b59b6",
-    Pink: "#e91e63",
-    DarkPink: "#ad1457"
-}
 
 const readline = require('readline')
 const { abbrev } = require('./functions/abbrev')
@@ -155,36 +120,36 @@ loadingProcess('Betöltés...')
  * @param {string} username
  */
 function saveUserToMemoryAll(user, username) {
-    if (!dataBackpacks[user.id]) {
-        dataBackpacks[user.id] = {}
+    if (!database.dataBackpacks[user.id]) {
+        database. dataBackpacks[user.id] = {}
     }
-    dataBackpacks[user.id].username = username
-    if (!dataBackpacks[user.id].crates) {
-        dataBackpacks[user.id].crates = 0
+    database.dataBackpacks[user.id].username = username
+    if (!database.dataBackpacks[user.id].crates) {
+        database. dataBackpacks[user.id].crates = 0
     }
-    if (!dataBackpacks[user.id].gifts) {
-        dataBackpacks[user.id].gifts = 0
+    if(!database.dataBackpacks[user.id].gifts) {
+        database.  dataBackpacks[user.id].gifts = 0
     }
-    if (!dataBackpacks[user.id].getGift) {
-        dataBackpacks[user.id].getGift = 0
+    if (!database.dataBackpacks[user.id].getGift) {
+        database. dataBackpacks[user.id].getGift = 0
     }
-    if (!dataBackpacks[user.id].tickets) {
-        dataBackpacks[user.id].tickets = 0
+    if (!database.dataBackpacks[user.id].tickets) {
+        database. dataBackpacks[user.id].tickets = 0
     }
-    if (!dataBackpacks[user.id].quizTokens) {
-        dataBackpacks[user.id].quizTokens = 0
+    if (!database.dataBackpacks[user.id].quizTokens) {
+        database.   dataBackpacks[user.id].quizTokens = 0
     }
-    if (!dataBackpacks[user.id].luckyCards) {
-        dataBackpacks[user.id].luckyCards = {}
+    if (!database.dataBackpacks[user.id].luckyCards) {
+        database.  dataBackpacks[user.id].luckyCards = {}
     }
-    if (!dataBackpacks[user.id].luckyCards.small) {
-        dataBackpacks[user.id].luckyCards.small = 0
+    if (!database.dataBackpacks[user.id].luckyCards.small) {
+        database.  dataBackpacks[user.id].luckyCards.small = 0
     }
-    if (!dataBackpacks[user.id].luckyCards.medium) {
-        dataBackpacks[user.id].luckyCards.medium = 0
+    if (!database.dataBackpacks[user.id].luckyCards.medium) {
+        database.  dataBackpacks[user.id].luckyCards.medium = 0
     }
-    if (!dataBackpacks[user.id].luckyCards.large) {
-        dataBackpacks[user.id].luckyCards.large = 0
+    if (!database.dataBackpacks[user.id].luckyCards.large) {
+        database.dataBackpacks[user.id].luckyCards.large = 0
     }
 
     if (!database.dataBasic[user.id]) {
@@ -296,7 +261,7 @@ function addNewPoll(messageId, title, optionTexts, optionIcons) {
 }
 
 function saveDatabase() {
-    fs.writeFile('./database/backpacks.json', JSON.stringify(dataBackpacks), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/backpacks.json', JSON.stringify(database.dataBackpacks), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
     fs.writeFile('./database/basic.json', JSON.stringify(database.dataBasic), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
     fs.writeFile('./database/stickers.json', JSON.stringify(dataStickers), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
     fs.writeFile('./database/userNames.json', JSON.stringify(dataUsernames), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
@@ -306,7 +271,7 @@ function saveDatabase() {
 
 function reloadDatabase() {
     try {
-        dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
+        database. dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
         database.dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
         dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8'))
         dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
@@ -613,166 +578,6 @@ function calculateAddXp(message) {
     return addScoreValue
 };
 
-/**
-* @param {number} score
-*/
-function xpRankIcon(score) {
-    let rank = ''
-    if (score < 1000) {
-        rank = '🔰'
-    } else if (score < 5000) {
-        rank = 'Ⓜ️'
-    } else if (score < 10000) {
-        rank = '📛'
-    } else if (score < 50000) {
-        rank = '💠'
-    } else if (score < 80000) {
-        rank = '⚜️'
-    } else if (score < 100000) {
-        rank = '🔱'
-    } else if (score < 140000) {
-        rank = '㊗️'
-    } else if (score < 180000) {
-        rank = '🉐'
-    } else if (score < 250000) {
-        rank = '🉑'
-    } else if (score < 350000) {
-        rank = '💫'
-    } else if (score < 500000) {
-        rank = '🌠'
-    } else if (score < 780000) {
-        rank = '☄️'
-    } else if (score < 1000000) {
-        rank = '🪐'
-    } else if (score < 1500000) {
-        rank = '🌀'
-    } else if (score < 1800000) {
-        rank = '🌌'
-    } else {
-        rank = '🧿'
-    }
-    return rank
-};
-
-/**
-* @param {number} score
-*/
-function xpRankText(score) {
-    let rankName = ''
-    if (score < 1000) {
-        rankName = 'Ujjonc'
-    } else if (score < 5000) {
-        rankName = 'Zöldfülű'
-    } else if (score < 10000) {
-        rankName = 'Felfedező'
-    } else if (score < 50000) {
-        rankName = 'Haladó'
-    } else if (score < 80000) {
-        rankName = 'Törzsvendég'
-    } else if (score < 100000) {
-        rankName = 'Állampolgár'
-    } else if (score < 140000) {
-        rankName = 'Csoportvezető'
-    } else if (score < 180000) {
-        rankName = 'Csoportvezér'
-    } else if (score < 250000) {
-        rankName = 'Vezér'
-    } else if (score < 350000) {
-        rankName = 'Polgárelnök'
-    } else if (score < 500000) {
-        rankName = 'Miniszterelnök'
-    } else if (score < 780000) {
-        rankName = 'Elnök'
-    } else if (score < 1000000) {
-        rankName = 'Világdiktátor'
-    } else if (score < 1500000) {
-        rankName = 'Galaxis hódító'
-    } else if (score < 1800000) {
-        rankName = 'Univerzum birtokló'
-    } else {
-        rankName = 'Isten'
-    }
-    return rankName
-};
-
-/**
-* @param {number} score
-*/
-function xpRankPrevoius(score) {
-    let prevoius = 0
-    if (score < 1000) {
-        prevoius = 0
-    } else if (score < 5000) {
-        prevoius = 1000
-    } else if (score < 10000) {
-        prevoius = 5000
-    } else if (score < 50000) {
-        prevoius = 10000
-    } else if (score < 80000) {
-        prevoius = 50000
-    } else if (score < 100000) {
-        prevoius = 80000
-    } else if (score < 140000) {
-        prevoius = 100000
-    } else if (score < 180000) {
-        prevoius = 140000
-    } else if (score < 250000) {
-        prevoius = 180000
-    } else if (score < 350000) {
-        prevoius = 250000
-    } else if (score < 500000) {
-        prevoius = 350000
-    } else if (score < 780000) {
-        prevoius = 500000
-    } else if (score < 1000000) {
-        prevoius = 780000
-    } else if (score < 1500000) {
-        prevoius = 1000000
-    } else if (score < 1800000) {
-        prevoius = 1500000
-    }
-    return prevoius
-};
-
-/**
-* @param {number} score
-*/
-function xpRankNext(score) {
-    let next = 0
-    if (score < 1000) {
-        next = 1000
-    } else if (score < 5000) {
-        next = 5000
-    } else if (score < 10000) {
-        next = 10000
-    } else if (score < 50000) {
-        next = 50000
-    } else if (score < 80000) {
-        next = 80000
-    } else if (score < 100000) {
-        next = 100000
-    } else if (score < 140000) {
-        next = 140000
-    } else if (score < 180000) {
-        next = 180000
-    } else if (score < 250000) {
-        next = 250000
-    } else if (score < 350000) {
-        next = 350000
-    } else if (score < 500000) {
-        next = 500000
-    } else if (score < 780000) {
-        next = 780000
-    } else if (score < 1000000) {
-        next = 1000000
-    } else if (score < 1500000) {
-        next = 1500000
-    } else if (score < 1800000) {
-        next = 1800000
-    }
-    return next
-};
-
 function musicGetLengthText(videoLengthSeconds) {
     let videoLengthMinutes = 0
     let videoLengthHours = 0
@@ -918,12 +723,12 @@ function openDayCrate(userId) {
     let val = 0
     if (RandomPercente < 10) { // 10%
         val = 1
-        dataBackpacks[userId].tickets += val
+        database.dataBackpacks[userId].tickets += val
 
         return 0 + '|' + val
     } else if (RandomPercente < 30) { // 20%
         val = 1
-        dataBackpacks[userId].crates += val
+        database. dataBackpacks[userId].crates += val
 
         return 1 + '|' + val
     } else if (RandomPercente < 60) { // 30%
@@ -942,21 +747,19 @@ function openDayCrate(userId) {
 //#endregion
 
 /**
- * @param {Discord.Message} message 
  * @param {Discord.User} sender 
- * @param {boolean} isPrivate
  */
-function commandStore(message, sender, isPrivate) {
+function commandStore(sender) {
     var currentDay = new Date().getDay();
     var dayCrates = dataBot.day - database.dataBasic[sender.id].day
-    var crates = dataBackpacks[sender.id].crates
-    var gifts = dataBackpacks[sender.id].gifts
-    var tickets = dataBackpacks[sender.id].tickets
-    var getGifts = dataBackpacks[sender.id].getGift
-    var quizTokens = dataBackpacks[sender.id].quizTokens
-    var smallLuckyCard = dataBackpacks[sender.id].luckyCards.small
-    var mediumLuckyCard = dataBackpacks[sender.id].luckyCards.medium
-    var largeLuckyCard = dataBackpacks[sender.id].luckyCards.large
+    var crates = database.dataBackpacks[sender.id].crates
+    var gifts =database. dataBackpacks[sender.id].gifts
+    var tickets = database.dataBackpacks[sender.id].tickets
+    var getGifts =database. dataBackpacks[sender.id].getGift
+    var quizTokens = database.dataBackpacks[sender.id].quizTokens
+    var smallLuckyCard = database.dataBackpacks[sender.id].luckyCards.small
+    var mediumLuckyCard =database. dataBackpacks[sender.id].luckyCards.medium
+    var largeLuckyCard =database. dataBackpacks[sender.id].luckyCards.large
     var money = database.dataBasic[sender.id].money
 
     const embed = new Discord.MessageEmbed()
@@ -971,149 +774,57 @@ function commandStore(message, sender, isPrivate) {
             '> \\🧰 ' + dayCrates + ' napi láda'
             , false)
         .addField('Sorsjegyek', '> \\💶 ' + smallLuckyCard + ' Black Jack\n> \\💷 ' + mediumLuckyCard + ' Buksza\n> \\💴 ' + largeLuckyCard + ' Fáraók Kincse', false)
-    if (isPrivate === true) {
-        embed.setFooter('Ha használni szeretnéd az egyik cuccodat, használd a .store parancsot egy szerveren!')
-    } else {
-        embed.setFooter('Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!')
-    }
-    embed.setColor(database.dataBasic[sender.id].color)
+        .setFooter('Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!')
+        .setColor(database.dataBasic[sender.id].color)
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/briefcase_1f4bc.png')
     if (getGifts > 0) {
-        if (isPrivate === true) {
-            if (getGifts = 1) {
-                embed.addField('Van egy ajándékod, ami kicsomagolásra vár!', 'Kattints a 🎀 ikionra, a kicsomagoláshoz')
-            } else {
-                embed.addField('Van ' + getGifts + ' ajándékod, ami kicsomagolásra vár!', 'Kattints a 🎀 ikionra, a kicsomagoláshoz')
-            }
+        if (getGifts == 1) {
+            embed.addField('Van egy ajándékod, ami kicsomagolásra vár', 'Kattints a \\🎀-ra a kicsomagoláshoz!')
         } else {
-            if (getGifts = 1) {
-                embed.addField('Van egy ajándékod, ami kicsomagolásra vár!', 'Hogy kicsomagolhasd, használd a `.store` parancsot egy szerveren.')
-            } else {
-                embed.addField('Van ' + getGifts + ' ajándékod, ami kicsomagolásra vár!', 'Hogy kicsomagolhasd, használd a `.store` parancsot egy szerveren.')
-            }
+            embed.addField('Van ' + getGifts + ' ajándékod, ami kicsomagolásra vár', 'Kattints a \\🎀-ra a kicsomagoláshoz!')
         }
     }
-
-    message.channel.send({embeds: [ embed ]}).then(embedMessage => {
-        if (isPrivate === true) return;
-        if (crates > 0) { embedMessage.react('🧱') };
-        if (gifts > 0) { embedMessage.react('🎁') };
-        if (getGifts > 0) { embedMessage.react('🎀') };
-        if (smallLuckyCard > 0) { embedMessage.react('💶') };
-        if (mediumLuckyCard > 0) { embedMessage.react('💷') };
-        if (largeLuckyCard > 0) { embedMessage.react('💴') };
-        if (dayCrates > 0) { embedMessage.react('🧰') };
-
-        const filter = (reaction, user) => {
-            return ['🧱', '🎁', '🎀', '💶', '💷', '💴', '🧰'].includes(reaction.emoji.name) && user.id == message.author.id;
-        };
-
-        embedMessage.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] }).then(collected => {
-                if (collected.first().emoji.name == '🧱') {
-                    dataBackpacks[sender.id].crates -= 1
-                    { //Láda kinyitása
-                        let replies = ['xp', 'money', 'gift'];
-                        let random = Math.floor(Math.random() * 3);
-                        let out = replies[random]
-                        let val = 0
-                        let txt = ''
-
-                        if (out === 'xp') {
-                            val = Math.floor(Math.random() * 110) + 10
-                            txt = '**\\🍺 ' + val + '** xp-t'
-                            database.dataBasic[sender.id].score += val
-                        }
-                        if (out === 'money') {
-                            val = Math.floor(Math.random() * 2000) + 3000
-                            txt = '**\\💵' + val + '** pénzt'
-                            database.dataBasic[sender.id].money += val
-                        }
-                        if (out === 'gift') {
-                            txt = '**\\🎁 1** ajándékot'
-                            dataBackpacks[sender.id].gifts += 1
-                        }
-
-                        message.channel.send('> \\🧱 Kaptál:  ' + txt);
-                    };
-                } else if (collected.first().emoji.name == '🎁') {
-                    message.channel.send('> **\\❔ Használd a **`' + perfix + 'gift @Felhasználó`** parancsot, egy személy megajándékozásához!**');
-                } else if (collected.first().emoji.name == '🎀') {
-                    dataBackpacks[sender.id].getGift -= 1
-                    { //Ajándék kinyitása
-                        let replies = ['xp', 'money'];
-                        let random = Math.floor(Math.random() * 2);
-                        let out = replies[random]
-                        let val = 0
-                        let txt = ''
-
-                        if (out === 'xp') {
-                            val = Math.floor(Math.random() * 530) + 210
-                            txt = '**\\🍺 ' + val + '** xp-t'
-                            database.dataBasic[sender.id].score += val
-                        };
-                        if (out === 'money') {
-                            val = Math.floor(Math.random() * 2300) + 1000
-                            txt = '**\\💵' + val + '** pénzt'
-                            database.dataBasic[sender.id].money += val
-                        };
-
-                        message.channel.send('> \\🎀 Kaptál:  ' + txt + ' pénzt');
-                    };
-                } else if (collected.first().emoji.name == '💶') {
-                    dataBackpacks[sender.id].luckyCards.small -= 1
-                    let val = 0
-
-                    var nyeroszam = Math.floor(Math.random() * 2)
-                    if (nyeroszam === 1) {
-                        val = Math.floor(Math.random() * 1001) + 1500
-                        database.dataBasic[sender.id].money += val
-                    }
-
-                    if (val === 0) {
-                        message.channel.send('> \\💶 Nyertél:  **semmit**')
-                    } else {
-                        message.channel.send('> \\💶 Nyertél:  **\\💵' + val + '** pénzt')
-                    }
-                } else if (collected.first().emoji.name == '💷') {
-                    dataBackpacks[sender.id].luckyCards.medium -= 1
-                    let val = 0
-
-                    var nyeroszam = Math.floor(Math.random() * 4)
-                    if (nyeroszam === 1) {
-                        val = Math.floor(Math.random() * 3001) + 3000
-                        database.dataBasic[sender.id].money += val
-                    }
-
-                    if (val === 0) {
-                        message.channel.send('> \\💷 Nyertél:  **semmit**')
-                    } else {
-                        message.channel.send('> \\💷 Nyertél:  **\\💵' + val + '** pénzt')
-                    }
-                } else if (collected.first().emoji.name == '💴') {
-                    dataBackpacks[sender.id].luckyCards.large -= 1
-                    let val = 0
-
-                    var nyeroszam = Math.floor(Math.random() * 9)
-                    if (nyeroszam === 1) {
-                        val = Math.floor(Math.random() * 5001) + 6500
-                        database.dataBasic[sender.id].money += val
-                    }
-
-                    if (val === 0) {
-                        message.channel.send('> \\💴 Nyertél:  **semmit**')
-                    } else {
-                        message.channel.send('> \\💴 Nyertél:  **\\💵' + val + '** pénzt')
-                    }
-
-                } else if (collected.first().emoji.name == '🧰') {
-                    commandNapi(message, sender)
-                };
-                embedMessage.reactions.removeAll()
-                saveDatabase()
-            }).catch(() => {
-                embedMessage.reactions.removeAll();
-            });
-    });
+    const buttonCrate = new MessageButton()
+        .setLabel("🧱")
+        .setCustomId("openCrate")
+        .setStyle("PRIMARY");
+    const buttonDayCrate = new MessageButton()
+        .setLabel("🧰")
+        .setCustomId("openDayCrate")
+        .setStyle("PRIMARY");
+    const buttonLuckyCardSmall = new MessageButton()
+        .setLabel("💶")
+        .setCustomId("useLuckyCardSmall")
+        .setStyle("SECONDARY");
+    const buttonLuckyCardMedium = new MessageButton()
+        .setLabel("💷")
+        .setCustomId("useLuckyCardMedium")
+        .setStyle("SECONDARY");
+    const buttonLuckyCardLarge = new MessageButton()
+        .setLabel("💴")
+        .setCustomId("useLuckyCardLarge")
+        .setStyle("SECONDARY");
+    const buttonOpenGift = new MessageButton()
+        .setLabel("🎀")
+        .setCustomId("openGift")
+        .setStyle("PRIMARY");
+    const buttonSendGift = new MessageButton()
+        .setLabel("🎁")
+        .setCustomId("sendGift")
+        .setStyle("SECONDARY");
+    if (!crates > 0) { buttonCrate.setDisabled(true) };
+    if (!dayCrates > 0) { buttonDayCrate.setDisabled(true) };
+    if (!smallLuckyCard > 0) { buttonLuckyCardSmall.setDisabled(true) };
+    if (!mediumLuckyCard > 0) { buttonLuckyCardMedium.setDisabled(true) };
+    if (!largeLuckyCard > 0) { buttonLuckyCardLarge.setDisabled(true) };
+    if (!getGifts > 0) { buttonOpenGift.setDisabled(true) };
+    if (!gifts > 0) { buttonSendGift.setDisabled(true) };
+    const rowPrimary = new MessageActionRow()
+        .addComponents(buttonCrate, buttonDayCrate, buttonLuckyCardSmall, buttonLuckyCardMedium, buttonLuckyCardLarge)
+    const rowSecondary = new MessageActionRow()
+        .addComponents(buttonSendGift)
+    if (getGifts > 0) { rowSecondary.addComponents(buttonOpenGift) };
+   return {embeds: [ embed ], components: [rowPrimary, rowSecondary]}
 }
 
 /**
@@ -1152,21 +863,14 @@ async function commandNapi(message, sender) {
     await saveDatabase()
 }
 /**
- * @param {Discord.Message} message 
- * @param {Discord.User} sender 
+ * @param {Discord.GuildMember} sender 
+ * @param {number} ammount
  */
-function commandPms(message, sender) {
-
-}
-/**
- * @param {Discord.Message} message 
- * @param {Discord.User} sender 
- */
-async function commandAllNapi(message, sender) {
+async function commandAllNapi(sender, ammount) {
     if (dayOfYear === database.dataBasic[sender.id].day) {
-        message.channel.send('> **\\❌ Nincs napi ládád! \\🧰**')
+        return {content: '> **\\❌ Nincs napi ládád! \\🧰**'}
     } else {
-        let dayCrates = dataBot.day - database.dataBasic[sender.id].day
+        let dayCrates = Math.min(dataBot.day - database.dataBasic[sender.id].day, ammount)
 
         let getXpS = 0
         let getChestS = 0
@@ -1190,27 +894,28 @@ async function commandAllNapi(message, sender) {
 
         }
 
-        message.channel.send('> ' + dayCrates + 'x \\🧰 Kaptál:\n' +
+
+        database.dataBasic[sender.id].day = database.dataBasic[sender.id].day + dayCrates
+        saveDatabase()
+    
+        return {content: '> ' + dayCrates + 'x \\🧰 Kaptál:\n' +
             '>     \\💵 **' + getMoney + '** pénzt\n' +
             '>     \\🍺 **' + getXpS + '** xpt\n' +
             '>     \\🧱 **' + getChestS + '** ládát\n' +
             '>     \\🎟️ **' + getTicket + '** kupont'
-        )
+        }
     };
-
-    database.dataBasic[sender.id].day = dataBot.day
-    saveDatabase()
 }
 
 /**
- * @param {Discord.Message} message 
- * @param {Discord.User} sender 
+ * @param {Discord.GuildMember} sender 
+ * @param {number} ammount
  */
-async function commandAllCrate(message, sender) {
-    if (dataBackpacks[sender.id].crates === 0) {
-        message.channel.send('> **\\❌ Nincs ládád! \\🧱**')
+async function commandAllCrate(sender, ammount) {
+    if (database.dataBackpacks[sender.id].crates === 0) {
+        return {content: '> **\\❌ Nincs ládád! \\🧱**'}
     } else {
-        let Crates = dataBackpacks[sender.id].crates
+        let Crates = Math.min(database.dataBackpacks[sender.id].crates, ammount)
 
         let getXpS = 0
         let getGiftS = 0
@@ -1234,30 +939,20 @@ async function commandAllCrate(message, sender) {
             };
             if (out === 'gift') {
                 getGiftS += 1
-                dataBackpacks[sender.id].gifts += 1
+                database.dataBackpacks[sender.id].gifts += 1
             };
         }
 
+        database.  dataBackpacks[sender.id].crates = database.dataBackpacks[sender.id].crates - Crates
+        saveDatabase()
 
-        message.channel.send('> ' + Crates + 'x \\🧱 Kaptál:\n' +
+        return {content: '> ' + Crates + 'x \\🧱 Kaptál:\n' +
             '>     \\🍺 **' + getXpS + '** xpt\n' +
             '>     \\💵 **' + getMoney + '** pénzt\n' +
             '>     \\🎁 **' + getGiftS + '** ajándékot'
-        )
+        }
 
     };
-
-    dataBackpacks[sender.id].crates = 0
-    saveDatabase()
-}
-
-/**
-* @param {Discord.Message} message
-* @param {Discord.Use} sender
-* @param {string} newName
-*/
-function commandPmsName(message, sender, newName) {
-    message.channel.send('> **\\⛔ Ez a parancs nem elérhető!**')
 }
 
 /**
@@ -1316,29 +1011,28 @@ async function commandSkip(message) {
 }
 
 /**
- * @param {Discord.Message} message 
- * @param {Discord.User} sender 
+ * @param {Discord.GuildMember} member
  */
-function commandProfil(message, sender) {
+function commandProfil(member) {
     const embed = new Discord.MessageEmbed()
-        .setColor(database.dataBasic[sender.id].color)
+        .setColor(database.dataBasic[member.id].color)
         .setTitle('Profil')
-        .setAuthor(sender.username, sender.displayAvatarURL())
+        .setAuthor(member.displayName, member.displayAvatarURL())
         .addField('Matricák',
-            '> ' + dataStickers[sender.id].stickersMusic + ' \\🎼 Zene\n' +
-            '> ' + dataStickers[sender.id].stickersMeme + ' \\🎭 Meme\n' +
-            '> ' + dataStickers[sender.id].stickersYoutube + ' \\🎬 YouTube\n' +
-            '> ' + dataStickers[sender.id].stickersMessage + ' \\📋 Üzenet\n' +
-            '> ' + dataStickers[sender.id].stickersCommand + ' \\🖥️ Parancs\n' +
-            '> ' + dataStickers[sender.id].stickersTip + ' \\💡 Ötlet'
+            '> ' + dataStickers[member.id].stickersMusic + ' \\🎼 Zene\n' +
+            '> ' + dataStickers[member.id].stickersMeme + ' \\🎭 Meme\n' +
+            '> ' + dataStickers[member.id].stickersYoutube + ' \\🎬 YouTube\n' +
+            '> ' + dataStickers[member.id].stickersMessage + ' \\📋 Üzenet\n' +
+            '> ' + dataStickers[member.id].stickersCommand + ' \\🖥️ Parancs\n' +
+            '> ' + dataStickers[member.id].stickersTip + ' \\💡 Ötlet'
         )
         .addField('Statisztika',
-            '> \\🎼 Zenék: ' + abbrev(userstats[sender.id].memes) + '\n' +
-            '> \\🎭 Vicces dolgok: ' + abbrev(userstats[sender.id].musics) + '\n' +
-            '> \\🎬 YouTube linkek: ' + abbrev(userstats[sender.id].youtubevideos) + '\n' +
-            '> \\📋 Üzenetek: ' + abbrev(userstats[sender.id].messages) + '\n' +
-            '> \\🖥️ Parancsok:' + abbrev(userstats[sender.id].commands) + '\n' +
-            '> \\👁‍🗨 Összes karakter: ' + abbrev(userstats[sender.id].chars)
+            '> \\🎼 Zenék: ' + abbrev(userstats[member.id].memes) + '\n' +
+            '> \\🎭 Vicces dolgok: ' + abbrev(userstats[member.id].musics) + '\n' +
+            '> \\🎬 YouTube linkek: ' + abbrev(userstats[member.id].youtubevideos) + '\n' +
+            '> \\📋 Üzenetek: ' + abbrev(userstats[member.id].messages) + '\n' +
+            '> \\🖥️ Parancsok:' + abbrev(userstats[member.id].commands) + '\n' +
+            '> \\👁‍🗨 Összes karakter: ' + abbrev(userstats[member.id].chars)
         )
         .addField('meta',
             '> \\🏆 medal-0a: 0\n' +
@@ -1352,7 +1046,7 @@ function commandProfil(message, sender) {
             '> \\🎴 card-0c: 0\n' +
             '> \\🧧 card-1a: 0'
         )
-    message.channel.send({embeds: [ embed ]});
+    return {embeds: [ embed ]}
 }
 
 function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken) {
@@ -1426,6 +1120,12 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
 
 }
 
+/**@param {Discord.GuildMember} member @returns {boolean} */
+function HasQuizStreakRole(member) {
+    const roles = ['929443006627586078', '929443558040166461', '929443627527180288', '929443673077329961']
+    return member.roles.cache.some(role => roles.includes(role.id))
+}
+
 /**@param {string} quizMessageId @param {number} correctIndex */
 async function quizDone(quizMessageId, correctIndex) {
 
@@ -1449,6 +1149,7 @@ async function quizDone(quizMessageId, correctIndex) {
         const awardAdd1 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
         const awardRemove0 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
         const awardRemove1 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
+        
         message.reactions.resolve('🎯').users.fetch().then(async (userList0) => {
             /**@type {string[]} */
             const usersWithCorrectAnswer = []
@@ -1456,33 +1157,38 @@ async function quizDone(quizMessageId, correctIndex) {
             const usersWithWrongAnswer = []
             const usersWithMultiplier = userList0.map((user) => user.id)
 
-            const members = bot.guilds.cache.get('737954264386764812').members
             let finalText = '**A helyes válasz: ' + correctAnswerEmoji + ' ' + correctAnswerText + '**'
 
+            var Mittomen = ''
             for (let i = 0; i < answersEmoji.length; i++) {
                 const currentAnswerEmoji = answersEmoji[i];
-                await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(userList1 => {
+                await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(async (userList1) => {
                     const users = userList1.map((user) => user.id)
-                    for (let i = 0; i < users.length; i++) {
-                        const userId = users[i]
+                    for (let j = 0; j < users.length; j++) {
+                        const userId = users[j]
                         if (userId == bot.user.id) { continue }
+            
+                        //const members = await bot.guilds.cache.get('737954264386764812').members.fetch({ limit: 20 })
+                        const member = await bot.guilds.cache.get('737954264386764812').members.fetch({user: userId})
+
                         if (currentAnswerEmoji == correctAnswerEmoji) {
                             usersWithCorrectAnswer.push(userId)
-                            if (usersWithMultiplier.includes(userId) && members.cache.get(userId).roles.cache.has('929443006627586078') && members.cache.get(userId).roles.cache.has('929443558040166461') && members.cache.get(userId).roles.cache.has('929443627527180288') && members.cache.get(userId).roles.cache.has('929443673077329961')) {
-                                finalText += '\n> <@!' + userId + '> nyert ' + (parseInt(awardAdd0) * 2) + '\\🍺t és ' + (parseInt(awardAdd1) * 2) + '\\🎫t'
+                            if (usersWithMultiplier.includes(userId) && HasQuizStreakRole(member)) {
+                                finalText += '\n> <@!' + userId + '> nyert ' + (parseInt(awardAdd0) * 2) + Mittomen + '🍺t és ' + (parseInt(awardAdd1) * 2) + Mittomen + '🎫t'
                             } else {
-                                finalText += '\n> <@!' + userId + '> nyert ' + (awardAdd0) + '\\🍺t és ' + (awardAdd1) + '\\🎫t'
+                                finalText += '\n> <@!' + userId + '> nyert ' + (awardAdd0) + Mittomen + '🍺t és ' + (awardAdd1) + Mittomen + '🎫t'
                             }
                         } else {
                             usersWithWrongAnswer.push(userId)
-                            if (usersWithMultiplier.includes(userId) && members.cache.get(userId).roles.cache.has('929443006627586078') && members.cache.get(userId).roles.cache.has('929443558040166461') && members.cache.get(userId).roles.cache.has('929443627527180288') && members.cache.get(userId).roles.cache.has('929443673077329961')) {
-                                finalText += '\n> <@!' + userId + '> veszített ' + (parseInt(awardRemove0) * 2) + '\\🍺t és ' + (parseInt(awardRemove1) * 2) + '\\🎫t'
+                            if (usersWithMultiplier.includes(userId) && HasQuizStreakRole(member)) {
+                                finalText += '\n> <@!' + userId + '> veszített ' + (parseInt(awardRemove0) * 2) + Mittomen + '🍺t és ' + (parseInt(awardRemove1) * 2) + Mittomen + '🎫t'
                             } else {
-                                finalText += '\n> <@!' + userId + '> veszített ' + (awardRemove0) + '\\🍺t és ' + (awardRemove1) + '\\🎫t'
+                                finalText += '\n> <@!' + userId + '> veszített ' + (awardRemove0) + Mittomen + '🍺t és ' + (awardRemove1) + Mittomen + '🎫t'
                             }
                         }
                     }
                 });
+                Mittomen = '\\'
             }
             bot.channels.cache.get('799340273431478303').send(finalText + '\n\n||\\⚠️ Ez ALFA verzió! A hibát itt jelentsd: <#930166957062357062> ||')
         });
@@ -1490,13 +1196,26 @@ async function quizDone(quizMessageId, correctIndex) {
 }
 //#endregion
 
+/** @param {Discord.GuildMember} member  @param {string} exceptRoleId  */
+async function removeAllColorRoles(member, exceptRoleId) {
+    const roleList = [ColorRoles.blue, ColorRoles.green, ColorRoles.invisible, ColorRoles.orange, ColorRoles.purple, ColorRoles.red, ColorRoles.yellow]
+    for (let i = 0; i < roleList.length; i++) {
+        const role = roleList[i];
+        if (role == exceptRoleId) { continue; }
+        if (member == undefined || member == null) { break; }
+        if (member.roles.cache.some(role => role.id == role)) {
+            member.roles.remove(member.guild.roles.cache.get(role))
+        }
+    }
+}
+
 bot.on('interactionCreate', async interaction => {
     if (interaction.isCommand()) {
         processApplicationCommand(interaction)
     } else if (interaction.isButton()) {
         try {
             if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
-                interaction.reply('> \\❗ **Ez nem a tied!**', true)
+                interaction.reply({content: '> \\❗ **Ez nem a tied!**', ephemeral: true})
                 return;
             }
         } catch (error) { }
@@ -1505,13 +1224,168 @@ bot.on('interactionCreate', async interaction => {
         let isInDebugMode = false
         let playerIndex = 0
 
-        if (interaction.component.customId === 'sendHelp') {
-            const thisIsPrivateMessage = interaction.channel.type === 'DM'
-            CommandHelp(interaction.channel, interaction.user, thisIsPrivateMessage)
-    
-            interaction.deleteReply()
-            button.message.delete()
-    
+        if (interaction.component.customId === 'openDayCrate') {
+            if (dayOfYear === database.dataBasic[interaction.user.id].day) {
+                interaction.reply({content: '> **\\❌ Már kinyitottad a napi ládádat!*', ephemeral: true});
+            } else {
+                const rewald = openDayCrate(interaction.user.id)
+                const rewaldIndex = rewald.split('|')[0]
+                const rewaldValue = rewald.split('|')[1]
+                let txt = ''
+        
+                if (rewaldIndex === '2') {
+                    txt = '**\\🍺 ' + rewaldValue + '** xp-t'
+                } else if (rewaldIndex === '3') {
+                    txt = '**\\💵' + rewaldValue + '** pénzt'
+                } else if (rewaldIndex === '1') {
+                    txt = '**\\🧱 1 ládát**'
+                } else if (rewaldIndex === '0') {
+                    txt = '**\\🎟️ 1 kupont**'
+                } else {
+                    txt = rewald
+                }
+        
+                interaction.reply({content: '> \\🧰 Kaptál:  ' + txt, ephemeral: true});
+            };
+        
+            database.dataBasic[interaction.user.id].day += 1
+            if (database.dataBasic[interaction.user.id].day > dataBot.day) {
+                database.dataBasic[interaction.user.id].day = dataBot.day
+            }
+
+            interaction.message.edit(commandStore(interaction.user))
+
+            saveDatabase()
+            return;
+        }
+
+        if (interaction.component.customId === 'openCrate') {
+            database.dataBackpacks[interaction.user.id].crates -= 1
+            var replies = ['xp', 'money', 'gift'];
+            var random = Math.floor(Math.random() * 3);
+            var out = replies[random]
+            var val = 0
+            var txt = ''
+
+            if (out === 'xp') {
+                val = Math.floor(Math.random() * 110) + 10
+                txt = '**\\🍺 ' + val + '** xp-t'
+                database.dataBasic[interaction.user.id].score += val
+            }
+            if (out === 'money') {
+                val = Math.floor(Math.random() * 2000) + 3000
+                txt = '**\\💵' + val + '** pénzt'
+                database.dataBasic[interaction.user.id].money += val
+            }
+            if (out === 'gift') {
+                txt = '**\\🎁 1** ajándékot'
+                database.dataBackpacks[interaction.user.id].gifts += 1
+            }
+
+            interaction.message.edit(commandStore(interaction.user))
+            interaction.reply({content: '> \\🧱 Kaptál:  ' + txt, ephemeral: true});
+
+            saveDatabase()
+            return
+        }
+
+        if (interaction.component.customId === 'useLuckyCardSmall') {
+            database. dataBackpacks[interaction.user.id].luckyCards.small -= 1
+            var val = 0
+
+            var nyeroszam = Math.floor(Math.random() * 2)
+            if (nyeroszam === 1) {
+                val = Math.floor(Math.random() * 1001) + 1500
+                database.dataBasic[interaction.user.id].money += val
+            }
+
+            if (val === 0) {
+                interaction.reply({content: '> \\💶 Nyertél:  **semmit**', ephemeral: true});
+            } else {
+                interaction.reply({content: '> \\💶 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true});
+            }
+
+            interaction.message.edit(commandStore(interaction.user))
+            
+            saveDatabase()
+            return;
+        }
+
+        if (interaction.component.customId === 'useLuckyCardMedium') {
+            database. dataBackpacks[interaction.user.id].luckyCards.medium -= 1
+            var val = 0
+
+            var nyeroszam = Math.floor(Math.random() * 4)
+            if (nyeroszam === 1) {
+                val = Math.floor(Math.random() * 3001) + 3000
+                database.dataBasic[interaction.user.id].money += val
+            }
+
+            if (val === 0) {
+                interaction.reply({content: '> \\💷 Nyertél:  **semmit**', ephemeral: true});
+            } else {
+                interaction.reply({content: '> \\💷 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true});
+            }
+
+            interaction.message.edit(commandStore(interaction.user))
+            
+            saveDatabase()
+            return;
+        }
+
+        if (interaction.component.customId === 'useLuckyCardLarge') {
+            database.   dataBackpacks[interaction.user.id].luckyCards.large -= 1
+            var val = 0
+
+            var nyeroszam = Math.floor(Math.random() * 9)
+            if (nyeroszam === 1) {
+                val = Math.floor(Math.random() * 5001) + 6500
+                database.dataBasic[interaction.user.id].money += val
+            }
+
+            if (val === 0) {
+                interaction.reply({content: '> \\💴 Nyertél:  **semmit**', ephemeral: true});
+            } else {
+                interaction.reply({content: '> \\💴 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true});
+            }
+
+            interaction.message.edit(commandStore(interaction.user))
+            
+            saveDatabase()
+            return;
+        }
+
+        if (interaction.component.customId === 'openGift') {
+            database.  dataBackpacks[interaction.user.id].getGift -= 1
+            var replies = ['xp', 'money'];
+            var random = Math.floor(Math.random() * 2);
+            var out = replies[random]
+            var val = 0
+            var txt = ''
+
+            if (out === 'xp') {
+                val = Math.floor(Math.random() * 530) + 210
+                txt = '**\\🍺 ' + val + '** xp-t'
+                database.dataBasic[interaction.user.id].score += val
+            };
+            if (out === 'money') {
+                val = Math.floor(Math.random() * 2300) + 1000
+                txt = '**\\💵' + val + '** pénzt'
+                database.dataBasic[interaction.user.id].money += val
+            };
+
+            interaction.reply({content: '> \\🎀 Kaptál ' + txt, ephemeral: true});
+            interaction.message.edit(commandStore(interaction.user))
+            
+            saveDatabase()
+            return;
+        }
+
+        if (interaction.component.customId === 'sendGift') {
+            interaction.reply({content: '> **\\❔ Használd a **`.gift @Felhasználó`** parancsot, egy személy megajándékozásához!**', ephemeral: true});
+            interaction.message.edit(commandStore(interaction.user))
+            
+            saveDatabase()
             return;
         }
 
@@ -1668,6 +1542,279 @@ bot.on('interactionCreate', async interaction => {
                 }
             }
             return;
+        }
+
+        if (interaction.component.customId == 'shopClose') {
+            interaction.message.delete()
+        }
+
+        if (interaction.component.customId.startsWith('shopBuy')) {
+            const money = database.dataBasic[interaction.user.id].money;
+            const buyItem = interaction.component.customId.replace('shopBuy', '')
+            if (buyItem == 'Crate') {
+                if (money >= 2099) {
+                    database.dataBasic[interaction.user.id].money -= 2099
+                    database.dataBackpacks[interaction.user.id].crates += 1
+
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'Gift') {
+                if (money >= 3999) {
+                    database.dataBasic[interaction.user.id].money -= 3999
+                    database.dataBackpacks[interaction.user.id].gifts += 1
+
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'Ticket') {
+                if (money >= 8999) {
+                    database.dataBasic[interaction.user.id].money -= 8999
+                    database.dataBackpacks[interaction.user.id].tickets += 1
+
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'WC') {
+                if (money >= 799) {
+                    database.dataBasic[interaction.user.id].money -= 799
+
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'LuckySmall') {
+                if (money >= 1999) {
+                    database.dataBasic[interaction.user.id].money -= 1999
+                    database.dataBackpacks[interaction.user.id].luckyCards.small += 1
+
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'LuckyMedium') {
+                if (money >= 3599) {
+                    database.dataBasic[interaction.user.id].money -= 3599
+                    database.dataBackpacks[interaction.user.id].luckyCards.medium += 1
+
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'LuckyLarge') {
+                if (money >= 6999) {
+                    database.dataBasic[interaction.user.id].money -= 6999
+                    database.dataBackpacks[interaction.user.id].luckyCards.large += 1
+
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database,2))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            }
+            return
+        }
+    } else if (interaction.isSelectMenu()) {
+        if (interaction.customId.startsWith('shopMenu')) {
+            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, interaction.values[0]))
+            return
+        }
+
+        if (interaction.customId == 'shopBackpackColors') {
+            const selectedIndex = interaction.values[0]
+            const money = database.dataBasic[interaction.user.id].money;
+            
+            if (selectedIndex == 0) {
+                if (money >= 3299) {
+                    database.dataBasic[interaction.user.id].money -= 3299
+                    database.dataBasic[interaction.user.id].color = '#fffff9'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (selectedIndex == 1) {
+                if (money >= 99) {
+                    database.dataBasic[interaction.user.id].money -= 99
+                    database.dataBasic[interaction.user.id].color = '#000000'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (selectedIndex == 2) {
+                if (money >= 2999) {
+                    database.dataBasic[interaction.user.id].money -= 2999
+                    database.dataBasic[interaction.user.id].color = '#734c09'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (selectedIndex == 3) {
+                if (money >= 1499) {
+                    database.dataBasic[interaction.user.id].money -= 1499
+                    database.dataBasic[interaction.user.id].color = '#ff0000'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (selectedIndex == 4) {
+                if (money >= 2499) {
+                    database.dataBasic[interaction.user.id].money -= 2499
+                    database.dataBasic[interaction.user.id].color = '#ffbb00'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (selectedIndex == 5) {
+                if (money >= 1499) {
+                    database.dataBasic[interaction.user.id].money -= 1499
+                    database.dataBasic[interaction.user.id].color = '#ffff00'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (selectedIndex == 6) {
+                if (money >= 2499) {
+                    database.dataBasic[interaction.user.id].money -= 2499
+                    database.dataBasic[interaction.user.id].color = '#00ff00'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (selectedIndex == 7) {
+                if (money >= 1499) {
+                    database.dataBasic[interaction.user.id].money -= 1499
+                    database.dataBasic[interaction.user.id].color = '#0000ff'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (selectedIndex == 8) {
+                if (money >= 2499) {
+                    database.dataBasic[interaction.user.id].money -= 2499
+                    database.dataBasic[interaction.user.id].color = '#9d00ff'
+
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            }
+            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 4))
+            
+            return
+        }
+
+        if (interaction.customId == 'shopNameColors') {
+            const selectedIndex = interaction.values[0]
+            const money = database.dataBasic[interaction.user.id].money;
+
+            var newColorRoleId = ''
+            
+            if (selectedIndex == 0) {
+                if (money >= 9) {
+                    database.dataBasic[interaction.user.id].money -= 9
+                    removeAllColorRoles(interaction.member, '')
+                    newColorRoleId = '0'
+                } else {
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+                }
+            } else if (selectedIndex == 1) {
+                if (money >= 2999) {
+                    removeAllColorRoles(interaction.member, ColorRoles.red)
+                    try {
+                        interaction.member.roles.add(interaction.member.guild.roles.cache.get(ColorRoles.red))
+                        database.dataBasic[interaction.user.id].money -= 2999
+                        newColorRoleId = ColorRoles.red
+                    } catch (error) { }
+                } else {
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+                }
+            } else if (selectedIndex == 2) {
+                if (money >= 3499) {
+                    removeAllColorRoles(interaction.member, ColorRoles.orange)
+                    try {
+                        interaction.member.roles.add(interaction.member.guild.roles.cache.get(ColorRoles.orange))
+                        database.dataBasic[interaction.user.id].money -= 3499
+                        newColorRoleId = ColorRoles.orange
+                    } catch (error) { }
+                } else {
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+                }
+            } else if (selectedIndex == 3) {
+                if (money >= 2999) {
+                    removeAllColorRoles(interaction.member, ColorRoles.yellow)
+                    try {
+                        interaction.member.roles.add(interaction.member.guild.roles.cache.get(ColorRoles.yellow))
+                        database.dataBasic[interaction.user.id].money -= 2999
+                        newColorRoleId = ColorRoles.yellow
+                    } catch (error) { }
+                } else {
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+                }
+            } else if (selectedIndex == 4) {
+                if (money >= 3499) {
+                    removeAllColorRoles(interaction.member, ColorRoles.green)
+                    try {
+                        interaction.member.roles.add(interaction.member.guild.roles.cache.get(ColorRoles.green))
+                        database.dataBasic[interaction.user.id].money -= 3499
+                        newColorRoleId = ColorRoles.green
+                    } catch (error) { }
+                } else {
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+                }
+            } else if (selectedIndex == 5) {
+                if (money >= 2999) {
+                    removeAllColorRoles(interaction.member, ColorRoles.blue)
+                    try {
+                        interaction.member.roles.add(interaction.member.guild.roles.cache.get(ColorRoles.blue))
+                        database.dataBasic[interaction.user.id].money -= 2999
+                        newColorRoleId = ColorRoles.blue
+                    } catch (error) { }
+                } else {
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+                }
+            } else if (selectedIndex == 6) {
+                if (money >= 3499) {
+                    removeAllColorRoles(interaction.member, ColorRoles.purple)
+                    try {
+                        interaction.member.roles.add(interaction.member.guild.roles.cache.get(ColorRoles.purple))
+                        database.dataBasic[interaction.user.id].money -= 3499
+                        newColorRoleId = ColorRoles.purple
+                    } catch (error) { }
+                } else {
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+                }
+            } else if (selectedIndex == 7) {
+                if (money >= 3999) {
+                    removeAllColorRoles(interaction.member, ColorRoles.invisible)
+                    try {
+                        interaction.member.roles.add(interaction.member.guild.roles.cache.get(ColorRoles.invisible))
+                        database.dataBasic[interaction.user.id].money -= 3999
+                        newColorRoleId = ColorRoles.invisible
+                    } catch (error) { }
+                } else {
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+                }
+            }
+
+            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 5, newColorRoleId))
+            return
         }
     }
 });
@@ -1856,51 +2003,12 @@ const getApp = (guildId) => {
     return app
 }
 
-async function RemoveAllCommands() {
-    const guild = bot.guilds.cache.get('737954264386764812')
-    const guildCommands = guild.commands
-    await guildCommands.fetch()
-    guildCommands.cache.forEach(async (val, key) => {
-        await guildCommands.delete(val)
-    });
-        
-    const appCommands = bot.application?.commands
-    await appCommands.fetch()
-    appCommands.cache.forEach(async (val, key) => {
-        await appCommands.delete(val)
-    });
-        
-}
-
-bot.once('ready', async () => { //Ready
-    //const commands = await getApp('737954264386764812').commands.get()
-    //log(commands)
-
-    const { SlashCommandBuilder } = require('@discordjs/builders');
-
-    const commandPing = new SlashCommandBuilder()
-        .setName('ping')
-        .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e');
-    const commandWeather = new SlashCommandBuilder()
-        .setName('weather')
-        .setDescription('Békéscsaba időjárása');
-    const commandXp = new SlashCommandBuilder()
-        .setName('xp')
-        .setDescription('Rangod');
-    const commandDev = new SlashCommandBuilder()
-        .setName('dev')
-        .setDescription('Fejlesztői segítség');
-
-    //await RemoveAllCommands()
-
-    const guildCommands = bot.guilds.cache.get('737954264386764812').commands
-
-    const appCommands = bot.application?.commands
-    
-    guildCommands?.create(commandPing.toJSON())
-    guildCommands?.create(commandWeather.toJSON())
-    guildCommands?.create(commandXp.toJSON())
-    guildCommands?.create(commandDev.toJSON())
+bot.once('ready', async () => {
+    if (false) {
+        await DeleteCommands(bot)
+    } else {
+        CreateCommands(bot)
+    }
 
     const lastDay = dataBot.day
     dataBot.day = dayOfYear
@@ -1909,8 +2017,8 @@ bot.once('ready', async () => { //Ready
     log(DONE + ': A BOT kész!')
 
     for (let i = 0; i < dayOfYear - lastDay; i++) {
-        for (let i = 0; i < listOfUserIDs.length; i++) {
-            const element = listOfUserIDs[i];
+        for (let i = 0; i < usersWithTax.length; i++) {
+            const element = usersWithTax[i];
             try {
                 const userMoney = database.dataBasic[element].money
                 const finalTax = Math.floor(userMoney * 0.001) * 2
@@ -2118,8 +2226,8 @@ function processNewsMessage(message) {
 
 bot.on('ready', () => { //Change status
     setInterval(() => {
-        const index = Math.floor(Math.random() * (activities_list.length - 1) + 1);
-        bot.user.setActivity(activities_list[index]);
+        const index = Math.floor(Math.random() * (activitiesDesktop.length - 1) + 1);
+        bot.user.setActivity(activitiesDesktop[index]);
     }, 10000);
     setInterval(() => {
         if (listOfNews.length > 0) {
@@ -2140,7 +2248,7 @@ bot.on('ready', () => { //Change status
 
     }, 2000);
 })
-bot.on('message', async message => { //Message
+bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
     if (message.author.bot && thisIsPrivateMessage === false) return
     if (!message.type) return
@@ -2318,53 +2426,11 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     //#region Enabled in dm
 
-    if (command === `crate all`) {
-        commandAllCrate(message, sender)
-        userstatsSendCommand(sender)
-        return;
-    };
-
-    if (command === `napi all`) {
-        commandAllNapi(message, sender)
-        userstatsSendCommand(sender)
-        return;
-    };
-
-    if (command == `napi`) {
-        commandNapi(message, sender)
-        userstatsSendCommand(sender)
-        return;
-    };
-
-    if (command === `profil`) {
-        commandProfil(message, sender)
-        userstatsSendCommand(sender)
-        return;
-    };
-
-    if (command === `store`) {
-        commandStore(message, sender, thisIsPrivateMessage)
-        userstatsSendCommand(sender)
-        return;
-    };
-
     if (command === `pms`) {
         CommandBusiness(message.channel, sender, thisIsPrivateMessage)
         userstatsSendCommand(sender)
         return;
     };
-
-    if (command === `help`) { // /help parancs
-        CommandHelp(message.channel, sender, thisIsPrivateMessage)
-        userstatsSendCommand(sender)
-        return
-    }
-    
-    if (command === `?`) { // /help parancs
-        CommandHelp(message.channel, sender, thisIsPrivateMessage)
-        userstatsSendCommand(sender)
-        return
-    }
 
     if (command === `test`) {
         /*
@@ -2466,16 +2532,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     //#region Disabled in dm
 
-    if (command === `bolt`) {
-        if (thisIsPrivateMessage === false) {
-            CommandShop(message.channel, sender, message.member)
-            userstatsSendCommand(sender)
-        } else {
-            message.channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-        return
-    }
-
     if (command.startsWith(`gift `)) {
         if (thisIsPrivateMessage === false) {
             if (message.channel.guild.id === '737954264386764812') {
@@ -2483,12 +2539,12 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                 try {
 
                     var giftableMember = message.mentions.users.first()
-                    if (dataBackpacks[sender.id].gifts > 0) {
+                    if (database.dataBackpacks[sender.id].gifts > 0) {
                         if (giftableMember.id === sender.id) {
                             message.channel.send('> \\❌ **Nem ajándékozhatod meg magad!**');
                         } else {
-                            dataBackpacks[giftableMember.id].getGift += 1;
-                            dataBackpacks[sender.id].gifts -= 1
+                            database.dataBackpacks[giftableMember.id].getGift += 1;
+                            database.dataBackpacks[sender.id].gifts -= 1
                             const embed = new Discord.MessageEmbed()
                                 .setAuthor(sender.username, sender.displayAvatarURL())
                                 .setTitle('\\✔️ ' + giftableMember.username.toString() + ' megajándékozva.')
@@ -2523,21 +2579,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             message.channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
         }
         return;
-    }
-
-    if (command === `home go`) {
-        message.channel.send('> **\\⛔ Ez a parancs nem elérhető!**')
-        return
-        if (thisIsPrivateMessage === false) {
-        } else {
-            message.channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-        if (message.channel.guild.id === '737954264386764812') {
-            CommandGoHome(sender, message.guild, message.channel)
-            userstatsSendCommand(sender)
-        } else {
-            message.channel.send('> **\\⛔ Ez a parancs ezen a szerveren nem használható!**')
-        }
     }
 
     if (command.startsWith(`pms name `)) {
@@ -2687,17 +2728,11 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         */
     }
 
-    const helpButton = new MessageButton()
-        .setLabel("Help")
-        .setCustomId("sendHelp")
-        .setStyle("PRIMARY");
-    const helpRow = new MessageActionRow()
-        .addComponents(helpButton)
-    message.channel.send("> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**", {components: [helpRow]});
+    message.channel.send("> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**");
 }
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
-function processApplicationCommand(command) {
+async function processApplicationCommand(command) {
 
     if (command.commandName === `xp`) {
         CommandXp(command)
@@ -2769,8 +2804,44 @@ function processApplicationCommand(command) {
                 .setColor(Color.Highlight)
             command.reply({ embeds: [embed], ephemeral: true })
         } else {
-            command.reply({ content: '> \\⛔ **Ezt a parancsot te nem használhatod!**', ephemeral: true })
+            command.reply({ content: '> \\⛔ **Nincs jogosultságod a parancs használatához!**', ephemeral: true })
         }
+        return
+    }
+
+    if (command.commandName === `help`) {
+        command.reply({ embeds: [CommandHelp(false)]})
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `crate`) {
+        command.reply(await commandAllCrate(command.member, command.options.getInteger("darab")))
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `napi`) {
+        command.reply(await commandAllNapi(command.member, command.options.getInteger("darab")))
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `profil`) {
+        command.reply(commandProfil(command.member))
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `store`) {
+        command.reply(commandStore(command.user))
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `bolt`) {
+        command.reply(CommandShop(command.channel, command.user, command.member, database, 0))
+        userstatsSendCommand(command.user)
         return
     }
 }

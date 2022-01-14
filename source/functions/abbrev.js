@@ -1,9 +1,9 @@
- /**
+/**
  * Converts numbers into units like `1K`, `1M`, `1B` etc.
  * @param {number|string} num
  * @returns {string}
  */
-module.exports = (num) => {
+function abbrev(num) {
     if (!num || isNaN(num)) return "0";
     if (typeof num === "string") num = parseInt(num);
     let decPlaces = Math.pow(10, 1);
@@ -21,4 +21,6 @@ module.exports = (num) => {
         }
     }
     return num;
-};
+}
+
+module.exports = { abbrev }

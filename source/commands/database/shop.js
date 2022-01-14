@@ -1,9 +1,7 @@
 const Discord = require('discord.js')
 const fs = require('fs')
-
-let dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
-let dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
-let dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8'))
+const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+const { DatabaseManager } = require('../../functions/databaseManager')
 
 const ColorRoles = {
 	red: "850016210422464534",
@@ -17,9 +15,8 @@ const ColorRoles = {
 
 async function saveDatabase(channel) {
     try {
-        fs.writeFile('./database/backpacks.json', await JSON.stringify(dataBackpacks), (err) => { if (err) { channel.send('> ' + err.message) }; });
-        fs.writeFile('./database/basic.json', await JSON.stringify(dataBasic), (err) => { if (err) { channel.send('> ' + err.message) }; });
-        fs.writeFile('./database/stickers.json', await JSON.stringify(dataStickers), (err) => { if (err) { channel.send('> ' + err.message) }; });
+        fs.writeFile('../database/backpacks.json', await JSON.stringify(databaseManager.dataBackpacks), (err) => { if (err) { channel.send('> ' + err.message) }; });
+        fs.writeFile('../database/basic.json', await JSON.stringify(databaseManager.dataBasic), (err) => { if (err) { channel.send('> ' + err.message) }; });
     } catch (error) {
         channel.send('> ' + error.message);
     }
@@ -65,9 +62,7 @@ function abbrev(num) {
     }
     return num;
 }
-/**
- * @param {Discord.GuildMember} member 
- */
+/** @param {Discord.GuildMember} member  */
 function removeAllColorRoles(member) {
     member.roles.remove(member.guild.roles.cache.get(ColorRoles.blue))
     member.roles.remove(member.guild.roles.cache.get(ColorRoles.green))
@@ -81,14 +76,15 @@ function removeAllColorRoles(member) {
  /**
  * @param {Discord.User} sender
  * @param {number} menuIndex 0: Main menu | 1: Basic | 2: Lucky cards | 3: Backpack colors | -1: None
+ * @param {DatabaseManager} databaseManager
  * @returns {Discord.MessageEmbed}
  */
-function getEmbedMessage(sender, menuIndex) {
-    if (menuIndex === 0) {
+function getEmbedMessage(sender, menuIndex, databaseManager) {
+    if (menuIndex == 0) {
         const embed = new Discord.MessageEmbed()
             .setAuthor(sender.username, sender.displayAvatarURL())
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(dataBasic[sender.id].money) + '**', true)
+            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
             .addField('Menük: ',
                 '> \\🛒 Alap dolgok\n' +
                 '> \\🍀 Sorsjegyek\n' +
@@ -97,48 +93,48 @@ function getEmbedMessage(sender, menuIndex) {
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
 
         return embed
-    } else if (menuIndex === 1) {
+    } else if (menuIndex == 1) {
         const embed = new Discord.MessageEmbed()
             .setAuthor(sender.username, sender.displayAvatarURL())
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(dataBasic[sender.id].money) + '**', true)
+            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
             .addField('Alap dolgok:',
-                '> \\🧱 Láda   [\\💵 2099] [' + dataBackpacks[sender.id].crates + ' db]\n' +
-                '> \\🎁 Ajándék   [\\💵 3999] [' + dataBackpacks[sender.id].gifts + ' db]\n' +
-                '> \\🎟️ Kupon   [\\💵 8999] [' + dataBackpacks[sender.id].tickets + ' db]\n' +
+                '> \\🧱 Láda   [\\💵 2099] [' + databaseManager.dataBackpacks[sender.id].crates + ' db]\n' +
+                '> \\🎁 Ajándék   [\\💵 3999] [' + databaseManager.dataBackpacks[sender.id].gifts + ' db]\n' +
+                '> \\🎟️ Kupon   [\\💵 8999] [' + databaseManager.dataBackpacks[sender.id].tickets + ' db]\n' +
                 '> \\🧻 WC papír   [\\💵 799]')
-            .setFooter('• Bezárás: ❌\n• Vissza: ◀️')
+            .setFooter('Bezárás: ❌')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
-    } else if (menuIndex === 2) {
+    } else if (menuIndex == 2) {
         const embed = new Discord.MessageEmbed()
             .setAuthor(sender.username, sender.displayAvatarURL())
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(dataBasic[sender.id].money) + '**', true)
+            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
             .addField('Sorsjegyek:',
-                '> \\💶 Black Jack   [\\💵 1999]  50% hogy nyersz, főnyeremény: 2500 [' + dataBackpacks[sender.id].luckyCards.small + ' db]\n' +
-                '> \\💷 Buksza   [\\💵 3599]  20% hogy nyersz, főnyeremény: 6000 [' + dataBackpacks[sender.id].luckyCards.medium + ' db]\n' +
-                '> \\💴 Fáraók Kincse   [\\💵 6999]  10% hogy nyersz, főnyeremény: 1150 [' + dataBackpacks[sender.id].luckyCards.large + ' db]')
-            .setFooter('• Bezárás: ❌\n• Vissza: ◀️')
+                '> \\💶 Black Jack   [\\💵 1999]  50% hogy nyersz, főnyeremény: 2500 [' + databaseManager.dataBackpacks[sender.id].luckyCards.small + ' db]\n' +
+                '> \\💷 Buksza   [\\💵 3599]  20% hogy nyersz, főnyeremény: 6000 [' + databaseManager.dataBackpacks[sender.id].luckyCards.medium + ' db]\n' +
+                '> \\💴 Fáraók Kincse   [\\💵 6999]  10% hogy nyersz, főnyeremény: 1150 [' + databaseManager.dataBackpacks[sender.id].luckyCards.large + ' db]')
+            .setFooter('Bezárás: ❌')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
-    } else if (menuIndex === 3) {
+    } else if (menuIndex == 3) {
         const embed = new Discord.MessageEmbed()
             .setAuthor(sender.username, sender.displayAvatarURL())
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(dataBasic[sender.id].money) + '**', true)
+            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
             .addField('Profil testreszabása: ',
                 '> \\🖍️ Neved színe\n' +
                 '> \\🛍️ Hátizsákod színe')
-            .setFooter('• Bezárás: ❌\n• Vissza: ◀️')
+            .setFooter('Bezárás: ❌')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
-    } else if (menuIndex === 4) {
+    } else if (menuIndex == 4) {
         let colorEmoji = '❔'
-        const userColor = dataBasic[sender.id].color
+        const userColor = databaseManager.dataBasic[sender.id].color
         if (userColor === "#ff0000") {
             colorEmoji = '🟥'
         } else if (userColor === "#ffff00") {
@@ -160,35 +156,35 @@ function getEmbedMessage(sender, menuIndex) {
         const embed = new Discord.MessageEmbed()
             .setAuthor(sender.username, sender.displayAvatarURL())
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(dataBasic[sender.id].money) + '**', true).addField('Hátizsák színek:  [\\' + colorEmoji + ']',
+            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true).addField('Hátizsák színek:  [\\' + colorEmoji + ']',
                 '> \\⬛ Nincs szín   [\\💵 99]\n> \\🟥\\🟨\\🟦 Alap színek   [\\💵 1499]\n' +
                 '> \\🟧\\🟪\\🟩 Alap kevert színek   [\\💵 2499]\n' +
                 '> \\🟫 Barna   [\\💵 2999]\n' +
                 '> \\⬜ Fehér   [\\💵 3299]')
-            .setFooter('• Bezárás: ❌\n• Vissza: ◀️')
+            .setFooter('Bezárás: ❌')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
-    } else if (menuIndex === 5) {
+    } else if (menuIndex == 5) {
     
         const embed = new Discord.MessageEmbed()
             .setAuthor(sender.username, sender.displayAvatarURL())
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(dataBasic[sender.id].money) + '**', true)
+            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
             .addField('Név színek:',
                 '> \\⚫ Alap   [\\💵 9]\n' +
                 '> \\🔴\\🟡\\🔵 Alap színek   [\\💵 2999]\n' +
                 '> \\🟠\\🟣\\🟢 Alap kevert színek   [\\💵 3499]\n' +
                 '> \\🚫 Láthatatlan   [\\💵 3999]')
-            .setFooter('• Bezárás: ❌\n• Vissza: ◀️')
+            .setFooter('Bezárás: ❌')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
-    } else if (menuIndex === -1) {
+    } else if (menuIndex == -1) {
         const embed = new Discord.MessageEmbed()
             .setAuthor(sender.username, sender.displayAvatarURL())
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(dataBasic[sender.id].money) + '**', true)
+            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
             .addField('A bolt nem használható.', 'Hogy újra használhasd a boltot, használd a `.bolt` parancsot!')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
@@ -206,7 +202,7 @@ function getEmbedMessage(sender, menuIndex) {
  * @param {Discord.GuildMember} senderMember
  */
 function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, senderMember) {
-    var money = dataBasic[sender.id].money;
+    var money = databaseManager.dataBasic[sender.id].money;
 
     const filter = (reaction, user) => {
         return ['🎁', '🧱', '🎟️', '🧻', '💶', '💷', '💴', '⬛',
@@ -218,112 +214,112 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
     embedMessage.awaitReactions({ filter, max: 1, time: 900000, errors: ['time'] }).then(async collected => {
             if (collected.first().emoji.name == '🧱') {
                 if (money >= 2099) {
-                    dataBasic[sender.id].money -= 2099
-                    dataBackpacks[sender.id].crates += 1
+                    databaseManager.dataBasic[sender.id].money -= 2099
+                    databaseManager.dataBackpacks[sender.id].crates += 1
                 } else {
                     sendFinishMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🎁') {
                 if (money >= 3999) {
-                    dataBasic[sender.id].money -= 3999
-                    dataBackpacks[sender.id].gifts += 1
+                    databaseManager.dataBasic[sender.id].money -= 3999
+                    databaseManager.dataBackpacks[sender.id].gifts += 1
                 } else {
                     sendFinishMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🎟️') {
                 if (money >= 8999) {
-                    dataBasic[sender.id].money -= 8999
-                    dataBackpacks[sender.id].tickets += 1
+                    databaseManager.dataBasic[sender.id].money -= 8999
+                    databaseManager.dataBackpacks[sender.id].tickets += 1
                 } else {
                     sendFinishMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🧻') {
                 if (money >= 799) {
-                    dataBasic[sender.id].money -= 799
+                    databaseManager.dataBasic[sender.id].money -= 799
                 } else {
                     sendFinishMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '💶') {
                 if (money >= 1999) {
-                    dataBasic[sender.id].money -= 1999
-                    dataBackpacks[sender.id].luckyCards.small += 1
+                    databaseManager.dataBasic[sender.id].money -= 1999
+                    databaseManager.dataBackpacks[sender.id].luckyCards.small += 1
                 } else {
                     sendLuckyMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '💷') {
                 if (money >= 3599) {
-                    dataBasic[sender.id].money -= 3599
-                    dataBackpacks[sender.id].luckyCards.medium += 1
+                    databaseManager.dataBasic[sender.id].money -= 3599
+                    databaseManager.dataBackpacks[sender.id].luckyCards.medium += 1
                 } else {
                     sendLuckyMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '💴') {
                 if (money >= 6999) {
-                    dataBasic[sender.id].money -= 6999
-                    dataBackpacks[sender.id].luckyCards.large += 1
+                    databaseManager.dataBasic[sender.id].money -= 6999
+                    databaseManager.dataBackpacks[sender.id].luckyCards.large += 1
                 } else {
                     sendLuckyMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '⬛') {
                 if (money >= 99) {
-                    dataBasic[sender.id].money -= 99
-                    dataBasic[sender.id].color = '#000000'
+                    databaseManager.dataBasic[sender.id].money -= 99
+                    databaseManager.dataBasic[sender.id].color = '#000000'
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🟥') {
                 if (money >= 1499) {
-                    dataBasic[sender.id].money -= 1499
-                    dataBasic[sender.id].color = '#ff0000'
+                    databaseManager.dataBasic[sender.id].money -= 1499
+                    databaseManager.dataBasic[sender.id].color = '#ff0000'
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🟨') {
                 if (money >= 1499) {
-                    dataBasic[sender.id].money -= 1499
-                    dataBasic[sender.id].color = '#ffff00'
+                    databaseManager.dataBasic[sender.id].money -= 1499
+                    databaseManager.dataBasic[sender.id].color = '#ffff00'
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🟦') {
                 if (money >= 1499) {
-                    dataBasic[sender.id].money -= 1499
-                    dataBasic[sender.id].color = '#0000ff'
+                    databaseManager.dataBasic[sender.id].money -= 1499
+                    databaseManager.dataBasic[sender.id].color = '#0000ff'
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🟧') {
                 if (money >= 2499) {
-                    dataBasic[sender.id].money -= 2499
-                    dataBasic[sender.id].color = '#ffbb00'
+                    databaseManager.dataBasic[sender.id].money -= 2499
+                    databaseManager.dataBasic[sender.id].color = '#ffbb00'
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🟪') {
                 if (money >= 2499) {
-                    dataBasic[sender.id].money -= 2499
-                    dataBasic[sender.id].color = '#9d00ff'
+                    databaseManager.dataBasic[sender.id].money -= 2499
+                    databaseManager.dataBasic[sender.id].color = '#9d00ff'
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🟩') {
                 if (money >= 2499) {
-                    dataBasic[sender.id].money -= 2499
-                    dataBasic[sender.id].color = '#00ff00'
+                    databaseManager.dataBasic[sender.id].money -= 2499
+                    databaseManager.dataBasic[sender.id].color = '#00ff00'
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🟫') {
                 if (money >= 2999) {
-                    dataBasic[sender.id].money -= 2999
-                    dataBasic[sender.id].color = '#734c09'
+                    databaseManager.dataBasic[sender.id].money -= 2999
+                    databaseManager.dataBasic[sender.id].color = '#734c09'
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '⬜') {
                 if (money >= 3299) {
-                    dataBasic[sender.id].money -= 3299
-                    dataBasic[sender.id].color = '#fffff9'
+                    databaseManager.dataBasic[sender.id].money -= 3299
+                    databaseManager.dataBasic[sender.id].color = '#fffff9'
                 } else {
                     sendColorMessage(channel, false)
                 }
@@ -343,7 +339,7 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                 embedMessage.reactions.removeAll()
             } else if (collected.first().emoji.name == '🔴') {
                 if (money >= 2999) {
-                    dataBasic[sender.id].money -= 2999
+                    databaseManager.dataBasic[sender.id].money -= 2999
                     removeAllColorRoles(senderMember)
                     senderMember.roles.add(senderMember.guild.roles.cache.get(ColorRoles.red))
                 } else {
@@ -351,7 +347,7 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                 }
             } else if (collected.first().emoji.name == '🟡') {
                 if (money >= 2999) {
-                    dataBasic[sender.id].money -= 2999
+                    databaseManager.dataBasic[sender.id].money -= 2999
                     removeAllColorRoles(senderMember)
                     senderMember.roles.add(senderMember.guild.roles.cache.get(ColorRoles.yellow))
                 } else {
@@ -359,7 +355,7 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                 }
             } else if (collected.first().emoji.name == '🔵') {
                 if (money >= 2999) {
-                    dataBasic[sender.id].money -= 2999
+                    databaseManager.dataBasic[sender.id].money -= 2999
                     removeAllColorRoles(senderMember)
                     senderMember.roles.add(senderMember.guild.roles.cache.get(ColorRoles.blue))
                 } else {
@@ -367,7 +363,7 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                 }
             } else if (collected.first().emoji.name == '🟠') {
                 if (money >= 3499) {
-                    dataBasic[sender.id].money -= 3499
+                    databaseManager.dataBasic[sender.id].money -= 3499
                     removeAllColorRoles(senderMember)
                     senderMember.roles.add(senderMember.guild.roles.cache.get(ColorRoles.orange))
                 } else {
@@ -375,7 +371,7 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                 }
             } else if (collected.first().emoji.name == '🟣') {
                 if (money >= 3499) {
-                    dataBasic[sender.id].money -= 3499
+                    databaseManager.dataBasic[sender.id].money -= 3499
                     removeAllColorRoles(senderMember)
                     senderMember.roles.add(senderMember.guild.roles.cache.get(ColorRoles.purple))
                 } else {
@@ -383,7 +379,7 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                 }
             } else if (collected.first().emoji.name == '🟢') {
                 if (money >= 3499) {
-                    dataBasic[sender.id].money -= 3499
+                    databaseManager.dataBasic[sender.id].money -= 3499
                     removeAllColorRoles(senderMember)
                     senderMember.roles.add(senderMember.guild.roles.cache.get(ColorRoles.green))
                 } else {
@@ -391,14 +387,14 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
                 }
             } else if (collected.first().emoji.name == '⚫') {
                 if (money >= 9) {
-                    dataBasic[sender.id].money -= 9
+                    databaseManager.dataBasic[sender.id].money -= 9
                     removeAllColorRoles(senderMember)
                 } else {
                     sendColorMessage(channel, false)
                 }
             } else if (collected.first().emoji.name == '🚫') {
                 if (money >= 3999) {
-                    dataBasic[sender.id].money -= 3999
+                    databaseManager.dataBasic[sender.id].money -= 3999
                     removeAllColorRoles(senderMember)
                     senderMember.roles.add(senderMember.guild.roles.cache.get(ColorRoles.invisible))
                 } else {
@@ -490,15 +486,296 @@ function awaitReactionsThis(embedMessage, sender, channel, currentMenuIndex, sen
     });
 }
 
+function backpackColorIndex(databaseManager, userId) {
+    const userColor = databaseManager.dataBasic[userId].color
+    if (userColor === "#ff0000") {
+        return 3
+    } else if (userColor === "#ffff00") {
+        return 5
+    } else if (userColor === "#0000ff") {
+        return 7
+    } else if (userColor === "#ffbb00") {
+        return 4
+    } else if (userColor === "#9d00ff") {
+        return 8
+    } else if (userColor === "#00ff00") {
+        return 6
+    } else if (userColor === "#734c09") {
+        return 2
+    } else if (userColor === "#000000") {
+        return 1
+    } else if (userColor === "#fffff9") {
+        return 0
+    }
+}
+
+/**@param {Discord.GuildMember} member */
+function colorRankToIndex(member) {
+    if (member.roles.cache.some(role => role.id == "850016210422464534")) {
+        return 1
+    } else if (member.roles.cache.some(role => role.id == "850016531848888340")) {
+        return 2
+    } else if (member.roles.cache.some(role => role.id == "850016458544250891")) {
+        return 3
+    } else if (member.roles.cache.some(role => role.id == "850016722039078912")) {
+        return 4
+    } else if (member.roles.cache.some(role => role.id == "850016589155401758")) {
+        return 5
+    } else if (member.roles.cache.some(role => role.id == "850016668352643072")) {
+        return 6
+    } else if (member.roles.cache.some(role => role.id == "850016786186371122")) {
+        return 7
+    }
+    return 0
+}
+
+/**@param {string} roleId */
+function colorRankToIndex2(roleId) {
+    if (roleId == "850016210422464534") {
+        return 1
+    } else if (roleId == "850016531848888340") {
+        return 2
+    } else if (roleId == "850016458544250891") {
+        return 3
+    } else if (roleId == "850016722039078912") {
+        return 4
+    } else if (roleId == "850016589155401758") {
+        return 5
+    } else if (roleId == "850016668352643072") {
+        return 6
+    } else if (roleId == "850016786186371122") {
+        return 7
+    }
+    return 0
+}
+
  /**
  * @param {Discord.Channel} channel
  * @param {Discord.User} sender
  * @param {Discord.GuildMember} senderMember
+ * @param {number} menuIndex
+ * @param {DatabaseManager} databaseManager
  */
-module.exports = (channel, sender, senderMember) => {
-    var money = dataBasic[sender.id].money;
+module.exports = (channel, sender, senderMember, databaseManager, menuIndex = 0, newColorRole = '') => {
+    const money = databaseManager.dataBasic[sender.id].money;
 
-    channel.send({embeds:[getEmbedMessage(sender, 0)]}).then(embedMessage => {
+    const selectMenu = new MessageSelectMenu()
+        .setCustomId("shopMenu")
+        .setPlaceholder('Menük')
+        .addOptions([
+            {
+                label: 'Alap',
+                value: '1',
+                emoji: '🛒'
+            },
+            {
+                label: 'Sorsjegyek',
+                value: '2',
+                emoji: '🍀'
+            },
+            {
+                label: 'Profil',
+                value: '3',
+                emoji: '🎨'
+            }
+        ])
+    const selectMenu2 = new MessageSelectMenu()
+        .setCustomId("shopMenu2")
+        .setPlaceholder('Menük')
+        .addOptions([
+            {
+                label: 'Hátizsákod színe',
+                value: '4',
+                emoji: '🛍️'
+            },
+            {
+                label: 'Neved színe',
+                value: '5',
+                emoji: '🖍️'
+            }
+        ])
+    const selectMenuBackpackColors = new MessageSelectMenu()
+        .setCustomId("shopBackpackColors")
+        .setPlaceholder('Színek')
+        .addOptions([
+            {
+                label: 'Fehér',
+                value: '0',
+                emoji: '⬜'
+            },
+            {
+                label: 'Fekete',
+                value: '1',
+                emoji: '⬛'
+            },
+            {
+                label: 'Barna',
+                value: '2',
+                emoji: '🟫'
+            },
+            {
+                label: 'Vörös',
+                value: '3',
+                emoji: '🟥'
+            },
+            {
+                label: 'Narancssárga',
+                value: '4',
+                emoji: '🟧'
+            },
+            {
+                label: 'Sárga',
+                value: '5',
+                emoji: '🟨'
+            },
+            {
+                label: 'Zöld',
+                value: '6',
+                emoji: '🟩'
+            },
+            {
+                label: 'Kék',
+                value: '7',
+                emoji: '🟦'
+            },
+            {
+                label: 'Lila',
+                value: '8',
+                emoji: '🟪'
+            }
+        ])
+
+    const selectMenuNameColors = new MessageSelectMenu()
+        .setCustomId("shopNameColors")
+        .setPlaceholder('Színek')
+        .addOptions([
+            {
+                label: 'Alap',
+                value: '0',
+                emoji: '⚫'
+            },
+            {
+                label: 'Vörös',
+                value: '1',
+                emoji: '🔴'
+            },
+            {
+                label: 'Narancssárga',
+                value: '2',
+                emoji: '🟠'
+            },
+            {
+                label: 'Sárga',
+                value: '3',
+                emoji: '🟡'
+            },
+            {
+                label: 'Zöld',
+                value: '4',
+                emoji: '🟢'
+            },
+            {
+                label: 'Kék',
+                value: '5',
+                emoji: '🔵'
+            },
+            {
+                label: 'Lila',
+                value: '6',
+                emoji: '🟣'
+            },
+            {
+                label: 'Láthatatlan',
+                value: '7',
+                emoji: '🚫'
+            }
+        ])
+        if (menuIndex == 4) {
+            selectMenuBackpackColors.options[backpackColorIndex(databaseManager, sender.id)].default = true
+        }
+    if (menuIndex == 5) {
+        const RankIndex = (newColorRole == '') ? colorRankToIndex(senderMember) : colorRankToIndex2(newColorRole)
+        selectMenuNameColors.options[RankIndex].default = true
+    }
+    if (menuIndex > 0) {
+        selectMenu.options[Math.min(menuIndex, 3) - 1].default = true
+    }
+    if (menuIndex > 3) {
+        selectMenu2.options[menuIndex - 4].default = true
+    }
+    const buttonExit = new MessageButton()
+        .setLabel("❌")
+        .setCustomId("shopClose")
+        .setStyle("SECONDARY");
+    const buttonBuyCrate = new MessageButton()
+        .setLabel("🧱")
+        .setCustomId("shopBuyCrate")
+        .setStyle("SECONDARY");
+    const buttonBuyGift = new MessageButton()
+        .setLabel("🎁")
+        .setCustomId("shopBuyGift")
+        .setStyle("SECONDARY");
+    const buttonBuyTicket = new MessageButton()
+        .setLabel("🎟️")
+        .setCustomId("shopBuyTicket")
+        .setStyle("SECONDARY");
+    const buttonBuyWC = new MessageButton()
+        .setLabel("🧻")
+        .setCustomId("shopBuyWC")
+        .setStyle("SECONDARY");
+    const buttonBuyLuckySmall = new MessageButton()
+        .setLabel("💶")
+        .setCustomId("shopBuyLuckySmall")
+        .setStyle("SECONDARY");
+    const buttonBuyLuckyMedium = new MessageButton()
+        .setLabel("💷")
+        .setCustomId("shopBuyLuckyMedium")
+        .setStyle("SECONDARY");
+    const buttonBuyLuckyLarge = new MessageButton()
+        .setLabel("💴")
+        .setCustomId("shopBuyLuckyLarge")
+        .setStyle("SECONDARY");
+
+    if (!money >= 2099) { buttonBuyCrate.setDisabled(true) }
+    if (!money >= 3999) { buttonBuyGift.setDisabled(true) }
+    if (!money >= 8999) { buttonBuyTicket.setDisabled(true) }
+    if (!money >= 799) { buttonBuyWC.setDisabled(true) }
+    if (!money >= 1999) { buttonBuyLuckySmall.setDisabled(true) }
+    if (!money >= 3599) { buttonBuyLuckyMedium.setDisabled(true) }
+    if (!money >= 6999) { buttonBuyLuckyLarge.setDisabled(true) }
+
+    const rowSecondary0 = new MessageActionRow()
+        .addComponents(buttonBuyCrate, buttonBuyGift, buttonBuyTicket, buttonBuyWC)
+    const rowSecondary1 = new MessageActionRow()
+        .addComponents(buttonBuyLuckySmall, buttonBuyLuckyMedium, buttonBuyLuckyLarge)
+    const rowSecondary2 = new MessageActionRow()
+        .addComponents(selectMenuBackpackColors)
+    const rowSecondary3 = new MessageActionRow()
+        .addComponents(selectMenuNameColors)
+    const rowSelectMenuPrimary = new MessageActionRow()
+        .addComponents(selectMenu)
+    const rowSelectMenuSecondary = new MessageActionRow()
+        .addComponents(selectMenu2)
+    const rowPrimary = new MessageActionRow()
+        .addComponents(buttonExit)
+    if (menuIndex == -1) {
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)] }
+    } else if (menuIndex == 0) {
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary] }
+    } else if (menuIndex == 1) {
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSecondary0, rowPrimary] }
+    } else if (menuIndex == 2) {
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSecondary1, rowPrimary] }
+    } else if (menuIndex == 3) {
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowPrimary] }
+    } else if (menuIndex == 4) {
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowSecondary2, rowPrimary] }
+    } else if (menuIndex == 5) {
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowSecondary3, rowPrimary] }
+    }
+
+    return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary] }
+    /*.then(embedMessage => {
 
         embedMessage.react('🛒');
         embedMessage.react('🍀');
@@ -506,5 +783,5 @@ module.exports = (channel, sender, senderMember) => {
         embedMessage.react('❌');
 
         awaitReactionsThis(embedMessage, sender, channel, 0, senderMember)
-    });
+    });*/
 }
