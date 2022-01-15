@@ -420,7 +420,8 @@ async function commandSkip(message) {
     }
 }
 
-function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken) {
+/**@param {Discord.MessageAttachment} image */
+function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image = undefined) {
     const optionEmojis = listOfOptionEmojis.toString().replace(' ', '').split(';')
     const optionTexts = listOfOptionText.toString().replace(' ', '').split(';')
     let optionText = ''
@@ -436,6 +437,12 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
             `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
             )
         .addField(`${titleText}`, `${optionText}`)
+        .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
+        .setFooter("Vége:")
+        .setTimestamp(dateNow)
+    if (image != undefined) {
+        embed.setImage(image.url)
+    }
 
     bot.channels.cache.get('799340273431478303').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&799342836931231775>')
@@ -981,7 +988,11 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     if (command.startsWith(`quiz\n`)) {
         const msgArgs = command.toString().replace(`quiz\n`, '').split('\n')
-        quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
+        if (message.attachments.size == 1) {
+            quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6], message.attachments.first())
+        } else {
+            quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
+        }
         return;
     } else if (command.startsWith(`quiz help`)) {
         const embed = new Discord.MessageEmbed()

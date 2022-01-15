@@ -10,7 +10,6 @@ const CommandBusiness = require('./commands/database/businees')
 
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./commands/database/xpFunctions')
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
-
 const { LogManager } = require('./functions/log.js')
 const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
@@ -1049,13 +1048,22 @@ function commandProfil(member) {
     return {embeds: [ embed ]}
 }
 
-function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken) {
+/**@param {number} days @returns {number} */
+function DaysToMilliseconds(days) {
+    return days * 24 * 60 * 60 * 1000
+}
+
+/**@param {Discord.MessageAttachment} image */
+function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image = undefined) {
     const optionEmojis = listOfOptionEmojis.toString().replace(' ', '').split(';')
     const optionTexts = listOfOptionText.toString().replace(' ', '').split(';')
     let optionText = ''
     for (let i = 0; i < optionTexts.length; i++) {
         optionText += `> ${optionEmojis[i]}  ${optionTexts[i]}\n`
     }
+
+    const dateNow = Date.now() + DaysToMilliseconds(2)
+
     const embed = new Discord.MessageEmbed()
         .setColor(Color.Pink)
         .setTitle('Quiz!')
@@ -1065,6 +1073,12 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
             `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
             )
         .addField(`${titleText}`, `${optionText}`)
+        .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
+        .setFooter("Vége:")
+        .setTimestamp(dateNow)
+    if (image != undefined) {
+        embed.setImage(image.url)
+    }
 
     bot.channels.cache.get('799340273431478303').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&799342836931231775>')
@@ -2590,7 +2604,11 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     if (command.startsWith(`quiz\n`)) {
         const msgArgs = command.toString().replace(`quiz\n`, '').split('\n')
-        quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
+        if (message.attachments.size == 1) {
+            quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6], message.attachments.first())
+        } else {
+            quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
+        }
         userstatsSendCommand(sender)
         return;
     } else if (command.startsWith(`quiz help`)) {

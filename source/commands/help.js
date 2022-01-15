@@ -1,4 +1,5 @@
 const Discord = require('discord.js')
+const { Color } = require('../functions/enums')
 
 /**
  * @param {boolean} isPrivate
@@ -9,17 +10,17 @@ function getEmbedMessage(isPrivate, isMobile) {
     if (isMobile === true) {
         if (isPrivate === true) {
             const embed = new Discord.MessageEmbed()
-                .setAuthor('Parancsok', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/60/microsoft/17/information-source_2139.png')
+                .setTitle('Parancsok')
                 .addField('Alap',
                     '>  \\ℹ    `/help` Segítség kérése a parancsok iránt.\n' +
                     '>  \\⛅  `/weather` Békéscsaba időjárása.\n' +
                     '>  \\🏓  `/ping` A BOT ping-elése, avagy megnézni hogy most épp online e.'
                 )
-                .setColor(0x00A6FF)
+                .setColor(Color.Highlight)
             return embed
         } else {
             const embed = new Discord.MessageEmbed()
-                .setAuthor('Parancsok', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/60/microsoft/17/information-source_2139.png')
+                .setTitle('Parancsok')
                 .addField('Alap',
                     '>  \\ℹ    `/help` Segítség kérése a parancsok iránt.\n' +
                     '>  \\⛅  `/weather` Békéscsaba időjárása.\n' +
@@ -33,13 +34,13 @@ function getEmbedMessage(isPrivate, isMobile) {
                 .addField('Fejlesztői \\⛔ Csak moderátor használhatja \\⛔',
                     '>  \\💻  `/dev`'
                 )
-                .setColor(0x00A6FF)
+                .setColor(Color.Highlight)
             return embed
         }
     } else {
         if (isPrivate === true) {
             const embed = new Discord.MessageEmbed()
-                .setAuthor('Parancsok', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/60/microsoft/17/information-source_2139.png')
+                .setTitle('Parancsok')
                 .addField('Alap',
                     '>  \\ℹ    `/help` Segítség kérése a parancsok iránt.\n' +
                     '>  \\⛅  `/weather` Békéscsaba időjárása.\n' +
@@ -54,11 +55,11 @@ function getEmbedMessage(isPrivate, isMobile) {
                     '>  \\👤  `/profil` Statisztikák és matricák megtekintése.\n' +
                     '>  \\💰   `.pms` Biznisz, ami pénzt termel. \\❗ **Alfa verzió** \\❗ \\⛔ **Korlátozott** \\⛔'
                 )
-                .setColor(0x00A6FF)
+                .setColor(Color.Highlight)
             return embed
         } else {
             const embed = new Discord.MessageEmbed()
-                .setAuthor('Parancsok', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/60/microsoft/17/information-source_2139.png')
+                .setTitle('Parancsok')
                 .addField('Alap',
                     '>  \\\u2139    `/help` Segítség kérése a parancsok iránt.\n' +
                     '>  \\⛅  `/weather` Békéscsaba időjárása.\n' +
@@ -87,7 +88,7 @@ function getEmbedMessage(isPrivate, isMobile) {
                 .addField('Játék \\❗ Alfa verzió \\❗',
                     '>  \\🎮  `.game`'
                 )
-                .setColor(0x00A6FF)
+                .setColor(Color.Highlight)
             return embed
         }
     }
