@@ -64,7 +64,7 @@ function TranslateMessage(message) {
             return new TranslateResult(message, "Kilépés", SHARD, false, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] Clearing the heartbeat interval.')) {
             return new TranslateResult(message, "Heartbeat időtúllépés törlése", SHARD, false, groupNames.shard)
-        } else if (message.startsWith('[WS => Shard 0] Session ID is present, attempting an immediate reconnect...')) {
+        } else if (message.startsWith('[WS => Shard 0] Session id is present, attempting an immediate reconnect...')) {
             return new TranslateResult(message, "A szerver-azonosító jelen van, azonnali újracsatlakozás megpróbálása...", SHARD, false, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] WS State: CLOSED')) {
             return new TranslateResult(message, "WebSocket állapota: Zárva", SHARD, false, groupNames.shard)
