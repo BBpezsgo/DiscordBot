@@ -428,6 +428,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
     for (let i = 0; i < optionTexts.length; i++) {
         optionText += `> ${optionEmojis[i]}  ${optionTexts[i]}\n`
     }
+
     const embed = new Discord.MessageEmbed()
         .setColor(Color.Pink)
         .setTitle('Quiz!')
@@ -443,6 +444,8 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
     if (image != undefined) {
         embed.setImage(image.url)
     }
+
+    const dateNow = Date.now() + DaysToMilliseconds(2)
 
     bot.channels.cache.get('799340273431478303').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&799342836931231775>')
