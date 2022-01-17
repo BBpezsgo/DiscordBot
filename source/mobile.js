@@ -433,6 +433,8 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
         optionText += `> ${optionEmojis[i]}  ${optionTexts[i]}\n`
     }
 
+    const dateNow = Date.now() + DaysToMilliseconds(2)
+
     const embed = new Discord.MessageEmbed()
         .setColor(Color.Pink)
         .setTitle('Quiz!')
@@ -448,9 +450,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
     if (image != undefined) {
         embed.setImage(image.url)
     }
-
-    const dateNow = Date.now() + DaysToMilliseconds(2)
-
+    
     bot.channels.cache.get('799340273431478303').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&799342836931231775>')
         message.react('🎯')
@@ -505,6 +505,12 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
 
 }
 
+/**@param {Discord.GuildMember} member @returns {boolean} */
+function HasQuizStreakRole(member) {
+    const roles = ['929443006627586078', '929443558040166461', '929443627527180288', '929443673077329961']
+    return member.roles.cache.some(role => roles.includes(role.id))
+}
+
 /**@param {string} quizMessageId @param {number} correctIndex */
 async function quizDone(quizMessageId, correctIndex) {
 
@@ -524,10 +530,11 @@ async function quizDone(quizMessageId, correctIndex) {
         const correctAnswer =  message.embeds[0].fields[0].value.split('\n')[correctIndex].replace('>', '').trimStart()
         const correctAnswerEmoji = correctAnswer.split(' ')[0]
         const correctAnswerText = correctAnswer.replace(correctAnswerEmoji, '').trimStart()
-        const awardAdd0 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
-        const awardAdd1 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
-        const awardRemove0 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
-        const awardRemove1 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
+        const awardAdd0 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
+        const awardAdd1 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
+        const awardRemove0 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
+        const awardRemove1 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
+
         message.reactions.resolve('🎯').users.fetch().then(async (userList0) => {
             /**@type {string[]} */
             const usersWithCorrectAnswer = []
@@ -542,22 +549,26 @@ async function quizDone(quizMessageId, correctIndex) {
                 const currentAnswerEmoji = answersEmoji[i];
                 await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(userList1 => {
                     const users = userList1.map((user) => user.id)
-                    for (let i = 0; i < users.length; i++) {
-                        const userId = users[i]
+                    for (let j = 0; j < users.length; j++) {
+                        const userId = users[j]
                         if (userId == bot.user.id) { continue }
+
+                        //const members = await bot.guilds.cache.get('737954264386764812').members.fetch({ limit: 20 })
+                        const member = await bot.guilds.cache.get('737954264386764812').members.fetch({user: userId})
+
                         if (currentAnswerEmoji == correctAnswerEmoji) {
                             usersWithCorrectAnswer.push(userId)
-                            if (usersWithMultiplier.includes(userId) && members.cache.get(userId).roles.cache.has('929443006627586078') && members.cache.get(userId).roles.cache.has('929443558040166461') && members.cache.get(userId).roles.cache.has('929443627527180288') && members.cache.get(userId).roles.cache.has('929443673077329961')) {
-                                finalText += '\n> <@!' + userId + '> nyert ' + (parseInt(awardAdd0) * 2) + '\\🍺t és ' + (parseInt(awardAdd1) * 2) + '\\🎫t'
+                            if (usersWithMultiplier.includes(userId) && HasQuizStreakRole(member)) {
+                                finalText += '\n> <@!' + userId + '> nyert ' + (parseInt(awardAdd0) * 2) + ' \\\uD83C\uDF7At és ' + (parseInt(awardAdd1) * 2) + ' \\🎫t'
                             } else {
-                                finalText += '\n> <@!' + userId + '> nyert ' + (awardAdd0) + '\\🍺t és ' + (awardAdd1) + '\\🎫t'
+                                finalText += '\n> <@!' + userId + '> nyert ' + (awardAdd0) + ' \\\uD83C\uDF7At és ' + (awardAdd1) + ' \\🎫t'
                             }
                         } else {
                             usersWithWrongAnswer.push(userId)
-                            if (usersWithMultiplier.includes(userId) && members.cache.get(userId).roles.cache.has('929443006627586078') && members.cache.get(userId).roles.cache.has('929443558040166461') && members.cache.get(userId).roles.cache.has('929443627527180288') && members.cache.get(userId).roles.cache.has('929443673077329961')) {
-                                finalText += '\n> <@!' + userId + '> veszített ' + (parseInt(awardRemove0) * 2) + '\\🍺t és ' + (parseInt(awardRemove1) * 2) + '\\🎫t'
+                            if (usersWithMultiplier.includes(userId) && HasQuizStreakRole(member)) {
+                                finalText += '\n> <@!' + userId + '> veszített ' + (parseInt(awardRemove0) * 2) + ' \\\uD83C\uDF7At és ' + (parseInt(awardRemove1) * 2) + ' \\🎫t'
                             } else {
-                                finalText += '\n> <@!' + userId + '> veszített ' + (awardRemove0) + '\\🍺t és ' + (awardRemove1) + '\\🎫t'
+                                finalText += '\n> <@!' + userId + '> veszített ' + (awardRemove0) + ' \\\uD83C\uDF7At és ' + (awardRemove1) + ' \\🎫t'
                             }
                         }
                     }

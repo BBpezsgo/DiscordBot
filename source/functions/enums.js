@@ -6,6 +6,10 @@ const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
 const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
 const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
 
+const ChannelId = {
+    Quiz: "799340273431478303"
+}
+
 const Color = {
     Error: "#ed4245",
     ErrorLight: "#f57531",
@@ -55,4 +59,4 @@ const usersWithTax = [
     '750748417373896825', '504304776033468438', '551299555698671627'
 ]
 
-module.exports = {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, activitiesMobile, usersWithTax}
+module.exports = {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId}

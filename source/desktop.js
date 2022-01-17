@@ -35,7 +35,7 @@ function log(message = '') {
     logManager.Log(message, false)
 }
 
-const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, usersWithTax} = require('./functions/enums.js')
+const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, usersWithTax, ChannelId} = require('./functions/enums.js')
 
 const consoleWidth = 80 - 2
 
@@ -1080,7 +1080,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
         embed.setImage(image.url)
     }
 
-    bot.channels.cache.get('799340273431478303').send({ embeds: [embed] }).then(message => {
+    bot.channels.cache.get(ChannelId.Quiz).send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&799342836931231775>')
         message.react('🎯')
         for (let i = 0; i < optionEmojis.length; i++) {
@@ -1144,7 +1144,7 @@ function HasQuizStreakRole(member) {
 async function quizDone(quizMessageId, correctIndex) {
 
     /**@type {Discord.TextChannel} */
-    const channel = bot.channels.cache.get('799340273431478303')
+    const channel = bot.channels.cache.get(ChannelId.Quiz)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
         const message = messages.get(quizMessageId)
         /**@type {string[]} */
@@ -1159,10 +1159,10 @@ async function quizDone(quizMessageId, correctIndex) {
         const correctAnswer =  message.embeds[0].fields[0].value.split('\n')[correctIndex].replace('>', '').trimStart()
         const correctAnswerEmoji = correctAnswer.split(' ')[0]
         const correctAnswerText = correctAnswer.replace(correctAnswerEmoji, '').trimStart()
-        const awardAdd0 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
-        const awardAdd1 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
-        const awardRemove0 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
-        const awardRemove1 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace('\\', '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
+        const awardAdd0 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
+        const awardAdd1 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
+        const awardRemove0 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
+        const awardRemove1 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
         
         message.reactions.resolve('🎯').users.fetch().then(async (userList0) => {
             /**@type {string[]} */
@@ -1171,9 +1171,9 @@ async function quizDone(quizMessageId, correctIndex) {
             const usersWithWrongAnswer = []
             const usersWithMultiplier = userList0.map((user) => user.id)
 
+            const members = bot.guilds.cache.get('737954264386764812').members
             let finalText = '**A helyes válasz: ' + correctAnswerEmoji + ' ' + correctAnswerText + '**'
 
-            var Mittomen = ''
             for (let i = 0; i < answersEmoji.length; i++) {
                 const currentAnswerEmoji = answersEmoji[i];
                 await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(async (userList1) => {
@@ -1188,23 +1188,22 @@ async function quizDone(quizMessageId, correctIndex) {
                         if (currentAnswerEmoji == correctAnswerEmoji) {
                             usersWithCorrectAnswer.push(userId)
                             if (usersWithMultiplier.includes(userId) && HasQuizStreakRole(member)) {
-                                finalText += '\n> <@!' + userId + '> nyert ' + (parseInt(awardAdd0) * 2) + Mittomen + '🍺t és ' + (parseInt(awardAdd1) * 2) + Mittomen + '🎫t'
+                                finalText += '\n> <@!' + userId + '> nyert ' + (parseInt(awardAdd0) * 2) + ' \\\uD83C\uDF7At és ' + (parseInt(awardAdd1) * 2) + ' \\🎫t'
                             } else {
-                                finalText += '\n> <@!' + userId + '> nyert ' + (awardAdd0) + Mittomen + '🍺t és ' + (awardAdd1) + Mittomen + '🎫t'
+                                finalText += '\n> <@!' + userId + '> nyert ' + (awardAdd0) + ' \\\uD83C\uDF7At és ' + (awardAdd1) + ' \\🎫t'
                             }
                         } else {
                             usersWithWrongAnswer.push(userId)
                             if (usersWithMultiplier.includes(userId) && HasQuizStreakRole(member)) {
-                                finalText += '\n> <@!' + userId + '> veszített ' + (parseInt(awardRemove0) * 2) + Mittomen + '🍺t és ' + (parseInt(awardRemove1) * 2) + Mittomen + '🎫t'
+                                finalText += '\n> <@!' + userId + '> veszített ' + (parseInt(awardRemove0) * 2) + ' \\\uD83C\uDF7At és ' + (parseInt(awardRemove1) * 2) + ' \\🎫t'
                             } else {
-                                finalText += '\n> <@!' + userId + '> veszített ' + (awardRemove0) + Mittomen + '🍺t és ' + (awardRemove1) + Mittomen + '🎫t'
+                                finalText += '\n> <@!' + userId + '> veszített ' + (awardRemove0) + ' \\\uD83C\uDF7At és ' + (awardRemove1) + ' \\🎫t'
                             }
                         }
                     }
                 });
-                Mittomen = '\\'
             }
-            bot.channels.cache.get('799340273431478303').send(finalText + '\n\n||\\⚠️ Ez ALFA verzió! A hibát itt jelentsd: <#930166957062357062> ||')
+            bot.channels.cache.get(ChannelId.Quiz).send(finalText + '\n\n||\\⚠️ Ez ALFA verzió! A hibát itt jelentsd: <#930166957062357062> ||')
         });
     })
 }
