@@ -236,48 +236,24 @@ bot.on('shardResume', (shardID, replayedEvents) => {
     log(SHARD & ': Folytatás: ' + replayedEvents.toString())
 });
 
-bot.on('raw', async event => {
-});
-
-bot.on('rateLimit', (RateLimitData) => {
-});
-
 bot.on('close', () => {
-    log(SHARD & ': close');
+    log(SHARD & ': close')
 });
 
 bot.on('destroyed', () => {
-    log(SHARD & ': destroyed');
+    log(SHARD & ': destroyed')
 });
 
 bot.on('invalidSession', () => {
-    log(SHARD & ': invalidSession');
+    log(SHARD & ': invalidSession')
 });
 
 bot.on('allReady', () => {
-    log(SHARD & ': allReady');
+    log(SHARD & ': allReady')
 });
 
 bot.on('presenceUpdate', (oldPresence, newPresence) => {
-    log(DEBUG & ': newStatus: ' + newPresence.status.toString());
-});
-
-bot.ws.on('READY', (data, shardID) => {
-});
-
-bot.ws.on('RESUMED', (data, shardID) => {
-});
-
-bot.ws.on('PRESENCE_UPDATE', (data, shardID) => {
-});
-
-bot.ws.on('VOICE_SERVER_UPDATE', (data, shardID) => {
-});
-
-bot.ws.on('VOICE_STATE_UPDATE', (data, shardID) => {
-});
-
-bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => {
+    log(DEBUG & ': newStatus: ' + newPresence.status.toString())
 });
 
 //#endregion

@@ -28,9 +28,7 @@ const ColorRoles = {
 	invisible: "850016786186371122"
 }
 
-/**
-* @param {string} message
-*/
+/** @param {string} message */
 function log(message = '') {
     logManager.Log(message, false)
 }
@@ -510,10 +508,6 @@ bot.on('raw', async event => {
     bot.emit(events[event.t], reaction, user);
 });
 
-bot.on('rateLimit', (RateLimitData) => {
-    //log(DEBUG + ': rateLimit: ' + RateLimitData.limit + '; timeout: ' + RateLimitData.timeout + '; route: "' + RateLimitData.route + '"; method: "' + RateLimitData.method + '"; path: "' + RateLimitData.path + '"');
-});
-
 bot.on('close', () => {
     log(SHARD & ': close');
 });
@@ -533,26 +527,12 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
     log(DEBUG & ': newStatus: ' + newPresence.status.toString());
 })
 
-bot.ws.on('READY', (data, shardID) => {
-})
+bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => {})
 
-bot.ws.on('RESUMED', (data, shardID) => {
-})
-
-bot.ws.on('PRESENCE_UPDATE', (data, shardID) => {
-})
-
-bot.ws.on('VOICE_SERVER_UPDATE', (data, shardID) => {
-})
-
-bot.ws.on('VOICE_STATE_UPDATE', (data, shardID) => {
-})
-
-bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => {
-    
-})
 //#endregion
+
 //#region Commands
+
 //#region Command Functions
 
 /**
