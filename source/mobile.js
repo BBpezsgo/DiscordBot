@@ -100,6 +100,10 @@ const processedNewsChannel = '746266528508411935'
 
 
 //#region Functions
+/**@param {number} days @returns {number} */
+function DaysToMilliseconds(days) {
+    return days * 24 * 60 * 60 * 1000
+}
 
 /**
 * @param {Discord.Message} message The message context
