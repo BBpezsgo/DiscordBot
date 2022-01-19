@@ -42,7 +42,6 @@ const fs = require('fs')
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-loadingProcess('Bővítmények, változók betöltése...')
 const Discord = require('discord.js')
 const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
 const { perfix, token } = require('./config.json')
@@ -108,7 +107,6 @@ const processedNewsChannel = '746266528508411935'
 
 
 
-loadingProcess('Betöltés...')
 
 //#region Functions 
 
@@ -342,14 +340,6 @@ async function logMessage(message, username, private = false.valueOf, author) {
         }
     };
 
-}
-
-/**
-* @param {string} title
-*/
-function loadingProcess(title) {
-    statesManager.loadingProgressText = title
-    log(DEBUG + ': ' + title)
 }
 
 /**
@@ -2854,8 +2844,14 @@ async function processApplicationCommand(command) {
     }
 }
 
-loadingProcess('Belépés...')
-bot.login(token)
+bot.login(token).catch((err) => {
+    if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
+        log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
+    } else {
+        log(ERROR + ': ' + err)
+    }
+})
+
 
 //#region Game
 

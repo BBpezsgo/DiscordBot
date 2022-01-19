@@ -26,9 +26,9 @@ class LogManager {
                     const log = this.logs[i];
                     if (log.printed == false) {
                         if (log.count == 1) {
-                            console.log(' ' + timestampForeColor + log.time + ' | '+ log.count +' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                            console.log(' ' + fontColor + timestampForeColor + log.time + ' | '+ log.count +' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
                         } else {
-                            console.log(' ' + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                            console.log(' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
                         }
                         this.logs[i].printed = true
                     }

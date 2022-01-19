@@ -82,7 +82,7 @@ let musicFinished = true
 let lastNoNews = false
 
 const readline = require('readline')
-const abbrev = require('./functions/abbrev')
+const { abbrev } = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
 const { DateToStringNews, ConvertNewsIdToName, NewsMessage } = require('./functions/news')
 
@@ -523,7 +523,7 @@ async function quizDone(quizMessageId, correctIndex) {
 
             for (let i = 0; i < answersEmoji.length; i++) {
                 const currentAnswerEmoji = answersEmoji[i];
-                await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(userList1 => {
+                await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(async (userList1) => {
                     const users = userList1.map((user) => user.id)
                     for (let j = 0; j < users.length; j++) {
                         const userId = users[j]
@@ -1157,8 +1157,10 @@ async function processApplicationCommand(command) {
     }
 }
 
-try {
-    bot.login(token)
-} catch (err) {
-    log(ERROR + ': ' + err)
-}
+bot.login(token).catch((err) => {
+    if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
+        log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
+    } else {
+        log(ERROR + ': ' + err)
+    }
+})
