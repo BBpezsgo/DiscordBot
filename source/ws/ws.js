@@ -112,7 +112,7 @@ class WebSocket {
                     //u.id
                     //u.fetch
                     if (u.id != "738030244367433770") {
-                        users.push({ id: u.id, username: u.username, avatar: u.avatarURL(), status: u.presence.status.toString(), selected: 0, bannerColor: "#00000000", discriminator: u.discriminator })
+                        users.push({ id: u.id, username: u.username, avatar: u.avatarURL(), status: 'offline', selected: 0, bannerColor: "#00000000", discriminator: u.discriminator })
                     }
                 })
 
@@ -150,7 +150,7 @@ class WebSocket {
                 var users = []
                 this.client.users.cache.forEach(u => {
                     if (u.id != "738030244367433770") {
-                        users.push({ id: u.id, username: u.username, avatar: u.avatarURL(), status: u.presence.status.toString(), selected: 0, bannerColor: "#00000000", discriminator: u.discriminator })
+                        users.push({ id: u.id, username: u.username, avatar: u.avatarURL(), status: 'offline', selected: 0, bannerColor: "#00000000", discriminator: u.discriminator })
                     }
                 })
 
@@ -159,7 +159,7 @@ class WebSocket {
                 var _messages = []
                 if (req.query.user != undefined) {
                     const u = this.client.users.cache.get(req.query.user.toString())
-                    _selectedUser = { id: u.id, username: u.username, avatar: u.avatarURL(), status: u.presence.status.toString(), channel: null, actions: { deleteDM: '0', createDM: '0' } }
+                    _selectedUser = { id: u.id, username: u.username, avatar: u.avatarURL(), status: 'offline', channel: null, actions: { deleteDM: '0', createDM: '0' } }
                     const c = u.dmChannel
                     if (c != undefined) {
                         _selectedChannel = { id: c.id, userId: u.id, username: u.username }
@@ -245,7 +245,7 @@ class WebSocket {
                                 _messages.push({ id: m.id, context: m.content, time: dateToHumanTime(m.createdAt), author: { id: m.author.id, username: m.author.username, avatar: m.author.avatarURL() } })
                             })
                             cT.members.forEach(u => {
-                                _members.push({ id: u.id, displayName: u.displayName, avatar: u.user.avatarURL(), displayColor: u.displayHexColor, status: u.user.presence.status.toString() })
+                                _members.push({ id: u.id, displayName: u.displayName, avatar: u.user.avatarURL(), displayColor: u.displayHexColor, status: 'offline' })
                             })
                         }
                     }

@@ -2006,10 +2006,10 @@ bot.once('ready', async () => {
                 const userMoney = database.dataBasic[element].money
                 const finalTax = Math.floor(userMoney * 0.001) * 2
                 const userMoneyFinal = userMoney - finalTax
-                log("[" + userMoney + " ---1%-->" + finalTax + " ======>" + userMoneyFinal + "]")
+                log("Adó:  " + userMoney + " ---1%-->" + finalTax + " ------->" + userMoneyFinal)
                 database.dataBasic[element].money = userMoneyFinal
             } catch (error) {
-                log(ERROR + ': ' + error)
+                log(ERROR + ': Adó hiba (id: ' + element + '): ' + error)
             }
         }
         log("Mindenki megadózva")
