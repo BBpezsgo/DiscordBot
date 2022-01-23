@@ -214,13 +214,13 @@ class WebSocket {
                 if (_selectedServer != null) {
                     let _p = 0
                     this.client.guilds.cache.get(_selectedServer.id).channels.cache.forEach(c => {
-                        if (c.type == "news" || c.type == "text" || c.type == "store") {
+                        if (c.type == "GUILD_NEWS" || c.type == "GUILD_TEXT" || c.type == "GUILD_STORE") {
                             if (c.parent == undefined) {
                                 chans.push({ id: c.id, name: c.name, type: c.type, selected: 0, pos: -100 + c.rawPosition, channelType: 'channel' })
                             } else {
                                 chans.push({ id: c.id, name: c.name, type: c.type, selected: 0, pos: _p + (c.rawPosition / 100) + c.parent.rawPosition, channelType: 'channel' })
                             }
-                        } else if (c.type == "category") {
+                        } else if (c.type == "GUILD_CATEGORY") {
                             chans.push({ id: 0, name: c.name, type: c.type, selected: 0, pos: _p + c.rawPosition, channelType: 'group' })
                         }
                     })
@@ -274,7 +274,7 @@ class WebSocket {
                 res.render('serverView', {
                     title: _title,
                     token: _password,
-                    chans,
+                    channels: chans,
                     servers,
                     selectedServer: _selectedServer,
                     selectedChannel: _selectedChannel,

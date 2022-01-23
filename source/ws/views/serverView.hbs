@@ -26,7 +26,7 @@
         <!--<img width="100%" height="100px" src="{{selectedServer.banner}}" style="flex: 0 1 auto;">-->
         <div id="channellist" class="channelList" style="flex: 0 1 40px;height: calc(100% - 44px - 61px);">
             <div style="height: 5px;"></div>
-            {{#each chans}}
+            {{#each channels}}
             <div id="{{this.id}}" class="{{this.channelType}}{{this.selected}}{{this.insideGroup}}"
                 onclick="SelectChannel(this.id)">
                 <div style="transform: translate(0px, -10px); font-weight: normal;">
