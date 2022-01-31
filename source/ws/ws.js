@@ -42,6 +42,11 @@ class WebSocket {
 
         this.registerRoots()
 
+        this.app.get('/data/status', function(req, res) {
+            var dataToSendToClient = {'message': 'error message from server'}
+            res.send(JSON.stringify(dataToSendToClient))
+         });
+
         this.server = this.app.listen(port, "127.0.0.1", () => {
             logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true)
         })
