@@ -55,6 +55,7 @@ let dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
 let dataUsernames = JSON.parse(fs.readFileSync('./database/userNames.json', 'utf-8'))
 let dataMail = JSON.parse(fs.readFileSync('./database/mails.json', 'utf-8'))
 let dataPolls = JSON.parse(fs.readFileSync('./database/polls.json', 'utf-8'))
+let dataMarket = JSON.parse(fs.readFileSync('./database/market.json', 'utf-8'))
 
 const database = new databaseManager()
 database.dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
@@ -270,6 +271,7 @@ function reloadDatabase() {
         database.dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
         dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8'))
         dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
+        dataMarket = JSON.parse(fs.readFileSync('./database/market.json', 'utf-8'))
         dataUsernames = JSON.parse(fs.readFileSync('./database/userNames.json', 'utf-8'))
         dataMail = JSON.parse(fs.readFileSync('./database/mails.json', 'utf-8'))
         dataPolls = JSON.parse(fs.readFileSync('./database/polls.json', 'utf-8'))
@@ -1585,6 +1587,55 @@ bot.on('interactionCreate', async interaction => {
             }
             return
         }
+
+        if (interaction.component.customId.startsWith('market')) {
+            const money = database.dataBasic[interaction.user.id].money;
+            const buyItem = interaction.component.customId.replace('market', '')
+            if (buyItem == 'TokenToMoney') {
+                if (database.dataBackpacks[interaction.user.id].quizTokens > 0) {
+                    database.dataBasic[interaction.user.id].money += Number.parseInt(dataMarket.prices.token)
+                    database.dataBackpacks[interaction.user.id].quizTokens -= 1
+
+                    interaction.update(commandMarket(interaction.user))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'TicketToMoney') {
+                if (database.dataBackpacks[interaction.user.id].tickets > 0) {
+                    database.dataBasic[interaction.user.id].money += Number.parseInt(dataMarket.prices.coupon)
+                    database.dataBackpacks[interaction.user.id].tickets -= 1
+
+                    interaction.update(commandMarket(interaction.user))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'JewelToMoney') {
+                if (database.dataBackpacks[interaction.user.id].jewel > 0) {
+                    database.dataBasic[interaction.user.id].money += Number.parseInt(dataMarket.prices.jewel)
+                    database.dataBackpacks[interaction.user.id].jewel -= 1
+
+                    interaction.update(commandMarket(interaction.user))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'MoneyToJewel') {
+                if (money >= Number.parseInt(dataMarket.prices.jewel)) {
+                    database.dataBasic[interaction.user.id].money -= Number.parseInt(dataMarket.prices.jewel)
+                    database.dataBackpacks[interaction.user.id].jewel += 1
+
+                    interaction.update(commandMarket(interaction.user))
+                    saveDatabase()
+                } else {
+                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                }
+            } else if (buyItem == 'Close') {
+                interaction.message.delete()
+            }
+            return
+        }
     } else if (interaction.isSelectMenu()) {
         if (interaction.customId.startsWith('shopMenu')) {
             interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, interaction.values[0]))
@@ -1977,6 +2028,13 @@ bot.once('ready', async () => {
     dataBot.day = dayOfYear
     fs.writeFile('./database/bot.json', JSON.stringify(dataBot), (err) => { if (err) { log(ERROR & ': ' & err.message, 37) }; });
 
+    const marketLastDay = (dataMarket.day == undefined) ? dayOfYear : dayOfYear
+    dataMarket.day = dayOfYear
+    
+    if (dataMarket.prices == undefined || dayOfYear-marketLastDay >= 3) { dataMarket.prices = {'token': (Math.floor(Math.random() * 1000) + 5000), 'coupon': (Math.floor(Math.random() * 1000) + 4000), 'jewel': (Math.floor(Math.random() * 100) + 11000)} }
+
+    fs.writeFile('./database/market.json', JSON.stringify(dataMarket), (err) => { if (err) { log(ERROR & ': ' & err.message, 37) }; });
+   
     log(DONE + ': A BOT kész!')
 
     for (let i = 0; i < dayOfYear - lastDay; i++) {
@@ -2710,8 +2768,69 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     message.channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**");
 }
 
+/**@param {Discord.User} user */
+function commandMarket(user) {
+    const newEmbed = new Discord.MessageEmbed()
+        .setAuthor({name: user.username, iconURL: user.displayAvatarURL()})
+        .setTitle('Piac')
+        .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/balance-scale_2696-fe0f.png')
+        .addField('\\💵 Egyenleged:', '**' + abbrev(database.dataBasic[user.id].money) + '**', true)
+        .addField('Ajánlatok: ',
+            '> 1\\🎫[' + database.dataBackpacks[user.id].quizTokens + ' db hátizsákban] ➜ ' + dataMarket.prices.token + '\\💵\n' +
+            '> 1\\🎟️[' + database.dataBackpacks[user.id].tickets + ' db hátizsákban] ➜ ' + dataMarket.prices.coupon + '\\💵\n' +
+            '> 1\\💍[' + database.dataBackpacks[user.id].jewel + ' db hátizsákban] ➜ ' + dataMarket.prices.jewel + '\\💵\n' +
+            '> ' + dataMarket.prices.jewel + '\\💵 ➜ 1\\💍[' + database.dataBackpacks[user.id].jewel + ' db hátizsákban]')
+        .setColor(Color.Highlight)
+    const buttonTokenToMoney = new MessageButton()
+        .setLabel("🎫➜💵")
+        .setCustomId("marketTokenToMoney")
+        .setStyle("SECONDARY");
+    const buttonTicketToMoney = new MessageButton()
+        .setLabel("🎟️➜💵")
+        .setCustomId("marketTicketToMoney")
+        .setStyle("SECONDARY");
+    const buttonJewelToMoney = new MessageButton()
+        .setLabel("💍➜💵")
+        .setCustomId("marketJewelToMoney")
+        .setStyle("SECONDARY");
+    const buttonMoneyToJewel = new MessageButton()
+        .setLabel("💵➜💍")
+        .setCustomId("marketMoneyToJewel")
+        .setStyle("SECONDARY");
+
+    if (database.dataBackpacks[user.id].quizTokens <= 0) {
+        buttonTokenToMoney.setDisabled(true)
+    }
+    if (database.dataBackpacks[user.id].tickets <= 0) {
+        buttonTicketToMoney.setDisabled(true)
+    }
+    if (database.dataBackpacks[user.id].jewel <= 0) {
+        buttonJewelToMoney.setDisabled(true)
+    }
+    if (database.dataBasic[user.id].money < Number.parseInt(dataMarket.prices.jewel)) {
+        buttonMoneyToJewel.setDisabled(true)
+    }
+
+    const buttonExit = new MessageButton()
+        .setLabel("❌")
+        .setCustomId("marketClose")
+        .setStyle("SECONDARY");
+
+    const row = new MessageActionRow()
+        .addComponents(buttonTokenToMoney, buttonTicketToMoney, buttonJewelToMoney, buttonMoneyToJewel)
+    const row2 = new MessageActionRow()
+        .addComponents(buttonExit)
+    return {embeds: [newEmbed], components: [row, row2]}
+}
+
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
 async function processApplicationCommand(command) {
+
+    if (command.commandName === `market`) {
+        command.reply(commandMarket(command.user));
+        userstatsSendCommand(command.user)
+        return
+    }
 
     if (command.commandName === `xp`) {
         CommandXp(command)

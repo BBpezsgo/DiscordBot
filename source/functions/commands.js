@@ -82,6 +82,10 @@ function CreateCommands(bot) {
         .addIntegerOption(commandQuizSub4)
         .addIntegerOption(commandQuizSub5)
         .addIntegerOption(commandQuizSub6)
+    
+    const commandMarket = new SlashCommandBuilder()
+        .setName('market')
+        .setDescription('Piac')
 
     const guildCommands = bot.guilds.cache.get('737954264386764812').commands
     guildCommands?.create(commandPing.toJSON())
@@ -95,6 +99,7 @@ function CreateCommands(bot) {
     guildCommands?.create(commandBackpack.toJSON())
     guildCommands?.create(commandShop.toJSON())
     guildCommands?.create(commandQuiz.toJSON())
+    guildCommands?.create(commandMarket.toJSON())
 }
 
 /**@param {Client} bot */
