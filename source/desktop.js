@@ -1636,6 +1636,56 @@ bot.on('interactionCreate', async interaction => {
             }
             return
         }
+
+        
+        if (interaction.component.customId === 'mailFolderMain') {
+            const message = getMailMessage(interaction.user, 0)
+            interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+        } else if (interaction.component.customId === 'mailFolderInbox') {
+            const message = getMailMessage(interaction.user, 1)
+            interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+        } else if (interaction.component.customId === 'mailFolderOutbox') {
+            const message = getMailMessage(interaction.user, 2)
+            interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+        } else if (interaction.component.customId === 'mailWrite') {
+
+            currentlyWritingEmails.push(
+                new CurrentlyWritingMail(
+                    interaction.user,
+                    new Mail(
+                        -1,
+                        new MailUser(interaction.user.username, interaction.user.id),
+                        new MailUser(interaction.user.username, interaction.user.id),
+                        'Cím',
+                        'Üzenet'
+                    ),
+                    interaction.message
+                ))
+
+            const message = getMailMessage(interaction.user, 3)
+            interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+        } else if (interaction.component.customId === 'mailWriteAbort') {
+            const message = getMailMessage(interaction.user)
+            interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+            currentlyWritingEmails.splice(getCurrentlyEditingMailIndex(interaction.user.id), 1)
+        } else if (interaction.component.customId === 'mailWriteSend') {
+            const editingMail = currentlyWritingEmails[getCurrentlyEditingMailIndex(interaction.user.id)]
+            let newMail = editingMail.mail
+            newMail.date = Date.now()
+            newMail.sender = new MailUser(editingMail.user.username, editingMail.user.id)
+            newMail.id = generateMailId()
+            const sended = sendMailOM(newMail)
+
+            if (sended === true) {
+                editingMail.message.channel.send('\\✔️ **A levél elküldve neki: ' + editingMail.mail.reciver.name + '**')
+
+                const message = getMailMessage(interaction.user)
+                interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+                currentlyWritingEmails.splice(getCurrentlyEditingMailIndex(interaction.user.id), 1)
+            } else {
+                editingMail.message.channel.send('\\❌ **A levelet nem sikerült elküldeni**')
+            }
+        }
     } else if (interaction.isSelectMenu()) {
         if (interaction.customId.startsWith('shopMenu')) {
             interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, interaction.values[0]))
@@ -1878,55 +1928,6 @@ bot.on('clickMenu', async (button) => {
         playerIndex = getPlayerIndex(button.clicker.user.id)
     } catch (error) { }
     
-    if (button.id === 'mailFolderMain') {
-        const message = getMailMessage(button.clicker.user, 0)
-        button.message.edit({ embed: message.embed, component: message.actionRows[0] })
-    } else if (button.id === 'mailFolderInbox') {
-        const message = getMailMessage(button.clicker.user, 1)
-        button.message.edit({ embed: message.embed, component: message.actionRows[0] })
-    } else if (button.id === 'mailFolderOutbox') {
-        const message = getMailMessage(button.clicker.user, 2)
-        button.message.edit({ embed: message.embed, component: message.actionRows[0] })
-    } else if (button.id === 'mailWrite') {
-
-        currentlyWritingEmails.push(
-            new CurrentlyWritingMail(
-                button.clicker.user,
-                new Mail(
-                    -1,
-                    new MailUser(button.clicker.user.username, button.clicker.user.id),
-                    new MailUser(button.clicker.user.username, button.clicker.user.id),
-                    'Cím',
-                    'Üzenet'
-                ),
-                button.message
-            ))
-
-        const message = getMailMessage(button.clicker.user, 3)
-        button.message.edit({ embed: message.embed, component: message.actionRows[0] })
-    } else if (button.id === 'mailWriteAbort') {
-        const message = getMailMessage(button.clicker.user)
-        button.message.edit({ embed: message.embed, component: message.actionRows[0] })
-        currentlyWritingEmails.splice(getCurrentlyEditingMailIndex(button.clicker.user.id), 1)
-    } else if (button.id === 'mailWriteSend') {
-        const editingMail = currentlyWritingEmails[getCurrentlyEditingMailIndex(button.clicker.user.id)]
-        let newMail = editingMail.mail
-        newMail.date = Date.now()
-        newMail.sender = new MailUser(editingMail.user.username, editingMail.user.id)
-        newMail.id = generateMailId()
-        const sended = sendMailOM(newMail)
-
-        if (sended === true) {
-            editingMail.message.channel.send('\\✔️ **A levél elküldve neki: ' + editingMail.mail.reciver.name + '**')
-
-            const message = getMailMessage(button.clicker.user)
-            button.message.edit({ embed: message.embed, component: message.actionRows[0] })
-            currentlyWritingEmails.splice(getCurrentlyEditingMailIndex(button.clicker.user.id), 1)
-        } else {
-            editingMail.message.channel.send('\\❌ **A levelet nem sikerült elküldeni**')
-        }
-    }
-
     if (button.id.startsWith('pollOption')) {
         const optionIndex = button.id.replace('pollOption', '')
         try {
@@ -2453,30 +2454,30 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     if (command === `test`) {
         /*
-        const button0 = new disbut.MessageButton()
+        const button0 = new MessageButton()
             .setLabel("This is a button!")
             .setID("myid0")
             .setStyle("grey");
-        const button1 = new disbut.MessageButton()
+        const button1 = new MessageButton()
             .setLabel("This is a button!")
             .setID("myid1")
             .setStyle("blurple");
-        const option = new disbut.MessageMenuOption()
+        const option = new MessageMenuOption()
             .setLabel('Your Label')
             .setEmoji('🍔')
             .setValue('menuid')
             .setDescription('Custom Description!')
 
-        const select = new disbut.MessageMenu()
+        const select = new MessageMenu()
             .setID('customid')
             .setPlaceholder('Click me! :D')
             .setMaxValues(1)
             .setMinValues(1)
             .addOption(option)
 
-        const row0 = new disbut.MessageActionRow()
+        const row0 = new MessageActionRow()
             .addComponents(button0, button1);
-        const row1 = new disbut.MessageActionRow()
+        const row1 = new MessageActionRow()
             .addComponents(select);
         message.channel.send("Message with a button!", { components: [row0, row1] });
 
@@ -2731,26 +2732,26 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         */
 
         /**
-         * @type {disbut.MessageButton[]}
+         * @type {MessageButton[]}
          */
         /*
         let buttons = []
         for (let i = 0; i < icons.length; i++) {
             const icon = icons[i];
-            const button0 = new disbut.MessageButton()
+            const button0 = new MessageButton()
                 .setLabel(icon)
                 .setID("pollOption" + i)
                 .setStyle("gray");
             buttons.push(button0)
         }
-        const row0 = new disbut.MessageActionRow()
+        const row0 = new MessageActionRow()
             .addComponents(buttons);
 
-        const buttonFinish = new disbut.MessageButton()
+        const buttonFinish = new MessageButton()
             .setLabel('Befejezés')
             .setID("pollFinish")
             .setStyle("green");
-        const row1 = new disbut.MessageActionRow()
+        const row1 = new MessageActionRow()
             .addComponent(buttonFinish);
 
         let optionText = ''
@@ -3910,7 +3911,7 @@ class GamePlayer {
 class GameMessage {
     /**
      * @param {Discord.MessageEmbed} embed
-     * @param {disbut.MessageActionRow[]} actionRows
+     * @param {MessageActionRow[]} actionRows
      */
     constructor(embed, actionRows) {
         this.embed = embed;
@@ -3967,7 +3968,7 @@ function getCurrentlyEditingMailIndex(userId) {
  */
 function commandMail(sender, channel) {
     const message = getMailMessage(sender)
-    channel.send({embeds: [ message.embed ], components: message.actionRows[0]} )
+    channel.send({embeds: [ message.embed ], components: [message.actionRows[0]]} )
 }
 
 /**
@@ -3975,24 +3976,24 @@ function commandMail(sender, channel) {
  * @param {number} selectedIndex 0: main | 1: inbox | 2: outbox | 3: writing
  */
 function getMailMessage(user, selectedIndex = 0) {
-    const button0 = new disbut.MessageButton()
+    const button0 = new MessageButton()
         .setLabel("Kezdőlap")
-        .setID("mailFolderMain")
-        .setStyle("grey");
-    const button1 = new disbut.MessageButton()
+        .setCustomId("mailFolderMain")
+        .setStyle("SECONDARY");
+    const button1 = new MessageButton()
         .setLabel("Beérkező e-mailek")
-        .setID("mailFolderInbox")
-        .setStyle("grey");
-    const button2 = new disbut.MessageButton()
+        .setCustomId("mailFolderInbox")
+        .setStyle("SECONDARY");
+    const button2 = new MessageButton()
         .setLabel("Elküldött e-mailek")
-        .setID("mailFolderOutbox")
-        .setStyle("grey");
-    const button3 = new disbut.MessageButton()
+        .setCustomId("mailFolderOutbox")
+        .setStyle("SECONDARY");
+    const button3 = new MessageButton()
         .setLabel("✍️ Levél írása")
-        .setID("mailWrite")
-        .setStyle("blurple");
+        .setCustomId("mailWrite")
+        .setStyle("PRIMARY");
 
-    const row0 = new disbut.MessageActionRow()
+    const row0 = new MessageActionRow()
 
     const embed = new Discord.MessageEmbed()
         .setAuthor({name: user.username, iconURL: user.avatarURL()})
@@ -4011,7 +4012,7 @@ function getMailMessage(user, selectedIndex = 0) {
         embed.addField("📤 Elküldött levelek", 'Összes: ' + allOutboxMails.length)
 
         button0.setLabel("↻")
-        button0.setStyle('blurple')
+        button0.setStyle('PRIMARY')
         row0.addComponents(button3, button0, button1, button2);
     } else if (selectedIndex === 1) {
         embed.setTitle("📥 Beérkező levelek");
@@ -4026,7 +4027,7 @@ function getMailMessage(user, selectedIndex = 0) {
         })
 
         button1.setLabel("↻")
-        button1.setStyle('blurple')
+        button1.setStyle('PRIMARY')
         row0.addComponents(button3, button1, button0, button2);
 
         setReadAllMessages(user.id)
@@ -4043,7 +4044,7 @@ function getMailMessage(user, selectedIndex = 0) {
         })
 
         button2.setLabel("↻")
-        button2.setStyle('blurple')
+        button2.setStyle('PRIMARY')
         row0.addComponents(button3, button2, button0, button1);
     } else if (selectedIndex === 3) {
         embed.setTitle("Levél írása")
@@ -4063,14 +4064,14 @@ function getMailMessage(user, selectedIndex = 0) {
                 '.mail wc [üzenet] Üzenet beállítása\n' +
                 '.mail wr [@Felhasználó | Azonosító] Címzet beállítása')
 
-        const button4 = new disbut.MessageButton()
+        const button4 = new MessageButton()
             .setLabel("Küldés")
-            .setID("mailWriteSend")
-            .setStyle("green");
-        const button5 = new disbut.MessageButton()
+            .setCustomId("mailWriteSend")
+            .setStyle("SUCCESS");
+        const button5 = new MessageButton()
             .setLabel("Elvetés")
-            .setID("mailWriteAbort")
-            .setStyle("red");
+            .setCustomId("mailWriteAbort")
+            .setStyle("DANGER");
         row0.addComponents(button4, button5);
     }
     return new MailMessage(embed, [row0])
@@ -4251,7 +4252,7 @@ class MailUser {
 class MailMessage {
     /**
      * @param {Discord.MessageEmbed} embed
-     * @param {disbut.MessageActionRow[]} actionRows
+     * @param {MessageActionRow[]} actionRows
      */
     constructor(embed, actionRows) {
         this.embed = embed;
