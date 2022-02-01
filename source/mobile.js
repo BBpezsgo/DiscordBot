@@ -1049,7 +1049,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     //#endregion
 
-    channel.send("> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**");
+    channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**");
 }
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */

@@ -62,7 +62,7 @@ database.dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json',
 
 const ytdl = require('ytdl-core')
 
-const dayOfYear = Math.floor(((new Date()) - (new Date(new Date().getFullYear(), 0, 0))) / (1000 * 60 * 60 * 24))
+const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
 const WS = require('./ws/ws')
 var ws = new WS('1234', 5665, bot, logManager, database)
@@ -396,7 +396,7 @@ function addXp(user, channel, ammount) {
 
         database.dataBasic[user.id].money += addMoney
         const embed = new Discord.MessageEmbed()
-            .setAuthor(user.username, user.displayAvatarURL())
+            .setAuthor({name: user.username, iconURL: user.avatarURL()})
             .setTitle('Szintet léptél!')
             .addField('Rang', '\\' + rank.toString() + '  (' + rankName + ')', true)
             .addField('Jutalmad', addMoney.toString() + '\\💵', true)
@@ -409,6 +409,7 @@ function addXp(user, channel, ammount) {
 }
 
 //#endregion
+
 //#region Listener-ek
 
 bot.on('reconnecting', () => {
@@ -474,28 +475,6 @@ bot.on('shardResume', (shardID, replayedEvents) => {
 
 bot.on('raw', async event => {
     log(DEBUG & ': raw');
-
-    return
-
-    // `event.t` is the raw event name
-    if (!events.hasOwnProperty(event.t)) return;
-
-    const { d: data } = event;
-    const user = bot.users.get(data.user_id);
-    const channel = bot.channels.get(data.channel_id) || await user.createDM();
-
-    // if the message is already in the cache, don't re-emit the event
-    if (channel.messages.has(data.message_id)) return;
-
-    // if you're on the master/v12 branch, use `channel.messages.fetch()`
-    const message = await channel.fetchMessage(data.message_id);
-
-    // custom emojis reactions are keyed in a `name:ID` format, while unicode emojis are keyed by names
-    // if you're on the master/v12 branch, custom emojis reactions are keyed by their ID
-    const emojiKey = (data.emoji.id) ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
-    const reaction = message.reactions.get(emojiKey);
-
-    bot.emit(events[event.t], reaction, user);
 });
 
 bot.on('close', () => {
@@ -611,7 +590,7 @@ async function playAudio(message) {
         const embed = new Discord.MessageEmbed()
             .setColor(Color.Purple)
             .setURL(info.videoDetails.video_url)
-            .setAuthor(message.author.username, message.author.displayAvatarURL())
+            .setAuthor({name: message.author.username, iconURL: message.author.displayAvatarURL()})
             .setTitle(info.videoDetails.title)
             .setThumbnail(info.videoDetails.thumbnails[0].url)
             .addField('Csatorna', info.videoDetails.author.name, true)
@@ -732,7 +711,7 @@ function commandStore(sender) {
     var money = database.dataBasic[sender.id].money
 
     const embed = new Discord.MessageEmbed()
-        .setAuthor(sender.username, sender.displayAvatarURL())
+        .setAuthor({name: sender.username, iconURL: sender.avatarURL()})
         .setTitle('Hátizsák')
         .addField('Pénz', '\\💵 ' + abbrev(money), false)
         .addField('Alap cuccok',
@@ -948,7 +927,7 @@ async function commandMusicList(message) {
         message.channel.send('> **\\➖ A lejátszólista üres \\🎧**')
     } else {
         const embed = new Discord.MessageEmbed()
-        embed.setAuthor(message.member.displayName, message.author.avatarURL())
+        .setAuthor({name: message.member.displayName, iconURL: message.author.avatarURL()})
         embed.setColor(Color.Purple)
         await ytdl.getBasicInfo(statesManager.ytdlCurrentlyPlayingUrl).then(info => {
             embed.addField('\\🎧 Most hallható: ' + info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
@@ -986,7 +965,7 @@ function commandProfil(member) {
     const embed = new Discord.MessageEmbed()
         .setColor(database.dataBasic[member.id].color)
         .setTitle('Profil')
-        .setAuthor(member.displayName, member.displayAvatarURL())
+        .setAuthor({name: member.displayName, iconURL: member.displayAvatarURL()})
         .addField('Matricák',
             '> ' + dataStickers[member.id].stickersMusic + ' \\🎼 Zene\n' +
             '> ' + dataStickers[member.id].stickersMeme + ' \\🎭 Meme\n' +
@@ -1806,6 +1785,7 @@ readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && key.name === 'c') {
+        log(DONE + ': A BOT leállítva!')
         bot.destroy()
         process.exit()
     } else if (key.ctrl && key.name === 't') {
@@ -2378,7 +2358,7 @@ bot.on('messageCreate', async message => { //Message
         }
     }
 })
-bot.on('messageReactionRemove', (messageReaction, user) => { //React
+bot.on('messageReactionRemove', (messageReaction, user) => {
     if (user.bot) return
 
     if (!dataUsernames[user.id]) {
@@ -2387,7 +2367,7 @@ bot.on('messageReactionRemove', (messageReaction, user) => { //React
     }
     dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
 })
-bot.on('messageReactionAdd', (messageReaction, user) => { //React
+bot.on('messageReactionAdd', (messageReaction, user) => {
     if (user.bot) return
 
     if (!dataUsernames[user.id]) {
@@ -2395,8 +2375,6 @@ bot.on('messageReactionAdd', (messageReaction, user) => { //React
         dataUsernames[user.id].username = user.username
     }
     dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
-})
-bot.on('messageDelete', (message) => { //React
 })
 
 /**
@@ -2521,31 +2499,35 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                 userstatsSendCommand(sender)
                 try {
 
-                    var giftableMember = message.mentions.users.first()
+                    var giftableMember = message.mentions.members.first()
                     if (database.dataBackpacks[sender.id].gifts > 0) {
                         if (giftableMember.id === sender.id) {
-                            message.channel.send('> \\❌ **Nem ajándékozhatod meg magad!**');
+                            message.channel.send('> \\❌ **Nem ajándékozhatod meg magad!**')
                         } else {
-                            database.dataBackpacks[giftableMember.id].getGift += 1;
-                            database.dataBackpacks[sender.id].gifts -= 1
-                            const embed = new Discord.MessageEmbed()
-                                .setAuthor(sender.username, sender.displayAvatarURL())
-                                .setTitle('\\✔️ ' + giftableMember.username.toString() + ' megajándékozva.')
-                                .setColor(Color.Highlight)
-                            message.channel.send({embeds: [ embed ]});
-                            message.mentions.users.first().send('> **\\✨ ' + sender.username + ' megajándékozott! \\🎆**');
-                            saveDatabase()
+                            if (database.dataBackpacks[giftableMember.id] != undefined) {
+                                database.dataBackpacks[giftableMember.id].getGift += 1;
+                                database.dataBackpacks[sender.id].gifts -= 1
+                                const embed = new Discord.MessageEmbed()
+                                    .setAuthor({name: sender.username, iconURL: sender.displayAvatarURL()})
+                                    .setTitle('\\✔️ ' + giftableMember.username.toString() + ' megajándékozva.')
+                                    .setColor(Color.Highlight)
+                                message.channel.send({embeds: [ embed ]});
+                                message.mentions.users.first().send('> **\\✨ ' + sender.username + ' megajándékozott! \\🎆**');
+                                saveDatabase()
+                            } else {
+                                message.channel.send('> \\❌ **Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban.**')
+                            }
                         }
                     } else {
                         if (giftableMember.id === sender.id) {
                             const embed = new Discord.MessageEmbed()
-                                .setAuthor(sender.username, sender.displayAvatarURL())
+                                .setAuthor({name: sender.username, iconURL: sender.displayAvatarURL()})
                                 .setTitle('\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod.')
                                 .setColor(Color.Error)
                             message.channel.send({embeds: [ embed ]});
                         } else {
                             const embed = new Discord.MessageEmbed()
-                                .setAuthor(sender.username, sender.displayAvatarURL())
+                                .setAuthor({name: sender.username, iconURL: sender.displayAvatarURL()})
                                 .setTitle('\\❌ Nincs ajándékod, amit odaadhatnál.')
                                 .setColor(Color.Error)
                             message.channel.send({embeds: [ embed ]});
@@ -2580,7 +2562,9 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         }
         userstatsSendCommand(sender)
         return;
-    } else if (command.startsWith(`quiz help`)) {
+    }
+    
+    if (command.startsWith(`quiz help`)) {
         userstatsSendCommand(sender)
         const embed = new Discord.MessageEmbed()
             .addField('Quiz szintaxis',
@@ -2596,7 +2580,9 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             .setColor(Color.Highlight)
         message.channel.send({embeds: [ embed ]})
         return;
-    } else if (command.startsWith(`quizdone help`)) {
+    }
+    
+    if (command.startsWith(`quizdone help`)) {
         userstatsSendCommand(sender)
         const embed = new Discord.MessageEmbed()
             .addField('Quizdone szintaxis',
@@ -2605,16 +2591,22 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             .setColor(Color.Highlight)
         message.channel.send({embeds: [ embed ]})
         return;
-    } else if (command.startsWith(`quizdone `)) {
+    }
+    
+    if (command.startsWith(`quizdone `)) {
         quizDone(command.replace(`quizdone `, '').split(' ')[0], command.replace(`quizdone `, '').split(' ')[1])
         userstatsSendCommand(sender)
         return
-    } else if (command.startsWith(`poll simple\n`)) {
+    }
+    
+    if (command.startsWith(`poll simple\n`)) {
         const msgArgs = command.toString().replace(`poll simple\n`, '').split('\n')
         poll(msgArgs[0], msgArgs[1], msgArgs[2], false)
         userstatsSendCommand(sender)
         return
-    } else if (command.startsWith(`poll wyr\n`)) {
+    }
+    
+    if (command.startsWith(`poll wyr\n`)) {
         const msgArgs = command.toString().replace(`poll wyr\n`, '').split('\n')
         poll(msgArgs[0], msgArgs[1], msgArgs[2], true)
         userstatsSendCommand(sender)
@@ -2715,7 +2707,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         */
     }
 
-    message.channel.send("> \\❌ **Ismeretlen parancs! **`.help`** a parancsok listájához!**");
+    message.channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**");
 }
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
@@ -3096,7 +3088,7 @@ function getGameEmbed(user, isOnPhone, isInDebugMode) {
     log('getGameEmbed.isOnPhone: ' + isOnPhone)
 
     const embed = new Discord.MessageEmbed()
-        .setAuthor(user.username, user.avatarURL())
+        .setAuthor({name: user.username, iconURL: user.avatarURL()})
         .setTitle('Game')
         .setDescription(getView(gameCameraX, gameCameraY, gameMap, isOnPhone) +
             '\n' +
@@ -3884,7 +3876,7 @@ function getMailMessage(user, selectedIndex = 0) {
     const row0 = new disbut.MessageActionRow()
 
     const embed = new Discord.MessageEmbed()
-        .setAuthor(user.username, user.avatarURL())
+        .setAuthor({name: user.username, iconURL: user.avatarURL()})
 
     if (selectedIndex === 0) {
         embed.setTitle("Kezdőlap");

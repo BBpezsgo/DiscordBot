@@ -49,6 +49,11 @@ class LogManager {
         if (!message) return;
         if (message.length == 0) return;
 
+        if (this.logs.length == 0) {
+            console.log('\x1b[1m' + fontColor)
+            console.clear()
+        }
+
         let hour = new Date().getHours();
         let minute = new Date().getMinutes();
         if (minute < 10) {
