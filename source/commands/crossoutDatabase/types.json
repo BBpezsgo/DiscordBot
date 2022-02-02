@@ -1,0 +1,406 @@
+[
+    {
+        "id": 0,
+        "name": "None"
+    },
+    {
+        "id": 1,
+        "name": "Ammunition"
+    },
+    {
+        "id": 2,
+        "name": "Appearance"
+    },
+    {
+        "id": 3,
+        "name": "Auto-cannon"
+    },
+    {
+        "id": 4,
+        "name": "Booster"
+    },
+    {
+        "id": 5,
+        "name": "Medium cabin"
+    },
+    {
+        "id": 6,
+        "name": "Cannon"
+    },
+    {
+        "id": 7,
+        "name": "Component"
+    },
+    {
+        "id": 8,
+        "name": "Crate"
+    },
+    {
+        "id": 9,
+        "name": "Drone"
+    },
+    {
+        "id": 10,
+        "name": "Paint"
+    },
+    {
+        "id": 11,
+        "name": "Crossbow"
+    },
+    {
+        "id": 12,
+        "name": "Engine"
+    },
+    {
+        "id": 13,
+        "name": "Frontal machine gun"
+    },
+    {
+        "id": 14,
+        "name": "Generator"
+    },
+    {
+        "id": 15,
+        "name": "Grenade launcher"
+    },
+    {
+        "id": 16,
+        "name": "Homing missile"
+    },
+    {
+        "id": 17,
+        "name": "Homing missile volley"
+    },
+    {
+        "id": 18,
+        "name": "Machine gun"
+    },
+    {
+        "id": 19,
+        "name": "Melee weapon"
+    },
+    {
+        "id": 20,
+        "name": "Minelayer"
+    },
+    {
+        "id": 21,
+        "name": "Proximity mine"
+    },
+    {
+        "id": 22,
+        "name": "Pulse accelerator"
+    },
+    {
+        "id": 23,
+        "name": "Radar"
+    },
+    {
+        "id": 24,
+        "name": "Radio"
+    },
+    {
+        "id": 25,
+        "name": "Resource"
+    },
+    {
+        "id": 26,
+        "name": "Shotgun"
+    },
+    {
+        "id": 27,
+        "name": "Special module"
+    },
+    {
+        "id": 28,
+        "name": "Stealth"
+    },
+    {
+        "id": 29,
+        "name": "Track"
+    },
+    {
+        "id": 30,
+        "name": "Turret"
+    },
+    {
+        "id": 31,
+        "name": "Turret cannon"
+    },
+    {
+        "id": 32,
+        "name": "Unguided rocket"
+    },
+    {
+        "id": 33,
+        "name": "Visor"
+    },
+    {
+        "id": 34,
+        "name": "Weapon cooling"
+    },
+    {
+        "id": 35,
+        "name": "Wheel"
+    },
+    {
+        "id": 36,
+        "name": "Minigun"
+    },
+    {
+        "id": 37,
+        "name": "Flamethrower"
+    },
+    {
+        "id": 38,
+        "name": "Decor. Horn"
+    },
+    {
+        "id": 39,
+        "name": "Decor. Signs"
+    },
+    {
+        "id": 40,
+        "name": "Decor. Lights"
+    },
+    {
+        "id": 41,
+        "name": "Mechanical leg"
+    },
+    {
+        "id": 42,
+        "name": "Consumable"
+    },
+    {
+        "id": 43,
+        "name": "Howitzer"
+    },
+    {
+        "id": 44,
+        "name": "Customization kit"
+    },
+    {
+        "id": 45,
+        "name": "Meta Item"
+    },
+    {
+        "id": 46,
+        "name": "Plasma Emitter"
+    },
+    {
+        "id": 47,
+        "name": "Hover"
+    },
+    {
+        "id": 48,
+        "name": "Microfactory"
+    },
+    {
+        "id": 49,
+        "name": "Combat laser"
+    },
+    {
+        "id": 50,
+        "name": "Tesla cannon"
+    },
+    {
+        "id": 51,
+        "name": "Protectivefield"
+    },
+    {
+        "id": 52,
+        "name": "Sticker"
+    },
+    {
+        "id": 53,
+        "name": "Harpoon cannon"
+    },
+    {
+        "id": 54,
+        "name": "Auger"
+    },
+    {
+        "id": 55,
+        "name": "Light cabin"
+    },
+    {
+        "id": 56,
+        "name": "Heavy cabin"
+    },
+    {
+        "id": 57,
+        "name": "Tank cabin"
+    },
+    {
+        "id": 58,
+        "name": "Weapon booster"
+    },
+    {
+        "id": 59,
+        "name": "Catapult"
+    },
+    {
+        "id": 60,
+        "name": "Flare"
+    },
+    {
+        "id": 61,
+        "name": "Revolver"
+    },
+    {
+        "id": 62,
+        "name": "Coupling module"
+    },
+    {
+        "id": 63,
+        "name": "Rapid-fire machine gun"
+    },
+    {
+        "id": 64,
+        "name": "Radiator"
+    },
+    {
+        "id": 65,
+        "name": "Cooler"
+    },
+    {
+        "id": 66,
+        "name": "Plasma Gun"
+    },
+    {
+        "id": 67,
+        "name": "Detonating module"
+    },
+    {
+        "id": 68,
+        "name": "Brake light"
+    },
+    {
+        "id": 69,
+        "name": "Chainsaw"
+    },
+    {
+        "id": 70,
+        "name": "Hubcap"
+    },
+    {
+        "id": 71,
+        "name": "Pulse rifle"
+    },
+    {
+        "id": 72,
+        "name": "Nailgun"
+    },
+    {
+        "id": 73,
+        "name": "Heavy wheel"
+    },
+    {
+        "id": 74,
+        "name": "Medium wheel"
+    },
+    {
+        "id": 75,
+        "name": "Light wheel"
+    },
+    {
+        "id": 76,
+        "name": "Explosives"
+    },
+    {
+        "id": 77,
+        "name": "Wheel drone"
+    },
+    {
+        "id": 78,
+        "name": "Electric weapon"
+    },
+    {
+        "id": 79,
+        "name": "Plasma cutter"
+    },
+    {
+        "id": 80,
+        "name": "Laser drill"
+    },
+    {
+        "id": 81,
+        "name": "Hologram projector"
+    },
+    {
+        "id": 82,
+        "name": "Guided missile"
+    },
+    {
+        "id": 83,
+        "name": "Plasma emitter booster"
+    },
+    {
+        "id": 84,
+        "name": "Laser shotgun"
+    },
+    {
+        "id": 85,
+        "name": "Headlights"
+    },
+    {
+        "id": 86,
+        "name": "Small-calibre cannon"
+    },
+    {
+        "id": 87,
+        "name": "Tesla emitter"
+    },
+    {
+        "id": 88,
+        "name": "Defence module"
+    },
+    {
+        "id": 89,
+        "name": "Homing rocket volley"
+    },
+    {
+        "id": 90,
+        "name": "Frontal rocket launcher"
+    },
+    {
+        "id": 91,
+        "name": "Activatable melee weapon"
+    },
+    {
+        "id": 92,
+        "name": "Pulse cannon"
+    },
+    {
+        "id": 93,
+        "name": "Autonomous drone"
+    },
+    {
+        "id": 94,
+        "name": "Tracking system"
+    },
+    {
+        "id": 95,
+        "name": "Rolling-based chassis"
+    },
+    {
+        "id": 96,
+        "name": "Recharge booster"
+    },
+    {
+        "id": 97,
+        "name": "Frontal wheel"
+    },
+    {
+        "id": 98,
+        "name": "Rocket launcher"
+    },
+    {
+        "id": 99,
+        "name": "Passive defence module"
+    },
+    {
+        "id": 100,
+        "name": "Plasma rocket launcher"
+    }
+]

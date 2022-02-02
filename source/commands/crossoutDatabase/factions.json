@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "name": "Engineers"
+    },
+    {
+        "id": 2,
+        "name": "Lunatics"
+    },
+    {
+        "id": 3,
+        "name": "Nomads"
+    },
+    {
+        "id": 4,
+        "name": "Scavengers"
+    },
+    {
+        "id": 5,
+        "name": "Steppenwolfs"
+    },
+    {
+        "id": 6,
+        "name": "Dawn's Children"
+    },
+    {
+        "id": 7,
+        "name": "Firestarters"
+    },
+    {
+        "id": 8,
+        "name": "Founders"
+    },
+    {
+        "id": 9,
+        "name": "Syndicate"
+    }
+]

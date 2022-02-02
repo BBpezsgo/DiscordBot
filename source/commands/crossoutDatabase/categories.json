@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "name": "Cabins"
+    },
+    {
+        "id": 2,
+        "name": "Weapons"
+    },
+    {
+        "id": 3,
+        "name": "Hardware"
+    },
+    {
+        "id": 4,
+        "name": "Movement"
+    },
+    {
+        "id": 5,
+        "name": "Structure"
+    },
+    {
+        "id": 6,
+        "name": "Decor"
+    },
+    {
+        "id": 7,
+        "name": "Dyes"
+    },
+    {
+        "id": 8,
+        "name": "Resources"
+    },
+    {
+        "id": 9,
+        "name": "Customization"
+    }
+]

@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "name": "Common"
+    },
+    {
+        "id": 2,
+        "name": "Rare"
+    },
+    {
+        "id": 3,
+        "name": "Epic"
+    },
+    {
+        "id": 4,
+        "name": "Legendary"
+    },
+    {
+        "id": 5,
+        "name": "Relic"
+    },
+    {
+        "id": 6,
+        "name": "Special"
+    }
+]

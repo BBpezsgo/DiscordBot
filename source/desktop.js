@@ -7,6 +7,7 @@ const CommandHelp = require('./commands/help')
 const CommandXp = require('./commands/database/xp')
 const CommandShop = require('./commands/database/shop')
 const CommandBusiness = require('./commands/database/businees')
+const { CrossoutTest } = require('./commands/crossout')
 
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./commands/database/xpFunctions')
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
@@ -2826,6 +2827,12 @@ function commandMarket(user) {
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
 async function processApplicationCommand(command) {
+
+    if (command.commandName === `crossout`) {
+        command.deferReply().then(() => {
+            CrossoutTest(command)
+        })
+    }
 
     if (command.commandName === `market`) {
         command.reply(commandMarket(command.user));

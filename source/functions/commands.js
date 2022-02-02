@@ -86,6 +86,9 @@ function CreateCommands(bot) {
     const commandMarket = new SlashCommandBuilder()
         .setName('market')
         .setDescription('Piac')
+    const commandCrossout = new SlashCommandBuilder()
+        .setName('crossout')
+        .setDescription('Crossout')
 
     const guildCommands = bot.guilds.cache.get('737954264386764812').commands
     guildCommands?.create(commandPing.toJSON())
@@ -100,6 +103,7 @@ function CreateCommands(bot) {
     guildCommands?.create(commandShop.toJSON())
     guildCommands?.create(commandQuiz.toJSON())
     guildCommands?.create(commandMarket.toJSON())
+    guildCommands?.create(commandCrossout.toJSON())
 }
 
 /**@param {Client} bot */
