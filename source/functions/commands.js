@@ -86,9 +86,15 @@ function CreateCommands(bot) {
     const commandMarket = new SlashCommandBuilder()
         .setName('market')
         .setDescription('Piac')
+
+    const commandCrossoutSub = new SlashCommandStringOption()
+        .setName('search')
+        .setDescription('A tárgy amit keresni szeretnél')
+        .setRequired(true)
     const commandCrossout = new SlashCommandBuilder()
         .setName('crossout')
         .setDescription('Crossout')
+        .addStringOption(commandCrossoutSub)
 
     const guildCommands = bot.guilds.cache.get('737954264386764812').commands
     guildCommands?.create(commandPing.toJSON())

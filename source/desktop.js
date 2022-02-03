@@ -1,7 +1,5 @@
 //#region Imports, variables
 
-
-
 const CommandWeather = require('./commands/weather')
 const CommandHelp = require('./commands/help')
 const CommandXp = require('./commands/database/xp')
@@ -30,8 +28,8 @@ const ColorRoles = {
 }
 
 /** @param {string} message */
-function log(message = '') {
-    logManager.Log(message, false)
+function log(message = '', translateResult = 0) {
+    logManager.Log(message, false, translateResult)
 }
 
 const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, usersWithTax, ChannelId} = require('./functions/enums.js')
@@ -67,7 +65,7 @@ const ytdl = require('ytdl-core')
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
 const WS = require('./ws/ws')
-var ws = new WS('1234', 5665, bot, logManager, database)
+var ws = new WS('1234', 5665, bot, logManager, database, StartBot, StopBot)
 
 let musicArray = []
 let musicFinished = true
@@ -438,7 +436,7 @@ bot.on('debug', debug => {
     if (translatedDebug == null) return;
     if (translatedDebug.secret == true) return;
 
-    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText)
+    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
 });
 
 bot.on('warn', warn => {
@@ -454,7 +452,7 @@ bot.on('invalidated', () => {
 });
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
-    log(ERROR + ': Lecsatlakozva');
+    log(SHARD + ': Lecsatlakozva');
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
 });
@@ -1888,7 +1886,7 @@ process.stdin.setRawMode(true);
 process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && key.name === 'c') {
         log(DONE + ': A BOT leállítva!')
-        bot.destroy()
+        StopBot()
         process.exit()
     } else if (key.ctrl && key.name === 't') {
         let x = ''
@@ -1899,6 +1897,9 @@ process.stdin.on('keypress', (str, key) => {
                 x += 'O'
             }
         })
+    } else if (key.ctrl && key.name === 'r') {
+        StopBot()
+        StartBot()
     }
 });
 
@@ -2076,9 +2077,7 @@ bot.once('ready', async () => {
     })
 })
 
-/**
- * @param {Discord.Message} message
- */
+/** @param {Discord.Message} message */
 function processNewsMessage(message) {
     let role = ''
     const newDate = new Date(message.createdTimestamp)
@@ -2830,7 +2829,7 @@ async function processApplicationCommand(command) {
 
     if (command.commandName === `crossout`) {
         command.deferReply().then(() => {
-            CrossoutTest(command)
+            CrossoutTest(command, command.options.getString('search'))
         })
     }
 
@@ -2963,14 +2962,21 @@ async function processApplicationCommand(command) {
     }
 }
 
-bot.login(token).catch((err) => {
-    if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
-        log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
-    } else {
-        log(ERROR + ': ' + err)
-    }
-})
+function StartBot() {
+    bot.login(token).catch((err) => {
+        if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
+            log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
+        } else {
+            log(ERROR + ': ' + err)
+        }
+    })
+}
 
+function StopBot() {
+    bot.destroy()
+}
+
+StartBot()
 
 //#region Game
 

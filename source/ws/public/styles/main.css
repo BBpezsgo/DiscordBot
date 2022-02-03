@@ -216,3 +216,23 @@ table td, table th {
     font-size: 20px;
     margin: 5px 5px 5px 15px;
 }
+
+.StartStopButton {
+    float: right;
+    position: relative;
+    top: 25%;
+    right: 10px;
+    border-radius: 4px;
+    background-color: #32363d;
+    color: #aaa;
+    transition-duration: 200ms;
+    font-size: 1.3em;
+}
+
+.StartStopButton:hover {
+    background-color: #474c55;
+}
+
+.StartStopButton:active {
+    background-color: #5a5f69;
+}

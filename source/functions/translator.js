@@ -1,4 +1,10 @@
-const { INFO, DEBUG, SERVER, WARNING, ERROR, SHARD, DONE } = require("../functions/log.js")
+const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
+const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
+const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + '\033[37m' + ']'
+const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
+const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
+const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
+const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
 const groupNames = {
     shard: "shard",
@@ -16,33 +22,33 @@ function TranslateMessage(message) {
         return new TranslateResult(message, message.replace("Provided token: ", "Biztosított token: "), DEBUG, true, groupNames.client)
     } else {
         if (message.startsWith('Preparing to connect to the gateway...')) {
-            return new TranslateResult(message, "Csatlakozás...", DEBUG, false, groupNames.client)
+            return new TranslateResult(message, "Csatlakozás...", DEBUG, false, groupNames.client, new Status(0))
         } else if (message.startsWith('[WS => Manager] Fetched Gateway Information')) {
             return null
         } else if (message.startsWith('[WS => Manager] Session Limit Information')) {
             return null
         } else if (message.startsWith('[WS => Shard 0] [CONNECTED] Took')) {
-            return new TranslateResult(message, "Csatlakozva " + message.replace('[WS => Shard 0] [CONNECTED] Took ', '') + ' alatt', SHARD, false, groupNames.shard)
+            return new TranslateResult(message, "Csatlakozva " + message.replace('[WS => Shard 0] [CONNECTED] Took ', '') + ' alatt', SHARD, false, groupNames.shard, new Status(40))
         } else if (message.startsWith('[WS => Manager] Spawning shards: ')) {
-            return new TranslateResult(message, "Shard-ok létrehozása...", DEBUG, false, groupNames.manager)
+            return new TranslateResult(message, "Shard-ok létrehozása...", DEBUG, false, groupNames.manager, new Status(20))
         } else if (message.startsWith('[WS => Shard 0] [CONNECT]')) {
-            return new TranslateResult(message, "Csatlakozás...", SHARD, false, groupNames.shard)
+            return new TranslateResult(message, "Csatlakozás...", SHARD, false, groupNames.shard, new Status(10))
         } else if (message.startsWith('[WS => Shard 0] Setting a HELLO timeout for ')) {
-            return new TranslateResult(message, message.replace("[WS => Shard 0] Setting a HELLO timeout for ", "HELLO időtúllépés beállítása: "), SHARD, false, groupNames.shard)
+            return new TranslateResult(message, message.replace("[WS => Shard 0] Setting a HELLO timeout for ", "HELLO időtúllépés beállítása: "), SHARD, false, groupNames.shard, new Status(30))
         } else if (message.startsWith('[WS => Shard 0] [CONNECTED] wss://gateway.discord.gg/?v=6&encoding=json in ')) {
             return new TranslateResult(message, "Csatlakozva", SHARD, false, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] Clearing the HELLO timeout.')) {
-            return new TranslateResult(message, "HELLO időtúllépés törölve", SHARD, false, groupNames.shard)
+            return new TranslateResult(message, "HELLO időtúllépés törölve", SHARD, false, groupNames.shard, new Status(50))
         } else if (message.startsWith('[WS => Shard 0] Setting a heartbeat interval for ')) {
-            return new TranslateResult(message, message.replace("[WS => Shard 0] Setting a heartbeat interval for ", "Heartbeat időtúllépés beállítása: "), SHARD, false, groupNames.shard)
+            return new TranslateResult(message, message.replace("[WS => Shard 0] Setting a heartbeat interval for ", "Heartbeat időtúllépés beállítása: "), SHARD, false, groupNames.shard, new Status(60))
         } else if (message.startsWith('[WS => Shard 0] [IDENTIFY] Shard 0/1')) {
-            return new TranslateResult(message, "Shard ellenőrizve", SHARD, false, groupNames.shard)
+            return new TranslateResult(message, "Shard ellenőrizve", SHARD, false, groupNames.shard, new Status(70))
         } else if (message.startsWith('[WS => Shard 0] [READY] Session ')) {
-            return new TranslateResult(message, message.replace("[WS => Shard 0] [READY] Session ", "Kész. Session: "), SHARD, false, groupNames.shard)
+            return new TranslateResult(message, message.replace("[WS => Shard 0] [READY] Session ", "Kész. Session: "), SHARD, false, groupNames.shard, new Status(80))
         } else if (message.startsWith('[WS => Shard 0] [ReadyHeartbeat] Sending a heartbeat.')) {
-            return new TranslateResult(message, "Heartbeat küldése", SHARD, false, groupNames.shard)
+            return new TranslateResult(message, "Heartbeat küldése", SHARD, false, groupNames.shard, new Status(90))
         } else if (message.startsWith('[WS => Shard 0] Shard received all its guilds. Marking as fully ready.')) {
-            return new TranslateResult(message, "Befejezés", SHARD, false, groupNames.shard)
+            return new TranslateResult(message, "Befejezés", SHARD, false, groupNames.shard, new Status(100))
         } else if (message.startsWith('[WS => Shard 0] Heartbeat acknowledged, latency of ')) {
             ping = message.replace('[WS => Shard 0] Heartbeat acknowledged, latency of ', '').replace('ms.', '')
             return new TranslateResult(message, "Heartbeat nyugtázva: " + ping + "ms", SHARD, true, groupNames.shard)
@@ -80,8 +86,10 @@ function TranslateMessage(message) {
             return new TranslateResult(message, "Folytatás", SHARD, false, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] [RESUMED]')) {
             return new TranslateResult(message, "Folytatva", SHARD, false, groupNames.shard)
-        } else if (message.startsWith('[WS => Shard 0] [ResumeHeartbeat] Sending a heartbeat')) {
-            return new TranslateResult(message, "Heartbeat küldése", SHARD, false, groupNames.shard)
+        } else if (message.startsWith('[WS => Shard 0] [RESUMED]')) {
+            return new TranslateResult(message, "Folytatva", SHARD, false, groupNames.shard)
+        } else if (message.startsWith('[WS => Shard 0] WS_CLOSE_REQUESTED')) {
+            return new TranslateResult(message, "Bezárás megkezdeményezve", SHARD, false, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] [INVALID SESSION] Resumable: false.')) {
             return new TranslateResult(message, "Érvénytelen session. Nem folytatható.", ERROR, false, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] An open connection was found, attempting an immediate identify.')) {
@@ -159,14 +167,25 @@ class TranslateResult {
      * @param {string} messagePrefix
      * @param {boolean} secret
      * @param {string} loadingGroup For example: 'shard', 'ytdl', etc.
+     * @param {Status} status
      */
-    constructor (originalText, translatedText, messagePrefix, secret, loadingGroup) {
+    constructor (originalText, translatedText, messagePrefix, secret, loadingGroup, status = null) {
         this.originalText = originalText
         this.translatedText = translatedText
         this.messagePrefix = messagePrefix
         this.secret = secret
         this.loadingGroup = loadingGroup
+        this.status = status
     }
 }
 
-module.exports = { TranslateMessage }
+class Status {
+    /**
+     * @param {number} percent
+     */
+    constructor (percent) {
+        this.percent = percent
+    }
+}
+
+module.exports = { TranslateMessage, TranslateResult }

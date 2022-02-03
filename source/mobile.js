@@ -5,12 +5,10 @@ console.clear()
 const CommandWeather = require('./commands/weather')
 const CommandHelp = require('./commands/help')
 
-
-
+const { CrossoutTest } = require('./commands/crossout')
 
 
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
-
 const { LogManager } = require('./functions/log.js')
 const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
@@ -19,9 +17,17 @@ const { StatesManager } = require('./functions/statesManager.js')
 const logManager = new LogManager()
 const statesManager = new StatesManager()
 
-/**
-* @param {string} message
-*/
+
+
+
+
+
+
+
+
+
+
+/** @param {string} message*/
 function log(message = '') {
     logManager.Log(message, false)
 }
@@ -1054,6 +1060,17 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
 async function processApplicationCommand(command) {
+
+    if (command.commandName === `crossout`) {
+        command.deferReply().then(() => {
+            CrossoutTest(command, command.options.getString('search'))
+        })
+    }
+
+    if (command.commandName === `market`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return
+    }
 
     if (command.commandName === `xp`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})

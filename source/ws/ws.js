@@ -3,7 +3,7 @@ const { engine } = require('express-handlebars')
 const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
-const { LogManager, LogMsg } = require('../functions/log.js')
+const { LogManager, LogMsg, MessageCodes } = require('../functions/log.js')
 const { databaseManager } = require('../functions/databaseManager.js')
 
 const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
@@ -21,9 +21,11 @@ class WebSocket {
      * @param {LogManager} logManager
      * @param {databaseManager} database
      */
-    constructor(password, port, client, logManager, database) {
+    constructor(password, port, client, logManager, database, StartBot, StopBot) {
         this.password = password
         this.client = client
+        this.StartBot = StartBot
+        this.StopBot = StopBot
 
         this.logManager = logManager
         this.database = database
@@ -48,7 +50,7 @@ class WebSocket {
          });
 
         this.server = this.app.listen(port, "127.0.0.1", () => {
-            logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true)
+            logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
         })
         this.server.on('error', (err) => {
             logManager.Log(ERROR + ': ' + err, true)
@@ -81,6 +83,14 @@ class WebSocket {
 
     checkPassword(_password) {
         return (_password == this.password)
+    }
+
+    GetClientStats() {
+        if (this.client.user != undefined) {
+            return { username: this.client.user.username, avatar: this.client.user.avatarURL(), discriminator: this.client.user.discriminator, ping: this.client.ws.ping, status: 'online', enStart: 'none', enStop: 'block' }
+        } else {
+            return { username: "Username", avatar: "defaultAvatar.png", discriminator: "0000", ping: 0, status: 'offline', enStart: 'block', enStop: 'none' }
+        }
     }
 
     registerRoots() {
@@ -130,14 +140,12 @@ class WebSocket {
 
                 logs = logs.reverse()
 
-                var _client = { username: this.client.user.username, avatar: this.client.user.avatarURL(), discriminator: this.client.user.discriminator, ping: this.client.ws.ping }
-
                 res.render('botView', {
                     title: 'Ügyintéző Dashboard',
                     token: _password,
                     users,
                     servers,
-                    client: _client,
+                    client: this.GetClientStats(),
                     logs
                 })
             } else if (view == 1) {
@@ -191,8 +199,6 @@ class WebSocket {
                     }
                 }
 
-                var _client = { username: this.client.user.username, avatar: this.client.user.avatarURL(), discriminator: this.client.user.discriminator }
-
                 res.render('discordView', {
                     title: 'Ügyintéző Dashboard',
                     token: _password,
@@ -200,7 +206,7 @@ class WebSocket {
                     servers,
                     selectedServer: _selectedServer,
                     selectedUser: _selectedUser,
-                    client: _client,
+                    client: this.GetClientStats(),
                     messages: _messages
                 })
             } else if (view == 2) {
@@ -267,8 +273,6 @@ class WebSocket {
                     }
                 }
 
-                var _client = { username: this.client.user.username, avatar: this.client.user.avatarURL(), discriminator: this.client.user.discriminator }
-
                 var _title = "?"
                 if (_selectedChannel == null) {
                     _title = "Ügyintéző Dashboard"
@@ -283,7 +287,7 @@ class WebSocket {
                     servers,
                     selectedServer: _selectedServer,
                     selectedChannel: _selectedChannel,
-                    client: _client,
+                    client: this.GetClientStats(),
                     messages: _messages,
                     members: _members
                 })
@@ -309,6 +313,11 @@ class WebSocket {
                     dataBasic: _dataBasic,
                     dataBackpacks: _dataBackpacks,
                     score: _score
+                })
+            } else if (view == 5) {
+                res.render('statusPanel', {
+                    token: _password,
+                    client: this.GetClientStats()
                 })
             }
         })
@@ -402,6 +411,22 @@ class WebSocket {
             if (!user) { return }
 
             user.fetch()
+        })
+
+        this.app.post('/startBot', (req, res) => {
+            var _pass = req.body.token
+
+            if (!this.checkPassword(_pass)) { return }
+
+            this.StartBot()
+        })
+
+        this.app.post('/stopBot', (req, res) => {
+            var _pass = req.body.token
+
+            if (!this.checkPassword(_pass)) { return }
+
+            this.StopBot()
         })
     }
 }

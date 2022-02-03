@@ -530,10 +530,9 @@ function GetPollutionIndex(type, value) {
  * @param {any} data0 msn data
  * @param {any} data1 openweather data
  * @param {any[]} data2 moon data
- * @param {number} index 0 | 1 | 2 | 3
  * @returns {Discord.MessageEmbed}
  */
-function getEmbed(data0, data1, data2, index, data3) {
+function getEmbedEarth(data0, data1, data2, index, data3) {
     var current = data0[0].current;
     const embed = new Discord.MessageEmbed()
         .setColor(0x00AE86)
@@ -769,7 +768,7 @@ module.exports = async (command) => {
                         weatherData1 = val
                         weatherData2 = m
                         const weatherData3 = weather.list[0].components
-                        let embed = getEmbed(weatherData0, weatherData1, weatherData2, 3, weatherData3)
+                        let embed = getEmbedEarth(weatherData0, weatherData1, weatherData2, 3, weatherData3)
                         
                         const skyImgName = weatherSkytextImgName(weatherData0[0].current.skytext, unixToTime(weatherData1.sys.sunset).split(':')[0], unixToTime(weatherData1.sys.sunrise).split(':')[0], weatherData1.clouds.all)
                         if (ImgExists(skyImgName) === true) {

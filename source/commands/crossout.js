@@ -38,14 +38,14 @@ function ProgressBar(val, width, max = 100) {
 /**
  * @param {Discord.CommandInteraction<Discord.CacheType>} command
 */
-function CrossoutTest(command) {
-    let url = 'https://crossoutdb.com/api/v1/items?query=Lupara'
+function CrossoutTest(command, searchName) {
+    let url = 'https://crossoutdb.com/api/v1/items?query=' + searchName
 
     request(url, function (err, response, body) {
         if (err) {
             command.editReply('> \\❌ **Requiest error:** ' + err.toString())
         } else {
-            const data = JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/items.json', 'utf-8'))[0]  //JSON.parse(body)[0]
+            const data = JSON.parse(body)[0] //JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/items.json', 'utf-8'))[0]  //
 
             if (data == undefined) {
                 command.editReply('> \\❌ **Nem található ilyen tárgy**')
@@ -75,15 +75,15 @@ function CrossoutTest(command) {
                         'Crafting Cost (Buy): ' + data.formatCraftingBuySum + ' 🅒'
                     )
                     .addField('Stats',
-                        'StatPercentDamageRating:\n' + ProgressBar(GetObjectFromKey('StatPercentDamageRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentDamageRating', data).value + '%' + '\n' +
-                        'StatPercentFireRateRating:\n' + ProgressBar(GetObjectFromKey('StatPercentFireRateRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentFireRateRating', data).value + '%' + '\n' +
-                        'StatPercentRangeRating:\n' + ProgressBar(GetObjectFromKey('StatPercentRangeRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentRangeRating', data).value + '%' + '\n' +
-                        'StatPercentAccuracyRating:\n' + ProgressBar(GetObjectFromKey('StatPercentAccuracyRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentAccuracyRating', data).value + '%' + '\n' +
-                        'StatPercentOverheatRating:\n' + ProgressBar(GetObjectFromKey('StatPercentOverheatRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentOverheatRating', data).value + '%' + '\n\n' +
+                        'Damage:\n' + ProgressBar(GetObjectFromKey('StatPercentDamageRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentDamageRating', data).value + '%' + '\n' +
+                        'FireRate:\n' + ProgressBar(GetObjectFromKey('StatPercentFireRateRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentFireRateRating', data).value + '%' + '\n' +
+                        'Range:\n' + ProgressBar(GetObjectFromKey('StatPercentRangeRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentRangeRating', data).value + '%' + '\n' +
+                        'Accuracy:\n' + ProgressBar(GetObjectFromKey('StatPercentAccuracyRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentAccuracyRating', data).value + '%' + '\n' +
+                        'Overheat:\n' + ProgressBar(GetObjectFromKey('StatPercentOverheatRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentOverheatRating', data).value + '%' + '\n\n' +
                         'Ammo: ' + GetObjectFromKey('StatAmmo', data).value + ' pcs\n' +
-                        'StatStructure: ' + GetObjectFromKey('StatStructure', data).value + ' pts\n' +
-                        'StatEnergyDrain: ' + GetObjectFromKey('StatEnergyDrain', data).value + ' pts\n' +
-                        'StatMass: ' + GetObjectFromKey('StatMass', data).value + ' kg'
+                        'Structure: ' + GetObjectFromKey('StatStructure', data).value + ' pts\n' +
+                        'EnergyDrain: ' + GetObjectFromKey('StatEnergyDrain', data).value + ' \\⚡\n' +
+                        'Mass: ' + GetObjectFromKey('StatMass', data).value + ' kg'
                     )
                     .setTimestamp(new Date(data.timestamp))
     
