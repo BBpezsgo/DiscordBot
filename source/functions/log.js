@@ -40,30 +40,40 @@ const sleep = (ms) => {
 class LogManager {
     constructor() {
         /** @type {[LogMsg]}*/
-        this.logs = [];
+        this.logs = []
         /** @type {number}*/
-        this.timer = 0;
+        this.timer = 0
+
+        /** @type {number}*/
+        this.loggedCount = 0
 
         /** @type {LoadingProgress}*/
         this.loading = new LoadingProgress();
         /** @type {number}*/
-        this.loadingIndex = 0;
+        this.loadingIndex = 0
+
+        /**@type {boolean} */
+        this.enableLog = false
 
         setInterval(async () => {
-            if (this.timer > 3) {
-                for (let i = 0; i < this.logs.length; i++) {
-                    const log = this.logs[i];
-                    if (log.printed == false) {
-                        if (log.count == 1) {
-                            print(' ' + fontColor + timestampForeColor + log.time + ' | ' + log.count + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
-                        } else {
-                            print(' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+            if (this.enableLog == true) {
+                if (this.timer > 3) {
+                    for (let i = 0; i < this.logs.length; i++) {
+                        const log = this.logs[i];
+                        if (log.printed == false) {
+                            var nl = (this.loggedCount == 0) ? '\n' : ''
+                            if (log.count == 1) {
+                                print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | ' + log.count + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                            } else {
+                                print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                            }
+                            this.loggedCount += 1
+                            this.logs[i].printed = true
                         }
-                        this.logs[i].printed = true
                     }
+                } else {
+                    this.timer += 1
                 }
-            } else {
-                this.timer += 1
             }
 
             if (this.loading.botLoading == true || this.loading.handlebarsLoading == true) {
@@ -114,6 +124,12 @@ class LogManager {
         if (translateResult != null) {
             if (translateResult.status != null) {
                 this.loading.botPercent = translateResult.status.percent
+                if (translateResult.status.percent == 100) {
+                    this.loading.botLoading = false
+                    process.stdout.cursorTo(0, 0)
+                    process.stdout.clearLine()
+                    this.enableLog = true
+                }
                 return
             }
         }
