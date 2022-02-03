@@ -28,7 +28,7 @@ const ColorRoles = {
 }
 
 /** @param {string} message */
-function log(message = '', translateResult = 0) {
+function log(message = '', translateResult = null) {
     logManager.Log(message, false, translateResult)
 }
 
@@ -2073,7 +2073,11 @@ bot.once('ready', async () => {
         listOfMessage.forEach(message => {
             processNewsMessage(message)
         })
-        log(`Received ${listOfMessage.length} news`)
+        if (listOfMessage.length > 0) {
+            log(`Received ${listOfMessage.length} news`)
+        } else {
+            log(`No news recived`)
+        }
     })
 })
 

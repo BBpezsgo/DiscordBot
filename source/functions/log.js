@@ -20,8 +20,8 @@ const { TranslateResult } = require('./translator.js')
 
 /**Reprints a line on the console */
 const reprint = (text) => {
-    process.stdout.clearLine()
     process.stdout.cursorTo(0, 0)
+    process.stdout.clearLine()
     process.stdout.write(text)
     process.stdout.write('\n')
 }
@@ -53,7 +53,7 @@ class LogManager {
         this.loadingIndex = 0
 
         /**@type {boolean} */
-        this.enableLog = false
+        this.enableLog = true
 
         setInterval(async () => {
             if (this.enableLog == true) {
@@ -113,6 +113,7 @@ class LogManager {
             console.clear()
         }
 
+        /*
         if (code == MessageCodes.HandlebarsStartLoading) {
             this.loading.handlebarsLoading = true
             this.loading.handlebarsState = 'Betöltés'
@@ -133,6 +134,7 @@ class LogManager {
                 return
             }
         }
+        */
 
         let hour = new Date().getHours();
         let minute = new Date().getMinutes();
@@ -216,9 +218,9 @@ class LoadingProgress {
     constructor() {
         this.botState = 'Betöltés';
         this.botPercent = 0;
-        this.botLoading = true;
+        this.botLoading = false;
         this.handlebarsState = 'Betöltés';
-        this.handlebarsLoading = true;
+        this.handlebarsLoading = false;
     }
 }
 

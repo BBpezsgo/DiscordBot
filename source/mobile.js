@@ -27,9 +27,9 @@ const statesManager = new StatesManager()
 
 
 
-/** @param {string} message*/
-function log(message = '') {
-    logManager.Log(message, false)
+/** @param {string} message */
+function log(message = '', translateResult = null) {
+    logManager.Log(message, false, translateResult)
 }
 
 const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesMobile} = require('./functions/enums.js')
@@ -207,7 +207,7 @@ bot.on('debug', debug => {
     if (translatedDebug == null) return;
     if (translatedDebug.secret == true) return;
 
-    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText)
+    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
 });
 
 bot.on('warn', warn => {
@@ -610,7 +610,11 @@ bot.once('ready', async () => { //Ready
         listOfMessage.forEach(message => {
             processNewsMessage(message)
         })
-        log(`Received ${listOfMessage.length} news`)
+        if (listOfMessage.length > 0) {
+            log(`Received ${listOfMessage.length} news`)
+        } else {
+            log(`No news recived`)
+        }
     })
 
     log(DONE + ': A BOT kész!')
