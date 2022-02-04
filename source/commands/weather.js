@@ -536,7 +536,7 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
     var current = data0[0].current;
     const embed = new Discord.MessageEmbed()
         .setColor(0x00AE86)
-        .setAuthor(current.observationpoint.replace(', Hungary', '') + ' ' + current.date.toString().replace('-', '.').replace('-', '.') + '. [' + dayName(new Date().getDay()) + '] ' + current.observationtime.replace(':00:00', ':00 -kor'));
+        .setAuthor({ name: current.observationpoint.replace(', Hungary', '') + ' ' + current.date.toString().replace('-', '.').replace('-', '.') + '. [' + dayName(new Date().getDay()) + '] ' + current.observationtime.replace(':00:00', ':00 -kor')});
 
     { //Ma
         let skyTxt = current.skytext
@@ -717,8 +717,9 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
     }
 
     embed
+        .setTimestamp(current.date + 'T' + current.observationtime)
         .setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(current.skytext, true).replace('\\', '')))
-        .setFooter('• weather.service.msn.com : openweathermap.org\n • weather-js : nodejs-weather-app : moonphase-js', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/60/microsoft/17/information-source_2139.png')
+        .setFooter({ text: '• weather.service.msn.com : openweathermap.org\n• weather-js : nodejs-weather-app : moonphase-js', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png'})
     return embed
 }
 

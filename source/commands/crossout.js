@@ -11,6 +11,7 @@ function lbl(txt) {
 function GetObjectFromKey(key, data) {
     /**@type {any[]} */
     const dataList = data.sortedStats
+    if (dataList == undefined) { return null }
     for (let i = 0; i < dataList.length; i++) {
         const dataElement = dataList[i];
         if (dataElement.key == key) {
@@ -70,22 +71,26 @@ function CrossoutTest(command, searchName) {
                         'Popularity: ' + data.popularity + '\n' +
                         'Demand/Supply: ' + data.popularity
                     )
-                    .addField('Crafting ' + data.craftingResultAmount + 'x',
-                        'Crafting Cost (Sell): ' + data.formatCraftingSellSum + ' 🅒\n' +
-                        'Crafting Cost (Buy): ' + data.formatCraftingBuySum + ' 🅒'
-                    )
-                    .addField('Stats',
-                        'Damage:\n' + ProgressBar(GetObjectFromKey('StatPercentDamageRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentDamageRating', data).value + '%' + '\n' +
-                        'FireRate:\n' + ProgressBar(GetObjectFromKey('StatPercentFireRateRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentFireRateRating', data).value + '%' + '\n' +
-                        'Range:\n' + ProgressBar(GetObjectFromKey('StatPercentRangeRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentRangeRating', data).value + '%' + '\n' +
-                        'Accuracy:\n' + ProgressBar(GetObjectFromKey('StatPercentAccuracyRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentAccuracyRating', data).value + '%' + '\n' +
-                        'Overheat:\n' + ProgressBar(GetObjectFromKey('StatPercentOverheatRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentOverheatRating', data).value + '%' + '\n\n' +
-                        'Ammo: ' + GetObjectFromKey('StatAmmo', data).value + ' pcs\n' +
-                        'Structure: ' + GetObjectFromKey('StatStructure', data).value + ' pts\n' +
-                        'EnergyDrain: ' + GetObjectFromKey('StatEnergyDrain', data).value + ' \\⚡\n' +
-                        'Mass: ' + GetObjectFromKey('StatMass', data).value + ' kg'
-                    )
-                    .setTimestamp(new Date(data.timestamp))
+                    if (data.craftingResultAmount > 0) {
+                        embed.addField('Crafting ' + data.craftingResultAmount + 'x',
+                            'Crafting Cost (Sell): ' + data.formatCraftingSellSum + ' 🅒\n' +
+                            'Crafting Cost (Buy): ' + data.formatCraftingBuySum + ' 🅒'
+                        )
+                    }
+                    if (data.sortedStats != undefined && data.sortedStats != null) {
+                        embed.addField('Stats',
+                            'Damage:\n' + ProgressBar(GetObjectFromKey('StatPercentDamageRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentDamageRating', data).value + '%' + '\n' +
+                            'FireRate:\n' + ProgressBar(GetObjectFromKey('StatPercentFireRateRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentFireRateRating', data).value + '%' + '\n' +
+                            'Range:\n' + ProgressBar(GetObjectFromKey('StatPercentRangeRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentRangeRating', data).value + '%' + '\n' +
+                            'Accuracy:\n' + ProgressBar(GetObjectFromKey('StatPercentAccuracyRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentAccuracyRating', data).value + '%' + '\n' +
+                            'Overheat:\n' + ProgressBar(GetObjectFromKey('StatPercentOverheatRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentOverheatRating', data).value + '%' + '\n\n' +
+                            'Ammo: ' + GetObjectFromKey('StatAmmo', data).value + ' pcs\n' +
+                            'Structure: ' + GetObjectFromKey('StatStructure', data).value + ' pts\n' +
+                            'EnergyDrain: ' + GetObjectFromKey('StatEnergyDrain', data).value + ' \\⚡\n' +
+                            'Mass: ' + GetObjectFromKey('StatMass', data).value + ' kg'
+                        )
+                    }
+                    embed.setTimestamp(new Date(data.timestamp))
     
                 command.editReply({embeds: [embed]})
             }

@@ -1345,7 +1345,7 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId === 'sendGift') {
-            interaction.reply({content: '> **\\❔ Használd a **`.gift @Felhasználó`** parancsot, egy személy megajándékozásához!**', ephemeral: true});
+            interaction.reply({content: '> **\\❔ Használd a **`/gift <felhasználó>`** parancsot egy személy megajándékozásához**', ephemeral: true});
             interaction.message.edit(commandStore(interaction.user))
             
             saveDatabase()
@@ -2556,59 +2556,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     //#region Disabled in dm
 
-    if (command.startsWith(`gift `)) {
-        if (thisIsPrivateMessage === false) {
-            if (message.channel.guild.id === '737954264386764812') {
-                userstatsSendCommand(sender)
-                try {
-
-                    var giftableMember = message.mentions.members.first()
-                    if (database.dataBackpacks[sender.id].gifts > 0) {
-                        if (giftableMember.id === sender.id) {
-                            message.channel.send('> \\❌ **Nem ajándékozhatod meg magad!**')
-                        } else {
-                            if (database.dataBackpacks[giftableMember.id] != undefined) {
-                                database.dataBackpacks[giftableMember.id].getGift += 1;
-                                database.dataBackpacks[sender.id].gifts -= 1
-                                const embed = new Discord.MessageEmbed()
-                                    .setAuthor({name: sender.username, iconURL: sender.displayAvatarURL()})
-                                    .setTitle('\\✔️ ' + giftableMember.username.toString() + ' megajándékozva.')
-                                    .setColor(Color.Highlight)
-                                message.channel.send({embeds: [ embed ]});
-                                message.mentions.users.first().send('> **\\✨ ' + sender.username + ' megajándékozott! \\🎆**');
-                                saveDatabase()
-                            } else {
-                                message.channel.send('> \\❌ **Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban.**')
-                            }
-                        }
-                    } else {
-                        if (giftableMember.id === sender.id) {
-                            const embed = new Discord.MessageEmbed()
-                                .setAuthor({name: sender.username, iconURL: sender.displayAvatarURL()})
-                                .setTitle('\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod.')
-                                .setColor(Color.Error)
-                            message.channel.send({embeds: [ embed ]});
-                        } else {
-                            const embed = new Discord.MessageEmbed()
-                                .setAuthor({name: sender.username, iconURL: sender.displayAvatarURL()})
-                                .setTitle('\\❌ Nincs ajándékod, amit odaadhatnál.')
-                                .setColor(Color.Error)
-                            message.channel.send({embeds: [ embed ]});
-                        }
-                    }
-                } catch (error) {
-                    message.channel.send('> **\\❌ ' + error.toString() + '**')
-                }
-
-            } else {
-                message.channel.send('> **\\⛔ Ez a parancs ezen a szerveren nem használható!**')
-            }
-        } else {
-            message.channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-        return;
-    }
-
     if (command.startsWith(`pms name `)) {
         message.channel.send('> \\⛔ **Ez a parancs átmenetileg nem elérhető!**')
         //commandPmsName(message.channel, sender, command.replace(`pms name `, ''))
@@ -2830,6 +2777,39 @@ function commandMarket(user) {
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
 async function processApplicationCommand(command) {
+
+    if (command.commandName == `gift`) {
+        userstatsSendCommand(command.user)
+        try {
+
+            var giftableMember = command.options.getUser('user')
+            if (database.dataBackpacks[command.user.id].gifts > 0) {
+                if (giftableMember.id === command.user.id) {
+                    command.reply({content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true})
+                } else {
+                    if (database.dataBackpacks[giftableMember.id] != undefined) {
+                        database.dataBackpacks[giftableMember.id].getGift += 1;
+                        database.dataBackpacks[command.user.id].gifts -= 1
+                        command.reply({content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true})
+                        giftableMember.send('> **\\✨ ' + command.user.username + ' megajándékozott! \\🎆**');
+                        saveDatabase()
+                    } else {
+                        command.reply({content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true})
+                    }
+                }
+            } else {
+                if (giftableMember.id === command.user.id) {
+                    command.reply({content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true})
+                } else {
+                    command.reply({content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true})
+                }
+            }
+        } catch (error) {
+            command.reply({content: '> **\\❌ ' + error.toString() + '**', ephemeral: true})
+        }
+
+        return;
+    }
 
     if (command.commandName === `crossout`) {
         command.deferReply().then(() => {

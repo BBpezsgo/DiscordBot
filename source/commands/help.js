@@ -46,7 +46,7 @@ function getEmbedMessage(isPrivate, isMobile) {
                 '>  \\👤  `/profil` Statisztikák és matricák megtekintése.\n' +
                 '>  \\💰   `.pms` Biznisz, ami pénzt termel. \\❗ **Alfa verzió** \\❗\n' +
                 //'>     └    `.pms name [új név]` \\⛔ **Nem elérhető** \\⛔\n' +
-                '>  \\🎁   `.gift @Felhasználó` Egy felhasználó megajándékozása.'
+                '>  \\🎁   `/gift <felhasználó>` Egy felhasználó megajándékozása.'
             )
             .addField('Zene \\❗ Alfa verzió \\❗',
                 '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +

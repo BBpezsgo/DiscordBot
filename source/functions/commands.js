@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, SlashCommandStringOption } = require('@discordjs/builders');
+const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, SlashCommandStringOption, SlashCommandUserOption } = require('@discordjs/builders');
 const { Client } = require('discord.js')
 
 /**@param {Client} bot */
@@ -82,6 +82,14 @@ function CreateCommands(bot) {
         .addIntegerOption(commandQuizSub4)
         .addIntegerOption(commandQuizSub5)
         .addIntegerOption(commandQuizSub6)
+    const commandGiftSub = new SlashCommandUserOption()
+        .setName('user')
+        .setDescription('Felhasználó')
+        .setRequired(true)
+    const commandGift = new SlashCommandBuilder()
+        .setName('gift')
+        .setDescription('Egy felhasználó megajándékozása')
+        .addUserOption(commandGiftSub)
     
     const commandMarket = new SlashCommandBuilder()
         .setName('market')
@@ -99,6 +107,7 @@ function CreateCommands(bot) {
     const guildCommands = bot.guilds.cache.get('737954264386764812').commands
     guildCommands?.create(commandPing.toJSON())
     guildCommands?.create(commandWeather.toJSON())
+    guildCommands?.create(commandGift.toJSON())
     guildCommands?.create(commandXp.toJSON())
     guildCommands?.create(commandDev.toJSON())
     guildCommands?.create(commandHelp.toJSON())
