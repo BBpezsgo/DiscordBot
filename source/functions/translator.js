@@ -86,6 +86,8 @@ function TranslateMessage(message) {
             return new TranslateResult(message, "Folytatás", SHARD, false, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] [RESUMED]')) {
             return new TranslateResult(message, "Folytatva", SHARD, false, groupNames.shard)
+        } else if (message.startsWith('[WS => Shard 0] [ResumeHeartbeat] Sending a heartbeat.')) {
+            return new TranslateResult(message, "Heartbeat küldése (folytatás)", SHARD, false, groupNames.shard)
         } else if (message.startsWith('Hit a 429 while executing a request.')) {
             return new TranslateResult(message, "429 - Túl sok kérés! Próbáld meg " + (Math.floor(Number.parseInt(message.split('\n')[6].split(':')[1].replace(' ', '').replace('ms', '').trim())/1000)) + ' másodperc múlva', WARNING, false, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] WS_CLOSE_REQUESTED')) {
