@@ -1065,6 +1065,11 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
 async function processApplicationCommand(command) {
 
+    if (command.commandName == `gift`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return;
+    }
+
     if (command.commandName === `crossout`) {
         command.deferReply().then(() => {
             CrossoutTest(command, command.options.getString('search'))
