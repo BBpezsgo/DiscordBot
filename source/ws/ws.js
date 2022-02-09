@@ -71,7 +71,7 @@ class WebSocket {
             logManager.Log(DEBUG + ': ' + "connect", true)
         })
         this.server.on('connection', (socket) => {
-            logManager.Log(DEBUG + ': ' + "New connection", true)
+            logManager.Log(DEBUG + ': ' + "New connection: " + socket.remoteAddress, true)
         })
         this.server.on('request', () => {
             logManager.Log(DEBUG + ': ' + "Requiest", true)
@@ -95,7 +95,9 @@ class WebSocket {
 
     registerRoots() {
         this.app.get('/', (req, res) => {
-            var _password = req.query.password
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+
+            const _password = req.query.password
 
             if (_password == undefined) {
                 res.render('login', {})
@@ -107,7 +109,7 @@ class WebSocket {
                 return
             }
 
-            var view = req.query.view
+            const view = req.query.view
 
             if (view == 0) {
                 var servers = []
