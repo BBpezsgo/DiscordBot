@@ -38,7 +38,8 @@ const sleep = (ms) => {
 }
 
 class LogManager {
-    constructor() {
+    /**@param {boolean} isPhone */
+    constructor(isPhone) {
         /** @type {[LogMsg]}*/
         this.logs = []
         /** @type {number}*/
@@ -55,17 +56,22 @@ class LogManager {
         /**@type {boolean} */
         this.enableLog = true
 
+        /**@type {boolean} */
+        this.isPhone = isPhone
+
         setInterval(async () => {
             if (this.enableLog == true) {
                 if (this.timer > 3) {
                     for (let i = 0; i < this.logs.length; i++) {
                         const log = this.logs[i];
                         if (log.printed == false) {
-                            var nl = (this.loggedCount == 0) ? '\n' : ''
-                            if (log.count == 1) {
-                                print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | ' + log.count + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
-                            } else {
-                                print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                            if (log.priv == false && this.isPhone == false) {} else {
+                                var nl = (this.loggedCount == 0) ? '\n' : ''
+                                if (log.count == 1) {
+                                    print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | ' + log.count + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                                } else {
+                                    print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                                }
                             }
                             this.loggedCount += 1
                             this.logs[i].printed = true

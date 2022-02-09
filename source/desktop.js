@@ -14,7 +14,7 @@ const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
 const { databaseManager } = require('./functions/databaseManager.js')
 
-const logManager = new LogManager()
+const logManager = new LogManager(false)
 const statesManager = new StatesManager()
 
 const ColorRoles = {

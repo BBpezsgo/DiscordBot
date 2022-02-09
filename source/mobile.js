@@ -14,7 +14,7 @@ const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
 
 
-const logManager = new LogManager()
+const logManager = new LogManager(true)
 const statesManager = new StatesManager()
 
 
