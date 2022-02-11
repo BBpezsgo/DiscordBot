@@ -49,7 +49,7 @@ class WebSocket {
             res.send(JSON.stringify(dataToSendToClient))
          });
 
-        this.server = this.app.listen(port, "127.0.0.1", () => {
+        this.server = this.app.listen(port, "192.168.0.107", () => {
             logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
         })
         this.server.on('error', (err) => {
