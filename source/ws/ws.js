@@ -16,12 +16,13 @@ const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
 class WebSocket {
     /**
      * @param {string} password
+     * @param {string} ip
      * @param {number} port
      * @param {Discord.Client} client
      * @param {LogManager} logManager
      * @param {databaseManager} database
      */
-    constructor(password, port, client, logManager, database, StartBot, StopBot) {
+    constructor(password, ip, port, client, logManager, database, StartBot, StopBot) {
         this.password = password
         this.client = client
         this.StartBot = StartBot
@@ -49,7 +50,7 @@ class WebSocket {
             res.send(JSON.stringify(dataToSendToClient))
          });
 
-        this.server = this.app.listen(port, "192.168.0.107", () => {
+        this.server = this.app.listen(port, ip, () => {
             logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
         })
         this.server.on('error', (err) => {
