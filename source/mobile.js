@@ -6,6 +6,7 @@ const CommandWeather = require('./commands/weather')
 const CommandHelp = require('./commands/help')
 
 const { CrossoutTest } = require('./commands/crossout')
+const CommandRedditsave = require('./commands/redditsave')
 
 
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
@@ -172,6 +173,37 @@ async function logMessage(message, username, private = false.valueOf, author) {
 bot.on('interactionCreate', interaction => {
     if (interaction.isCommand()) {
         processApplicationCommand(interaction)
+    } else if (interaction.isButton()) {
+        if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
+            if (interaction.component.customId.includes(interaction.user.id)) {
+                interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
+                const button1 = new MessageButton()
+                    .setLabel("Letöltés")
+                    .setStyle("LINK")
+                    .setURL(interaction.message.embeds[0].url)
+                const button2 = new MessageButton()
+                    .setLabel("Törlés")
+                    .setCustomId("redditsaveDelete" + interaction.component.customId.replace('redditsaveDeleteMain', '').split('.')[0])
+                    .setStyle("SECONDARY")
+                const row = new MessageActionRow()
+                    .addComponents(button1, button2)
+                interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
+                return
+            }
+        }
+        if (interaction.component.customId.startsWith('redditsaveDelete')) {
+            if (interaction.component.customId.includes(interaction.user.id)) {
+                interaction.message.delete()
+                return
+            }
+        }
+        
+        try {
+            if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
+                interaction.reply({content: '> \\❗ **Ez nem a tied!**', ephemeral: true})
+                return
+            }
+        } catch (error) { }
     }
 });
 
@@ -900,6 +932,10 @@ bot.on('messageCreate', async message => { //Message
     }
 
     //#endregion
+
+    if (message.content.startsWith('https://www.reddit.com/r/')) {
+        CommandRedditsave(message)
+    }
 
     //#region News
     if (message.channel.id == incomingNewsChannel) {
