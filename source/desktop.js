@@ -789,7 +789,7 @@ function commandStore(sender) {
             '> \\🧰 ' + dayCrates + ' napi láda'
             , false)
         .addField('Sorsjegyek', '> \\💶 ' + smallLuckyCard + ' Black Jack\n> \\💷 ' + mediumLuckyCard + ' Buksza\n> \\💴 ' + largeLuckyCard + ' Fáraók Kincse', false)
-        .setFooter('Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!')
+        .setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!' })
         .setColor(database.dataBasic[sender.id].color)
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/briefcase_1f4bc.png')
     if (getGifts > 0) {
@@ -1090,7 +1090,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
             )
         .addField(`${titleText}`, `${optionText}`)
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
-        .setFooter("Vége:")
+        .setFooter({ text: "Vége:" })
         .setTimestamp(dateNow)
     if (image != undefined) {
         embed.setImage(image.url)
@@ -2169,12 +2169,12 @@ function processNewsMessage(message) {
     let role = ''
     const newDate = new Date(message.createdTimestamp)
     const embed = new Discord.MessageEmbed()
-        .setAuthor(ConvertNewsIdToName(message.author.id), message.author.displayAvatarURL())
+        .setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
         .setDescription(message.content)
         .setColor(Color.Highlight)
-        .setFooter('• ' + DateToStringNews(newDate));
+        .setFooter({ text: '• ' + DateToStringNews(newDate) });
     if (message.author.id == '802864588877856789') {
-        embed.setAuthor(ConvertNewsIdToName(message.author.id), message.author.displayAvatarURL(), 'https://crossout.net/en/#/')
+        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
         if (message.embeds.length > 0) {
             if (message.content.includes('@Entertainment')) {
                 role = '902881176719622145'
@@ -2216,10 +2216,10 @@ function processNewsMessage(message) {
                 embed.setImage(embed2.image.url)
             }
             embed.setDescription(embed2.description)
-            embed.setFooter(message.content.replace('@', '• #') + '\n• ' + DateToStringNews(newDate))
+            embed.setFooter({ text: message.content.replace('@', '• #') + '\n• ' + DateToStringNews(newDate) })
         }
     } else if (message.author.id == '813398275305898014') {
-        embed.setAuthor(ConvertNewsIdToName(message.author.id), message.author.displayAvatarURL(), 'https://wz2100.net/')
+        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://wz2100.net/' })
         if (message.embeds.length > 0) {
             const embed2 = message.embeds[0]
 
@@ -2240,7 +2240,7 @@ function processNewsMessage(message) {
         }
         role = '902878851938517043'
     } else if (message.author.id == '802864713323118603') {
-        embed.setAuthor(ConvertNewsIdToName(message.author.id), message.author.displayAvatarURL())
+        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
         if (message.embeds.length == 1) {
             let content = message.content.replace('@Free Games Ping', '')
             let title = ''
@@ -2281,7 +2281,7 @@ function processNewsMessage(message) {
         }
         role = '902878798956093510'
     } else if (message.author.id == '875340034537062400') {
-        embed.setAuthor(ConvertNewsIdToName(message.author.id), 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/apple-icon-180x180.png', 'https://www.minecraft.net/en-us')
+        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/apple-icon-180x180.png', url: 'https://www.minecraft.net/en-us' })
 
         let content = message.content
         let title = ''
@@ -2323,9 +2323,9 @@ function processNewsMessage(message) {
         if (message.author.bot == false && message.author.system == false) {
             const senderMember = message.guild.members.cache.get(message.author.id)
             if (senderMember != undefined) {
-                embed.setAuthor(senderMember.displayName, message.author.displayAvatarURL())
+                embed.setAuthor({ name: senderMember.displayName, iconURL: message.author.displayAvatarURL() })
             } else {
-                embed.setAuthor(message.author.username, message.author.displayAvatarURL())
+                embed.setAuthor({ name: message.author.username, iconURL: message.author.displayAvatarURL() })
             }
         }
     }
@@ -4150,9 +4150,9 @@ function getMailMessage(user, selectedIndex = 0) {
         });
 
         embed.addField('Cím: "' + mail.title + '"', 'Üzenet: "' + mail.context + '"\n' + 'Fogadó: @' + mail.reciver.name)
-            .setFooter('.mail wt [cím] Cím beállítása\n' +
+            .setFooter({ text: '.mail wt [cím] Cím beállítása\n' +
                 '.mail wc [üzenet] Üzenet beállítása\n' +
-                '.mail wr [@Felhasználó | Azonosító] Címzet beállítása')
+                '.mail wr [@Felhasználó | Azonosító] Címzet beállítása' })
 
         const button4 = new MessageButton()
             .setLabel("Küldés")

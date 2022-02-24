@@ -66,12 +66,12 @@ async function execute(command) {
         }
 
         const embed = new Discord.MessageEmbed()
-            .setAuthor(command.user.username, command.user.displayAvatarURL())
+            .setAuthor({ name: command.user.username, iconURL: command.user.displayAvatarURL() })
             .setTitle('Rang')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/beer-mug_1f37a.png')
             .addField(rankName,'\\' + xpRankIcon(score) + ' ' + progressBar + ' \\❔')
             .setColor(userColor)
-            .setFooter(abbrev(score) + ' / ' + abbrev(next) + '\nKell még: 🍺' + abbrev(next - score) + ' xp')
+            .setFooter({ text: abbrev(score) + ' / ' + abbrev(next) + '\nKell még: 🍺' + abbrev(next - score) + ' xp' })
         command.reply({embeds: [embed]});
     } catch (error) {
         command.reply('> \\❌ ' + error.toString())
