@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, SlashCommandStringOption, SlashCommandUserOption } = require('@discordjs/builders');
 const { Client } = require('discord.js')
+const { GetFonts, StringToFont } = require('../commands/fonts')
+const Discord = require('discord.js')
 
 /**@param {Client} bot */
 function CreateCommands(bot) {
@@ -90,7 +92,7 @@ function CreateCommands(bot) {
         .setName('gift')
         .setDescription('Egy felhasználó megajándékozása')
         .addUserOption(commandGiftSub)
-    
+
     const commandMarket = new SlashCommandBuilder()
         .setName('market')
         .setDescription('Piac')
@@ -103,6 +105,24 @@ function CreateCommands(bot) {
         .setName('crossout')
         .setDescription('Crossout')
         .addStringOption(commandCrossoutSub)
+
+    const commandFont = new SlashCommandBuilder()
+        .setName('font')
+        .setDescription('Font converter')
+    const commandFontSub0 = new SlashCommandStringOption()
+        .setName('font')
+        .setDescription('Font')
+        .setRequired(true)
+    const commandFontSub1 = new SlashCommandStringOption()
+        .setName('text')
+        .setDescription('Text')
+        .setRequired(true)
+    const fonts = GetFonts()
+    for (let i = 1; i < fonts.length; i++) {
+        commandFontSub0.addChoice(StringToFont("Lorem ipsum", i), i.toString())
+    }
+    commandFont.addStringOption(commandFontSub1)
+    commandFont.addStringOption(commandFontSub0)
 
     const guildCommands = bot.guilds.cache.get('737954264386764812').commands
     guildCommands?.create(commandPing.toJSON())
@@ -119,6 +139,7 @@ function CreateCommands(bot) {
     guildCommands?.create(commandQuiz.toJSON())
     guildCommands?.create(commandMarket.toJSON())
     guildCommands?.create(commandCrossout.toJSON())
+    guildCommands?.create(commandFont.toJSON())
 }
 
 /**@param {Client} bot */
@@ -141,4 +162,4 @@ async function DeleteCommands(bot) {
 
 
 
-module.exports = {CreateCommands, DeleteCommands}
+module.exports = { CreateCommands, DeleteCommands }

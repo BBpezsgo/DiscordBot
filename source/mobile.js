@@ -7,6 +7,7 @@ const CommandHelp = require('./commands/help')
 
 const { CrossoutTest } = require('./commands/crossout')
 const CommandRedditsave = require('./commands/redditsave')
+const { CommandFont } = require('./commands/fonts')
 
 
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
@@ -1215,6 +1216,11 @@ async function processApplicationCommand(command) {
 
     if (command.commandName === `bolt`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem elérhető.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return
+    }
+
+    if (command.commandName === `font`) {
+        CommandFont(command)
         return
     }
 }

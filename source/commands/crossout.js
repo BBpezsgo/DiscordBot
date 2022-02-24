@@ -36,9 +36,7 @@ function ProgressBar(val, width, max = 100) {
     return bar
 }
 
-/**
- * @param {Discord.CommandInteraction<Discord.CacheType>} command
-*/
+/** @param {Discord.CommandInteraction<Discord.CacheType>} command */
 function CrossoutTest(command, searchName) {
     let url = 'https://crossoutdb.com/api/v1/items?query=' + searchName
 

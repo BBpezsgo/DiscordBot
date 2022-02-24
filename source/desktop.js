@@ -7,6 +7,7 @@ const CommandShop = require('./commands/database/shop')
 const CommandBusiness = require('./commands/database/businees')
 const { CrossoutTest } = require('./commands/crossout')
 const CommandRedditsave = require('./commands/redditsave')
+const { CommandFont } = require('./commands/fonts')
 
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./commands/database/xpFunctions')
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
@@ -3033,6 +3034,12 @@ async function processApplicationCommand(command) {
         } catch (error) {
             command.reply({content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true})
         }
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `font`) {
+        CommandFont(command)
         userstatsSendCommand(command.user)
         return
     }
