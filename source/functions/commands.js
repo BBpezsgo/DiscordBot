@@ -118,7 +118,8 @@ function CreateCommands(bot) {
         .setDescription('Text')
         .setRequired(true)
     const fonts = GetFonts()
-    for (let i = 1; i < fonts.length; i++) {
+    for (let i = 0; i < fonts.length; i++) {
+        if (i == 1) { continue }
         commandFontSub0.addChoice(StringToFont("Lorem ipsum", i), i.toString())
     }
     commandFont.addStringOption(commandFontSub1)

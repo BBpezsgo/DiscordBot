@@ -42,13 +42,19 @@ function GetVideoLink(rawHtmlFile) {
     return dom.window.document.getElementsByClassName('downloadbutton')[0].getAttribute('href')
 }
 
+/**@param {string} rawHtmlFile @returns {string} */
+function GetGifLink(rawHtmlFile) {
+    const dom = new JSDOM(rawHtmlFile);
+    return 'https://redditsave.com' + dom.window.document.getElementsByClassName('downloadbutton')[0].getAttribute('href')
+}
+
 /**@param {string} rawHtmlFile @param {string} redditLink */
-function GetInformationsVideo(rawHtmlFile, redditLink) {
+function GetInformations(rawHtmlFile, redditLink) {
     const info = { subreddit: '?', filesize: '? MB', permalink: redditLink }
     const dom = new JSDOM(rawHtmlFile)
     const infoTable = dom.window.document.getElementsByClassName('table')[0].getElementsByTagName('tbody')[0]
     info.subreddit = 'r/' + infoTable.getElementsByTagName('tr')[2].getElementsByTagName('td')[1].textContent
-    info.filesize = infoTable.getElementsByTagName('tr')[4].getElementsByTagName('td')[1].textContent
+    info.filesize = infoTable.getElementsByTagName('tr')[4].getElementsByTagName('td')[1].textContent.trimEnd()
     return info
 }
 
@@ -142,35 +148,56 @@ module.exports = async (message) => {
                 var videoOrGif = GifOrVideo(rawHtml)
 
                 if (videoOrGif == 1) {
-                    const postInfo = GetInformationsVideo(rawHtml.toString('utf8'), messageContentUrl)
+                    const postInfo = GetInformations(rawHtml.toString('utf8'), messageContentUrl)
                     const videoUrl = GetVideoLink(rawHtml.toString('utf8'))
 
                     const button1 = new MessageButton()
-                        .setLabel("Letöltés")
+                        .setLabel("Letöltés (" + postInfo.filesize + ")")
                         .setStyle("LINK")
                         .setURL(videoUrl)
                     const button2 = new MessageButton()
                         .setLabel("Törlés")
                         .setCustomId("redditsaveDelete" + message.author.id)
                         .setStyle("SECONDARY")
-                        .setDisabled(true)
                     const button3 = new MessageButton()
                         .setLabel("Üzenetem törlése")
                         .setCustomId("redditsaveDeleteMain" + message.author.id + '.' + message.id)
                         .setStyle("SECONDARY")
-                        .setDisabled(true)
                     const row = new MessageActionRow()
                         .addComponents(button1, button2, button3)
                     
                     const embed = new MessageEmbed()
                         .setAuthor({ iconURL: 'https://www.reddit.com/favicon.ico', name: postInfo.subreddit, url: postInfo.permalink })
                         .setURL(videoUrl)
-                        .setFooter({ text: 'Videó letöltése...', iconURL: SPINNER })
                     await replyMessage.edit({ embeds: [embed], components: [row] })
 
-                    DownloadVideo(message, videoUrl, replyMessage, postInfo)
+                    fs.unlinkSync('./' + message.id)
+                    //DownloadVideo(message, videoUrl, replyMessage, postInfo)
                 } else if (videoOrGif == 2) {
-                    message.reply("Gif")
+                    const postInfo = GetInformations(rawHtml.toString('utf8'), messageContentUrl)
+                    const videoUrl = GetGifLink(rawHtml.toString('utf8'))
+
+                    const button1 = new MessageButton()
+                        .setLabel("Letöltés (" + postInfo.filesize + ")")
+                        .setStyle("LINK")
+                        .setURL(videoUrl)
+                    const button2 = new MessageButton()
+                        .setLabel("Törlés")
+                        .setCustomId("redditsaveDelete" + message.author.id)
+                        .setStyle("SECONDARY")
+                    const button3 = new MessageButton()
+                        .setLabel("Üzenetem törlése")
+                        .setCustomId("redditsaveDeleteMain" + message.author.id + '.' + message.id)
+                        .setStyle("SECONDARY")
+                    const row = new MessageActionRow()
+                        .addComponents(button1, button2, button3)
+                    
+                    const embed = new MessageEmbed()
+                        .setAuthor({ iconURL: 'https://www.reddit.com/favicon.ico', name: postInfo.subreddit, url: postInfo.permalink })
+                        .setURL(videoUrl)
+                    await replyMessage.edit({ embeds: [embed], components: [row] })
+
+                    fs.unlinkSync('./' + message.id)
                 } else {
                     message.reply("Other")
                 }

@@ -178,14 +178,8 @@ bot.on('interactionCreate', interaction => {
         if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
             if (interaction.component.customId.includes(interaction.user.id)) {
                 interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
-                const button1 = new MessageButton()
-                    .setLabel("Letöltés")
-                    .setStyle("LINK")
-                    .setURL(interaction.message.embeds[0].url)
-                const button2 = new MessageButton()
-                    .setLabel("Törlés")
-                    .setCustomId("redditsaveDelete" + interaction.component.customId.replace('redditsaveDeleteMain', '').split('.')[0])
-                    .setStyle("SECONDARY")
+                const button1 = interaction.message.components[0].components[0]
+                const button2 = interaction.message.components[0].components[1]
                 const row = new MessageActionRow()
                     .addComponents(button1, button2)
                 interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
