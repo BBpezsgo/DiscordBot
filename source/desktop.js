@@ -96,7 +96,7 @@ const ytdl = require('ytdl-core')
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
 const WS = require('./ws/ws')
-var ws = new WS('1234', '192.168.0.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager)
+var ws = new WS('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager)
 
 let musicArray = []
 let musicFinished = true

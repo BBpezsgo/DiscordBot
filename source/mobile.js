@@ -80,7 +80,7 @@ const ytdl = require('ytdl-core')
 
 
 const WS = require('./ws/ws')
-var ws = new WS('1234', '192.168.0.102', 5665, bot, logManager, null, null, null, statesManager)
+var ws = new WS('1234', '192.168.1.102', 5665, bot, logManager, null, null, null, statesManager)
 
 let musicArray = []
 let musicFinished = true
