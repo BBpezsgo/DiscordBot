@@ -5,6 +5,7 @@ const path = require('path')
 const Discord = require('discord.js')
 const { LogManager, LogMsg, MessageCodes } = require('../functions/log.js')
 const { databaseManager } = require('../functions/databaseManager.js')
+const { StatesManager } = require('../functions/statesManager')
 
 const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
 const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
@@ -21,8 +22,9 @@ class WebSocket {
      * @param {Discord.Client} client
      * @param {LogManager} logManager
      * @param {databaseManager} database
+     * @param {StatesManager} statesManager
      */
-    constructor(password, ip, port, client, logManager, database, StartBot, StopBot) {
+    constructor(password, ip, port, client, logManager, database, StartBot, StopBot, statesManager) {
         this.password = password
         this.client = client
         this.StartBot = StartBot
@@ -30,6 +32,8 @@ class WebSocket {
 
         this.logManager = logManager
         this.database = database
+
+        this.statesManager = statesManager
 
         this.app = express()
         this.app.engine('hbs', engine({
@@ -51,34 +55,42 @@ class WebSocket {
          });
 
         this.server = this.app.listen(port, ip, () => {
-            logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
+            this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
+            this.statesManager.handlebarsDone = true
+            this.statesManager.handlebarsURL = 'http://' + this.server.address().address + ":" + this.server.address().port
         })
         this.server.on('error', (err) => {
-            logManager.Log(ERROR + ': ' + err, true)
+            if (err.message.startsWith('listen EADDRNOTAVAIL: address not available')) {
+                this.statesManager.handlebarsErrorMessage = 'Address not available';
+            } else {
+                this.statesManager.handlebarsErrorMessage = err.message;
+            }
         })
         this.server.on('checkContinue', () => {
-            logManager.Log(DEBUG + ': ' + "Check continue", true)
+            this.logManager.Log(DEBUG + ': ' + "Check continue", true)
         })
         this.server.on('checkExpectation', () => {
-            logManager.Log(DEBUG + ': ' + "Check expectation", true)
+            this.logManager.Log(DEBUG + ': ' + "Check expectation", true)
         })
         this.server.on('clientError', (err, socket) => {
-            logManager.Log(ERROR + ': ' + err, true)
+            this.logManager.Log(ERROR + ': ' + err, true)
         })
         this.server.on('close', () => {
-            logManager.Log(SERVER + ': ' + "Closed", true)
+            this.statesManager.handlebarsDone = false
+            this.statesManager.handlebarsURL = ''
+            this.logManager.Log(SERVER + ': ' + "Closed", true)
         })
         this.server.on('connect', (req, socket, head) => {
-            logManager.Log(DEBUG + ': ' + "connect", true)
+            this.logManager.Log(DEBUG + ': ' + "connect", true)
         })
         this.server.on('connection', (socket) => {
-            logManager.Log(DEBUG + ': ' + "New connection: " + socket.remoteAddress, true)
+            this.statesManager.handlebarsClients.push(socket)
         })
         this.server.on('request', () => {
-            logManager.Log(DEBUG + ': ' + "Requiest", true)
+            this.statesManager.handlebarsRequiests.push(10)
         })
         this.server.on('upgrade', (req, socket, head) => {
-            logManager.Log(DEBUG + ': ' + "upgrade", true)
+            this.logManager.Log(DEBUG + ': ' + "upgrade", true)
         })
     }
 

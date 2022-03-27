@@ -125,22 +125,26 @@ function CreateCommands(bot) {
     commandFont.addStringOption(commandFontSub1)
     commandFont.addStringOption(commandFontSub0)
 
-    const guildCommands = bot.guilds.cache.get('737954264386764812').commands
-    guildCommands?.create(commandPing.toJSON())
-    guildCommands?.create(commandWeather.toJSON())
-    guildCommands?.create(commandGift.toJSON())
-    guildCommands?.create(commandXp.toJSON())
-    guildCommands?.create(commandDev.toJSON())
-    guildCommands?.create(commandHelp.toJSON())
-    guildCommands?.create(commandCrate.toJSON())
-    guildCommands?.create(commandNapi.toJSON())
-    guildCommands?.create(commandProfil.toJSON())
-    guildCommands?.create(commandBackpack.toJSON())
-    guildCommands?.create(commandShop.toJSON())
-    guildCommands?.create(commandQuiz.toJSON())
-    guildCommands?.create(commandMarket.toJSON())
-    guildCommands?.create(commandCrossout.toJSON())
-    guildCommands?.create(commandFont.toJSON())
+    try {
+        const guildCommands = bot.guilds.cache.get('737954264386764812').commands
+        guildCommands?.create(commandPing.toJSON())
+        guildCommands?.create(commandWeather.toJSON())
+        guildCommands?.create(commandGift.toJSON())
+        guildCommands?.create(commandXp.toJSON())
+        guildCommands?.create(commandDev.toJSON())
+        guildCommands?.create(commandHelp.toJSON())
+        guildCommands?.create(commandCrate.toJSON())
+        guildCommands?.create(commandNapi.toJSON())
+        guildCommands?.create(commandProfil.toJSON())
+        guildCommands?.create(commandBackpack.toJSON())
+        guildCommands?.create(commandShop.toJSON())
+        guildCommands?.create(commandQuiz.toJSON())
+        guildCommands?.create(commandMarket.toJSON())
+        guildCommands?.create(commandCrossout.toJSON())
+        guildCommands?.create(commandFont.toJSON())
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 /**@param {Client} bot */

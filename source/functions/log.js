@@ -1,13 +1,39 @@
 const fontColor = '\033[37m'
 const timestampForeColor = '\033[30m'
 
-const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
-const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
-const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + '\033[37m' + ']'
-const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
-const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
-const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
-const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
+const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + fontColor + ']'
+const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + fontColor + ']'
+const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + fontColor + ']'
+const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + fontColor + ']'
+const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + fontColor + ']'
+const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + fontColor + ']'
+const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + fontColor + ']'
+
+const CliColor = {
+    FgBlack: "\x1b[30m",
+    FgRed: "\x1b[31m",
+    FgGreen: "\x1b[32m",
+    FgYellow: "\x1b[33m",
+    FgBlue: "\x1b[34m",
+    FgMagenta: "\x1b[35m",
+    FgCyan: "\x1b[36m",
+    FgWhite: "\x1b[37m",
+
+    BgBlack: "\x1b[40m",
+    BgRed: "\x1b[41m",
+    BgGreen: "\x1b[42m",
+    BgYellow: "\x1b[43m",
+    BgBlue: "\x1b[44m",
+    BgMagenta: "\x1b[45m",
+    BgCyan: "\x1b[46m",
+    BgWhite: "\x1b[47m",
+
+    FgDefault: fontColor
+}
+
+const { StatesManager } = require('./statesManager.js')
+
+const Discord = require('discord.js')
 
 const MessageCodes = {
     HandlebarsStartLoading: 0,
@@ -19,8 +45,8 @@ const spinner = ['─','\\','|','/']
 const { TranslateResult } = require('./translator.js')
 
 /**Reprints a line on the console */
-const reprint = (text) => {
-    process.stdout.cursorTo(0, 0)
+const reprint = (text, x = 0, y = 0) => {
+    process.stdout.cursorTo(x, y)
     process.stdout.clearLine()
     process.stdout.write(text)
     process.stdout.write('\n')
@@ -37,9 +63,165 @@ const sleep = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function chars(char, len) {
+    txt = ""
+    for (let i = 0; i < len; i++) {
+        txt += char
+    }
+    return txt
+}
+
+/**@param {string} str */
+function ThisContainsColorcode(str) {
+    return (
+        str.includes(CliColor.BgBlack) ||
+        str.includes(CliColor.BgBlue) ||
+        str.includes(CliColor.BgCyan) ||
+        str.includes(CliColor.BgGreen) ||
+        str.includes(CliColor.BgMagenta) ||
+        str.includes(CliColor.BgRed) ||
+        str.includes(CliColor.BgWhite) ||
+        str.includes(CliColor.BgYellow) ||
+        str.includes(CliColor.FgBlack) ||
+        str.includes(CliColor.FgBlue) ||
+        str.includes(CliColor.FgCyan) ||
+        str.includes(CliColor.FgDefault) ||
+        str.includes(CliColor.FgGreen) ||
+        str.includes(CliColor.FgMagenta) ||
+        str.includes(CliColor.FgRed) ||
+        str.includes(CliColor.FgWhite) ||
+        str.includes(CliColor.FgYellow)
+    )
+}
+
+function RemoveColorcodes(text) {
+    var txt = text + ''
+    while (ThisContainsColorcode(txt)) {
+        txt = txt.replace(CliColor.BgBlack, '')
+        txt = txt.replace(CliColor.BgBlue, '')
+        txt = txt.replace(CliColor.BgCyan, '')
+        txt = txt.replace(CliColor.BgGreen, '')
+        txt = txt.replace(CliColor.BgMagenta, '')
+        txt = txt.replace(CliColor.BgRed, '')
+        txt = txt.replace(CliColor.BgWhite, '')
+        txt = txt.replace(CliColor.BgYellow, '')
+        txt = txt.replace(CliColor.FgBlack, '')
+        txt = txt.replace(CliColor.FgBlue, '')
+        txt = txt.replace(CliColor.FgCyan, '')
+        txt = txt.replace(CliColor.FgDefault, '')
+        txt = txt.replace(CliColor.FgGreen, '')
+        txt = txt.replace(CliColor.FgMagenta, '')
+        txt = txt.replace(CliColor.FgRed, '')
+        txt = txt.replace(CliColor.FgWhite, '')
+        txt = txt.replace(CliColor.FgYellow, '')
+    }
+    return txt
+}
+
+/**@param {string} text @param {number} width */
+function genLine(text, width) {
+    var txt = text + ''
+    txt += chars(' ', width - RemoveColorcodes(text).length)
+    return txt
+}
+
+function genLine(text, width) {
+    var txt = text + ''
+    txt += chars(' ', width - txt.length)
+    return txt
+}
+
+const WsStatus = ['READY',
+    'CONNECTING',
+    'RECONNECTING',
+    'IDLE',
+    'NEARLY',
+    'DISCONNECTED',
+    'WAITING_FOR_GUILDS',
+    'IDENTIFYING',
+    'RESUMING']
+
+function AddZeros(num) {
+    if (num < 10) {
+        return '0' + num
+    } else {
+        return num
+    }
+}
+/**@param {Date} date */
+function GetTime(date) {
+    if (date) {
+        return date.getHours() + ':' + AddZeros(date.getMinutes()) + ':' + AddZeros(date.getSeconds())
+    } else {
+        return '--:--:--'
+    }
+}
+
+/**@param {number} bytes */
+function GetDataSize(bytes) {
+    var txt = "bytes"
+    var val = bytes
+    if (val > 1024) {
+        txt = "Kb"
+        val = val / 1024
+    }
+    if (val > 1024) {
+        txt = "Mb"
+        val = val / 1024
+    }
+    if (val > 1024) {
+        txt = "Gb"
+        val = val / 1024
+    }
+
+    return Math.floor(val) + " " + txt
+}
+
+/**@param {string} error @param {boolean} ready @param {string} url */
+function StateText_HB(error, ready, url) {
+    if (error.length > 0) {
+        return CliColor.FgRed + error + CliColor.FgDefault + chars(' ', 15)
+    }
+    if (ready == true) {
+        if (url.length > 0) {
+            return 'Listening on ' + url
+        }
+        return "Ready"
+    } else {
+        return "Loading"
+    }
+}
+
+/**@param {string} text */
+function Capitalize(text) {
+    var str = text
+    if (str.includes(' ') == true) {
+        return str.charAt(0).toUpperCase() + str.slice(1)
+    }
+
+    const arr = str.split(" ");
+
+    for (var i = 0; i < arr.length; i++) {
+        arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+    }
+
+    const str2 = arr.join(" ");
+    return str2
+}
+
+function StateText_WS(state) {
+    if (state == 'IDLE') {
+        return 'Idle'
+    }
+    if (state == 'READY') {
+        return 'Ready'
+    }
+    return Capitalize(state)
+}
+
 class LogManager {
     /**@param {boolean} isPhone */
-    constructor(isPhone) {
+    constructor(isPhone, bot, statesManager) {
         /** @type {[LogMsg]}*/
         this.logs = []
         /** @type {number}*/
@@ -59,19 +241,30 @@ class LogManager {
         /**@type {boolean} */
         this.isPhone = isPhone
 
+        /**@type {Discord.Client} */
+        this.bot = bot
+
+        /**@type {StatesManager} */
+        this.statesManager = statesManager
+
+        /** @type {number}*/
+        this.deltaTime = 0
+        /** @type {number}*/
+        this.lastTime = 0
+
         setInterval(async () => {
             if (this.enableLog == true) {
                 if (this.timer > 3) {
                     for (let i = 0; i < this.logs.length; i++) {
                         const log = this.logs[i];
                         if (log.printed == false) {
-                            if (log.priv == false && this.isPhone == false) {} else {
-                                var nl = (this.loggedCount == 0) ? '\n' : ''
-                                if (log.count == 1) {
-                                    print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | ' + log.count + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
-                                } else {
-                                    print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
-                                }
+                            if (log.priv == false && this.isPhone == false) {} else {                                    
+                                    var nl = (this.loggedCount == 0) ? '\n' : ''
+                                    if (log.count == 1) {
+                                        //print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | ' + log.count + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                                    } else {
+                                        //print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
+                                    }
                             }
                             this.loggedCount += 1
                             this.logs[i].printed = true
@@ -94,12 +287,81 @@ class LogManager {
                     txt = txt.trimStart()
                 }
                 reprint(txt)
-                this.loadingIndex += 1
-                if (this.loadingIndex >= spinner.length) {
-                    this.loadingIndex = 0
+            }
+                
+            this.loadingIndex += 1
+            if (this.loadingIndex >= spinner.length) {
+                this.loadingIndex = 0
+            }
+
+            var delIndex = -1
+            for (let i = 0; i < this.statesManager.handlebarsRequiests.length; i++) {
+                this.statesManager.handlebarsRequiests[i] -= this.deltaTime
+                if (this.statesManager.handlebarsRequiests[i] <= 0) {
+                    delIndex = i
                 }
             }
+
+            if (delIndex > -1) {
+                this.statesManager.handlebarsRequiests.splice(delIndex)
+            }
+
+            const now = Date.now()
+            this.deltaTime = now - this.lastTime
+            this.lastTime = now
+
+            this.RefreshScreen()
         }, 100);
+    }
+
+    GetSocketState(socket) {
+        if (socket.connecting == true) {
+            return spinner[this.loadingIndex]
+        }
+        if (socket.destroyed == true) {
+            return "X"
+        }
+
+        return ""
+    }
+
+    RefreshScreen() {
+        const window = {width: 60, height: 20}
+        var txt = '┌' + chars('─', window.width-2) + '┒\n'
+        txt += '│ ' + genLine(genLine('Ready at:', 20) + GetTime(this.bot.readyAt), window.width-4) + ' ┃\n'
+        txt += '│ ' + genLine(genLine('Uptime:', 20) + Math.floor(this.bot.uptime/1000) + ' s', window.width-4) + ' ┃\n'
+        txt += '│ ' + genLine(genLine('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width-4) + ' ┃\n'
+        txt += '│ ' + genLine(genLine('WS State:', 20) + StateText_WS(WsStatus[this.bot.ws.status]), window.width-4) + ' ┃\n'
+        txt += '│ ' + genLine('', window.width-4) + ' ┃\n'
+        txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.handlebarsErrorMessage, this.statesManager.handlebarsDone, this.statesManager.handlebarsURL), window.width-4) + ' ┃\n'
+        txt += '│ ' + genLine(genLine('HB Requiests:', 20) + this.statesManager.handlebarsRequiests.length, window.width-4) + ' ┃\n'
+        for (let i = 0; i < this.statesManager.handlebarsClients.length; i++) {
+            const socket = this.statesManager.handlebarsClients[i];
+            if (i == 0) {
+                txt += '│ ' + genLine(genLine('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width-4) + ' ┃\n'
+            } else {
+                txt += '│ ' + genLine(genLine('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + ", "  + "]", window.width-4) + ' ┃\n'
+            }
+        }
+        if (this.statesManager.shardCurrentlyLoading == true) {
+            txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' Shard:', 20) + this.statesManager.shardCurrentlyLoadingText, window.width-4) + ' ┃\n'
+        }
+        if (this.statesManager.shardErrorText.length > 0) {
+            txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.shardErrorText + CliColor.FgDefault, window.width-4) + chars(' ', 15) + ' ┃\n'
+        }
+        if (this.statesManager.ytdlCurrentlyLoading == true) {
+            txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width-4) + ' ┃\n'
+        }
+        //txt += '˥ ˦ ˧ ˨ ˩' + '\n'
+        //txt += '˹˺˻˼' + '\n'
+        const remaingHeight = window.height - txt.split('\n').length - 1
+        for (let i = 0; i < remaingHeight; i++) {
+            txt += '│ ' + genLine('', window.width-4) + ' ┃\n'
+        }
+        txt += '┕' + chars('━', window.width-2) + '┛\n'
+        txt += chars(' ', window.width) + '\n'
+
+        reprint(txt)
     }
 
     /**
@@ -200,6 +462,10 @@ class LogManager {
         }
 
         this.timer = 0
+    }
+
+    Event(message) {
+
     }
 
     type = {

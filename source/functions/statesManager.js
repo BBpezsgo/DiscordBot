@@ -1,12 +1,14 @@
-
 class StatesManager {
     constructor() {
         /**@type {boolean} */
         this.botLoaded = false
+        /**@type {boolean} */
+        this.botReady = false
         /**@type {number} */
         this.ping = 0
         /**@type {string} */
         this.loadingProgressText = 'Betöltés...'
+
         /**@type {boolean} */
         this.ytdlCurrentlyLoading = false
         /**@type {string} */
@@ -17,16 +19,31 @@ class StatesManager {
         this.ytdlCurrentlyPlayingText = ''
         /**@type {string} */
         this.ytdlCurrentlyPlayingUrl = ''
+
         /**@type {boolean} */
         this.shardCurrentlyLoading = false
         /**@type {string} */
         this.shardCurrentlyLoadingText = ''
+        /**@type {string} */
+        this.shardErrorText = ''
+
         /**@type {boolean} */
         this.stateCurrentlyConnected = false
         /**@type {boolean} */
         this.stateCurrentlyShard = false
         /**@type {boolean} */
         this.stateCurrentlyHearthbeat = false
+
+        /**@type {boolean} */
+        this.handlebarsDone = false
+        /**@type {string} */
+        this.handlebarsErrorMessage = ''
+        /**@type {string} */
+        this.handlebarsURL = ''
+        /**@type {[Socket]} */
+        this.handlebarsClients = []
+        /**@type {[number]} [lifetime] */
+        this.handlebarsRequiests = []
     }
 
     /**@param {string} message */
@@ -35,103 +52,140 @@ class StatesManager {
         } else if (message.startsWith('Preparing to connect to the gateway...')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Csatlakozás...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Manager] Fetched Gateway Information')) {
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Manager] Session Limit Information')) {
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Manager] Spawning shards: ')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Shard-ok létrehozása...'
             this.stateCurrentlyShard = false
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [CONNECT]')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Csatlakozva'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Setting a HELLO timeout for ')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = '\'HELLO\' időtúllépés beállítása...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [CONNECTED] wss://gateway.discord.gg/?v=6&encoding=json in ')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Csatlakozva a szerverhez'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Clearing the HELLO timeout.')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = '\'HELLO\' időtúllépés törölve'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Setting a heartbeat interval for ')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = '\'heartbeat\' beállítása...'
             this.stateCurrentlyHearthbeat = false
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [IDENTIFY] Shard 0/1')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Shard ellenőrizve...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [READY] Session ')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'A Szerver kész'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [ReadyHeartbeat] Sending a heartbeat.')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = '\'heartbeat\' küldése...'
             this.stateCurrentlyHearthbeat = false
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Shard received all its guilds. Marking as fully ready.')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Befejezés...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Heartbeat acknowledged, latency of ')) {
             this.ping = message.replace('[WS => Shard 0] Heartbeat acknowledged, latency of ', '')
             this.stateCurrentlyShard = true
             this.stateCurrentlyHearthbeat = true
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [HeartbeatTimer] Sending a heartbeat.')) {
             this.stateCurrentlyHearthbeat = true
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Manager] Couldn\'t reconnect or fetch information about the gate')) {
+            this.shardErrorText = 'Couldn\'t reconnect or fetch information about the gate'
         } else if (message.startsWith('[WS => Manager] Possible network error occurred. Retrying in 5s...')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Újracsatlakozás...'
             this.stateCurrentlyShard = false
+            this.shardErrorText = 'Possible network error occurred.'
         } else if (message.startsWith('[WS => Shard 0] [DESTROY]')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Shard törölve'
             this.stateCurrentlyShard = false
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Tried to send packet \'{')) {
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Shard was destroyed but no WebSocket connection was present! Reconnecting...')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Újracsatlakozás...'
             this.stateCurrentlyShard = false
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Manager] Manager was destroyed. Called by:')) {
+            this.shardCurrentlyLoading = false
+            this.shardCurrentlyLoadingText = ''
+            this.shardErrorText = 'Manager was destroyed.'
         } else if (message.startsWith('[WS => Shard 0] [CLOSE]')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Kilépés...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Clearing the heartbeat interval.')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = '\'heartbeat\' időtúllépés törölve'
             this.stateCurrentlyHearthbeat = false
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Session ID is present, attempting an immediate reconnect...')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Újracsatlakozás...'
             this.stateCurrentlyShard = false
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] WS State: CLOSED')) {
             this.shardCurrentlyLoading = false
             this.ping = 0
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] A connection object was found. Cleaning up before continuing.')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Tisztítás...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] WS State: CONNECTING')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Csatlakozás...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] Failed to connect to the gateway, requeueing...')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Újracsatlakozás...'
             this.stateCurrentlyShard = false
+            this.shardErrorText = 'Failed to connect to the gateway, requeueing...'
         } else if (message.startsWith('[WS => Manager] Shard Queue Size: 1; continuing in 5 seconds...')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Folytatás...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [RESUME]')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Folytatás...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [RESUMED]')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Folytatás...'
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [ResumeHeartbeat] Sending a heartbeat')) {
             this.shardCurrentlyLoading = false
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [INVALID SESSION] Resumable: false.')) {
+            this.shardErrorText = '[INVALID SESSION]'
         } else if (message.startsWith('[WS => Shard 0] An open connection was found, attempting an immediate identify.')) {
+            this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [RECONNECT] Discord asked us to reconnect')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Újracsatlakozás...'
             this.stateCurrentlyShard = false
+            this.shardErrorText = ''
         } else if (message.startsWith('429 hit on route /gateway/bot')) {
         } else if (message.startsWith('[VOICE (') && message.includes(')]: [WS] >> {')) {
             this.ytdlCurrentlyLoading = true

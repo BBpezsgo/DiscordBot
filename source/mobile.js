@@ -16,9 +16,6 @@ const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
 
 
-const logManager = new LogManager(true)
-const statesManager = new StatesManager()
-
 
 
 
@@ -57,6 +54,9 @@ const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }
 
 
 
+const statesManager = new StatesManager()
+const logManager = new LogManager(true, bot, statesManager)
+
 
 
 
@@ -80,7 +80,7 @@ const ytdl = require('ytdl-core')
 
 
 const WS = require('./ws/ws')
-var ws = new WS('1234', '192.168.0.109', 5665, bot, logManager, null)
+var ws = new WS('1234', '192.168.0.102', 5665, bot, logManager, null, null, null, statesManager)
 
 let musicArray = []
 let musicFinished = true

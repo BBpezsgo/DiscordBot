@@ -8,6 +8,34 @@ const CommandBusiness = require('./commands/database/businees')
 const { CrossoutTest } = require('./commands/crossout')
 const CommandRedditsave = require('./commands/redditsave')
 const { CommandFont } = require('./commands/fonts')
+const {
+    playerCanMoveToHere,
+    gameResetCameraPos,
+    resetGameMessage,
+    addItemToPlayer,
+    getGameUserSettings,
+    createGame,
+    connectTogame,
+    MapPoint,
+    Game,
+    savedGameMessage,
+    GameUserSettings,
+    GameMessage,
+    GamePlayer,
+    MapObject,
+    GameTool,
+    GameItem,
+    ItemType,
+    ToolType,
+    Direction,
+    MapObjectType,
+    MapHeight,
+    MapBiome,
+    NoisePoint,
+    Table,
+    getGameMessage,
+    getMapPoint
+} = require('./commands/game')
 
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./commands/database/xpFunctions')
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
@@ -16,7 +44,6 @@ const { TranslateMessage } = require('./functions/translator.js')
 const { StatesManager } = require('./functions/statesManager.js')
 const { databaseManager } = require('./functions/databaseManager.js')
 
-const logManager = new LogManager(false)
 const statesManager = new StatesManager()
 
 const ColorRoles = {
@@ -27,11 +54,6 @@ const ColorRoles = {
 	green: "850016722039078912",
 	purple: "850016668352643072",
 	invisible: "850016786186371122"
-}
-
-/** @param {string} message */
-function log(message = '', translateResult = null) {
-    logManager.Log(message, false, translateResult)
 }
 
 const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, usersWithTax, ChannelId} = require('./functions/enums.js')
@@ -48,6 +70,13 @@ const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.
 const { perfix, token } = require('./config.json')
 const bot = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
 statesManager.botLoaded = true
+
+const logManager = new LogManager(false, bot, statesManager)
+
+/** @param {string} message */
+function log(message = '', translateResult = null) {
+    logManager.Log(message, false, translateResult)
+}
 
 let userstats = JSON.parse(fs.readFileSync('./database/userstats.json', 'utf-8'))
 
@@ -67,7 +96,7 @@ const ytdl = require('ytdl-core')
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
 const WS = require('./ws/ws')
-var ws = new WS('1234', '192.168.0.107', 5665, bot, logManager, database, StartBot, StopBot)
+var ws = new WS('1234', '192.168.0.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager)
 
 let musicArray = []
 let musicFinished = true
@@ -79,23 +108,7 @@ const { abbrev } = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
 const { DateToStringNews, ConvertNewsIdToName, NewsMessage, CreateNews } = require('./functions/news')
 
-//#region Game Variables
-/** @type {GameMap} */
-let gameMap = null
-
-/** @type {number} */
-let gameCameraX = 0
-
-/** @type {number} */
-let gameCameraY = 0
-
-/** @type {GameUserSettings[]} */
-let gameUserSettings = []
-
-
-/** @type {savedGameMessage[]} */
-let allGameMessages = []
-//#endregion
+const game = new Game()
 
 /** @type {CurrentlyWritingMail[]} */
 let currentlyWritingEmails = []
@@ -480,18 +493,22 @@ function addXp(user, channel, ammount) {
 //#region Listener-ek
 
 bot.on('reconnecting', () => {
+    logManager.Event('reconnecting;')
     log(INFO + ': Újracsatlakozás...');
 });
 
 bot.on('disconnect', () => {
+    logManager.Event('disconnect;')
     log(ERROR + ': Megszakadt a kapcsolat!');
 });
 
 bot.on('resume', () => {
+    logManager.Event('resume;')
     log(INFO + ': Folytatás');
 });
 
 bot.on('error', error => {
+    logManager.Event('error;' + JSON.stringify(error))
     log(ERROR + ': ' + error);
 });
 
@@ -506,18 +523,22 @@ bot.on('debug', debug => {
 });
 
 bot.on('warn', warn => {
+    logManager.Event('warn;' + JSON.stringify(warn))
     log(WARNING + ': ' + warn);
 });
 
 bot.on('shardError', (error, shardID) => {
+    logManager.Event('shardError;' + JSON.stringify(error))
     log(ERROR + ': shardError: ' + error);
 });
 
 bot.on('invalidated', () => {
+    logManager.Event('invalidated;')
     log(ERROR + ': Érvénytelen');
 });
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
+    logManager.Event('shardDisconnect;')
     log(SHARD + ': Lecsatlakozva');
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
@@ -1437,58 +1458,58 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId.startsWith('game')) {
-            if (gameMap == null) {
+            if (game.gameMap == null) {
                 interaction.reply('> \\❗ **Nincs létrehozva játék!**', true)
             } else {
                 if (interaction.component.customId === 'gameW') {
-                    gameMap.players[playerIndex].direction = Direction.Up
-                    if (playerCanMoveToHere(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y - 1, gameMap) === true) {
-                        gameMap.players[playerIndex].y -= 1
+                    game.gameMap.players[playerIndex].direction = Direction.Up
+                    if (playerCanMoveToHere(game.gameMap.players[playerIndex].x, game.gameMap.players[playerIndex].y - 1, game.gameMap) === true) {
+                        game.gameMap.players[playerIndex].y -= 1
                     }
-                    gameResetCameraPos(isOnPhone, interaction.user)
+                    gameResetCameraPos(isOnPhone, interaction.user, game)
     
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameA') {
-                    gameMap.players[playerIndex].direction = Direction.Left
-                    if (playerCanMoveToHere(gameMap.players[playerIndex].x - 1, gameMap.players[playerIndex].y, gameMap) === true) {
-                        gameMap.players[playerIndex].x -= 1
+                    game.gameMap.players[playerIndex].direction = Direction.Left
+                    if (playerCanMoveToHere(game.gameMap.players[playerIndex].x - 1, game.gameMap.players[playerIndex].y, game.gameMap) === true) {
+                        game.gameMap.players[playerIndex].x -= 1
                     }
-                    gameResetCameraPos(isOnPhone, interaction.user)
+                    gameResetCameraPos(isOnPhone, interaction.user, game)
     
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameS') {
-                    gameMap.players[playerIndex].direction = Direction.Down
-                    if (playerCanMoveToHere(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y + 1, gameMap) === true) {
-                        gameMap.players[playerIndex].y += 1
+                    game.gameMap.players[playerIndex].direction = Direction.Down
+                    if (playerCanMoveToHere(game.gameMap.players[playerIndex].x, game.gameMap.players[playerIndex].y + 1, game.gameMap) === true) {
+                        game.gameMap.players[playerIndex].y += 1
                     }
-                    gameResetCameraPos(isOnPhone, interaction.user)
+                    gameResetCameraPos(isOnPhone, interaction.user, game)
     
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameD') {
-                    gameMap.players[playerIndex].direction = Direction.Right
-                    if (playerCanMoveToHere(gameMap.players[playerIndex].x + 1, gameMap.players[playerIndex].y, gameMap) === true) {
-                        gameMap.players[playerIndex].x += 1
+                    game.gameMap.players[playerIndex].direction = Direction.Right
+                    if (playerCanMoveToHere(game.gameMap.players[playerIndex].x + 1, game.gameMap.players[playerIndex].y, game.gameMap) === true) {
+                        game.gameMap.players[playerIndex].x += 1
                     }
-                    gameResetCameraPos(isOnPhone, interaction.user)
+                    gameResetCameraPos(isOnPhone, interaction.user, game)
     
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameHit') {
                     /**
                      * @type {MapPoint}
                      */
                     let mapPoint
-                    if (gameMap.players[playerIndex].direction === Direction.Up) {
-                        mapPoint = getMapPoint(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y - 1, gameMap)
-                    } else if (gameMap.players[playerIndex].direction === Direction.Right) {
-                        mapPoint = getMapPoint(gameMap.players[playerIndex].x + 1, gameMap.players[playerIndex].y, gameMap)
-                    } else if (gameMap.players[playerIndex].direction === Direction.Down) {
-                        mapPoint = getMapPoint(gameMap.players[playerIndex].x, gameMap.players[playerIndex].y + 1, gameMap)
-                    } else if (gameMap.players[playerIndex].direction === Direction.Left) {
-                        mapPoint = getMapPoint(gameMap.players[playerIndex].x - 1, gameMap.players[playerIndex].y, gameMap)
+                    if (game.gameMap.players[playerIndex].direction === Direction.Up) {
+                        mapPoint = getMapPoint(game.gameMap.players[playerIndex].x, game.gameMap.players[playerIndex].y - 1, game.gameMap)
+                    } else if (game.gameMap.players[playerIndex].direction === Direction.Right) {
+                        mapPoint = getMapPoint(game.gameMap.players[playerIndex].x + 1, game.gameMap.players[playerIndex].y, game.gameMap)
+                    } else if (game.gameMap.players[playerIndex].direction === Direction.Down) {
+                        mapPoint = getMapPoint(game.gameMap.players[playerIndex].x, game.gameMap.players[playerIndex].y + 1, game.gameMap)
+                    } else if (game.gameMap.players[playerIndex].direction === Direction.Left) {
+                        mapPoint = getMapPoint(game.gameMap.players[playerIndex].x - 1, game.gameMap.players[playerIndex].y, game.gameMap)
                     }
     
                     if (mapPoint.object !== null) {
@@ -1500,92 +1521,92 @@ bot.on('interactionCreate', async interaction => {
                         breakableObj.breakValue -= 1
                         if (breakableObj.breakValue <= 0) {
                             if (breakableObj.type === MapObjectType.bamboo) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 1)
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.blossom) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.cactus) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.cherryBlossom) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.hibiscus) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.igloo) {
     
                             } else if (breakableObj.type === MapObjectType.mushroom) {
     
                             } else if (breakableObj.type === MapObjectType.palm) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 3)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 3)
                             } else if (breakableObj.type === MapObjectType.plant) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.rice) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 2)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 2)
                             } else if (breakableObj.type === MapObjectType.rose) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.spruce) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 4)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 4)
                             } else if (breakableObj.type === MapObjectType.sunflower) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.tanabataTree) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 2)
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 2)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.tree) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Wood, 4)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 4)
                             } else if (breakableObj.type === MapObjectType.tulip) {
-                                addItemToPlayer(gameMap.players[playerIndex], ItemType.Grass, 1)
+                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             }
                             mapPoint.object = null
                         }
                     }
     
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameUse') {
     
                 } else if (interaction.component.customId === 'gameSwitchPhone') {
-                    for (let i = 0; i < gameUserSettings.length; i++) {
-                        if (gameUserSettings[i].userId === interaction.user.id) {
+                    for (let i = 0; i < game.gameUserSettings.length; i++) {
+                        if (game.gameUserSettings[i].userId === interaction.user.id) {
                             if (isOnPhone === true) {
-                                gameUserSettings[i].isOnPhone = false
+                                game.gameUserSettings[i].isOnPhone = false
                             } else {
-                                gameUserSettings[i].isOnPhone = true
+                                game.gameUserSettings[i].isOnPhone = true
                             }
                         }
                     }
     
-                    if (getGameUserSettings(interaction.user.id) !== null) {
-                        isOnPhone = getGameUserSettings(interaction.user.id).isOnPhone
+                    if (getGameUserSettings(interaction.user.id, game) !== null) {
+                        isOnPhone = getGameUserSettings(interaction.user.id, game).isOnPhone
                     }
     
-                    gameResetCameraPos(isOnPhone, interaction.user)
+                    gameResetCameraPos(isOnPhone, interaction.user, game)
     
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
     
-                    log(gameUserSettings);
+                    log(game.gameUserSettings);
                 } else if (interaction.component.customId === 'gameSwitchDebug') {
-                    for (let i = 0; i < gameUserSettings.length; i++) {
-                        if (gameUserSettings[i].userId === interaction.user.id) {
+                    for (let i = 0; i < game.gameUserSettings.length; i++) {
+                        if (game.gameUserSettings[i].userId === interaction.user.id) {
                             if (isInDebugMode === true) {
-                                gameUserSettings[i].isInDebugMode = false
+                                game.gameUserSettings[i].isInDebugMode = false
                             } else {
-                                gameUserSettings[i].isInDebugMode = true
+                                game.gameUserSettings[i].isInDebugMode = true
                             }
                         }
                     }
     
-                    if (getGameUserSettings(interaction.user.id) !== null) {
-                        isInDebugMode = getGameUserSettings(interaction.user.id).isInDebugMode
+                    if (getGameUserSettings(interaction.user.id, game) !== null) {
+                        isInDebugMode = getGameUserSettings(interaction.user.id, game).isInDebugMode
                     }
     
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
     
-                    log(gameUserSettings);
+                    log(game.gameUserSettings);
                 } else if (interaction.component.customId === 'gameRestart') {
-                    gameMap = createGame(50, 50)
-                    connectTogame(interaction.user)
-                    gameResetCameraPos(isOnPhone, interaction.user)
+                    game.gameMap = createGame(50, 50)
+                    connectTogame(interaction.user, game)
+                    gameResetCameraPos(isOnPhone, interaction.user, game)
     
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction)
+                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
                 }
             }
             return;
@@ -2000,12 +2021,12 @@ bot.on('clickMenu', async (button) => {
 
     try {
 
-        if (getGameUserSettings(button.clicker.user.id) !== null) {
-            isOnPhone = getGameUserSettings(button.clicker.user.id).isOnPhone
+        if (getGameUserSettings(button.clicker.user.id, game) !== null) {
+            isOnPhone = getGameUserSettings(button.clicker.user.id, game).isOnPhone
         }
 
-        if (getGameUserSettings(button.clicker.user.id) !== null) {
-            isInDebugMode = getGameUserSettings(button.clicker.user.id).isInDebugMode
+        if (getGameUserSettings(button.clicker.user.id, game) !== null) {
+            isInDebugMode = getGameUserSettings(button.clicker.user.id, game).isInDebugMode
         }
     } catch (error) { }
 
@@ -2575,20 +2596,20 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     //#endregion
 
     if (command === 'game') {
-        if (gameMap == null) {
-            gameMap = createGame(50, 50)
+        if (game.gameMap == null) {
+            game.gameMap = createGame(50, 50)
         }
 
-        connectTogame(sender)
-        gameResetCameraPos(false, sender)
+        connectTogame(sender, game)
+        gameResetCameraPos(false, sender, game)
 
-        if (getGameUserSettings(sender.id) == null) {
-            gameUserSettings.push(new GameUserSettings(sender.id))
+        if (getGameUserSettings(sender.id, game) == null) {
+            game.gameUserSettings.push(new GameUserSettings(sender.id))
         }
 
-        const _message = getGameMessage(sender, false, false)
+        const _message = getGameMessage(sender, false, false, game)
         message.channel.send({ embeds: [_message.embed], components: _message.actionRows }).then(msg => {
-            allGameMessages.push(new savedGameMessage(msg, sender))
+            game.allGameMessages.push(new savedGameMessage(msg, sender))
         })
         return
     }
@@ -2890,986 +2911,6 @@ function StopBot() {
 }
 
 StartBot()
-
-//#region Game
-
-function distance(x1, y1, x2, y2) {
-    return Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)))
-}
-
-function distanceNearestPoint(x, y, points) {
-    let z = -1
-    points.forEach(point => {
-        if (z === -1) {
-            z = distance(x, y, point[0], point[1])
-        } else {
-            z = Math.min(z, distance(x, y, point[0], point[1]))
-        }
-    })
-    return z
-}
-
-/**
- * @param {number} cameraX
- * @param {number} cameraY
- * @param {GameMap} gameMap
- * @param {boolean} isOnPhone
- */
-function getView(cameraX, cameraY, gameMap, isOnPhone) {
-    log('getView.isOnPhone: ' + isOnPhone)
-
-    let viewText = ''
-    let map = gameMap.map
-
-    let viewWidth
-    let viewHeight
-
-    if (isOnPhone === true) {
-        viewWidth = 15
-        viewHeight = 18
-    } else {
-        viewWidth = 25
-        viewHeight = 25
-    }
-
-    for (let y = 0; y < viewHeight; y++) {
-        for (let x = 0; x < viewWidth; x++) {
-
-            const xVal = x + cameraX
-            const yVal = y + cameraY
-
-            /**
-             * @type {MapPoint}
-             */
-            let mapP
-            for (let i = 0; i < map.length; i++) {
-                if (map[i].x === xVal && map[i].y === yVal) {
-                    mapP = map[i]
-                    break;
-                }
-            }
-
-            if (mapP === undefined) {
-                mapP = new MapPoint(xVal, yVal, MapBiome.void, MapHeight.normal)
-            }
-
-            const height = mapP.height
-            const biome = mapP.biome
-
-            let newPixel = '\\⬛'
-
-            if (biome === MapBiome.ocean) {
-                newPixel = '\\🟦'
-            } else if (biome === MapBiome.plain || biome === MapBiome.flowerPlain || biome === MapBiome.forest || biome === MapBiome.spruceForest) {
-                newPixel = '\\🟩'
-            } else if (biome === MapBiome.mountains) {
-                newPixel = '\\🟫'
-            } else if (biome === MapBiome.desertHills) {
-                newPixel = '\\🟨'
-            } else if (biome === MapBiome.desert || biome === MapBiome.beach) {
-                newPixel = '\\🟨'
-            }
-
-            if (height === MapHeight.mountainSnow && biome !== MapBiome.desertHills) {
-                newPixel = '\\⬜'
-            }
-
-            if (mapP.object == null) { } else {
-                if (mapP.object.type == MapObjectType.plant) {
-                    newPixel = '\\🌱'
-                } else if (mapP.object.type == MapObjectType.bamboo) {
-                    newPixel = '\\🎍'
-                } else if (mapP.object.type == MapObjectType.tanabataTree) {
-                    newPixel = '\\🎋'
-                } else if (mapP.object.type == MapObjectType.rice) {
-                    newPixel = '\\🌾'
-                } else if (mapP.object.type == MapObjectType.mushroom) {
-                    newPixel = '\\🍄'
-                } else if (mapP.object.type == MapObjectType.sunflower) {
-                    newPixel = '\\🌻'
-                } else if (mapP.object.type == MapObjectType.blossom) {
-                    newPixel = '\\🌼'
-                } else if (mapP.object.type == MapObjectType.cherryBlossom) {
-                    newPixel = '\\🌸'
-                } else if (mapP.object.type == MapObjectType.hibiscus) {
-                    newPixel = '\\🌺'
-                } else if (mapP.object.type == MapObjectType.rose) {
-                    newPixel = '\\🌹'
-                } else if (mapP.object.type == MapObjectType.tulip) {
-                    newPixel = '\\🌷'
-                } else if (mapP.object.type == MapObjectType.palm) {
-                    newPixel = '\\🌴'
-                } else if (mapP.object.type == MapObjectType.spruce) {
-                    newPixel = '\\🌲'
-                } else if (mapP.object.type == MapObjectType.tree) {
-                    newPixel = '\\🌳'
-                } else if (mapP.object.type == MapObjectType.cactus) {
-                    newPixel = '\\🌵'
-                }
-            }
-
-            gameMap.players.forEach(player => {
-                if (player.x === mapP.x && player.y === mapP.y) {
-                    newPixel = '\\🧍'
-                }
-            })
-
-            viewText += newPixel
-        }
-        viewText += '\n'
-    }
-
-    return viewText
-}
-
-/**
- * @param {GamePlayer} player
- * @returns {string}
- * @param {boolean} isOnPhone
- * @param {boolean} isInDebugMode
- */
-function getPlayerStatText(player, isOnPhone, isInDebugMode) {
-    log('getPlayerStatText.isInDebugMode: ' + isInDebugMode)
-
-    let text = ''
-    for (let v = 0; v < player.health; v++) {
-        text += '\\❤️'
-    }
-    for (let v = 0; v < 10 - player.health; v++) {
-        text += '\\🖤'
-    }
-    if (isInDebugMode === true) {
-        text += ' | '
-        if (player.direction === Direction.Up) {
-            text += '⇑'
-        } else if (player.direction === Direction.Right) {
-            text += '⇒'
-        } else if (player.direction === Direction.Down) {
-            text += '⇓'
-        } else if (player.direction === Direction.Left) {
-            text += '⇐'
-        }
-        try {
-            text += ' | '
-            text += getMapPoint(player.x, player.y, gameMap).biome.toString()
-        } catch (error) { }
-        text += ' | cam: ' + gameCameraX + ' ' + gameCameraY
-        text += ' | pos: ' + player.x + ' ' + player.y
-    }
-    text += '\n\\👊'
-    text += '\n\n**Felszerelés:**\n'
-    text += '\\👊|'
-    player.tools.forEach(tool => {
-        if (tool.type === ToolType.Axe) {
-            text += '\\🪓'
-        } else if (tool.type === ToolType.Fix) {
-            if (tool.efficiency === 1) {
-                text += '\\🔨'
-            } else if (tool.efficiency === 2) {
-                text += '\\🔧'
-            }
-        } else if (tool.type === ToolType.MeleeWeapon) {
-            if (tool.efficiency === 1) {
-                text += '\\🔪'
-            } else if (tool.efficiency === 2) {
-                text += '\\🗡️'
-            }
-        } else if (tool.type === ToolType.Pickaxe) {
-            text += '\\⛏️'
-        } else if (tool.type === ToolType.RangeWeapon) {
-            text += '\\🏹'
-        }
-        text += '|'
-    })
-    if (text.endsWith('|')) {
-        text = text.slice(0, text.length - 1)
-    }
-    player.items.forEach(item => {
-        text += item.count + 'x '
-        if (item.type === ItemType.Brick) {
-            text += '\\🧱'
-        } else if (item.type === ItemType.Gem) {
-            text += '\\💎'
-        } else if (item.type === ItemType.Grass) {
-            text += '\\🌿'
-        } else if (item.type === ItemType.Map) {
-            text += '\\🗺️'
-        } else if (item.type === ItemType.Sponge) {
-            text += '\\🧽'
-        } else if (item.type === ItemType.Stick) {
-            text += '\\🥢'
-        } else if (item.type === ItemType.Stone) {
-            text += '\\🌑'
-        } else if (item.type === ItemType.Whool) {
-            text += '\\🧶'
-        } else if (item.type === ItemType.Wood) {
-            text += '\\📏'
-        }
-        text += '|'
-    })
-
-    return text
-}
-
-/**
- * @param {number} x
- * @param {number} y
- * @param {GameMap} map
- * @returns {MapPoint}
- */
-function getMapPoint(x, y, map) {
-    for (let i = 0; i < map.map.length; i++) {
-        if (map.map[i].x === x && map.map[i].y === y) {
-            return map.map[i]
-        }
-    }
-}
-
-/**
- * @param {Discord.User} user
- * @param {boolean} isOnPhone
- * @param {boolean} isInDebugMode
- */
-function getGameEmbed(user, isOnPhone, isInDebugMode) {
-    log('getGameEmbed.isOnPhone: ' + isOnPhone)
-
-    const embed = new Discord.MessageEmbed()
-        .setAuthor({name: user.username, iconURL: user.avatarURL()})
-        .setTitle('Game')
-        .setDescription(getView(gameCameraX, gameCameraY, gameMap, isOnPhone) +
-            '\n' +
-            getPlayerStatText(gameMap.players[0], isOnPhone, isInDebugMode))
-
-    return embed
-}
-
-/**
- * @param {Table} parentNoise
- * @param {Table} overlayNoise
- * @return {Table}
- */
-function combineNoises(parentNoise, overlayNoise) {
-    /**
-     * @type {Table}
-     */
-    let newNoise = new Table(parentNoise.width, parentNoise.height, [])
-
-    for (let i = 0; i < parentNoise.points.length; i++) {
-        const parentValue = parentNoise.points[i]
-        const overlayValue = overlayNoise.points[i]
-
-        const newValue = (parentValue + parentValue + overlayValue) / 3
-        newNoise.push(newValue)
-    }
-
-    return newNoise
-}
-
-function createGame(width, height) {
-    let newMap = new GameMap(width, height, generateMap(width, height), [])
-    return newMap
-}
-
-function generateMap(width, height) {
-
-    const heightScale = 4
-    const biomeScale = 5
-    const treesScale = 5
-    const plantsScale = 3
-
-    const heightNoise = combineNoises(generateNoise(width, height, heightScale), generateNoise(width, height, 1))
-    const biomeNoise = generateNoise(width, height, biomeScale)
-    const treesNoise = generateNoise(width, height, treesScale)
-    const plantsNoise = generateNoise(width, height, plantsScale)
-
-    /**
-     * @type {MapPoint[]}
-     */
-    let newMap = []
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            /**
-             * @type {MapObject}
-             */
-            let newObj = null
-
-            const heightValue = heightNoise.valueAt(x, y) / heightScale
-            const biomeValue = biomeNoise.valueAt(x, y) / biomeScale
-            const treesValue = treesNoise.valueAt(x, y) / treesScale
-            const plantsValue = plantsNoise.valueAt(x, y) / plantsScale
-
-            /**
-             * @type {MapPoint}
-             */
-            let newMapPoint
-
-            if (heightValue < 0) {
-                newMapPoint = new MapPoint(x, y, MapBiome.void, MapHeight.normal, null)
-            } else if (heightValue < 1.2) {
-                newMapPoint = new MapPoint(x, y, MapBiome.ocean, MapHeight.water, null)
-            } else if (heightValue < 1.4) {
-                newMapPoint = new MapPoint(x, y, MapBiome.beach, MapHeight.normal, null)
-            } else if (heightValue < 3) {
-                if (biomeValue < 2) {
-                    if (treesValue < 2) {
-                        newMapPoint = new MapPoint(x, y, MapBiome.forest, MapHeight.normal)
-                    } else if (plantsValue < 3) {
-                        newMapPoint = new MapPoint(x, y, MapBiome.flowerPlain, MapHeight.normal)
-                    } else {
-                        newMapPoint = new MapPoint(x, y, MapBiome.plain, MapHeight.normal)
-                    }
-                } else {
-                    newMapPoint = new MapPoint(x, y, MapBiome.desert, MapHeight.normal)
-                }
-            } else if (heightValue < 4) {
-                if (biomeValue < 2) {
-                    if (treesValue < 2) {
-                        newMapPoint = new MapPoint(x, y, MapBiome.spruceForest, MapHeight.mountain)
-                    } else {
-                        newMapPoint = new MapPoint(x, y, MapBiome.mountains, MapHeight.mountain)
-                    }
-                } else {
-                    newMapPoint = new MapPoint(x, y, MapBiome.desertHills, MapHeight.mountain)
-                }
-            } else {
-                if (biomeValue < 2) {
-                    newMapPoint = new MapPoint(x, y, MapBiome.mountains, MapHeight.mountainSnow)
-                } else {
-                    newMapPoint = new MapPoint(x, y, MapBiome.desertHills, MapHeight.mountainSnow)
-                }
-            }
-
-            if (newMapPoint.biome === MapBiome.desert) {
-                if ((Math.random() * 10) < 0.1) {
-                    newObj = new MapObject(MapObjectType.cactus, false, 2)
-                }
-            } else if (newMapPoint.biome === MapBiome.flowerPlain) {
-                if ((Math.random() * 10) < 0.7) {
-                    const randomValue = Math.random()
-                    if (randomValue < 0.14) {
-                        newObj = new MapObject(MapObjectType.plant, true, 1)
-                    } else if (randomValue < 0.29) {
-                        newObj = new MapObject(MapObjectType.blossom, true, 1)
-                    } else if (randomValue < 0.43) {
-                        newObj = new MapObject(MapObjectType.cherryBlossom, true, 1)
-                    } else if (randomValue < 0.57) {
-                        newObj = new MapObject(MapObjectType.hibiscus, true, 1)
-                    } else if (randomValue < 0.71) {
-                        newObj = new MapObject(MapObjectType.rose, true, 1)
-                    } else if (randomValue < 0.86) {
-                        newObj = new MapObject(MapObjectType.sunflower, true, 1)
-                    } else {
-                        newObj = new MapObject(MapObjectType.tulip, true, 1)
-                    }
-                }
-            } else if (newMapPoint.biome === MapBiome.forest) {
-                if (Math.random() < 0.1) {
-                    newObj = new MapObject(MapObjectType.plant, true, 1)
-                }
-                if ((Math.random()) < 0.2) {
-                    newObj = new MapObject(MapObjectType.tree, false, 3)
-                }
-            } else if (newMapPoint.biome === MapBiome.spruceForest) {
-                if ((Math.random()) < 0.17) {
-                    newObj = new MapObject(MapObjectType.spruce, false, 3)
-                }
-            } else if (newMapPoint.biome === MapBiome.beach) {
-                if (Math.random() < 0.1) {
-                    newObj = new MapObject(MapObjectType.rice, true, 1)
-                }
-                if ((Math.random()) < 0.07) {
-                    newObj = new MapObject(MapObjectType.palm, false, 3)
-                }
-            } else if (newMapPoint.biome === MapBiome.mountains && newMapPoint.height === MapHeight.mountainSnow) {
-                if (Math.random() < 0.01) {
-                    newObj = new MapObject(MapObjectType.igloo, false, 5)
-                }
-            }
-
-            newMapPoint.object = newObj
-            newMap.push(newMapPoint)
-        }
-    }
-
-    return newMap
-}
-
-/**
- * @param {Discord.User} user
- */
-function connectTogame(user) {
-    if (gameMap !== null) {
-        if (getPlayerIndex(user.id) === -1) {
-            const spawnpoint = getSpawnPoint(gameMap)
-            gameMap.players.push(new GamePlayer(spawnpoint[0], spawnpoint[1], user, 10, Direction.Up, 0, [new GameTool(ToolType.Axe, 100, 1)]))
-            return true
-        }
-    }
-
-    return false
-}
-
-/**
- * @param {number} width
- * @param {number} height
- * @param {number} scale
- * @returns {Table}
- */
-function generateNoise(width, height, scale) {
-    /**
-     * @type {number[][]}
-     */
-    const points = []
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            if (Math.random() * 100 < 10) {
-                points.push([x * scale, y * scale])
-            }
-        }
-    }
-
-    /**
-     * @type {Table}
-     */
-    let noise = new Table(width, height, [])
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            if (distanceNearestPoint(x, y, points) > -1) {
-                noise.push(distanceNearestPoint(x, y, points))
-            } else {
-                noise.push(0)
-            }
-        }
-    }
-
-    return noise
-}
-
-/**
- * @param {string} userId
- */
-function getPlayerIndex(userId) {
-    let index = -1
-
-    if (gameMap == null) {
-        return index;
-    }
-
-    for (let i = 0; i < gameMap.players.length; i++) {
-        const player = gameMap.players[i]
-        if (player.ownerUser.id === userId) {
-            index = i
-            break;
-        }
-    }
-
-    return index
-}
-
-/**
- * @param {GamePlayer} player
- * @param {ItemType} item
- * @param {number} count
- */
-function addItemToPlayer(player, item, count) {
-    let thisIsNewItem = true
-    player.items.forEach(_item => {
-        if (_item.type === item) {
-            thisIsNewItem = false
-            _item.count += count
-        }
-    })
-    if (thisIsNewItem === true) {
-        player.items.push(new GameItem(item, count))
-    }
-}
-
-/**
- * @param {number} x
- * @param {number} y
- * @param {gameMap} map
- * @returns {boolean}
- */
-function playerCanMoveToHere(x, y, map) {
-    let canMove = true
-    map.map.forEach(mapP => {
-        if (mapP.x === x && mapP.y === y) {
-            if (mapP.object == null) { } else {
-                if (mapP.object.walkable === false) {
-                    canMove = false
-                }
-            }
-            if (mapP.biome === MapBiome.ocean || mapP.biome === MapBiome.void) {
-                canMove = false
-            }
-
-            map.players.forEach(player => {
-                if (player.x === x && player.y === y) {
-                    canMove = false
-                }
-            })
-        }
-    })
-    return canMove
-}
-
-/**
- * @param {boolean} isOnPhone
- * @param {Discord.User} user
- */
-function gameResetCameraPos(isOnPhone, user) {
-    const playerIndex = getPlayerIndex(user.id)
-
-    if (isOnPhone === true) {
-        gameCameraX = Math.max(Math.min(gameMap.players[playerIndex].x - 7, 50), 0)
-        gameCameraY = Math.max(Math.min(gameMap.players[playerIndex].y - 9, 50), 0)
-    } else {
-        gameCameraX = Math.max(Math.min(gameMap.players[playerIndex].x - 12, 50), 0)
-        gameCameraY = Math.max(Math.min(gameMap.players[playerIndex].y - 12, 50), 0)
-    }
-}
-
-/**
- * @param {number} x
- * @param {number} y
- * @param {NoisePoint[]} noise
- * @returns {number}
- */
-function getValueAt(x, y, noise) {
-    /**
-     * @type {number}
-     */
-    let val = null
-    noise.forEach(noiseP => {
-        if (noiseP.x === x && noiseP.y === y) {
-            val = noiseP.value
-        }
-    })
-    return val
-}
-
-/**
- * @param {GameMap} map
- * @param {GameMap} map
- * @returns {number[]} [x,y]
- */
-function getSpawnPoint(map) {
-    let x = 5
-    let y = 5
-    while (playerCanMoveToHere(x, y, map) === false) {
-        x += 1
-        y += 1
-        if (x > map.width) {
-            x = 6
-            y = 5
-        }
-        if (y > map.height) {
-            x = 6
-            y = 5
-        }
-    }
-    return [x, y]
-}
-
-/**
- * @param {Discord.User} user
- * @param {boolean} isOnPhone
- * @param {boolean} isInDebugMode
- */
-function getGameMessage(user, isOnPhone, isInDebugMode) {
-    log('getGameMessage.isOnPhone: ' + isOnPhone)
-
-    const playerIndex = getPlayerIndex(user.id)
-    const playerDirection = gameMap.players[playerIndex].direction
-
-    const buttonW = new MessageButton()
-        .setLabel("  ↑  ")
-        .setCustomId("gameW")
-        .setStyle("SECONDARY");
-    const buttonA = new MessageButton()
-        .setLabel(" ←")
-        .setCustomId("gameA")
-        .setStyle("SECONDARY");
-    const buttonS = new MessageButton()
-        .setLabel("  ↓  ")
-        .setCustomId("gameS")
-        .setStyle("SECONDARY");
-    const buttonD = new MessageButton()
-        .setLabel(" →")
-        .setCustomId("gameD")
-        .setStyle("SECONDARY");
-    const buttonHit = new MessageButton()
-        .setLabel("👊")
-        .setCustomId("gameHit")
-        .setStyle("SECONDARY");
-    const buttonUse = new MessageButton()
-        .setLabel("🤚")
-        .setCustomId("gameUse")
-        .setStyle("SECONDARY");
-    const buttonSwitchPhone = new MessageButton()
-        .setLabel("📱 Telefonon vagyok")
-        .setCustomId("gameSwitchPhone")
-        .setStyle("SECONDARY");
-    const buttonSwitchDebug = new MessageButton()
-        .setLabel("📟")
-        .setCustomId("gameSwitchDebug")
-        .setStyle("SECONDARY");
-    const buttonRestart = new MessageButton()
-        .setLabel("↺")
-        .setCustomId("gameRestart")
-        .setStyle("DANGER");
-
-
-
-    if (playerDirection === Direction.Up) {
-        buttonW.setStyle("PRIMARY")
-    } else if (playerDirection === Direction.Left) {
-        buttonA.setStyle("PRIMARY")
-    } else if (playerDirection === Direction.Down) {
-        buttonS.setStyle("PRIMARY")
-    } else if (playerDirection === Direction.Right) {
-        buttonD.setStyle("PRIMARY")
-    }
-
-    if (isOnPhone === true) {
-        buttonSwitchPhone.setLabel("🖥️")
-    } else {
-        buttonSwitchPhone.setLabel("📱 Telefonon vagyok")
-    }
-
-    if (getGameUserSettings(user.id).isInDebugMode === true) {
-        buttonSwitchDebug.setStyle("PRIMARY")
-    } else {
-        buttonSwitchDebug.setStyle("SECONDARY")
-    }
-
-    const row0 = new MessageActionRow()
-        .addComponents(buttonUse, buttonW, buttonHit, buttonSwitchPhone)
-    const row1 = new MessageActionRow()
-        .addComponents(buttonA, buttonS, buttonD, buttonSwitchDebug, buttonRestart)
-
-    return new GameMessage(getGameEmbed(user, isOnPhone, isInDebugMode), [row0, row1])
-}
-
-/**
- * @param {Discord.User} user
- * @param {Discord.Message} message
- * @param {boolean} isOnPhone
- * @param {boolean} isInDebugMode
- * @param {Discord.ButtonInteraction<Discord.CacheType>} integration
- */
-function resetGameMessage(user, message, isOnPhone, isInDebugMode, integration) {
-    log('resetGameMessage.isOnPhone: ' + isOnPhone)
-
-    for (let i = 0; i < allGameMessages.length; i++) {
-        const savedGameMsg = allGameMessages[i];
-
-        const _message = getGameMessage(savedGameMsg.user, isOnPhone, isInDebugMode)
-        savedGameMsg.message.edit({ embeds: [_message.embed], components: _message.actionRows })
-        integration.update({ embeds: [_message.embed], components: _message.actionRows })
-    }
-}
-
-function getGameUserSettings(userId) {
-    for (let i = 0; i < gameUserSettings.length; i++) {
-        const userSettings = gameUserSettings[i];
-        if (userSettings.userId === userId) {
-            return userSettings
-        }
-    }
-    return null
-}
-
-class Table {
-    /**
-     * @param {number} width
-     * @param {number} height
-     * @param {number[]} points
-     */
-    constructor(width, height, points) {
-        this.width = width;
-        this.height = height;
-        this.points = points;
-    }
-
-    /**
-     * @param {number} x
-     * @param {number} y
-     */
-    valueAt(x, y) {
-        return this.points[y * this.width + x];
-    }
-
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {number} value
-     */
-    setValue(x, y, value) {
-        this.points[y * this.width + x] = value;
-    }
-
-    /**
-     * @param {number} value
-     */
-    push(value) {
-        this.points.push(value);
-    }
-}
-
-class NoisePoint {
-    /**
-     * @param {number} x 
-     * @param {number} y 
-     * @param {number} value 
-     */
-    constructor(x, y, value) {
-        this.x = x;
-        this.y = y;
-        this.value = value;
-    }
-
-    /*
-        get xValue() {
-            return this.x;
-        }
-    
-        get yValue() {
-            return this.y;
-        }
-    
-        get zValue() {
-            return this.value;
-        }
-        */
-}
-
-const MapBiome = {
-    void: 'void',
-    plain: 'plains',
-    desert: 'desert',
-    ocean: 'ocean',
-    beach: 'beach',
-    mountains: 'mountains',
-    desertHills: 'deserthills',
-    flowerPlain: 'flowerplains',
-    spruceForest: 'spruceforest',
-    forest: 'forest'
-}
-
-const MapHeight = {
-    water: 0,
-    normal: 1,
-    mountain: 2,
-    mountainSnow: 3
-}
-
-const MapObjectType = {
-    plant: 0, //🌱
-    bamboo: 1, //🎍
-    tanabataTree: 2, //🎋
-    rice: 3, //🌾
-    mushroom: 4, //🍄
-    sunflower: 5, //🌻
-    blossom: 6, //🌼
-    cherryBlossom: 7, //🌸
-    hibiscus: 8, //🌺
-    rose: 9, //🌹
-    tulip: 10, //🌷
-    palm: 11, //🌴
-    spruce: 12, //🌲
-    tree: 13, //🌳
-    cactus: 14, //🌵
-    igloo: 15, //🍙
-}
-
-const Direction = {
-    Up: 0,
-    Right: 1,
-    Down: 2,
-    Left: 3
-}
-
-const ToolType = {
-    Fix: 0,
-    Pickaxe: 1,
-    Axe: 2,
-    MeleeWeapon: 3,
-    RangeWeapon: 4
-}
-
-const ItemType = {
-    Wood: 0, //📏
-    Whool: 1, //🧶
-    Grass: 2, //🌿
-    Sponge: 3, //🧽
-    Stone: 4, //🌑
-    Gem: 5, //💎
-    Stick: 6, //🥢
-    Brick: 7, //🧱
-    Map: 8 //🗺️
-}
-
-class GameItem {
-    /**
-     * @param {ItemType} type
-     * @param {number} count
-     */
-    constructor(type, count) {
-        this.type = type;
-        this.count = count;
-    }
-}
-
-class GameTool {
-    /**
-     * @param {ToolType} type
-     * @param {number} health
-     * @param {number} maxHealth
-     * @param {number} efficiency
-     */
-    constructor(type, health, efficiency) {
-        this.type = type;
-        this.health = health;
-        this.maxHealth = health;
-        this.efficiency = efficiency;
-    }
-}
-
-class GameMap {
-    /**
-     * @param {number} width
-     * @param {number} height
-     * @param {MapPoint[]} map
-     * @param {GamePlayer[]} players
-     */
-    constructor(width, height, map, players) {
-        this.width = width;
-        this.height = height;
-        this.map = map;
-        this.players = players;
-    }
-}
-
-class MapPoint {
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {MapBiome} biome
-     * @param {MapHeight} height
-     * @param {MapObject} object
-     */
-    constructor(x, y, biome, height, object) {
-        this.x = x;
-        this.y = y;
-        this.biome = biome;
-        this.height = height;
-        this.object = object;
-    }
-    /*
-        get xValue() {
-            return this.x;
-        }
-    
-        get yValue() {
-            return this.y;
-        }
-    
-        get biomeValue() {
-            return this.biome;
-        }
-    
-        get heightValue() {
-            return this.height;
-        }
-    
-        get objectValue() {
-            return this.object;
-        }
-        */
-}
-
-class MapObject {
-    /**
-     * @param {MapObjectType} type
-     * @param {boolean} walkable
-     * @param {number} breakValue
-     */
-    constructor(type, walkable, breakValue) {
-        this.type = type;
-        this.walkable = walkable;
-        this.breakValue = breakValue;
-    }
-    /*
-        get typeValue() {
-            return this.type;
-        }
-        */
-}
-
-class GamePlayer {
-    /**
-     * @param {number} x
-     * @param {number} y
-     * @param {Discord.User} ownerUser
-     * @param {number} health
-     * @param {Direction} direction
-     * @param {number} selectedToolIndex
-     * @param {GameTool[]} tools
-     * @param {GameItem[]} items
-     * @param {boolean} aggreeToRestart
-     */
-    constructor(x, y, ownerUser, health = 10, direction = 0, selectedToolIndex = 0, tools = [], items = [], aggreeToRestart = false) {
-        this.x = x;
-        this.y = y;
-        this.ownerUser = ownerUser;
-        this.health = health;
-        this.direction = direction;
-        this.selectedToolIndex = selectedToolIndex;
-        this.tools = tools;
-        this.items = items;
-        this.aggreeToRestart = false;
-    }
-}
-
-class GameMessage {
-    /**
-     * @param {Discord.MessageEmbed} embed
-     * @param {MessageActionRow[]} actionRows
-     */
-    constructor(embed, actionRows) {
-        this.embed = embed;
-        this.actionRows = actionRows;
-    }
-}
-
-class GameUserSettings {
-    /**
-     * @param {string} userId
-     * @param {boolean} isOnPhone
-     * @param {boolean} isInDebugMode
-     */
-    constructor(userId, isOnPhone = false, isInDebugMode = false) {
-        this.userId = userId;
-        this.isOnPhone = isOnPhone;
-        this.isInDebugMode = isInDebugMode;
-    }
-}
-
-class savedGameMessage {
-    /**
-     * @param {Discord.Message} message
-     * @param {Discord.User]} user
-     */
-    constructor(message, user) {
-        this.message = message;
-        this.user = user;
-    }
-}
-
-//#endregion
 
 //#region Mails
 
