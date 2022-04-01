@@ -26,31 +26,14 @@ const Color = {
 }
 
 const activitiesDesktop = [
-    "GTA V",
-    "Minecraft",
-    "Fortnite",
-    "Mindustry",
-    "GTA IV",
-    "CS:GO",
-    "Terrira",
-    "Crossout",
-    "Apex Legends",
-    "Factorio",
-    "World of Tanks",
-    "Warthunder",
-    "Warzone 2100",
-    "Genshin Impact",
-    "Valoriant"
+    "Nothing 2"
 ]
 
 const activitiesMobile = [
-    "Manga",
-    "Discord.js documentation",
-    "Reddit",
-    "Twitter",
-    "Facebook",
-    "Instagram",
-    "Wiki"
+    "Photon PUN documentation",
+    "Discord Devolper Portal",
+    "Node.js documentation",
+    "Unity tutorials"
 ]
 
 const usersWithTax = [
