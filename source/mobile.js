@@ -619,7 +619,7 @@ bot.once('ready', async () => { //Ready
     if (false) {
         await DeleteCommands(bot)
     } else {
-        CreateCommands(bot)
+        //CreateCommands(bot)
     }
 
     const channel = bot.channels.cache.get(incomingNewsChannel)

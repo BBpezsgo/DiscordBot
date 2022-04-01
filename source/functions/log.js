@@ -9,6 +9,8 @@ const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + fontColor + ']'
 const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + fontColor + ']'
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + fontColor + ']'
 
+const timelineStepSize = 20000
+
 const CliColor = {
     FgBlack: "\x1b[30m",
     FgRed: "\x1b[31m",
@@ -40,7 +42,8 @@ const MessageCodes = {
     HandlebarsFinishLoading: 1
 }
 
-const spinner = ['─','\\','|','/']
+const spinner = ['─', '\\', '|', '/']
+const timeline = [' ', '▓', '█']
 
 const { TranslateResult } = require('./translator.js')
 
@@ -252,66 +255,130 @@ class LogManager {
         /** @type {number}*/
         this.lastTime = 0
 
-        setInterval(async () => {
-            if (this.enableLog == true) {
-                if (this.timer > 3) {
-                    for (let i = 0; i < this.logs.length; i++) {
-                        const log = this.logs[i];
-                        if (log.printed == false) {
-                            if (log.priv == false && this.isPhone == false) {} else {                                    
+        /** @type {string}*/
+        this.loadingOverride = ''
+
+        /** @type {NodeJS.Timer} */
+        this.timer = null
+
+        /** @type number[] */
+        this.timeline = []
+
+        /** @type number */
+        this.lastTimelineTime = 0
+
+        if (bot != null && statesManager != null) {
+            this.timer = setInterval(async () => {
+                if (this.enableLog == true) {
+                    if (this.timer > 3) {
+                        for (let i = 0; i < this.logs.length; i++) {
+                            const log = this.logs[i];
+                            if (log.printed == false) {
+                                if (log.priv == false && this.isPhone == false) { } else {
                                     var nl = (this.loggedCount == 0) ? '\n' : ''
                                     if (log.count == 1) {
                                         //print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | ' + log.count + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
                                     } else {
                                         //print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
                                     }
+                                }
+                                this.loggedCount += 1
+                                this.logs[i].printed = true
                             }
-                            this.loggedCount += 1
-                            this.logs[i].printed = true
                         }
+                    } else {
+                        this.timer += 1
                     }
-                } else {
-                    this.timer += 1
+                }
+
+                if (this.loading.botLoading == true || this.loading.handlebarsLoading == true) {
+                    var txt = ''
+                    if (this.loading.botLoading) {
+                        txt += '\nBot        ' + spinner[this.loadingIndex] + ' (' + this.loading.botPercent + ')  |'
+                    }
+                    if (this.loading.handlebarsLoading) {
+                        txt += '\nHandlebars ' + spinner[this.loadingIndex] + '  |'
+                    }
+                    if (txt.startsWith('\n')) {
+                        txt = txt.trimStart()
+                    }
+                    reprint(txt)
+                }
+
+                this.loadingIndex += 1
+                if (this.loadingIndex >= spinner.length) {
+                    this.loadingIndex = 0
+                }
+
+                var delIndex = -1
+                for (let i = 0; i < this.statesManager.handlebarsRequiests.length; i++) {
+                    this.statesManager.handlebarsRequiests[i] -= this.deltaTime
+                    if (this.statesManager.handlebarsRequiests[i] <= 0) {
+                        delIndex = i
+                    }
+                }
+
+                if (delIndex > -1) {
+                    this.statesManager.handlebarsRequiests.splice(delIndex)
+                }
+
+                const now = Date.now()
+                this.deltaTime = now - this.lastTime
+                this.lastTime = now
+
+                if (this.lastTimelineTime < Date.now() - timelineStepSize) {
+                    this.lastTimelineTime = Date.now()
+                    this.AddTimeline(1)
+                }
+
+                this.RefreshScreen()
+            }, 100);
+        } else {
+            this.timer = setInterval(async () => {
+                this.loadingIndex += 1
+                if (this.loadingIndex >= spinner.length) {
+                    this.loadingIndex = 0
+                }
+
+                const now = Date.now()
+                this.deltaTime = now - this.lastTime
+                this.lastTime = now
+
+                if (this.lastTimelineTime < Date.now() - timelineStepSize) {
+                    this.lastTimelineTime = Date.now()
+                    this.AddTimeline(1)
+                }
+
+                this.RefreshScreen()
+            }, 100);
+        }
+    }
+
+    AddTimeline(val) {
+        this.timeline.push(Date.now(), val)
+    }
+
+    GetTimelineText() {
+        var str = '|'
+        const width = 30
+        for (let i = Date.now()-(timelineStepSize * width); i < Date.now(); i+=timelineStepSize) {
+            var x = ' '
+            for (let j = 0; j < this.timeline.length; j += 2) {
+                if (this.timeline[j] >= (i- timelineStepSize) && this.timeline[j] <= i) {
+                    x = timeline[this.timeline[j + 1]]
+                    if (this.timeline[j + 1] == 2) { break }
                 }
             }
+            str += x
+        }
+        if ((str.length - 1) > width) {
+            str = str.substring(0, width + 1)
+        }
+        return str + '|'
+    }
 
-            if (this.loading.botLoading == true || this.loading.handlebarsLoading == true) {
-                var txt = ''
-                if (this.loading.botLoading) {
-                    txt += '\nBot        ' + spinner[this.loadingIndex] + ' (' + this.loading.botPercent + ')  |'
-                }
-                if (this.loading.handlebarsLoading) {
-                    txt += '\nHandlebars ' + spinner[this.loadingIndex] + '  |'
-                }
-                if (txt.startsWith('\n')) {
-                    txt = txt.trimStart()
-                }
-                reprint(txt)
-            }
-                
-            this.loadingIndex += 1
-            if (this.loadingIndex >= spinner.length) {
-                this.loadingIndex = 0
-            }
-
-            var delIndex = -1
-            for (let i = 0; i < this.statesManager.handlebarsRequiests.length; i++) {
-                this.statesManager.handlebarsRequiests[i] -= this.deltaTime
-                if (this.statesManager.handlebarsRequiests[i] <= 0) {
-                    delIndex = i
-                }
-            }
-
-            if (delIndex > -1) {
-                this.statesManager.handlebarsRequiests.splice(delIndex)
-            }
-
-            const now = Date.now()
-            this.deltaTime = now - this.lastTime
-            this.lastTime = now
-
-            this.RefreshScreen()
-        }, 100);
+    Destroy() {
+        clearInterval(this.timer)
     }
 
     GetSocketState(socket) {
@@ -325,40 +392,71 @@ class LogManager {
         return ""
     }
 
-    RefreshScreen() {
-        const window = {width: 60, height: 20}
-        var txt = '┌' + chars('─', window.width-2) + '┒\n'
-        txt += '│ ' + genLine(genLine('Ready at:', 20) + GetTime(this.bot.readyAt), window.width-4) + ' ┃\n'
-        txt += '│ ' + genLine(genLine('Uptime:', 20) + Math.floor(this.bot.uptime/1000) + ' s', window.width-4) + ' ┃\n'
-        txt += '│ ' + genLine(genLine('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width-4) + ' ┃\n'
-        txt += '│ ' + genLine(genLine('WS State:', 20) + StateText_WS(WsStatus[this.bot.ws.status]), window.width-4) + ' ┃\n'
-        txt += '│ ' + genLine('', window.width-4) + ' ┃\n'
-        txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.handlebarsErrorMessage, this.statesManager.handlebarsDone, this.statesManager.handlebarsURL), window.width-4) + ' ┃\n'
-        txt += '│ ' + genLine(genLine('HB Requiests:', 20) + this.statesManager.handlebarsRequiests.length, window.width-4) + ' ┃\n'
-        for (let i = 0; i < this.statesManager.handlebarsClients.length; i++) {
-            const socket = this.statesManager.handlebarsClients[i];
-            if (i == 0) {
-                txt += '│ ' + genLine(genLine('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width-4) + ' ┃\n'
-            } else {
-                txt += '│ ' + genLine(genLine('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + ", "  + "]", window.width-4) + ' ┃\n'
-            }
-        }
-        if (this.statesManager.shardCurrentlyLoading == true) {
-            txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' Shard:', 20) + this.statesManager.shardCurrentlyLoadingText, window.width-4) + ' ┃\n'
-        }
-        if (this.statesManager.shardErrorText.length > 0) {
-            txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.shardErrorText + CliColor.FgDefault, window.width-4) + chars(' ', 15) + ' ┃\n'
-        }
-        if (this.statesManager.ytdlCurrentlyLoading == true) {
-            txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width-4) + ' ┃\n'
-        }
-        //txt += '˥ ˦ ˧ ˨ ˩' + '\n'
-        //txt += '˹˺˻˼' + '\n'
+    Loading(loadingName, packetName) {
+        this.loadingOverride = loadingName + ': ' + packetName
+    }
+
+    BlankScreen() {
+        this.loadingOverride = ''
+
+        const window = { width: 60, height: 20 }
+        var txt = '┌' + chars('─', window.width - 2) + '┒\n'
+        txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
         const remaingHeight = window.height - txt.split('\n').length - 1
         for (let i = 0; i < remaingHeight; i++) {
-            txt += '│ ' + genLine('', window.width-4) + ' ┃\n'
+            txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
         }
-        txt += '┕' + chars('━', window.width-2) + '┛\n'
+        txt += '┕' + chars('━', window.width - 2) + '┛\n'
+        txt += chars(' ', window.width) + '\n'
+
+        reprint(txt)
+    }
+
+    //txt += '˥ ˦ ˧ ˨ ˩' + '\n'
+    //txt += '˹˺˻˼' + '\n'
+
+    RefreshScreen() {
+        const window = { width: 60, height: 20 }
+        var txt = '┌' + chars('─', window.width - 2) + '┒\n'
+
+        if (this.loadingOverride == '') {
+            txt += '│ ' + genLine(genLine('Ready at:', 20) + GetTime(this.bot.readyAt), window.width - 4) + ' ┃\n'
+            var dfdfdf = new Date(0)
+            dfdfdf.setSeconds(this.bot.uptime/1000)
+            dfdfdf.setHours(0)
+            txt += '│ ' + genLine(genLine('Uptime:', 20) + GetTime(dfdfdf), window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('WS State:', 20) + StateText_WS(WsStatus[this.bot.ws.status]), window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.handlebarsErrorMessage, this.statesManager.handlebarsDone, this.statesManager.handlebarsURL), window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('HB Requiests:', 20) + this.statesManager.handlebarsRequiests.length, window.width - 4) + ' ┃\n'
+            for (let i = 0; i < this.statesManager.handlebarsClients.length; i++) {
+                const socket = this.statesManager.handlebarsClients[i];
+                if (i == 0) {
+                    txt += '│ ' + genLine(genLine('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width - 4) + ' ┃\n'
+                } else {
+                    txt += '│ ' + genLine(genLine('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + ", " + "]", window.width - 4) + ' ┃\n'
+                }
+            }
+            if (this.statesManager.shardCurrentlyLoading == true) {
+                txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' Shard:', 20) + this.statesManager.shardCurrentlyLoadingText, window.width - 4) + ' ┃\n'
+            }
+            if (this.statesManager.shardErrorText.length > 0) {
+                txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.shardErrorText + CliColor.FgDefault, window.width - 4) + chars(' ', 15) + ' ┃\n'
+            }
+            if (this.statesManager.ytdlCurrentlyLoading == true) {
+                txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width - 4) + ' ┃\n'
+            }    
+            txt += '│ ' + genLine(this.GetTimelineText(), window.width - 4) + ' ┃\n'
+        } else {
+            txt += '│ ' + spinner[this.loadingIndex] + genLine(this.loadingOverride, window.width - 4) + ' ┃\n'
+        }
+
+        const remaingHeight = window.height - txt.split('\n').length - 1
+        for (let i = 0; i < remaingHeight; i++) {
+            txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+        }
+        txt += '┕' + chars('━', window.width - 2) + '┛\n'
         txt += chars(' ', window.width) + '\n'
 
         reprint(txt)

@@ -1,13 +1,25 @@
 //#region Imports, variables
 
+const { LogManager } = require('./functions/log.js')
+var logManager = new LogManager(false, null, null)
+
+logManager.Loading("Loading extensions", 'weather')
 const CommandWeather = require('./commands/weather')
+logManager.Loading("Loading extensions", 'help')
 const CommandHelp = require('./commands/help')
+logManager.Loading("Loading extensions", 'database/xp')
 const CommandXp = require('./commands/database/xp')
+logManager.Loading("Loading extensions", 'database/shop')
 const CommandShop = require('./commands/database/shop')
+logManager.Loading("Loading extensions", 'database/businees')
 const CommandBusiness = require('./commands/database/businees')
+logManager.Loading("Loading extensions", 'crossout')
 const { CrossoutTest } = require('./commands/crossout')
+logManager.Loading("Loading extensions", 'redditsave')
 const CommandRedditsave = require('./commands/redditsave')
+logManager.Loading("Loading extensions", 'fonts')
 const { CommandFont } = require('./commands/fonts')
+logManager.Loading("Loading extensions", 'game')
 const {
     playerCanMoveToHere,
     gameResetCameraPos,
@@ -37,66 +49,89 @@ const {
     getMapPoint
 } = require('./commands/game')
 
+logManager.Loading("Loading extensions", 'database/xpFunctions')
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./commands/database/xpFunctions')
+logManager.Loading("Loading extensions", 'commands')
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
-const { LogManager } = require('./functions/log.js')
+logManager.Loading("Loading extensions", 'translator')
 const { TranslateMessage } = require('./functions/translator.js')
+logManager.Loading("Loading extensions", 'statesManager')
 const { StatesManager } = require('./functions/statesManager.js')
+logManager.Loading("Loading extensions", 'databaseManager')
 const { databaseManager } = require('./functions/databaseManager.js')
 
 const statesManager = new StatesManager()
+logManager.BlankScreen()
 
 const ColorRoles = {
-	red: "850016210422464534",
-	yellow: "850016458544250891",
-	blue: "850016589155401758",
-	orange: "850016531848888340",
-	green: "850016722039078912",
-	purple: "850016668352643072",
-	invisible: "850016786186371122"
+    red: "850016210422464534",
+    yellow: "850016458544250891",
+    blue: "850016589155401758",
+    orange: "850016531848888340",
+    green: "850016722039078912",
+    purple: "850016668352643072",
+    invisible: "850016786186371122"
 }
 
-const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, usersWithTax, ChannelId} = require('./functions/enums.js')
+const { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, usersWithTax, ChannelId } = require('./functions/enums.js')
 
 const consoleWidth = 80 - 2
 
+logManager.Loading('Loading packet', "fs")
 const fs = require('fs')
 
+logManager.BlankScreen()
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
+logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
 const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+logManager.Loading('Loading', "bot")
 const { perfix, token } = require('./config.json')
 const bot = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
+logManager.Destroy()
+logManager = new LogManager(false, bot, statesManager)
 statesManager.botLoaded = true
-
-const logManager = new LogManager(false, bot, statesManager)
+logManager.BlankScreen()
 
 /** @param {string} message */
 function log(message = '', translateResult = null) {
     logManager.Log(message, false, translateResult)
 }
 
+logManager.Loading('Loading database', 'userstats.json')
 let userstats = JSON.parse(fs.readFileSync('./database/userstats.json', 'utf-8'))
 
+logManager.Loading('Loading database', 'stickers.json')
 let dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8'))
+logManager.Loading('Loading database', 'bot.json')
 let dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
+logManager.Loading('Loading database', 'userNames.json')
 let dataUsernames = JSON.parse(fs.readFileSync('./database/userNames.json', 'utf-8'))
+logManager.Loading('Loading database', 'mails.json')
 let dataMail = JSON.parse(fs.readFileSync('./database/mails.json', 'utf-8'))
+logManager.Loading('Loading database', 'polls.json')
 let dataPolls = JSON.parse(fs.readFileSync('./database/polls.json', 'utf-8'))
+logManager.Loading('Loading database', 'market.json')
 let dataMarket = JSON.parse(fs.readFileSync('./database/market.json', 'utf-8'))
 
+logManager.Loading('Loading database', 'Manager')
 const database = new databaseManager()
+logManager.Loading('Loading database', 'basic.json')
 database.dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
+logManager.Loading('Loading database', 'backpacks.json')
 database.dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
 
+logManager.Loading('Loading packet', "ytdl-core")
 const ytdl = require('ytdl-core')
 
-const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
-
+logManager.Loading('Loading', "WS")
 const WS = require('./ws/ws')
 var ws = new WS('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager)
+logManager.BlankScreen()
+
+const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
 let musicArray = []
 let musicFinished = true
@@ -125,55 +160,55 @@ const processedNewsChannel = '746266528508411935'
 
 process.stdin.on('mousepress', function (info) {
     console.log('got "mousepress" event at %d x %d', info.x, info.y);
-  });
+});
 
 process.stdin.resume();
 
 process.stdin.on('data', function (b) {
-  var s = b.toString('utf8');
-  if (s === '\u0003') {
-    console.error('Ctrl+C');
-    process.stdin.pause();
-  } else if (/^\u001b\[M/.test(s)) {
-    // mouse event
-    console.error('s.length:', s.length);
-    // reuse the key array albeit its name
-    // otherwise recompute as the mouse event is structured differently
-    var modifier = s.charCodeAt(3);
-    var key = {};
-    key.shift = !!(modifier & 4);
-    key.meta = !!(modifier & 8);
-    key.ctrl = !!(modifier & 16);
-    key.x = s.charCodeAt(4) - 32;
-    key.y = s.charCodeAt(5) - 32;
-    key.button = null;
-    key.sequence = s;
-    key.buf = Buffer(key.sequence);
-    if ((modifier & 96) === 96) {
-      key.name = 'scroll';
-      key.button = modifier & 1 ? 'down' : 'up';
+    var s = b.toString('utf8');
+    if (s === '\u0003') {
+        console.error('Ctrl+C');
+        process.stdin.pause();
+    } else if (/^\u001b\[M/.test(s)) {
+        // mouse event
+        console.error('s.length:', s.length);
+        // reuse the key array albeit its name
+        // otherwise recompute as the mouse event is structured differently
+        var modifier = s.charCodeAt(3);
+        var key = {};
+        key.shift = !!(modifier & 4);
+        key.meta = !!(modifier & 8);
+        key.ctrl = !!(modifier & 16);
+        key.x = s.charCodeAt(4) - 32;
+        key.y = s.charCodeAt(5) - 32;
+        key.button = null;
+        key.sequence = s;
+        key.buf = Buffer(key.sequence);
+        if ((modifier & 96) === 96) {
+            key.name = 'scroll';
+            key.button = modifier & 1 ? 'down' : 'up';
+        } else {
+            key.name = modifier & 64 ? 'move' : 'click';
+            switch (modifier & 3) {
+                case 0: key.button = 'left'; break;
+                case 1: key.button = 'middle'; break;
+                case 2: key.button = 'right'; break;
+                case 3: key.button = 'none'; break;
+                default: return;
+            }
+        }
+        console.error(key);
     } else {
-      key.name = modifier & 64 ? 'move' : 'click';
-      switch (modifier & 3) {
-        case 0 : key.button = 'left'; break;
-        case 1 : key.button = 'middle'; break;
-        case 2 : key.button = 'right'; break;
-        case 3 : key.button = 'none'; break;
-        default : return;
-      }
+        // something else...
+        console.error(0, s, b);
     }
-    console.error(key);
-  } else {
-    // something else...
-    console.error(0, s, b);
-  }
 })
 
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
-  process.stdin.setRawMode(true);
+    process.stdin.setRawMode(true);
 } else {
-  require('tty').setRawMode(true);
+    require('tty').setRawMode(true);
 }
 
 // Enable "mouse reporting"
@@ -181,10 +216,10 @@ process.stdout.write('\x1b[?1005h');
 process.stdout.write('\x1b[?1003h');
 
 process.on('exit', function () {
-  // don't forget to turn off mouse reporting
-  process.stdout.write('\x1b[?1005l');
-  process.stdout.write('\x1b[?1003l');
-  console.log("Exit...")
+    // don't forget to turn off mouse reporting
+    process.stdout.write('\x1b[?1005l');
+    process.stdout.write('\x1b[?1003l');
+    console.log("Exit...")
 });
 
 //#region Functions 
@@ -195,32 +230,32 @@ process.on('exit', function () {
  */
 function saveUserToMemoryAll(user, username) {
     if (!database.dataBackpacks[user.id]) {
-        database. dataBackpacks[user.id] = {}
+        database.dataBackpacks[user.id] = {}
     }
     database.dataBackpacks[user.id].username = username
     if (!database.dataBackpacks[user.id].crates) {
-        database. dataBackpacks[user.id].crates = 0
+        database.dataBackpacks[user.id].crates = 0
     }
-    if(!database.dataBackpacks[user.id].gifts) {
-        database.  dataBackpacks[user.id].gifts = 0
+    if (!database.dataBackpacks[user.id].gifts) {
+        database.dataBackpacks[user.id].gifts = 0
     }
     if (!database.dataBackpacks[user.id].getGift) {
-        database. dataBackpacks[user.id].getGift = 0
+        database.dataBackpacks[user.id].getGift = 0
     }
     if (!database.dataBackpacks[user.id].tickets) {
-        database. dataBackpacks[user.id].tickets = 0
+        database.dataBackpacks[user.id].tickets = 0
     }
     if (!database.dataBackpacks[user.id].quizTokens) {
-        database.   dataBackpacks[user.id].quizTokens = 0
+        database.dataBackpacks[user.id].quizTokens = 0
     }
     if (!database.dataBackpacks[user.id].luckyCards) {
-        database.  dataBackpacks[user.id].luckyCards = {}
+        database.dataBackpacks[user.id].luckyCards = {}
     }
     if (!database.dataBackpacks[user.id].luckyCards.small) {
-        database.  dataBackpacks[user.id].luckyCards.small = 0
+        database.dataBackpacks[user.id].luckyCards.small = 0
     }
     if (!database.dataBackpacks[user.id].luckyCards.medium) {
-        database.  dataBackpacks[user.id].luckyCards.medium = 0
+        database.dataBackpacks[user.id].luckyCards.medium = 0
     }
     if (!database.dataBackpacks[user.id].luckyCards.large) {
         database.dataBackpacks[user.id].luckyCards.large = 0
@@ -345,7 +380,7 @@ function saveDatabase() {
 
 function reloadDatabase() {
     try {
-        database. dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
+        database.dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
         database.dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
         dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8'))
         dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
@@ -476,13 +511,13 @@ function addXp(user, channel, ammount) {
 
         database.dataBasic[user.id].money += addMoney
         const embed = new Discord.MessageEmbed()
-            .setAuthor({name: user.username, iconURL: user.avatarURL()})
+            .setAuthor({ name: user.username, iconURL: user.avatarURL() })
             .setTitle('Szintet léptél!')
             .addField('Rang', '\\' + rank.toString() + '  (' + rankName + ')', true)
             .addField('Jutalmad', addMoney.toString() + '\\💵', true)
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/clinking-beer-mugs_1f37b.png')
             .setColor(Color.Highlight)
-        channel.send({embeds: [ embed ]})
+        channel.send({ embeds: [embed] })
     }
 
     saveDatabase()
@@ -517,6 +552,11 @@ bot.on('debug', debug => {
     const translatedDebug = TranslateMessage(debug)
 
     if (translatedDebug == null) return;
+
+    if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
+        logManager.AddTimeline(2)
+    }
+
     if (translatedDebug.secret == true) return;
 
     log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
@@ -584,7 +624,7 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
     log(DEBUG & ': newStatus: ' + newPresence.status.toString());
 })
 
-bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => {})
+bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => { })
 
 //#endregion
 
@@ -678,12 +718,12 @@ async function playAudio(message) {
         const embed = new Discord.MessageEmbed()
             .setColor(Color.Purple)
             .setURL(info.videoDetails.video_url)
-            .setAuthor({name: message.author.username, iconURL: message.author.displayAvatarURL()})
+            .setAuthor({ name: message.author.username, iconURL: message.author.displayAvatarURL() })
             .setTitle(info.videoDetails.title)
             .setThumbnail(info.videoDetails.thumbnails[0].url)
             .addField('Csatorna', info.videoDetails.author.name, true)
             .addField('Hossz', musicGetLengthText(info.videoDetails.lengthSeconds), true)
-        message.channel.send('> **\\✔️ Most hallható: \\🎧**', {embeds: [ embed ]})
+        message.channel.send('> **\\✔️ Most hallható: \\🎧**', { embeds: [embed] })
         statesManager.ytdlCurrentlyPlayingText = info.videoDetails.title
         statesManager.ytdlCurrentlyPlayingUrl = link
         return true
@@ -764,7 +804,7 @@ function openDayCrate(userId) {
         return 0 + '|' + val
     } else if (RandomPercente < 30) { // 20%
         val = 1
-        database. dataBackpacks[userId].crates += val
+        database.dataBackpacks[userId].crates += val
 
         return 1 + '|' + val
     } else if (RandomPercente < 60) { // 30%
@@ -789,17 +829,17 @@ function commandStore(sender) {
     var currentDay = new Date().getDay();
     var dayCrates = dataBot.day - database.dataBasic[sender.id].day
     var crates = database.dataBackpacks[sender.id].crates
-    var gifts =database. dataBackpacks[sender.id].gifts
+    var gifts = database.dataBackpacks[sender.id].gifts
     var tickets = database.dataBackpacks[sender.id].tickets
-    var getGifts =database. dataBackpacks[sender.id].getGift
+    var getGifts = database.dataBackpacks[sender.id].getGift
     var quizTokens = database.dataBackpacks[sender.id].quizTokens
     var smallLuckyCard = database.dataBackpacks[sender.id].luckyCards.small
-    var mediumLuckyCard =database. dataBackpacks[sender.id].luckyCards.medium
-    var largeLuckyCard =database. dataBackpacks[sender.id].luckyCards.large
+    var mediumLuckyCard = database.dataBackpacks[sender.id].luckyCards.medium
+    var largeLuckyCard = database.dataBackpacks[sender.id].luckyCards.large
     var money = database.dataBasic[sender.id].money
 
     const embed = new Discord.MessageEmbed()
-        .setAuthor({name: sender.username, iconURL: sender.avatarURL()})
+        .setAuthor({ name: sender.username, iconURL: sender.avatarURL() })
         .setTitle('Hátizsák')
         .addField('Pénz', '\\💵 ' + abbrev(money), false)
         .addField('Alap cuccok',
@@ -860,7 +900,7 @@ function commandStore(sender) {
     const rowSecondary = new MessageActionRow()
         .addComponents(buttonSendGift)
     if (getGifts > 0) { rowSecondary.addComponents(buttonOpenGift) };
-   return {embeds: [ embed ], components: [rowPrimary, rowSecondary]}
+    return { embeds: [embed], components: [rowPrimary, rowSecondary] }
 }
 
 /**
@@ -904,7 +944,7 @@ async function commandNapi(message, sender) {
  */
 async function commandAllNapi(sender, ammount) {
     if (dayOfYear === database.dataBasic[sender.id].day) {
-        return {content: '> **\\❌ Nincs napi ládád! \\🧰**'}
+        return { content: '> **\\❌ Nincs napi ládád! \\🧰**' }
     } else {
         let dayCrates = Math.min(dataBot.day - database.dataBasic[sender.id].day, ammount)
 
@@ -933,12 +973,13 @@ async function commandAllNapi(sender, ammount) {
 
         database.dataBasic[sender.id].day = database.dataBasic[sender.id].day + dayCrates
         saveDatabase()
-    
-        return {content: '> ' + dayCrates + 'x \\🧰 Kaptál:\n' +
-            '>     \\💵 **' + getMoney + '** pénzt\n' +
-            '>     \\🍺 **' + getXpS + '** xpt\n' +
-            '>     \\🧱 **' + getChestS + '** ládát\n' +
-            '>     \\🎟️ **' + getTicket + '** kupont'
+
+        return {
+            content: '> ' + dayCrates + 'x \\🧰 Kaptál:\n' +
+                '>     \\💵 **' + getMoney + '** pénzt\n' +
+                '>     \\🍺 **' + getXpS + '** xpt\n' +
+                '>     \\🧱 **' + getChestS + '** ládát\n' +
+                '>     \\🎟️ **' + getTicket + '** kupont'
         }
     };
 }
@@ -949,7 +990,7 @@ async function commandAllNapi(sender, ammount) {
  */
 async function commandAllCrate(sender, ammount) {
     if (database.dataBackpacks[sender.id].crates === 0) {
-        return {content: '> **\\❌ Nincs ládád! \\🧱**'}
+        return { content: '> **\\❌ Nincs ládád! \\🧱**' }
     } else {
         let Crates = Math.min(database.dataBackpacks[sender.id].crates, ammount)
 
@@ -979,13 +1020,14 @@ async function commandAllCrate(sender, ammount) {
             };
         }
 
-        database.  dataBackpacks[sender.id].crates = database.dataBackpacks[sender.id].crates - Crates
+        database.dataBackpacks[sender.id].crates = database.dataBackpacks[sender.id].crates - Crates
         saveDatabase()
 
-        return {content: '> ' + Crates + 'x \\🧱 Kaptál:\n' +
-            '>     \\🍺 **' + getXpS + '** xpt\n' +
-            '>     \\💵 **' + getMoney + '** pénzt\n' +
-            '>     \\🎁 **' + getGiftS + '** ajándékot'
+        return {
+            content: '> ' + Crates + 'x \\🧱 Kaptál:\n' +
+                '>     \\🍺 **' + getXpS + '** xpt\n' +
+                '>     \\💵 **' + getMoney + '** pénzt\n' +
+                '>     \\🎁 **' + getGiftS + '** ajándékot'
         }
 
     };
@@ -1015,7 +1057,7 @@ async function commandMusicList(message) {
         message.channel.send('> **\\➖ A lejátszólista üres \\🎧**')
     } else {
         const embed = new Discord.MessageEmbed()
-        .setAuthor({name: message.member.displayName, iconURL: message.author.avatarURL()})
+            .setAuthor({ name: message.member.displayName, iconURL: message.author.avatarURL() })
         embed.setColor(Color.Purple)
         await ytdl.getBasicInfo(statesManager.ytdlCurrentlyPlayingUrl).then(info => {
             embed.addField('\\🎧 Most hallható: ' + info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
@@ -1025,7 +1067,7 @@ async function commandMusicList(message) {
                 embed.addField(info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
             })
         });
-        message.channel.send('> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', {embeds: [ embed ]})
+        message.channel.send('> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', { embeds: [embed] })
     }
 }
 
@@ -1053,7 +1095,7 @@ function commandProfil(member) {
     const embed = new Discord.MessageEmbed()
         .setColor(database.dataBasic[member.id].color)
         .setTitle('Profil')
-        .setAuthor({name: member.displayName, iconURL: member.displayAvatarURL()})
+        .setAuthor({ name: member.displayName, iconURL: member.displayAvatarURL() })
         .addField('Matricák',
             '> ' + dataStickers[member.id].stickersMusic + ' \\🎼 Zene\n' +
             '> ' + dataStickers[member.id].stickersMeme + ' \\🎭 Meme\n' +
@@ -1082,7 +1124,7 @@ function commandProfil(member) {
             '> \\🎴 card-0c: 0\n' +
             '> \\🧧 card-1a: 0'
         )
-    return {embeds: [ embed ]}
+    return { embeds: [embed] }
 }
 
 /**@param {number} days @returns {number} */
@@ -1108,7 +1150,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
             `\\✔️  **${addXpValue}\\🍺** és **${addToken}\\🎫**\n` +
             `\\❌ **-${removeXpValue}\\🍺** és **-${removeToken}\\🎫**\n` +
             `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
-            )
+        )
         .addField(`${titleText}`, `${optionText}`)
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
         .setFooter({ text: "Vége:" })
@@ -1158,7 +1200,7 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
         .setTitle('Szavazás!')
         .addField(`${titleText}`, `${optionText}`);
 
-    bot.channels.cache.get('795935090026086410').send({embeds: [ embed ]}).then(message => {
+    bot.channels.cache.get('795935090026086410').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&795935996982198272>')
         for (let i = 0; i < optionEmojis.length; i++) {
             if (optionEmojis[i].includes('<')) {
@@ -1193,14 +1235,14 @@ async function quizDone(quizMessageId, correctIndex) {
                 answersEmoji.push(gfgfdgdfgdf)
             }
         })
-        const correctAnswer =  message.embeds[0].fields[0].value.split('\n')[correctIndex].replace('>', '').trimStart()
+        const correctAnswer = message.embeds[0].fields[0].value.split('\n')[correctIndex].replace('>', '').trimStart()
         const correctAnswerEmoji = correctAnswer.split(' ')[0]
         const correctAnswerText = correctAnswer.replace(correctAnswerEmoji, '').trimStart()
         const awardAdd0 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
         const awardAdd1 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
         const awardRemove0 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
         const awardRemove1 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
-        
+
         message.reactions.resolve('🎯').users.fetch().then(async (userList0) => {
             /**@type {string[]} */
             const usersWithCorrectAnswer = []
@@ -1218,9 +1260,9 @@ async function quizDone(quizMessageId, correctIndex) {
                     for (let j = 0; j < users.length; j++) {
                         const userId = users[j]
                         if (userId == bot.user.id) { continue }
-            
+
                         //const members = await bot.guilds.cache.get('737954264386764812').members.fetch({ limit: 20 })
-                        const member = await bot.guilds.cache.get('737954264386764812').members.fetch({user: userId})
+                        const member = await bot.guilds.cache.get('737954264386764812').members.fetch({ user: userId })
 
                         if (currentAnswerEmoji == correctAnswerEmoji) {
                             usersWithCorrectAnswer.push(userId)
@@ -1270,7 +1312,7 @@ bot.on('interactionCreate', async interaction => {
                 const button2 = interaction.message.components[0].components[1]
                 const row = new MessageActionRow()
                     .addComponents(button1, button2)
-                interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
+                interaction.update({ embeds: [interaction.message.embeds[0]], components: [row] })
                 return
             }
         }
@@ -1283,7 +1325,7 @@ bot.on('interactionCreate', async interaction => {
 
         try {
             if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
-                interaction.reply({content: '> \\❗ **Ez nem a tied!**', ephemeral: true})
+                interaction.reply({ content: '> \\❗ **Ez nem a tied!**', ephemeral: true })
                 return
             }
         } catch (error) { }
@@ -1294,13 +1336,13 @@ bot.on('interactionCreate', async interaction => {
 
         if (interaction.component.customId === 'openDayCrate') {
             if (dayOfYear === database.dataBasic[interaction.user.id].day) {
-                interaction.reply({content: '> **\\❌ Már kinyitottad a napi ládádat!*', ephemeral: true});
+                interaction.reply({ content: '> **\\❌ Már kinyitottad a napi ládádat!*', ephemeral: true });
             } else {
                 const rewald = openDayCrate(interaction.user.id)
                 const rewaldIndex = rewald.split('|')[0]
                 const rewaldValue = rewald.split('|')[1]
                 let txt = ''
-        
+
                 if (rewaldIndex === '2') {
                     txt = '**\\🍺 ' + rewaldValue + '** xp-t'
                 } else if (rewaldIndex === '3') {
@@ -1312,10 +1354,10 @@ bot.on('interactionCreate', async interaction => {
                 } else {
                     txt = rewald
                 }
-        
-                interaction.reply({content: '> \\🧰 Kaptál:  ' + txt, ephemeral: true});
+
+                interaction.reply({ content: '> \\🧰 Kaptál:  ' + txt, ephemeral: true });
             };
-        
+
             database.dataBasic[interaction.user.id].day += 1
             if (database.dataBasic[interaction.user.id].day > dataBot.day) {
                 database.dataBasic[interaction.user.id].day = dataBot.day
@@ -1351,14 +1393,14 @@ bot.on('interactionCreate', async interaction => {
             }
 
             interaction.message.edit(commandStore(interaction.user))
-            interaction.reply({content: '> \\🧱 Kaptál:  ' + txt, ephemeral: true});
+            interaction.reply({ content: '> \\🧱 Kaptál:  ' + txt, ephemeral: true });
 
             saveDatabase()
             return
         }
 
         if (interaction.component.customId === 'useLuckyCardSmall') {
-            database. dataBackpacks[interaction.user.id].luckyCards.small -= 1
+            database.dataBackpacks[interaction.user.id].luckyCards.small -= 1
             var val = 0
 
             var nyeroszam = Math.floor(Math.random() * 2)
@@ -1368,19 +1410,19 @@ bot.on('interactionCreate', async interaction => {
             }
 
             if (val === 0) {
-                interaction.reply({content: '> \\💶 Nyertél:  **semmit**', ephemeral: true});
+                interaction.reply({ content: '> \\💶 Nyertél:  **semmit**', ephemeral: true });
             } else {
-                interaction.reply({content: '> \\💶 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true});
+                interaction.reply({ content: '> \\💶 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true });
             }
 
             interaction.message.edit(commandStore(interaction.user))
-            
+
             saveDatabase()
             return;
         }
 
         if (interaction.component.customId === 'useLuckyCardMedium') {
-            database. dataBackpacks[interaction.user.id].luckyCards.medium -= 1
+            database.dataBackpacks[interaction.user.id].luckyCards.medium -= 1
             var val = 0
 
             var nyeroszam = Math.floor(Math.random() * 4)
@@ -1390,19 +1432,19 @@ bot.on('interactionCreate', async interaction => {
             }
 
             if (val === 0) {
-                interaction.reply({content: '> \\💷 Nyertél:  **semmit**', ephemeral: true});
+                interaction.reply({ content: '> \\💷 Nyertél:  **semmit**', ephemeral: true });
             } else {
-                interaction.reply({content: '> \\💷 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true});
+                interaction.reply({ content: '> \\💷 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true });
             }
 
             interaction.message.edit(commandStore(interaction.user))
-            
+
             saveDatabase()
             return;
         }
 
         if (interaction.component.customId === 'useLuckyCardLarge') {
-            database.   dataBackpacks[interaction.user.id].luckyCards.large -= 1
+            database.dataBackpacks[interaction.user.id].luckyCards.large -= 1
             var val = 0
 
             var nyeroszam = Math.floor(Math.random() * 9)
@@ -1412,19 +1454,19 @@ bot.on('interactionCreate', async interaction => {
             }
 
             if (val === 0) {
-                interaction.reply({content: '> \\💴 Nyertél:  **semmit**', ephemeral: true});
+                interaction.reply({ content: '> \\💴 Nyertél:  **semmit**', ephemeral: true });
             } else {
-                interaction.reply({content: '> \\💴 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true});
+                interaction.reply({ content: '> \\💴 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true });
             }
 
             interaction.message.edit(commandStore(interaction.user))
-            
+
             saveDatabase()
             return;
         }
 
         if (interaction.component.customId === 'openGift') {
-            database.  dataBackpacks[interaction.user.id].getGift -= 1
+            database.dataBackpacks[interaction.user.id].getGift -= 1
             var replies = ['xp', 'money'];
             var random = Math.floor(Math.random() * 2);
             var out = replies[random]
@@ -1442,17 +1484,17 @@ bot.on('interactionCreate', async interaction => {
                 database.dataBasic[interaction.user.id].money += val
             };
 
-            interaction.reply({content: '> \\🎀 Kaptál ' + txt, ephemeral: true});
+            interaction.reply({ content: '> \\🎀 Kaptál ' + txt, ephemeral: true });
             interaction.message.edit(commandStore(interaction.user))
-            
+
             saveDatabase()
             return;
         }
 
         if (interaction.component.customId === 'sendGift') {
-            interaction.reply({content: '> **\\❔ Használd a **`/gift <felhasználó>`** parancsot egy személy megajándékozásához**', ephemeral: true});
+            interaction.reply({ content: '> **\\❔ Használd a **`/gift <felhasználó>`** parancsot egy személy megajándékozásához**', ephemeral: true });
             interaction.message.edit(commandStore(interaction.user))
-            
+
             saveDatabase()
             return;
         }
@@ -1467,7 +1509,7 @@ bot.on('interactionCreate', async interaction => {
                         game.gameMap.players[playerIndex].y -= 1
                     }
                     gameResetCameraPos(isOnPhone, interaction.user, game)
-    
+
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameA') {
@@ -1476,7 +1518,7 @@ bot.on('interactionCreate', async interaction => {
                         game.gameMap.players[playerIndex].x -= 1
                     }
                     gameResetCameraPos(isOnPhone, interaction.user, game)
-    
+
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameS') {
@@ -1485,7 +1527,7 @@ bot.on('interactionCreate', async interaction => {
                         game.gameMap.players[playerIndex].y += 1
                     }
                     gameResetCameraPos(isOnPhone, interaction.user, game)
-    
+
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameD') {
@@ -1494,7 +1536,7 @@ bot.on('interactionCreate', async interaction => {
                         game.gameMap.players[playerIndex].x += 1
                     }
                     gameResetCameraPos(isOnPhone, interaction.user, game)
-    
+
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameHit') {
@@ -1511,7 +1553,7 @@ bot.on('interactionCreate', async interaction => {
                     } else if (game.gameMap.players[playerIndex].direction === Direction.Left) {
                         mapPoint = getMapPoint(game.gameMap.players[playerIndex].x - 1, game.gameMap.players[playerIndex].y, game.gameMap)
                     }
-    
+
                     if (mapPoint.object !== null) {
                         /**
                          * @type {MapObject}
@@ -1532,9 +1574,9 @@ bot.on('interactionCreate', async interaction => {
                             } else if (breakableObj.type === MapObjectType.hibiscus) {
                                 addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
                             } else if (breakableObj.type === MapObjectType.igloo) {
-    
+
                             } else if (breakableObj.type === MapObjectType.mushroom) {
-    
+
                             } else if (breakableObj.type === MapObjectType.palm) {
                                 addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 3)
                             } else if (breakableObj.type === MapObjectType.plant) {
@@ -1558,11 +1600,11 @@ bot.on('interactionCreate', async interaction => {
                             mapPoint.object = null
                         }
                     }
-    
+
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
                 } else if (interaction.component.customId === 'gameUse') {
-    
+
                 } else if (interaction.component.customId === 'gameSwitchPhone') {
                     for (let i = 0; i < game.gameUserSettings.length; i++) {
                         if (game.gameUserSettings[i].userId === interaction.user.id) {
@@ -1573,15 +1615,15 @@ bot.on('interactionCreate', async interaction => {
                             }
                         }
                     }
-    
+
                     if (getGameUserSettings(interaction.user.id, game) !== null) {
                         isOnPhone = getGameUserSettings(interaction.user.id, game).isOnPhone
                     }
-    
+
                     gameResetCameraPos(isOnPhone, interaction.user, game)
-    
+
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-    
+
                     log(game.gameUserSettings);
                 } else if (interaction.component.customId === 'gameSwitchDebug') {
                     for (let i = 0; i < game.gameUserSettings.length; i++) {
@@ -1593,19 +1635,19 @@ bot.on('interactionCreate', async interaction => {
                             }
                         }
                     }
-    
+
                     if (getGameUserSettings(interaction.user.id, game) !== null) {
                         isInDebugMode = getGameUserSettings(interaction.user.id, game).isInDebugMode
                     }
-    
+
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-    
+
                     log(game.gameUserSettings);
                 } else if (interaction.component.customId === 'gameRestart') {
                     game.gameMap = createGame(50, 50)
                     connectTogame(interaction.user, game)
                     gameResetCameraPos(isOnPhone, interaction.user, game)
-    
+
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
                 }
             }
@@ -1627,7 +1669,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'Gift') {
                 if (money >= 3999) {
@@ -1637,7 +1679,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'Ticket') {
                 if (money >= 8999) {
@@ -1647,7 +1689,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'WC') {
                 if (money >= 799) {
@@ -1656,7 +1698,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'LuckySmall') {
                 if (money >= 1999) {
@@ -1666,7 +1708,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'LuckyMedium') {
                 if (money >= 3599) {
@@ -1676,17 +1718,17 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'LuckyLarge') {
                 if (money >= 6999) {
                     database.dataBasic[interaction.user.id].money -= 6999
                     database.dataBackpacks[interaction.user.id].luckyCards.large += 1
 
-                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database,2))
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             }
             return
@@ -1703,7 +1745,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(commandMarket(interaction.user))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'TicketToMoney') {
                 if (database.dataBackpacks[interaction.user.id].tickets > 0) {
@@ -1713,7 +1755,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(commandMarket(interaction.user))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'JewelToMoney') {
                 if (database.dataBackpacks[interaction.user.id].jewel > 0) {
@@ -1723,7 +1765,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(commandMarket(interaction.user))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'MoneyToJewel') {
                 if (money >= Number.parseInt(dataMarket.prices.jewel)) {
@@ -1733,14 +1775,14 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(commandMarket(interaction.user))
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'Close') {
                 interaction.message.delete()
             }
             return
         }
-        
+
         if (interaction.component.customId === 'mailFolderMain') {
             const message = getMailMessage(interaction.user, 0)
             interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
@@ -1798,7 +1840,7 @@ bot.on('interactionCreate', async interaction => {
         if (interaction.customId == 'shopBackpackColors') {
             const selectedIndex = interaction.values[0]
             const money = database.dataBasic[interaction.user.id].money;
-            
+
             if (selectedIndex == 0) {
                 if (money >= 3299) {
                     database.dataBasic[interaction.user.id].money -= 3299
@@ -1806,7 +1848,7 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (selectedIndex == 1) {
                 if (money >= 99) {
@@ -1815,7 +1857,7 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (selectedIndex == 2) {
                 if (money >= 2999) {
@@ -1824,7 +1866,7 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (selectedIndex == 3) {
                 if (money >= 1499) {
@@ -1833,7 +1875,7 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (selectedIndex == 4) {
                 if (money >= 2499) {
@@ -1842,7 +1884,7 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (selectedIndex == 5) {
                 if (money >= 1499) {
@@ -1851,7 +1893,7 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (selectedIndex == 6) {
                 if (money >= 2499) {
@@ -1860,7 +1902,7 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (selectedIndex == 7) {
                 if (money >= 1499) {
@@ -1869,7 +1911,7 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (selectedIndex == 8) {
                 if (money >= 2499) {
@@ -1878,11 +1920,11 @@ bot.on('interactionCreate', async interaction => {
 
                     saveDatabase()
                 } else {
-                    interaction.reply({content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true})
+                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             }
             interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 4))
-            
+
             return
         }
 
@@ -1891,7 +1933,7 @@ bot.on('interactionCreate', async interaction => {
             const money = database.dataBasic[interaction.user.id].money;
 
             var newColorRoleId = ''
-            
+
             if (selectedIndex == 0) {
                 if (money >= 9) {
                     database.dataBasic[interaction.user.id].money -= 9
@@ -2033,7 +2075,7 @@ bot.on('clickMenu', async (button) => {
     try {
         playerIndex = getPlayerIndex(button.clicker.user.id)
     } catch (error) { }
-    
+
     if (button.id.startsWith('pollOption')) {
         const optionIndex = button.id.replace('pollOption', '')
         try {
@@ -2130,6 +2172,8 @@ bot.once('ready', async () => {
     } else {
         CreateCommands(bot)
     }
+    
+    logManager.AddTimeline(2)
 
     const lastDay = dataBot.day
     dataBot.day = dayOfYear
@@ -2137,11 +2181,11 @@ bot.once('ready', async () => {
 
     const marketLastDay = (dataMarket.day == undefined) ? dayOfYear : dayOfYear
     dataMarket.day = dayOfYear
-    
-    if (dataMarket.prices == undefined || dayOfYear-marketLastDay >= 3) { dataMarket.prices = {'token': (Math.floor(Math.random() * 1000) + 5000), 'coupon': (Math.floor(Math.random() * 1000) + 4000), 'jewel': (Math.floor(Math.random() * 100) + 11000)} }
+
+    if (dataMarket.prices == undefined || dayOfYear - marketLastDay >= 3) { dataMarket.prices = { 'token': (Math.floor(Math.random() * 1000) + 5000), 'coupon': (Math.floor(Math.random() * 1000) + 4000), 'jewel': (Math.floor(Math.random() * 100) + 11000) } }
 
     fs.writeFile('./database/market.json', JSON.stringify(dataMarket), (err) => { if (err) { log(ERROR & ': ' & err.message, 37) }; });
-   
+
     log(DONE + ': A BOT kész!')
 
     for (let i = 0; i < dayOfYear - lastDay; i++) {
@@ -2204,10 +2248,10 @@ bot.on('ready', () => { //Change status
             const newsChannel = bot.channels.cache.get(processedNewsChannel)
             const embed = newsMessage.embed
             if (newsMessage.NotifyRoleId.length == 0) {
-                newsChannel.send({ embeds: [ embed ] })
+                newsChannel.send({ embeds: [embed] })
                     .then(() => { newsMessage.message.delete() })
             } else {
-                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [ embed ] })
+                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
                     .then(() => { newsMessage.message.delete() })
             }
         }
@@ -2517,14 +2561,14 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         userstatsSendCommand(sender)
         return;
     }
-    
+
     if (command.startsWith(`quiz help`)) {
         userstatsSendCommand(sender)
         const embed = new Discord.MessageEmbed()
             .addField('Quiz szintaxis',
                 '.quiz\n' +
                 'Cím\n' +
-                'Opció;Opció;Opció\n' + 
+                'Opció;Opció;Opció\n' +
                 '💥;💥;💥\n' +
                 '5000 (add XP)\n' +
                 '2500 (remove XP)\n' +
@@ -2532,10 +2576,10 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                 '5 (remove Token)'
             )
             .setColor(Color.Highlight)
-        message.channel.send({embeds: [ embed ]})
+        message.channel.send({ embeds: [embed] })
         return;
     }
-    
+
     if (command.startsWith(`quizdone help`)) {
         userstatsSendCommand(sender)
         const embed = new Discord.MessageEmbed()
@@ -2543,23 +2587,23 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                 '.quizdone messageId correctIndex(0 - ...)'
             )
             .setColor(Color.Highlight)
-        message.channel.send({embeds: [ embed ]})
+        message.channel.send({ embeds: [embed] })
         return;
     }
-    
+
     if (command.startsWith(`quizdone `)) {
         quizDone(command.replace(`quizdone `, '').split(' ')[0], command.replace(`quizdone `, '').split(' ')[1])
         userstatsSendCommand(sender)
         return
     }
-    
+
     if (command.startsWith(`poll simple\n`)) {
         const msgArgs = command.toString().replace(`poll simple\n`, '').split('\n')
         poll(msgArgs[0], msgArgs[1], msgArgs[2], false)
         userstatsSendCommand(sender)
         return
     }
-    
+
     if (command.startsWith(`poll wyr\n`)) {
         const msgArgs = command.toString().replace(`poll wyr\n`, '').split('\n')
         poll(msgArgs[0], msgArgs[1], msgArgs[2], true)
@@ -2667,7 +2711,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 /**@param {Discord.User} user */
 function commandMarket(user) {
     const newEmbed = new Discord.MessageEmbed()
-        .setAuthor({name: user.username, iconURL: user.displayAvatarURL()})
+        .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
         .setTitle('Piac')
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/balance-scale_2696-fe0f.png')
         .addField('\\💵 Egyenleged:', '**' + abbrev(database.dataBasic[user.id].money) + '**', true)
@@ -2716,7 +2760,7 @@ function commandMarket(user) {
         .addComponents(buttonTokenToMoney, buttonTicketToMoney, buttonJewelToMoney, buttonMoneyToJewel)
     const row2 = new MessageActionRow()
         .addComponents(buttonExit)
-    return {embeds: [newEmbed], components: [row, row2]}
+    return { embeds: [newEmbed], components: [row, row2] }
 }
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
@@ -2729,27 +2773,27 @@ async function processApplicationCommand(command) {
             var giftableMember = command.options.getUser('user')
             if (database.dataBackpacks[command.user.id].gifts > 0) {
                 if (giftableMember.id === command.user.id) {
-                    command.reply({content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true})
+                    command.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
                 } else {
                     if (database.dataBackpacks[giftableMember.id] != undefined) {
                         database.dataBackpacks[giftableMember.id].getGift += 1;
                         database.dataBackpacks[command.user.id].gifts -= 1
-                        command.reply({content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true})
+                        command.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
                         giftableMember.send('> **\\✨ ' + command.user.username + ' megajándékozott! \\🎆**');
                         saveDatabase()
                     } else {
-                        command.reply({content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true})
+                        command.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
                     }
                 }
             } else {
                 if (giftableMember.id === command.user.id) {
-                    command.reply({content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true})
+                    command.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true })
                 } else {
-                    command.reply({content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true})
+                    command.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true })
                 }
             }
         } catch (error) {
-            command.reply({content: '> **\\❌ ' + error.toString() + '**', ephemeral: true})
+            command.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
         }
 
         return;
@@ -2814,7 +2858,7 @@ async function processApplicationCommand(command) {
                 '> Mód: ' + bot.shard.mode
             )
         }
-        command.reply({embeds: [ embed ]})
+        command.reply({ embeds: [embed] })
         userstatsSendCommand(command.user)
         return
     }
@@ -2833,7 +2877,7 @@ async function processApplicationCommand(command) {
                     '> \\❔  `.quiz`\n' +
                     '>  \\📊  `.poll simple`\n' +
                     '>  \\📊  `.poll wyr`'
-            )
+                )
                 .setColor(Color.Highlight)
             command.reply({ embeds: [embed], ephemeral: true })
         } else {
@@ -2843,7 +2887,7 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `help`) {
-        command.reply({ embeds: [CommandHelp(false)]})
+        command.reply({ embeds: [CommandHelp(false)] })
         userstatsSendCommand(command.user)
         return
     }
@@ -2881,9 +2925,9 @@ async function processApplicationCommand(command) {
     if (command.commandName === `quiz`) {
         try {
             quiz(command.options.getString("title"), command.options.getString("options"), command.options.getString("option_emojis"), command.options.getInteger("add_xp"), command.options.getInteger("remove_xp"), command.options.getInteger("add_token"), command.options.getInteger("remove_token"))
-            command.reply({content: '> \\✔️ **Kész**', ephemeral: true})
+            command.reply({ content: '> \\✔️ **Kész**', ephemeral: true })
         } catch (error) {
-            command.reply({content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true})
+            command.reply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
         }
         userstatsSendCommand(command.user)
         return
@@ -2935,7 +2979,7 @@ function getCurrentlyEditingMailIndex(userId) {
  */
 function commandMail(sender, channel) {
     const message = getMailMessage(sender)
-    channel.send({embeds: [ message.embed ], components: [message.actionRows[0]]} )
+    channel.send({ embeds: [message.embed], components: [message.actionRows[0]] })
 }
 
 /**
@@ -2963,7 +3007,7 @@ function getMailMessage(user, selectedIndex = 0) {
     const row0 = new MessageActionRow()
 
     const embed = new Discord.MessageEmbed()
-        .setAuthor({name: user.username, iconURL: user.avatarURL()})
+        .setAuthor({ name: user.username, iconURL: user.avatarURL() })
 
     if (selectedIndex === 0) {
         embed.setTitle("Kezdőlap");
@@ -3027,9 +3071,11 @@ function getMailMessage(user, selectedIndex = 0) {
         });
 
         embed.addField('Cím: "' + mail.title + '"', 'Üzenet: "' + mail.context + '"\n' + 'Fogadó: @' + mail.reciver.name)
-            .setFooter({ text: '.mail wt [cím] Cím beállítása\n' +
-                '.mail wc [üzenet] Üzenet beállítása\n' +
-                '.mail wr [@Felhasználó | Azonosító] Címzet beállítása' })
+            .setFooter({
+                text: '.mail wt [cím] Cím beállítása\n' +
+                    '.mail wc [üzenet] Üzenet beállítása\n' +
+                    '.mail wr [@Felhasználó | Azonosító] Címzet beállítása'
+            })
 
         const button4 = new MessageButton()
             .setLabel("Küldés")
