@@ -400,6 +400,11 @@ class LogManager {
         this.loadingOverride = ''
 
         const window = { width: 60, height: 20 }
+        if (this.isPhone == true) {
+            window.width = 48
+        } else {
+            window.width = 80
+        }
         var txt = '┌' + chars('─', window.width - 2) + '┒\n'
         txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
         const remaingHeight = window.height - txt.split('\n').length - 1
@@ -417,6 +422,11 @@ class LogManager {
 
     RefreshScreen() {
         const window = { width: 60, height: 20 }
+        if (this.isPhone == true) {
+            window.width = 48
+        } else {
+            window.width = 80
+        }
         var txt = '┌' + chars('─', window.width - 2) + '┒\n'
 
         if (this.loadingOverride == '') {
