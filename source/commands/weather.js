@@ -436,6 +436,21 @@ function GetReadableNumber(value) {
     return Math.floor(value * 10) / 10;
 }
 
+function GetPollutionText(value) {
+    if (value == 1) {
+        return 'Good'
+    } else if (value == 2) {
+        return 'Fair'
+    } else if (value == 3) {
+        return 'Moderate'
+    } else if (value == 4) {
+        return 'Poor'
+    } else if (value == 5) {
+        return 'Very Poor'
+    }
+    return ''
+}
+
 function GetPollutionIndex(type, value) {
     if (type == 0) { //CO
         return '⚫'
@@ -522,6 +537,19 @@ function GetPollutionIndex(type, value) {
         } else {
             return '🔴'
         }
+    } else if (type == 8) { //Index
+        if (value == 1) {
+            return '🟢'
+        } else if (value == 2) {
+            return '🟡'
+        } else if (value == 3) {
+            return '🟠'
+        } else if (value == 4) {
+            return '🔴'
+        } else if (value == 5) {
+            return '⚠️'
+        }
+        return '⚫'
     }
     return '⚫'
 }
@@ -575,14 +603,6 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
             alert = 'Nincs figyelmeztetés'
         }
 
-        let weatherMessage = ''
-        weatherMessage = data1.sys.message
-        let weatherMessageIcon = '\\📢'
-        if (weatherMessage === undefined) {
-            weatherMessageIcon = '\\➖'
-            weatherMessage = 'Nincs üzenet'
-        }
-
         embed
             .setTitle(`**${skyTxt}** ||(${data1.weather[0].description})|||| (${data1.weather[0].id})||`)
             .setDescription(
@@ -597,24 +617,23 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
 
                 '\n\n**Levegőminőség:**\n\n' +
 
-                'CO: \\' + GetPollutionIndex(0, data3.co) + ' ' + data3.co + ' μg/m³' +
-                '\nNO: \\' + GetPollutionIndex(1, data3.no) + ' ' + data3.no + ' μg/m³' +
-                '\nNO₂: \\' + GetPollutionIndex(2, data3.no2) + ' ' + data3.no2 + ' μg/m³' +
-                '\nO₃: \\' + GetPollutionIndex(3, data3.o3) + ' ' + data3.o3 + ' μg/m³' +
-                '\nSO₂: \\' + GetPollutionIndex(4, data3.so2) + ' ' + data3.so2 + ' μg/m³' +
-                '\nPM₂.₅: \\' + GetPollutionIndex(5, data3.pm2_5) + ' ' + data3.pm2_5 + ' μg/m³' +
-                '\nPM₁₀: \\' + GetPollutionIndex(6, data3.pm10) + ' ' + data3.pm10 + ' μg/m³' +
-                '\nNH₃: \\' + GetPollutionIndex(7, data3.nh3) + ' ' + data3.nh3 + ' μg/m³' +
+                'Levőminőség index: \\' + GetPollutionIndex(8, data3.main.aqi) + ' ' + GetPollutionText(data3.main.aqi) +
+
+                '\n\nCO: \\' + GetPollutionIndex(0, data3.components.co) + ' ' + data3.components.co + ' μg/m³' +
+                '\nNO: \\' + GetPollutionIndex(1, data3.components.no) + ' ' + data3.components.no + ' μg/m³' +
+                '\nNO₂: \\' + GetPollutionIndex(2, data3.components.no2) + ' ' + data3.components.no2 + ' μg/m³' +
+                '\nO₃: \\' + GetPollutionIndex(3, data3.components.o3) + ' ' + data3.components.o3 + ' μg/m³' +
+                '\nSO₂: \\' + GetPollutionIndex(4, data3.components.so2) + ' ' + data3.components.so2 + ' μg/m³' +
+                '\nPM₂.₅: \\' + GetPollutionIndex(5, data3.components.pm2_5) + ' ' + data3.components.pm2_5 + ' μg/m³' +
+                '\nPM₁₀: \\' + GetPollutionIndex(6, data3.components.pm10) + ' ' + data3.components.pm10 + ' μg/m³' +
+                '\nNH₃: \\' + GetPollutionIndex(7, data3.components.nh3) + ' ' + data3.components.nh3 + ' μg/m³' +
                 
                 '\n\n**Egyéb:**\n\n' +
 
                 `${moonIcon} ${moonText} (${Math.floor(data2[1].illum * 100)} %-a látható)\n` +
-                `\\🌇 ${Dawn}\n` +
-                `\\🏙️ ${unixToTime(data1.sys.sunrise)}\n` +
-                `\\🌆 ${unixToTime(data1.sys.sunset)}\n` +
-                `\\🌃 ${Dusk}\n\n` +
-                `${alertIcon} ${alert}\n` +
-                `${weatherMessageIcon} ${weatherMessage}` +
+                `\\🌇 ${unixToTime(data1.sys.sunrise)}\n` +
+                `\\🌆 ${unixToTime(data1.sys.sunset)}\n\n` +
+                `${alertIcon} ${alert}` +
 
                 '\n\n**Előrejelzés:**')
         if (ImgExists(skyImgName) === true) {
@@ -654,7 +673,7 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
         const tempMaxIcon = weatherTempIcon(tempMaxValue);
 
         embed
-            .addField(dayName(new Date().getDay()),
+            .addField(dayName(new Date().getDay()) + ' (ma)',
                 `\\💧 ${data0[0].forecast[1].precip} %\n` +
                 `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
                 `${skyIcon} ${skyTxt}\n` +
@@ -768,7 +787,7 @@ module.exports = async (command) => {
                         weatherData0 = result
                         weatherData1 = val
                         weatherData2 = m
-                        const weatherData3 = weather.list[0].components
+                        const weatherData3 = weather.list[0]
                         let embed = getEmbedEarth(weatherData0, weatherData1, weatherData2, 3, weatherData3)
                         
                         const skyImgName = weatherSkytextImgName(weatherData0[0].current.skytext, unixToTime(weatherData1.sys.sunset).split(':')[0], unixToTime(weatherData1.sys.sunrise).split(':')[0], weatherData1.clouds.all)
