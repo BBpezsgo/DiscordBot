@@ -280,6 +280,9 @@ function saveUserToMemoryAll(user, username) {
     if (!database.dataBasic[user.id].customname) {
         database.dataBasic[user.id].customname = username
     }
+    if (!database.dataBasic[user.id].privateCommands) {
+        database.dataBasic[user.id].privateCommands = false
+    }
 
     if (!dataStickers[user.id]) {
         dataStickers[user.id] = {}
@@ -824,8 +827,9 @@ function openDayCrate(userId) {
 
 /**
  * @param {Discord.User} sender 
+ * @param {boolean} privateCommand
  */
-function commandStore(sender) {
+function commandStore(sender, privateCommand) {
     var currentDay = new Date().getDay();
     var dayCrates = dataBot.day - database.dataBasic[sender.id].day
     var crates = database.dataBackpacks[sender.id].crates
@@ -900,7 +904,7 @@ function commandStore(sender) {
     const rowSecondary = new MessageActionRow()
         .addComponents(buttonSendGift)
     if (getGifts > 0) { rowSecondary.addComponents(buttonOpenGift) };
-    return { embeds: [embed], components: [rowPrimary, rowSecondary] }
+    return { embeds: [embed], components: [rowPrimary, rowSecondary], ephemeral: privateCommand }
 }
 
 /**
@@ -941,10 +945,11 @@ async function commandNapi(message, sender) {
 /**
  * @param {Discord.GuildMember} sender 
  * @param {number} ammount
+ * @param {boolean} privateCommand
  */
-async function commandAllNapi(sender, ammount) {
+async function commandAllNapi(sender, ammount, privateCommand) {
     if (dayOfYear === database.dataBasic[sender.id].day) {
-        return { content: '> **\\❌ Nincs napi ládád! \\🧰**' }
+        return { content: '> **\\❌ Nincs napi ládád! \\🧰**', ephemeral: privateCommand }
     } else {
         let dayCrates = Math.min(dataBot.day - database.dataBasic[sender.id].day, ammount)
 
@@ -979,7 +984,8 @@ async function commandAllNapi(sender, ammount) {
                 '>     \\💵 **' + getMoney + '** pénzt\n' +
                 '>     \\🍺 **' + getXpS + '** xpt\n' +
                 '>     \\🧱 **' + getChestS + '** ládát\n' +
-                '>     \\🎟️ **' + getTicket + '** kupont'
+                '>     \\🎟️ **' + getTicket + '** kupont',
+            ephemeral: privateCommand
         }
     };
 }
@@ -987,10 +993,14 @@ async function commandAllNapi(sender, ammount) {
 /**
  * @param {Discord.GuildMember} sender 
  * @param {number} ammount
+ * @param {boolean} privateCommand
  */
-async function commandAllCrate(sender, ammount) {
+async function commandAllCrate(sender, ammount, privateCommand) {
     if (database.dataBackpacks[sender.id].crates === 0) {
-        return { content: '> **\\❌ Nincs ládád! \\🧱**' }
+        return {
+            content: '> **\\❌ Nincs ládád! \\🧱**',
+            ephemeral: privateCommand
+        }
     } else {
         let Crates = Math.min(database.dataBackpacks[sender.id].crates, ammount)
 
@@ -1027,7 +1037,8 @@ async function commandAllCrate(sender, ammount) {
             content: '> ' + Crates + 'x \\🧱 Kaptál:\n' +
                 '>     \\🍺 **' + getXpS + '** xpt\n' +
                 '>     \\💵 **' + getMoney + '** pénzt\n' +
-                '>     \\🎁 **' + getGiftS + '** ajándékot'
+                '>     \\🎁 **' + getGiftS + '** ajándékot',
+            ephemeral: privateCommand
         }
 
     };
@@ -1090,8 +1101,9 @@ async function commandSkip(message) {
 
 /**
  * @param {Discord.GuildMember} member
+ * @param {boolean} privateCommand
  */
-function commandProfil(member) {
+function commandProfil(member, privateCommand) {
     const embed = new Discord.MessageEmbed()
         .setColor(database.dataBasic[member.id].color)
         .setTitle('Profil')
@@ -1124,7 +1136,7 @@ function commandProfil(member) {
             '> \\🎴 card-0c: 0\n' +
             '> \\🧧 card-1a: 0'
         )
-    return { embeds: [embed] }
+    return { embeds: [embed], ephemeral: privateCommand }
 }
 
 /**@param {number} days @returns {number} */
@@ -1302,8 +1314,10 @@ async function removeAllColorRoles(member, exceptRoleId) {
 }
 
 bot.on('interactionCreate', async interaction => {
+    saveUserToMemoryAll(interaction.user, interaction.member.displayName)
+    const privateCommand = database.dataBasic[interaction.user.id].privateCommands
     if (interaction.isCommand()) {
-        processApplicationCommand(interaction)
+        processApplicationCommand(interaction, privateCommand)
     } else if (interaction.isButton()) {
         if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
             if (interaction.component.customId.includes(interaction.user.id)) {
@@ -1363,7 +1377,7 @@ bot.on('interactionCreate', async interaction => {
                 database.dataBasic[interaction.user.id].day = dataBot.day
             }
 
-            interaction.message.edit(commandStore(interaction.user))
+            interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             saveDatabase()
             return;
@@ -1392,7 +1406,7 @@ bot.on('interactionCreate', async interaction => {
                 database.dataBackpacks[interaction.user.id].gifts += 1
             }
 
-            interaction.message.edit(commandStore(interaction.user))
+            interaction.message.edit(commandStore(interaction.user, privateCommand))
             interaction.reply({ content: '> \\🧱 Kaptál:  ' + txt, ephemeral: true });
 
             saveDatabase()
@@ -1415,7 +1429,7 @@ bot.on('interactionCreate', async interaction => {
                 interaction.reply({ content: '> \\💶 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true });
             }
 
-            interaction.message.edit(commandStore(interaction.user))
+            interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             saveDatabase()
             return;
@@ -1437,7 +1451,7 @@ bot.on('interactionCreate', async interaction => {
                 interaction.reply({ content: '> \\💷 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true });
             }
 
-            interaction.message.edit(commandStore(interaction.user))
+            interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             saveDatabase()
             return;
@@ -1459,7 +1473,7 @@ bot.on('interactionCreate', async interaction => {
                 interaction.reply({ content: '> \\💴 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true });
             }
 
-            interaction.message.edit(commandStore(interaction.user))
+            interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             saveDatabase()
             return;
@@ -1485,7 +1499,7 @@ bot.on('interactionCreate', async interaction => {
             };
 
             interaction.reply({ content: '> \\🎀 Kaptál ' + txt, ephemeral: true });
-            interaction.message.edit(commandStore(interaction.user))
+            interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             saveDatabase()
             return;
@@ -1493,7 +1507,7 @@ bot.on('interactionCreate', async interaction => {
 
         if (interaction.component.customId === 'sendGift') {
             interaction.reply({ content: '> **\\❔ Használd a **`/gift <felhasználó>`** parancsot egy személy megajándékozásához**', ephemeral: true });
-            interaction.message.edit(commandStore(interaction.user))
+            interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             saveDatabase()
             return;
@@ -1666,7 +1680,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money -= 2099
                     database.dataBackpacks[interaction.user.id].crates += 1
 
-                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1, '', privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1676,7 +1690,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money -= 3999
                     database.dataBackpacks[interaction.user.id].gifts += 1
 
-                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1, '', privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1686,7 +1700,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money -= 8999
                     database.dataBackpacks[interaction.user.id].tickets += 1
 
-                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1, '', privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1695,7 +1709,7 @@ bot.on('interactionCreate', async interaction => {
                 if (money >= 799) {
                     database.dataBasic[interaction.user.id].money -= 799
 
-                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1))
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 1, '', privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1705,7 +1719,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money -= 1999
                     database.dataBackpacks[interaction.user.id].luckyCards.small += 1
 
-                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2))
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2, '', privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1715,7 +1729,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money -= 3599
                     database.dataBackpacks[interaction.user.id].luckyCards.medium += 1
 
-                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2))
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2, '', privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1725,7 +1739,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money -= 6999
                     database.dataBackpacks[interaction.user.id].luckyCards.large += 1
 
-                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2))
+                    interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 2, '', privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1742,7 +1756,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money += Number.parseInt(dataMarket.prices.token)
                     database.dataBackpacks[interaction.user.id].quizTokens -= 1
 
-                    interaction.update(commandMarket(interaction.user))
+                    interaction.update(commandMarket(interaction.user, privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1752,7 +1766,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money += Number.parseInt(dataMarket.prices.coupon)
                     database.dataBackpacks[interaction.user.id].tickets -= 1
 
-                    interaction.update(commandMarket(interaction.user))
+                    interaction.update(commandMarket(interaction.user, privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1762,7 +1776,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money += Number.parseInt(dataMarket.prices.jewel)
                     database.dataBackpacks[interaction.user.id].jewel -= 1
 
-                    interaction.update(commandMarket(interaction.user))
+                    interaction.update(commandMarket(interaction.user, privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1772,7 +1786,7 @@ bot.on('interactionCreate', async interaction => {
                     database.dataBasic[interaction.user.id].money -= Number.parseInt(dataMarket.prices.jewel)
                     database.dataBackpacks[interaction.user.id].jewel += 1
 
-                    interaction.update(commandMarket(interaction.user))
+                    interaction.update(commandMarket(interaction.user, privateCommand))
                     saveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1833,7 +1847,7 @@ bot.on('interactionCreate', async interaction => {
         }
     } else if (interaction.isSelectMenu()) {
         if (interaction.customId.startsWith('shopMenu')) {
-            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, interaction.values[0]))
+            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, interaction.values[0], '', privateCommand))
             return
         }
 
@@ -1923,7 +1937,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             }
-            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 4))
+            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 4, '', privateCommand))
 
             return
         }
@@ -2021,7 +2035,7 @@ bot.on('interactionCreate', async interaction => {
                 }
             }
 
-            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 5, newColorRoleId))
+            interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 5, newColorRoleId, privateCommand))
             return
         }
     }
@@ -2709,7 +2723,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 }
 
 /**@param {Discord.User} user */
-function commandMarket(user) {
+function commandMarket(user, privateCommand = false) {
     const newEmbed = new Discord.MessageEmbed()
         .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
         .setTitle('Piac')
@@ -2759,17 +2773,18 @@ function commandMarket(user) {
     const row = new MessageActionRow()
         .addComponents(buttonTokenToMoney, buttonTicketToMoney, buttonJewelToMoney, buttonMoneyToJewel)
     const row2 = new MessageActionRow()
-        .addComponents(buttonExit)
-    return { embeds: [newEmbed], components: [row, row2] }
+    if (privateCommand == false) {
+        row2 .addComponents(buttonExit)
+    }
+    return { embeds: [newEmbed], components: [row, row2], ephemeral: privateCommand }
 }
 
-/**@param {Discord.CommandInteraction<Discord.CacheType>} command */
-async function processApplicationCommand(command) {
+/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
+async function processApplicationCommand(command, privateCommand) {
 
     if (command.commandName == `gift`) {
         userstatsSendCommand(command.user)
         try {
-
             var giftableMember = command.options.getUser('user')
             if (database.dataBackpacks[command.user.id].gifts > 0) {
                 if (giftableMember.id === command.user.id) {
@@ -2800,19 +2815,19 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `crossout`) {
-        command.deferReply().then(() => {
-            CrossoutTest(command, command.options.getString('search'))
+        command.deferReply({ ephemeral: privateCommand }).then(() => {
+            CrossoutTest(command, command.options.getString('search'), privateCommand)
         })
     }
 
     if (command.commandName === `market`) {
-        command.reply(commandMarket(command.user));
+        command.reply(commandMarket(command.user, privateCommand));
         userstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `xp`) {
-        CommandXp(command)
+        CommandXp(command, privateCommand)
         userstatsSendCommand(command.user)
         return
     }
@@ -2858,13 +2873,13 @@ async function processApplicationCommand(command) {
                 '> Mód: ' + bot.shard.mode
             )
         }
-        command.reply({ embeds: [embed] })
+        command.reply({ embeds: [embed], ephemeral: privateCommand })
         userstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `weather`) {
-        CommandWeather(command)
+        CommandWeather(command, privateCommand)
         userstatsSendCommand(command.user)
         return
     }
@@ -2887,37 +2902,37 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `help`) {
-        command.reply({ embeds: [CommandHelp(false)] })
+        command.reply({ embeds: [CommandHelp(false)], ephemeral: privateCommand })
         userstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `crate`) {
-        command.reply(await commandAllCrate(command.member, command.options.getInteger("darab")))
+        command.reply(await commandAllCrate(command.member, command.options.getInteger("darab"), privateCommand))
         userstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `napi`) {
-        command.reply(await commandAllNapi(command.member, command.options.getInteger("darab")))
+        command.reply(await commandAllNapi(command.member, command.options.getInteger("darab"), privateCommand))
         userstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `profil`) {
-        command.reply(commandProfil(command.member))
+        command.reply(commandProfil(command.member, privateCommand))
         userstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `store`) {
-        command.reply(commandStore(command.user))
+        command.reply(commandStore(command.user, privateCommand))
         userstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `bolt`) {
-        command.reply(CommandShop(command.channel, command.user, command.member, database, 0))
+        command.reply(CommandShop(command.channel, command.user, command.member, database, 0, '', privateCommand))
         userstatsSendCommand(command.user)
         return
     }
@@ -2934,7 +2949,7 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `font`) {
-        CommandFont(command)
+        CommandFont(command, privateCommand)
         userstatsSendCommand(command.user)
         return
     }

@@ -555,8 +555,9 @@ function colorRankToIndex2(roleId) {
  * @param {Discord.GuildMember} senderMember
  * @param {number} menuIndex
  * @param {DatabaseManager} databaseManager
+ * @param {boolean} privateCommand
  */
-module.exports = (channel, sender, senderMember, databaseManager, menuIndex = 0, newColorRole = '') => {
+module.exports = (channel, sender, senderMember, databaseManager, menuIndex = 0, newColorRole = '', privateCommand = false) => {
     const money = databaseManager.dataBasic[sender.id].money;
 
     const selectMenu = new MessageSelectMenu()
@@ -757,21 +758,23 @@ module.exports = (channel, sender, senderMember, databaseManager, menuIndex = 0,
     const rowSelectMenuSecondary = new MessageActionRow()
         .addComponents(selectMenu2)
     const rowPrimary = new MessageActionRow()
-        .addComponents(buttonExit)
+    if (privateCommand == false) {
+        rowPrimary.addComponents(buttonExit)
+    }
     if (menuIndex == -1) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)] }
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], ephemeral:privateCommand }
     } else if (menuIndex == 0) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary] }
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary], ephemeral:privateCommand }
     } else if (menuIndex == 1) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSecondary0, rowPrimary] }
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSecondary0, rowPrimary], ephemeral:privateCommand }
     } else if (menuIndex == 2) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSecondary1, rowPrimary] }
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSecondary1, rowPrimary], ephemeral:privateCommand }
     } else if (menuIndex == 3) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowPrimary] }
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowPrimary], ephemeral:privateCommand }
     } else if (menuIndex == 4) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowSecondary2, rowPrimary] }
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowSecondary2, rowPrimary], ephemeral:privateCommand }
     } else if (menuIndex == 5) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowSecondary3, rowPrimary] }
+        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowSecondary3, rowPrimary], ephemeral:privateCommand }
     }
 
     return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary] }

@@ -37,17 +37,17 @@ function ProgressBar(val, width, max = 100) {
 }
 
 /** @param {Discord.CommandInteraction<Discord.CacheType>} command */
-function CrossoutTest(command, searchName) {
+function CrossoutTest(command, searchName, privateCommand) {
     let url = 'https://crossoutdb.com/api/v1/items?query=' + searchName
 
     request(url, function (err, response, body) {
         if (err) {
-            command.editReply('> \\❌ **Requiest error:** ' + err.toString())
+            command.editReply({ content: '> \\❌ **Requiest error:** ' + err.toString() })
         } else {
             const data = JSON.parse(body)[0] //JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/items.json', 'utf-8'))[0]  //
 
             if (data == undefined) {
-                command.editReply('> \\❌ **Nem található ilyen tárgy**')
+                command.editReply({ content: '> \\❌ **Nem található ilyen tárgy**' })
             } else {
                 const embed = new Discord.MessageEmbed()
                     .setColor(Color.Warning)
@@ -90,7 +90,7 @@ function CrossoutTest(command, searchName) {
                     }
                     embed.setTimestamp(new Date(data.timestamp))
     
-                command.editReply({embeds: [embed]})
+                command.editReply({ embeds: [embed] })
             }
         }
     })

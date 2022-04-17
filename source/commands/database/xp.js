@@ -25,8 +25,8 @@ function abbrev(num) {
     return num;
 }
 
- /** @param {Discord.CommandInteraction<Discord.CacheType>} command */
-async function execute(command) {
+ /** @param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
+async function execute(command, privateCommand) {
     try {
         const userColor = scores[command.user.id].color
 
@@ -72,13 +72,14 @@ async function execute(command) {
             .addField(rankName,'\\' + xpRankIcon(score) + ' ' + progressBar + ' \\❔')
             .setColor(userColor)
             .setFooter({ text: abbrev(score) + ' / ' + abbrev(next) + '\nKell még: 🍺' + abbrev(next - score) + ' xp' })
-        command.reply({embeds: [embed]});
+        command.reply({ embeds: [embed], ephemeral: privateCommand });
     } catch (error) {
-        command.reply('> \\❌ ' + error.toString())
+        command.reply({ content: '> \\❌ ' + error.toString(), ephemeral: privateCommand})
     }
 }
 
  /**
  * @param {Discord.CommandInteraction<Discord.CacheType>} command
+ * @param {boolean} privateCommand
  */
-module.exports = (command) => { execute(command) }
+module.exports = (command, privateCommand) => { execute(command, privateCommand) }

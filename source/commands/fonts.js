@@ -32,11 +32,11 @@ function StringToFont(str, fontIndex) {
     return inputStr
 }
 
-/** @param {Discord.CommandInteraction<Discord.CacheType>} command */
-function CommandFont(command) {
+/** @param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
+function CommandFont(command, privateCommand) {
     const x = command.options.getString('font')
     const y = command.options.getString('text')
-    command.reply({content: StringToFont(y, x)})
+    command.reply({content: StringToFont(y, x), ephemeral: privateCommand})
 }
 
 function GetFonts() {

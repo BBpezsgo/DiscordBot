@@ -754,8 +754,9 @@ function addDays(date, days) {
 
 /**
  * @param {Discord.CommandInteraction<Discord.CacheType>} command
+ * @param {boolean} privateCommand
 */
-module.exports = async (command) => {
+module.exports = async (command, privateCommand) => {
 
     const year = new Date().getFullYear()
     const month = new Date().getMonth() + 1
@@ -768,12 +769,12 @@ module.exports = async (command) => {
         new MoonPhase(addDays(new Date(year, month, day), 3))
     ]
 
-    await command.deferReply()
+    await command.deferReply({ ephemeral: privateCommand })
 
     try {
         await weather1.find({ search: 'Békéscsaba, HU', degreeType: 'C' }, function (err, result) {
             if (err) {
-                command.editReply('> \\❌ **MSN Error:** ' + err.toString())
+                command.editReply({ content: '> \\❌ **MSN Error:** ' + err.toString() })
                 return
             }
             weather2.getWeather("bekescsaba").then(async val => {
@@ -781,7 +782,7 @@ module.exports = async (command) => {
 
                 request(url, function (err, response, body) {
                     if (err) {
-                        command.editReply('> \\❌ **OpenWeatherMap Error:** ' + err.toString)
+                        command.editReply({ content: '> \\❌ **OpenWeatherMap Error:** ' + err.toString })
                     } else {
                         let weather = JSON.parse(body)
                         weatherData0 = result
@@ -802,6 +803,6 @@ module.exports = async (command) => {
             });
         });
     } catch (error) {
-        command.editReply('> \\❌ **MSN Error:** ' + error.toString())
+        command.editReply({ content: '> \\❌ **MSN Error:** ' + error.toString() })
     }
 }
