@@ -1,6 +1,7 @@
 .message {
     margin: 20px 0px;
     padding: 10px;
+    width: 100%;
 }
 
 .message::after {
@@ -29,6 +30,7 @@
 .messages {
     overflow-y: scroll;
     height: calc(100% - 169px);
+    width: 100%;
 }
 
 .messages::-webkit-scrollbar {

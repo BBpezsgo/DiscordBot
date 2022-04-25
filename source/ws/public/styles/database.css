@@ -1,65 +1,66 @@
 .databaseTreeView {
-    list-style-type: none;
-  }
-  
-  .databaseTreeView {
-    margin: 0;
-    padding: 0;
-  }
-  
-  .databaseTreeView .caret {
-    cursor: pointer;
-  }
-  
-  .databaseTreeView .caret::before {
-    content: "\25B6";
-    color: #fff;
-    display: inline-block;
-    margin-right: 6px;
-    font-size: 7px;
-    transform: translate(2px, -2px);
-    transition-duration: 200ms;
-  }
-  
-  .databaseTreeView .caret-down::before {
-    transform: rotate(90deg) translate(-2px, -2px);
-  }
-  
-  .databaseTreeView .nested {
-    display: none;
-    list-style-type: none;
-  }
-  
-  .databaseTreeView .active {
-    display: block;
-    list-style-type: none;
-  }
+  list-style-type: none;
+}
+
+.databaseTreeView {
+  margin: 0;
+  padding: 0;
+}
+
+.databaseTreeView .caret {
+  cursor: pointer;
+}
+
+.databaseTreeView .caret::before {
+  content: "\25B6";
+  color: #fff;
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 7px;
+  transform: translate(2px, -2px);
+  transition-duration: 200ms;
+}
+
+.databaseTreeView .caret-down::before {
+  transform: rotate(90deg) translate(-2px, -2px);
+}
+
+.databaseTreeView .nested {
+  display: none;
+  list-style-type: none;
+}
+
+.databaseTreeView .active {
+  display: block;
+  list-style-type: none;
+}
 
 
-  #myProgress {
-    width: 50%;
-    background-color: #3e4044;
-    border-radius: 5px;
-    height: 10px;
-    margin: 0px 0px 10px 10px;
-  }
-  
-  #myBar {
-    width: 10%;
-    background-color: #5865f2;
-    text-align: center;
-    line-height: 10px;
-    color: white;
-    border-radius: 5px;
-    height: 10px;
-  }
+#myProgress {
+  width: 50%;
+  background-color: #3e4044;
+  border-radius: 5px;
+  height: 10px;
+  margin: 0px 0px 10px 10px;
+}
+
+#myBar {
+  width: 10%;
+  background-color: #5865f2;
+  text-align: center;
+  line-height: 10px;
+  color: white;
+  border-radius: 5px;
+  height: 10px;
+}
+
 
 .databaseMain::-webkit-scrollbar {
-    width: 5px;
+  width: 5px;
 }
 
 /* Handle */
 .databaseMain:hover::-webkit-scrollbar-thumb {
-    background: rgb(46, 48, 53); 
-    border-radius: 10px;
+  background: rgb(46, 48, 53);
+  border-radius: 10px;
 }

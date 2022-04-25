@@ -13,7 +13,8 @@
                 </div>
             </div>
             {{#each servers}}
-            <div id="{{this.id}}" class="server" onclick="SelectGuild(this.id)" style="margin: 4px 10px 4px 12px;">
+            <div id="{{this.id}}" class="server" onclick="parent.SelectGuild(this.id)"
+                style="margin: 4px 10px 4px 12px;">
                 <img src="{{this.iconUrl}}">
             </div>
             {{/each}}
@@ -47,7 +48,6 @@
                 </p>
             </div>
         </div>
-
         <h2
             style="font-size: 15px; padding: 18px 8px 4px 18px; height: 40px; text-transform: uppercase; font-weight: 600; letter-spacing: .25px; color: rgb(142 146 151);">
             Közvetlen üzenetek
@@ -71,18 +71,8 @@
             </div>
             {{/each}}
         </div>
-        <div class="statusPanel" style="background-color: #000; height: 61px;">
-            <img src="{{client.avatar}}" width="32px" height="32px" style="position: relative; top: 10px; left: 10px;">
-            <div
-                style="border-radius: 8px; width: 16px; height: 16px; position:relative; top: 5px; left: -1px; background-color: #202225; display: inline-block; z-index: 9; margin: -8px">
-            </div>
-            <img src="{{client.status}}.png" width="10px" height="10px"
-                style="position: relative; top: 10px; left: -9px; z-index: 10; border-radius: 50%;">
-            <div style="color: white; position: relative; left: -4px; top: -8px; display: inline-block;">
-                {{client.username}}</div>
-            <div style="color: gray; position: relative; left: 50px; top: -8px; font-size: 12px;">
-                #{{client.discriminator}}
-            </div>
+        <div class="statusPanel">
+            <iframe id="statusPanel" src="" style="border: none; width: 100%;"></iframe>
         </div>
     </th>
     <th style="width:100%; height: 100%; border: none;">
@@ -168,7 +158,6 @@
 </table>
 
 
-<!--Form Creators-->
 {{#each users}}
 <div id="userModal{{this.id}}" class="modal">
     <div class="modal-content animate">
@@ -182,17 +171,6 @@
                             <button id="{{this.id}}" type="button" onclick="SelectUserChannel(this.id)">
                                 <div class="contents-18-Yxp">Üzenet küldése</div>
                             </button>
-                            <div class="" role="button" tabindex="0">
-                                <svg class="modal-additionalActionsIcon" aria-hidden="false" width="24" height="24"
-                                    viewBox="0 0 24 24">
-                                    <g fill="none" fill-rule="evenodd">
-                                        <path d="M24 0v24H0V0z"></path>
-                                        <path fill="currentColor"
-                                            d="M12 16c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2zm0-6c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2zm0-6c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2z">
-                                        </path>
-                                    </g>
-                                </svg>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -203,9 +181,7 @@
             </header>
             <div class="modal-tabs">
                 <div class="modal-tabs-tabs">
-                    <div class="modal-tab modal-tab-selected">Felhasználói adatok</div>
-                    <div class="modal-tab">Közös szerverek</div>
-                    <div class="modal-tab">Egyéb</div>
+                    <div class="modal-tab modal-tab-selected">Adatbázis</div>
                 </div>
             </div>
         </div>
@@ -254,6 +230,12 @@
         element.scrollTo(0, element.scrollHeight);
     }
 
+</script>
+<script>
+    document.body.onload = function () {
+        //document.getElementById("serverList").src = window.location.href.split("?")[0] + "?password={{this.token}}" + "&view=4"
+        document.getElementById("statusPanel").src = window.location.href.split("?")[0] + "?password={{this.token}}" + "&view=5"
+    }
 </script>
 
 <script>

@@ -261,7 +261,7 @@ class WebSocket {
                     const c = this.client.channels.cache.get(req.query.channel.toString())
                     if (c != undefined) {
                         _selectedChannel = { id: c.id, name: c.name, type: c.type }
-                        if (c.type == "text") {
+                        if (c.type == "GUILD_TEXT") {
                             /**
                              * @type {Discord.TextChannel}
                              */
@@ -380,13 +380,21 @@ class WebSocket {
             var _pass = req.body.token
             var channelId = req.body.id
 
-            if (!this.checkPassword(_pass)) { return }
+            if (!this.checkPassword(_pass)) {
+                res.status(401).send("Unauthorized")
+                return
+            }
 
             var chan = this.client.channels.cache.get(channelId)
 
-            if (!chan) { return }
+            if (!chan) { 
+                res.status(500).send("Internal Server Error")
+                return
+            }
 
             chan.messages.fetch()
+
+            res.status(200).send("OK")
         })
 
         this.app.post('/deleteUserDM', (req, res) => {
