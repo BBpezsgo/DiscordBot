@@ -583,7 +583,7 @@ async function quizDone(quizMessageId, correctIndex) {
                     }
                 });
             }
-            bot.channels.cache.get('799340273431478303').send(finalText + '\n\n||\\⚠️ Ez ALFA verzió! A hibát itt jelentsd: <#930166957062357062> ||')
+            bot.channels.cache.get('799340273431478303').send(finalText)
         });
     })
 }
