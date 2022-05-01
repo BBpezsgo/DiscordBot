@@ -85,6 +85,7 @@ class WebSocket {
         })
         this.server.on('connection', (socket) => {
             this.statesManager.handlebarsClients.push(socket)
+            this.statesManager.handlebarsClientsTime.push(10)
         })
         this.server.on('request', () => {
             this.statesManager.handlebarsRequiests.push(10)

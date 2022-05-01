@@ -1,61 +1,105 @@
 //#region Imports, variables
 
-console.clear()
+const { LogManager } = require('./functions/log.js')
+var logManager = new LogManager(false, null, null)
 
+logManager.Loading("Loading extensions", 'weather')
 const CommandWeather = require('./commands/weather')
+logManager.Loading("Loading extensions", 'help')
 const CommandHelp = require('./commands/help')
 
+
+
+
+
+
+logManager.Loading("Loading extensions", 'crossout')
 const { CrossoutTest } = require('./commands/crossout')
+logManager.Loading("Loading extensions", 'redditsave')
 const CommandRedditsave = require('./commands/redditsave')
+logManager.Loading("Loading extensions", 'fonts')
 const { CommandFont } = require('./commands/fonts')
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+logManager.Loading("Loading extensions", 'commands')
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
-const { LogManager } = require('./functions/log.js')
+logManager.Loading("Loading extensions", 'translator')
 const { TranslateMessage } = require('./functions/translator.js')
+logManager.Loading("Loading extensions", 'statesManager')
 const { StatesManager } = require('./functions/statesManager.js')
 
 
 
+const statesManager = new StatesManager()
+logManager.BlankScreen()
+
+const ColorRoles = {
+    red: "850016210422464534",
+    yellow: "850016458544250891",
+    blue: "850016589155401758",
+    orange: "850016531848888340",
+    green: "850016722039078912",
+    purple: "850016668352643072",
+    invisible: "850016786186371122"
+}
+
+const { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesMobile } = require('./functions/enums.js')
+
+const consoleWidth = 80 - 2
 
 
 
 
+logManager.BlankScreen()
+/** @type {string[]} */
+let listOfHelpRequiestUsers = []
 
-
-
-
+logManager.Loading('Loading packet', "discord.js")
+const Discord = require("discord.js");
+const { MessageActionRow, MessageButton } = require('discord.js');
+logManager.Loading('Loading', "bot")
+const { perfix, token } = require('./config.json')
+const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
+logManager.Destroy()
+logManager = new LogManager(false, bot, statesManager)
+statesManager.botLoaded = true
+logManager.BlankScreen()
 
 /** @param {string} message */
 function log(message = '', translateResult = null) {
     logManager.Log(message, false, translateResult)
 }
 
-const {INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesMobile} = require('./functions/enums.js')
-
-const consoleWidth = 80 - 2
-
-
-
-/** @type {string[]} */
-let listOfHelpRequiestUsers = []
-
-
-
-
-
-
-
-
-const Discord = require("discord.js");
-const { MessageActionRow, MessageButton } = require('discord.js');
-const { perfix, token } = require('./config.json')
-const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
-
-
-
-const statesManager = new StatesManager()
-const logManager = new LogManager(true, bot, statesManager)
 
 
 
@@ -69,27 +113,31 @@ const logManager = new LogManager(true, bot, statesManager)
 
 
 
+
+
+
+
+
+
+
+
+
+
+logManager.Loading('Loading packet', "ytdl-core")
 const ytdl = require('ytdl-core')
 
-
-
-
-
-
-
-
-
+logManager.Loading('Loading', "WS")
 const WS = require('./ws/ws')
 var ws = new WS('1234', '192.168.1.102', 5665, bot, logManager, null, null, null, statesManager)
+logManager.BlankScreen()
+
+const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
 let musicArray = []
 let musicFinished = true
 
-
-
 let lastNoNews = false
 
-const readline = require('readline')
 const { abbrev } = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
 const { DateToStringNews, ConvertNewsIdToName, NewsMessage, CreateNews } = require('./functions/news')
@@ -106,6 +154,75 @@ const listOfNews = []
 const incomingNewsChannel = '902894789874311198'
 const processedNewsChannel = '746266528508411935'
 
+
+
+
+process.stdin.on('mousepress', function (info) {
+    console.log('got "mousepress" event at %d x %d', info.x, info.y)
+})
+
+process.stdin.resume()
+
+process.stdin.on('data', function (b) {
+    var s = b.toString('utf8')
+    if (s === '\u0003') {
+        process.stdin.pause()
+        StopBot()
+        log(DONE + ': A BOT leállítva!')
+    } else if (s === ' ') {
+        console.clear()
+    } else if (/^\u001b\[M/.test(s)) {
+        // mouse event
+        console.error('s.length:', s.length)
+        // reuse the key array albeit its name
+        // otherwise recompute as the mouse event is structured differently
+        var modifier = s.charCodeAt(3)
+        var key = {}
+        key.shift = !!(modifier & 4)
+        key.meta = !!(modifier & 8)
+        key.ctrl = !!(modifier & 16)
+        key.x = s.charCodeAt(4) - 32
+        key.y = s.charCodeAt(5) - 32
+        key.button = null
+        key.sequence = s
+        key.buf = Buffer(key.sequence)
+        if ((modifier & 96) === 96) {
+            key.name = 'scroll'
+            key.button = modifier & 1 ? 'down' : 'up'
+        } else {
+            key.name = modifier & 64 ? 'move' : 'click'
+            switch (modifier & 3) {
+                case 0: key.button = 'left'; break;
+                case 1: key.button = 'middle'; break;
+                case 2: key.button = 'right'; break;
+                case 3: key.button = 'none'; break;
+                default: return;
+            }
+        }
+        console.error(key);
+    } else {
+        // something else...
+        console.error(0, s, b);
+    }
+})
+
+// Enable "raw mode"
+if (process.stdin.setRawMode) {
+    process.stdin.setRawMode(true);
+} else {
+    require('tty').setRawMode(true);
+}
+
+// Enable "mouse reporting"
+process.stdout.write('\x1b[?1005h');
+process.stdout.write('\x1b[?1003h');
+
+process.on('exit', function () {
+    // don't forget to turn off mouse reporting
+    process.stdout.write('\x1b[?1005l');
+    process.stdout.write('\x1b[?1003l');
+    console.log("Exit...")
+});
 
 //#region Functions
 /**@param {number} days @returns {number} */
@@ -171,6 +288,109 @@ async function logMessage(message, username, private = false.valueOf, author) {
 
 //#region Listener-ek
 
+bot.on('reconnecting', () => {
+    log(INFO + ': Újracsatlakozás...')
+    statesManager.botLoadingState = 'Reconnecting'
+});
+
+bot.on('disconnect', () => {
+    log(ERROR + ': Megszakadt a kapcsolat!')
+    statesManager.botLoadingState = 'Disconnect'
+});
+
+bot.on('resume', () => {
+    log(INFO + ': Folytatás')
+    statesManager.botLoadingState = 'Resume'
+});
+
+bot.on('error', error => {
+    log(ERROR + ': ' + error)
+    statesManager.botLoadingState = 'Error'
+});
+
+bot.on('debug', debug => {
+    statesManager.ProcessDebugMessage(debug)
+    const translatedDebug = TranslateMessage(debug)
+
+    if (translatedDebug == null) return;
+
+    if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
+        logManager.AddTimeline(2)
+    }
+
+    if (translatedDebug.secret == true) return;
+
+    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
+});
+
+bot.on('warn', warn => {
+    log(WARNING + ': ' + warn)
+    statesManager.botLoadingState = 'Warning'
+});
+
+bot.on('shardError', (error, shardID) => {
+    log(ERROR + ': shardError: ' + error)
+});
+
+bot.on('invalidated', () => {
+    log(ERROR + ': Érvénytelen')
+});
+
+bot.on('shardDisconnect', (colseEvent, shardID) => {
+    log(ERROR + ': Lecsatlakozva')
+    statesManager.shardCurrentlyLoading = true
+    statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
+});
+
+bot.on('shardReady', (shardID) => {
+    const mainGuild = bot.guilds.cache.get('737954264386764812')
+    const quizChannel = mainGuild.channels.cache.get('799340273431478303')
+    quizChannel.messages.fetch()
+    statesManager.shardCurrentlyLoading = false
+});
+
+bot.on('shardReconnecting', (shardID) => {
+    statesManager.shardCurrentlyLoading = true
+    statesManager.shardCurrentlyLoadingText = 'Újracsatlakozás...'
+});
+
+bot.on('shardResume', (shardID, replayedEvents) => {
+    log(SHARD & ': Folytatás: ' + replayedEvents.toString())
+    statesManager.shardCurrentlyLoading = false
+});
+
+bot.on('raw', async event => {
+    log(DEBUG & ': raw')
+});
+
+bot.on('close', () => {
+    log(SHARD & ': close')
+    statesManager.botLoadingState = 'Close'
+});
+
+bot.on('destroyed', () => {
+    log(SHARD & ': destroyed')
+    statesManager.botLoadingState = 'Destroyed'
+});
+
+bot.on('invalidSession', () => {
+    log(SHARD & ': invalidSession')
+    statesManager.botLoadingState = 'Invalid Session'
+});
+
+bot.on('allReady', () => {
+    log(SHARD & ': allReady')
+    statesManager.botLoadingState = 'All Ready'
+});
+
+bot.on('presenceUpdate', (oldPresence, newPresence) => {
+    log(DEBUG & ': newStatus: ' + newPresence.status.toString())
+});
+
+bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => { })
+
+//#endregion
+
 bot.on('interactionCreate', interaction => {
     if (interaction.isCommand()) {
         processApplicationCommand(interaction)
@@ -201,95 +421,6 @@ bot.on('interactionCreate', interaction => {
         } catch (error) { }
     }
 });
-
-readline.emitKeypressEvents(process.stdin);
-process.stdin.setRawMode(true);
-process.stdin.on('keypress', (str, key) => {
-    if (key.ctrl && key.name === 'c') {
-        bot.destroy()
-        process.exit()
-    }
-});
-
-bot.on('reconnecting', () => {
-    log(INFO + ': Újracsatlakozás...');
-});
-
-bot.on('disconnect', () => {
-    log(ERROR + ': Megszakadt a kapcsolat!');
-});
-
-bot.on('resume', () => {
-    log(INFO + ': Folytatás');
-});
-
-bot.on('error', error => {
-    log(ERROR + ': ' + error);
-});
-
-bot.on('debug', debug => {
-    statesManager.ProcessDebugMessage(debug)
-    const translatedDebug = TranslateMessage(debug)
-
-    if (translatedDebug == null) return;
-    if (translatedDebug.secret == true) return;
-
-    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
-});
-
-bot.on('warn', warn => {
-    log(WARNING + ': ' + warn);
-});
-
-bot.on('shardError', (error, shardID) => {
-    log(ERROR + ': shardError: ' + error);
-});
-
-bot.on('invalidated', () => {
-    log(ERROR + ': Érvénytelen');
-});
-
-bot.on('shardDisconnect', (colseEvent, shardID) => {
-    statesManager.shardCurrentlyLoading = true
-    statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
-    log(ERROR + ': Lecsatlakozva');
-});
-
-bot.on('shardReady', (shardID) => {
-    statesManager.shardCurrentlyLoading = false
-});
-
-bot.on('shardReconnecting', (shardID) => {
-    statesManager.shardCurrentlyLoading = true
-    statesManager.shardCurrentlyLoadingText = 'Újracsatlakozás...'
-});
-
-bot.on('shardResume', (shardID, replayedEvents) => {
-    statesManager.shardCurrentlyLoading = false
-    log(SHARD & ': Folytatás: ' + replayedEvents.toString())
-});
-
-bot.on('close', () => {
-    log(SHARD & ': close')
-});
-
-bot.on('destroyed', () => {
-    log(SHARD & ': destroyed')
-});
-
-bot.on('invalidSession', () => {
-    log(SHARD & ': invalidSession')
-});
-
-bot.on('allReady', () => {
-    log(SHARD & ': allReady')
-});
-
-bot.on('presenceUpdate', (oldPresence, newPresence) => {
-    log(DEBUG & ': newStatus: ' + newPresence.status.toString())
-});
-
-//#endregion
 
 //#region Commands
 
@@ -645,14 +776,14 @@ bot.once('ready', async () => { //Ready
     })
 
     log(DONE + ': A BOT kész!')
-});
+})
 
 /**
  * @param {Discord.Message} message
  */
 function processNewsMessage(message) {
     listOfNews.push(CreateNews(message))
-};
+}
 
 bot.on('ready', () => { //Change status
     setInterval(() => {
@@ -678,7 +809,7 @@ bot.on('ready', () => { //Change status
         }
 
     }, 2000);
-});
+})
 
 bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
@@ -794,7 +925,11 @@ bot.on('messageCreate', async message => { //Message
             listOfHelpRequiestUsers.push(message.author.id)
         }
     }
-});
+})
+
+
+
+
 
 /**
  * @param {Discord.Message} message
@@ -931,6 +1066,10 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
     channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**");
 }
 
+
+
+
+
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
 async function processApplicationCommand(command) {
 
@@ -1057,10 +1196,20 @@ async function processApplicationCommand(command) {
     }
 }
 
-bot.login(token).catch((err) => {
-    if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
-        log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
-    } else {
-        log(ERROR + ': ' + err)
-    }
-})
+function StartBot() {
+    bot.login(token).catch((err) => {
+        if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
+            log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
+        } else {
+            log(ERROR + ': ' + err)
+        }
+    })
+}
+
+function StopBot() {
+    bot.destroy()
+}
+
+StartBot()
+
+

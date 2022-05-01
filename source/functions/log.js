@@ -44,6 +44,7 @@ const MessageCodes = {
 
 const spinner = ['─', '\\', '|', '/']
 const timeline = [' ', '▓', '█']
+const timeout = ['◌', '○', '●']
 
 const { TranslateResult } = require('./translator.js')
 
@@ -124,17 +125,15 @@ function RemoveColorcodes(text) {
 /**@param {string} text @param {number} width */
 function genLine(text, width) {
     var txt = text + ''
+    if (RemoveColorcodes(text).length > width) {
+        txt = txt.substring(0, width - 3) + '...'
+    }
     txt += chars(' ', width - RemoveColorcodes(text).length)
     return txt
 }
 
-function genLine(text, width) {
-    var txt = text + ''
-    txt += chars(' ', width - txt.length)
-    return txt
-}
-
-const WsStatus = ['READY',
+const WsStatus = [
+    'READY',
     'CONNECTING',
     'RECONNECTING',
     'IDLE',
@@ -142,7 +141,8 @@ const WsStatus = ['READY',
     'DISCONNECTED',
     'WAITING_FOR_GUILDS',
     'IDENTIFYING',
-    'RESUMING']
+    'RESUMING'
+]
 
 function AddZeros(num) {
     if (num < 10) {
@@ -187,9 +187,9 @@ function StateText_HB(error, ready, url) {
     }
     if (ready == true) {
         if (url.length > 0) {
-            return 'Listening on ' + url
+            return CliColor.FgGreen + 'Listening' + CliColor.FgDefault + ' on ' + url
         }
-        return "Ready"
+        return CliColor.FgGreen + 'Ready' + CliColor.FgDefault
     } else {
         return "Loading"
     }
@@ -212,12 +212,33 @@ function Capitalize(text) {
     return str2
 }
 
-function StateText_WS(state) {
+function StateText(state) {
     if (state == 'IDLE') {
-        return 'Idle'
+        return CliColor.FgYellow + 'Idle' + CliColor.FgDefault
     }
     if (state == 'READY') {
-        return 'Ready'
+        return CliColor.FgGreen + 'Ready' + CliColor.FgDefault
+    }
+    if (state == 'CONNECTING') {
+        return 'Connecting'
+    }
+    if (state == 'RECONNECTING') {
+        return 'Reconnecting'
+    }
+    if (state == 'NEARLY') {
+        return CliColor.FgYellow + 'Nearly' + CliColor.FgDefault
+    }
+    if (state == 'DISCONNECTED') {
+        return CliColor.FgRed + 'Disconnected' + CliColor.FgDefault
+    }
+    if (state == 'WAITING_FOR_GUILDS') {
+        return CliColor.FgYellow + 'Waiting for guilds' + CliColor.FgDefault
+    }
+    if (state == 'IDENTIFYING') {
+        return 'Identifying'
+    }
+    if (state == 'RESUMING') {
+        return 'Resuming'
     }
     return Capitalize(state)
 }
@@ -331,6 +352,21 @@ class LogManager {
                     this.AddTimeline(1)
                 }
 
+                var removeIndex = -1
+                for (let i = 0; i < this.statesManager.handlebarsClients.length; i++) {
+                    const element = this.statesManager.handlebarsClients[i]
+                    if (element.destroyed == true) {
+                        this.statesManager.handlebarsClientsTime[i] -= 1
+                        if (this.statesManager.handlebarsClientsTime[i] <= 0) {
+                            removeIndex = i
+                        }
+                    }
+                }
+                if (removeIndex > -1) {
+                    this.statesManager.handlebarsClients.splice(removeIndex, 1)
+                    this.statesManager.handlebarsClientsTime.splice(removeIndex, 1)
+                }
+
                 this.RefreshScreen()
             }, 100);
         } else {
@@ -386,10 +422,10 @@ class LogManager {
             return spinner[this.loadingIndex]
         }
         if (socket.destroyed == true) {
-            return "X"
+            return CliColor.FgRed + "X" + CliColor.FgDefault
         }
 
-        return ""
+        return CliColor.FgGreen + '√' + CliColor.FgDefault
     }
 
     Loading(loadingName, packetName) {
@@ -436,7 +472,9 @@ class LogManager {
             dfdfdf.setHours(0)
             txt += '│ ' + genLine(genLine('Uptime:', 20) + GetTime(dfdfdf), window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width - 4) + ' ┃\n'
-            txt += '│ ' + genLine(genLine('WS State:', 20) + StateText_WS(WsStatus[this.bot.ws.status]), window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('WS State:', 20) + StateText(WsStatus[this.bot.ws.status]), window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('BOT State:', 20) + this.statesManager.botLoadingState, window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('Timeouts:', 20) + timeout[this.statesManager.heartbeat] + ' ' + timeout[this.statesManager.hello], window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.handlebarsErrorMessage, this.statesManager.handlebarsDone, this.statesManager.handlebarsURL), window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('HB Requiests:', 20) + this.statesManager.handlebarsRequiests.length, window.width - 4) + ' ┃\n'
@@ -448,24 +486,30 @@ class LogManager {
                     txt += '│ ' + genLine(genLine('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + ", " + "]", window.width - 4) + ' ┃\n'
                 }
             }
+            if (this.bot.ws.shards.size == 0) {
+                txt += '│ ' + genLine(genLine('Shard State:', 20) + 'None', window.width - 4) + ' ┃\n'
+            } else {
+                txt += '│ ' + genLine(genLine('Shard State:', 20) + StateText(WsStatus[this.bot.ws.shards.first().status]), window.width - 4) + ' ┃\n'
+            }
             if (this.statesManager.shardCurrentlyLoading == true) {
-                txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' Shard:', 20) + this.statesManager.shardCurrentlyLoadingText, window.width - 4) + ' ┃\n'
+                txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' Loading Shard:', 20) + this.statesManager.shardCurrentlyLoadingText, window.width - 4) + ' ┃\n'
             }
             if (this.statesManager.shardErrorText.length > 0) {
-                txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.shardErrorText + CliColor.FgDefault, window.width - 4) + chars(' ', 15) + ' ┃\n'
+                txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.shardErrorText + CliColor.FgDefault, window.width - 4) + ' ┃\n'
             }
             if (this.statesManager.ytdlCurrentlyLoading == true) {
                 txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width - 4) + ' ┃\n'
             }    
-            txt += '│ ' + genLine(this.GetTimelineText(), window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('Timeline:', 20) + this.GetTimelineText(), window.width - 4) + ' ┃\n'
         } else {
             txt += '│ ' + spinner[this.loadingIndex] + genLine(this.loadingOverride, window.width - 4) + ' ┃\n'
         }
 
-        const remaingHeight = window.height - txt.split('\n').length - 1
+        const remaingHeight = window.height - txt.split('\n').length - 1 - 1
         for (let i = 0; i < remaingHeight; i++) {
             txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
         }
+        txt += '│ ' + genLine(CliColor.BgWhite + CliColor.FgBlack + 'Ctrl+C: Disconnect' + CliColor.BgBlack + CliColor.FgDefault, window.width - 4) + ' ┃\n'
         txt += '┕' + chars('━', window.width - 2) + '┛\n'
         txt += chars(' ', window.width) + '\n'
 
@@ -570,10 +614,6 @@ class LogManager {
         }
 
         this.timer = 0
-    }
-
-    Event(message) {
-
     }
 
     type = {

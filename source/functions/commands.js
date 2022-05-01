@@ -5,6 +5,7 @@ const Discord = require('discord.js')
 
 /**@param {Client} bot */
 function CreateCommands(bot) {
+    return
     const commandPing = new SlashCommandBuilder()
         .setName('ping')
         .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e');
@@ -149,20 +150,24 @@ function CreateCommands(bot) {
 
 /**@param {Client} bot */
 async function DeleteCommands(bot) {
-    const guild = bot.guilds.cache.get('737954264386764812')
-    const guildCommands = guild.commands
-    await guildCommands.fetch()
-    guildCommands.cache.forEach(async (val, key) => {
-        await guildCommands.delete(val)
-        console.log('Szerver parancsok törölése... (' + guildCommands.cache.size + ')')
-    });
-
-    const appCommands = bot.application?.commands
-    await appCommands.fetch()
-    appCommands.cache.forEach(async (val, key) => {
-        await appCommands.delete(val)
-        console.log('Bot parancsok törölése... (' + appCommands.cache.size + ')')
-    });
+    try {
+        const guild = bot.guilds.cache.get('737954264386764812')
+        const guildCommands = guild.commands
+        await guildCommands.fetch()
+        guildCommands.cache.forEach(async (val, key) => {
+            await guildCommands.delete(val)
+            console.log('Szerver parancsok törölése... (' + guildCommands.cache.size + ')')
+        });
+    
+        const appCommands = bot.application?.commands
+        await appCommands.fetch()
+        appCommands.cache.forEach(async (val, key) => {
+            await appCommands.delete(val)
+            console.log('Bot parancsok törölése... (' + appCommands.cache.size + ')')
+        });
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 

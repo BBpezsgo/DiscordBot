@@ -86,7 +86,7 @@ let listOfHelpRequiestUsers = []
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
-const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+const { MessageActionRow, MessageButton } = require('discord.js');
 logManager.Loading('Loading', "bot")
 const { perfix, token } = require('./config.json')
 const bot = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
@@ -138,7 +138,6 @@ let musicFinished = true
 
 const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
 
-const readline = require('readline')
 const { abbrev } = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
 const { DateToStringNews, ConvertNewsIdToName, NewsMessage, CreateNews } = require('./functions/news')
@@ -159,36 +158,39 @@ const processedNewsChannel = '746266528508411935'
 
 
 process.stdin.on('mousepress', function (info) {
-    console.log('got "mousepress" event at %d x %d', info.x, info.y);
-});
+    console.log('got "mousepress" event at %d x %d', info.x, info.y)
+})
 
-process.stdin.resume();
+process.stdin.resume()
 
 process.stdin.on('data', function (b) {
-    var s = b.toString('utf8');
+    var s = b.toString('utf8')
     if (s === '\u0003') {
-        console.error('Ctrl+C');
-        process.stdin.pause();
+        process.stdin.pause()
+        StopBot()
+        log(DONE + ': A BOT leállítva!')
+    } else if (s === ' ') {
+        console.clear()
     } else if (/^\u001b\[M/.test(s)) {
         // mouse event
-        console.error('s.length:', s.length);
+        console.error('s.length:', s.length)
         // reuse the key array albeit its name
         // otherwise recompute as the mouse event is structured differently
-        var modifier = s.charCodeAt(3);
-        var key = {};
-        key.shift = !!(modifier & 4);
-        key.meta = !!(modifier & 8);
-        key.ctrl = !!(modifier & 16);
-        key.x = s.charCodeAt(4) - 32;
-        key.y = s.charCodeAt(5) - 32;
-        key.button = null;
-        key.sequence = s;
-        key.buf = Buffer(key.sequence);
+        var modifier = s.charCodeAt(3)
+        var key = {}
+        key.shift = !!(modifier & 4)
+        key.meta = !!(modifier & 8)
+        key.ctrl = !!(modifier & 16)
+        key.x = s.charCodeAt(4) - 32
+        key.y = s.charCodeAt(5) - 32
+        key.button = null
+        key.sequence = s
+        key.buf = Buffer(key.sequence)
         if ((modifier & 96) === 96) {
-            key.name = 'scroll';
-            key.button = modifier & 1 ? 'down' : 'up';
+            key.name = 'scroll'
+            key.button = modifier & 1 ? 'down' : 'up'
         } else {
-            key.name = modifier & 64 ? 'move' : 'click';
+            key.name = modifier & 64 ? 'move' : 'click'
             switch (modifier & 3) {
                 case 0: key.button = 'left'; break;
                 case 1: key.button = 'middle'; break;
@@ -531,23 +533,23 @@ function addXp(user, channel, ammount) {
 //#region Listener-ek
 
 bot.on('reconnecting', () => {
-    logManager.Event('reconnecting;')
-    log(INFO + ': Újracsatlakozás...');
+    log(INFO + ': Újracsatlakozás...')
+    statesManager.botLoadingState = 'Reconnecting'
 });
 
 bot.on('disconnect', () => {
-    logManager.Event('disconnect;')
-    log(ERROR + ': Megszakadt a kapcsolat!');
+    log(ERROR + ': Megszakadt a kapcsolat!')
+    statesManager.botLoadingState = 'Disconnect'
 });
 
 bot.on('resume', () => {
-    logManager.Event('resume;')
-    log(INFO + ': Folytatás');
+    log(INFO + ': Folytatás')
+    statesManager.botLoadingState = 'Resume'
 });
 
 bot.on('error', error => {
-    logManager.Event('error;' + JSON.stringify(error))
-    log(ERROR + ': ' + error);
+    log(ERROR + ': ' + error)
+    statesManager.botLoadingState = 'Error'
 });
 
 bot.on('debug', debug => {
@@ -566,23 +568,20 @@ bot.on('debug', debug => {
 });
 
 bot.on('warn', warn => {
-    logManager.Event('warn;' + JSON.stringify(warn))
-    log(WARNING + ': ' + warn);
+    log(WARNING + ': ' + warn)
+    statesManager.botLoadingState = 'Warning'
 });
 
 bot.on('shardError', (error, shardID) => {
-    logManager.Event('shardError;' + JSON.stringify(error))
-    log(ERROR + ': shardError: ' + error);
+    log(ERROR + ': shardError: ' + error)
 });
 
 bot.on('invalidated', () => {
-    logManager.Event('invalidated;')
-    log(ERROR + ': Érvénytelen');
+    log(ERROR + ': Érvénytelen')
 });
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
-    logManager.Event('shardDisconnect;')
-    log(SHARD + ': Lecsatlakozva');
+    log(SHARD + ': Lecsatlakozva')
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
 });
@@ -605,26 +604,31 @@ bot.on('shardResume', (shardID, replayedEvents) => {
 });
 
 bot.on('raw', async event => {
-    log(DEBUG & ': raw');
+    log(DEBUG & ': raw')
 });
 
 bot.on('close', () => {
-    log(SHARD & ': close');
+    log(SHARD & ': close')
+    statesManager.botLoadingState = 'Close'
 });
 
 bot.on('destroyed', () => {
-    log(SHARD & ': destroyed');
+    log(SHARD & ': destroyed')
+    statesManager.botLoadingState = 'Destroyed'
 });
 
 bot.on('invalidSession', () => {
-    log(SHARD & ': invalidSession');
+    log(SHARD & ': invalidSession')
+    statesManager.botLoadingState = 'Invalid Session'
 });
+
 bot.on('allReady', () => {
-    log(SHARD & ': allReady');
+    log(SHARD & ': allReady')
+    statesManager.botLoadingState = 'All Ready'
 });
 
 bot.on('presenceUpdate', (oldPresence, newPresence) => {
-    log(DEBUG & ': newStatus: ' + newPresence.status.toString());
+    log(DEBUG & ': newStatus: ' + newPresence.status.toString())
 })
 
 bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => { })
@@ -2041,28 +2045,6 @@ bot.on('interactionCreate', async interaction => {
     }
 });
 
-readline.emitKeypressEvents(process.stdin);
-process.stdin.setRawMode(true);
-process.stdin.on('keypress', (str, key) => {
-    if (key.ctrl && key.name === 'c') {
-        log(DONE + ': A BOT leállítva!')
-        StopBot()
-        process.exit()
-    } else if (key.ctrl && key.name === 't') {
-        let x = ''
-        uptimeTimes.forEach((time) => {
-            if (time == true) {
-                x += 'X'
-            } else {
-                x += 'O'
-            }
-        })
-    } else if (key.ctrl && key.name === 'r') {
-        StopBot()
-        StartBot()
-    }
-});
-
 bot.on('clickMenu', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
@@ -2181,10 +2163,15 @@ const getApp = (guildId) => {
 }
 
 bot.once('ready', async () => {
-    if (false) {
-        await DeleteCommands(bot)
-    } else {
-        CreateCommands(bot)
+    statesManager.botLoadingState = 'Ready'
+    try {
+        if (false) {
+            await DeleteCommands(bot)
+        } else {
+            CreateCommands(bot)
+        }
+    } catch (error) {
+        console.log(error)
     }
     
     logManager.AddTimeline(2)
@@ -2272,6 +2259,7 @@ bot.on('ready', () => { //Change status
 
     }, 2000);
 })
+
 bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
     if (message.author.bot && thisIsPrivateMessage === false) return

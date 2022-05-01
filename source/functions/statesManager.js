@@ -8,6 +8,8 @@ class StatesManager {
         this.ping = 0
         /**@type {string} */
         this.loadingProgressText = 'Betöltés...'
+        /**@type {string} */
+        this.botLoadingState = ''
 
         /**@type {boolean} */
         this.ytdlCurrentlyLoading = false
@@ -40,10 +42,17 @@ class StatesManager {
         this.handlebarsErrorMessage = ''
         /**@type {string} */
         this.handlebarsURL = ''
+        /**@type {[number]} */
+        this.handlebarsClientsTime = []
         /**@type {[Socket]} */
         this.handlebarsClients = []
         /**@type {[number]} [lifetime] */
         this.handlebarsRequiests = []
+
+        /**@type {number} */
+        this.heartbeat = 0
+        /**@type {number} */
+        this.hello = 0
     }
 
     /**@param {string} message */
@@ -70,6 +79,7 @@ class StatesManager {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = '\'HELLO\' időtúllépés beállítása...'
             this.shardErrorText = ''
+            this.hello = 1
         } else if (message.startsWith('[WS => Shard 0] [CONNECTED] wss://gateway.discord.gg/?v=6&encoding=json in ')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Csatlakozva a szerverhez'
@@ -78,11 +88,13 @@ class StatesManager {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = '\'HELLO\' időtúllépés törölve'
             this.shardErrorText = ''
+            this.hello = 0
         } else if (message.startsWith('[WS => Shard 0] Setting a heartbeat interval for ')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = '\'heartbeat\' beállítása...'
             this.stateCurrentlyHearthbeat = false
             this.shardErrorText = ''
+            this.heartbeat = 1
         } else if (message.startsWith('[WS => Shard 0] [IDENTIFY] Shard 0/1')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Shard ellenőrizve...'
@@ -96,6 +108,7 @@ class StatesManager {
             this.shardCurrentlyLoadingText = '\'heartbeat\' küldése...'
             this.stateCurrentlyHearthbeat = false
             this.shardErrorText = ''
+            this.heartbeat = 2
         } else if (message.startsWith('[WS => Shard 0] Shard received all its guilds. Marking as fully ready.')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Befejezés...'
@@ -105,9 +118,11 @@ class StatesManager {
             this.stateCurrentlyShard = true
             this.stateCurrentlyHearthbeat = true
             this.shardErrorText = ''
+            this.heartbeat = 1
         } else if (message.startsWith('[WS => Shard 0] [HeartbeatTimer] Sending a heartbeat.')) {
             this.stateCurrentlyHearthbeat = true
             this.shardErrorText = ''
+            this.heartbeat = 2
         } else if (message.startsWith('[WS => Manager] Couldn\'t reconnect or fetch information about the gate')) {
             this.shardErrorText = 'Couldn\'t reconnect or fetch information about the gate'
         } else if (message.startsWith('[WS => Manager] Possible network error occurred. Retrying in 5s...')) {
@@ -140,6 +155,7 @@ class StatesManager {
             this.shardCurrentlyLoadingText = '\'heartbeat\' időtúllépés törölve'
             this.stateCurrentlyHearthbeat = false
             this.shardErrorText = ''
+            this.heartbeat = 0
         } else if (message.startsWith('[WS => Shard 0] Session ID is present, attempting an immediate reconnect...')) {
             this.shardCurrentlyLoading = true
             this.shardCurrentlyLoadingText = 'Újracsatlakozás...'
@@ -177,6 +193,7 @@ class StatesManager {
         } else if (message.startsWith('[WS => Shard 0] [ResumeHeartbeat] Sending a heartbeat')) {
             this.shardCurrentlyLoading = false
             this.shardErrorText = ''
+            this.heartbeat = 1
         } else if (message.startsWith('[WS => Shard 0] [INVALID SESSION] Resumable: false.')) {
             this.shardErrorText = '[INVALID SESSION]'
         } else if (message.startsWith('[WS => Shard 0] An open connection was found, attempting an immediate identify.')) {
