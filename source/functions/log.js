@@ -254,6 +254,11 @@ class LogManager {
         /** @type {number}*/
         this.loggedCount = 0
 
+        /** @type {string}*/
+        this.currentlyTyping = ""
+        /** @type {number}*/
+        this.blinkerTime = 0
+
         /** @type {LoadingProgress}*/
         this.loading = new LoadingProgress();
         /** @type {number}*/
@@ -343,6 +348,12 @@ class LogManager {
                     this.statesManager.handlebarsRequiests.splice(delIndex)
                 }
 
+                this.blinkerTime += this.deltaTime
+
+                if (this.blinkerTime > 1000) {
+                    this.blinkerTime = -1000
+                }
+
                 const now = Date.now()
                 this.deltaTime = now - this.lastTime
                 this.lastTime = now
@@ -376,6 +387,11 @@ class LogManager {
                     this.loadingIndex = 0
                 }
 
+                this.blinkerTime += this.deltaTime
+
+                if (this.blinkerTime > 1) {
+                    this.blinkerTime = -1
+                }
                 const now = Date.now()
                 this.deltaTime = now - this.lastTime
                 this.lastTime = now
@@ -505,10 +521,19 @@ class LogManager {
             txt += '│ ' + spinner[this.loadingIndex] + genLine(this.loadingOverride, window.width - 4) + ' ┃\n'
         }
 
-        const remaingHeight = window.height - txt.split('\n').length - 1 - 1
+        const remaingHeight = window.height - txt.split('\n').length - 2 - 1
         for (let i = 0; i < remaingHeight; i++) {
             txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
         }
+
+        var cursor = ''
+        if (this.blinkerTime > 0) {
+            cursor = '_'
+        } else {
+            cursor = ' '
+        }
+
+        txt += '│ ' + genLine('> ' + this.currentlyTyping + cursor, window.width - 4) + ' ┃\n'
         txt += '│ ' + genLine(CliColor.BgWhite + CliColor.FgBlack + 'Ctrl+C: Disconnect' + CliColor.BgBlack + CliColor.FgDefault, window.width - 4) + ' ┃\n'
         txt += '┕' + chars('━', window.width - 2) + '┛\n'
         txt += chars(' ', window.width) + '\n'

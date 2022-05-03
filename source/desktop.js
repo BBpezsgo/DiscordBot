@@ -155,7 +155,7 @@ const incomingNewsChannel = '902894789874311198'
 const processedNewsChannel = '746266528508411935'
 
 
-
+var cliCurrentlyTyping = ''
 
 process.stdin.on('mousepress', function (info) {
     console.log('got "mousepress" event at %d x %d', info.x, info.y)
@@ -169,8 +169,8 @@ process.stdin.on('data', function (b) {
         process.stdin.pause()
         StopBot()
         log(DONE + ': A BOT leállítva!')
-    } else if (s === ' ') {
-        console.clear()
+    //} else if (s === ' ') {
+    //    console.clear()
     } else if (/^\u001b\[M/.test(s)) {
         // mouse event
         console.error('s.length:', s.length)
@@ -201,10 +201,120 @@ process.stdin.on('data', function (b) {
         }
         console.error(key);
     } else {
-        // something else...
-        console.error(0, s, b);
+        const validChars = [
+            'a',
+            'b',
+            'c',
+            'd',
+            'e',
+            'f',
+            'g',
+            'h',
+            'i',
+            'j',
+            'k',
+            'l',
+            'm',
+            'n',
+            'o',
+            'p',
+            'q',
+            'r',
+            's',
+            't',
+            'u',
+            'v',
+            'w',
+            'x',
+            'y',
+            'z',
+
+            'ö',
+            'ü',
+            'ó',
+            'ő',
+            'ú',
+            'é',
+            'á',
+            'ű',
+
+            ',',
+            '.',
+            '-',
+            '?',
+            ':',
+            '_',
+
+            ' ',
+
+            '0',
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+        ]
+
+        if (s.charCodeAt(0) == 13) {
+            ProcessCliCommand(cliCurrentlyTyping)
+            cliCurrentlyTyping = ''
+            logManager.currentlyTyping = cliCurrentlyTyping
+        } else if (s.charCodeAt(0) == 8) {
+            cliCurrentlyTyping = cliCurrentlyTyping.substring(0, cliCurrentlyTyping.length-1)
+            logManager.currentlyTyping = cliCurrentlyTyping
+        } else if (true) {
+            cliCurrentlyTyping += s
+            logManager.currentlyTyping = cliCurrentlyTyping
+        } else {
+            console.error(0, s, b);
+        }
     }
 })
+
+/**@param {string} command */
+function ProcessCliCommand(command) {
+    if (command.startsWith('spam ')) {
+        var count = 5
+
+        var otherText = ''
+
+        const commandArgs = command.split(' ')
+        
+        if (commandArgs.length >= 2) {
+            count = Number.parseInt(commandArgs[1])
+        } else {
+            return
+        }
+
+        if (commandArgs.length >= 3) {
+            otherText = command.replace('spam ' + count + ' ', '')
+        }
+
+        /**@type {Discord.TextChannel} */
+        const channel = bot.channels.cache.get('756929083387936818')
+
+        SpamMessage(count, channel, '<@750748417373896825> ' + otherText)
+    }
+}
+
+/**@param {number} count @param {Discord.TextChannel} channel @param {string} content */
+function SpamMessage(count, channel, content) {
+    if (count <= 0) {
+        return
+    }
+
+    channel.send({ content: content }).then((msg) => {
+        setTimeout(() => {
+            msg.delete().then((a) => {
+                SpamMessage(count - 1, channel, content)
+            })
+        }, 100)
+    })
+}
 
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
