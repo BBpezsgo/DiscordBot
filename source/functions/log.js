@@ -162,7 +162,7 @@ function GetTime(date) {
 
 /**@param {number} bytes */
 function GetDataSize(bytes) {
-    var txt = "bytes"
+    var txt = "byte"
     var val = bytes
     if (val > 1024) {
         txt = "Kb"
@@ -220,25 +220,62 @@ function StateText(state) {
         return CliColor.FgGreen + 'Ready' + CliColor.FgDefault
     }
     if (state == 'CONNECTING') {
-        return 'Connecting'
+        return CliColor.FgYellow + 'Connecting...' + CliColor.FgDefault
     }
     if (state == 'RECONNECTING') {
-        return 'Reconnecting'
+        return CliColor.FgYellow + 'Reconnecting...' + CliColor.FgDefault
     }
     if (state == 'NEARLY') {
-        return CliColor.FgYellow + 'Nearly' + CliColor.FgDefault
+        return CliColor.FgYellow + 'Nearly...' + CliColor.FgDefault
     }
     if (state == 'DISCONNECTED') {
         return CliColor.FgRed + 'Disconnected' + CliColor.FgDefault
     }
     if (state == 'WAITING_FOR_GUILDS') {
-        return CliColor.FgYellow + 'Waiting for guilds' + CliColor.FgDefault
+        return CliColor.FgYellow + 'Waiting for guilds...' + CliColor.FgDefault
     }
     if (state == 'IDENTIFYING') {
-        return 'Identifying'
+        return CliColor.FgYellow + 'Identifying...' + CliColor.FgDefault
     }
     if (state == 'RESUMING') {
-        return 'Resuming'
+        return CliColor.FgYellow + 'Resuming...' + CliColor.FgDefault
+    }
+    return Capitalize(state)
+}
+/**
+ * @param {string} state
+ * Error; Warning; Close; Destroyed; Invalid Session; All Ready; Ready; Reconnecting; Disconnect; Resume
+ */
+function StateTextBot(state) {
+    if (state == 'Error') {
+        return CliColor.FgRed + 'Error' + CliColor.FgDefault
+    }
+    if (state == 'Warning') {
+        return CliColor.FgYellow + 'Warning' + CliColor.FgDefault
+    }
+    if (state == 'Close') {
+        return CliColor.FgYellow + 'Close' + CliColor.FgDefault
+    }
+    if (state == 'Destroyed') {
+        return CliColor.FgRed + 'Destroyed' + CliColor.FgDefault
+    }
+    if (state == 'Invalid Session') {
+        return CliColor.FgRed + 'Invalid Session' + CliColor.FgDefault
+    }
+    if (state == 'All Ready') {
+        return CliColor.FgGreen + 'Ready' + CliColor.FgDefault
+    }
+    if (state == 'Ready') {
+        return CliColor.FgGreen + 'Ready' + CliColor.FgDefault
+    }
+    if (state == 'Reconnecting') {
+        return CliColor.FgYellow + 'Reconnecting...' + CliColor.FgDefault
+    }
+    if (state == 'Disconnect') {
+        return CliColor.FgYellow + 'Disconnect' + CliColor.FgDefault
+    }
+    if (state == 'Resume') {
+        return CliColor.FgYellow + 'Resume' + CliColor.FgDefault
     }
     return Capitalize(state)
 }
@@ -413,10 +450,10 @@ class LogManager {
     GetTimelineText() {
         var str = '|'
         const width = 30
-        for (let i = Date.now()-(timelineStepSize * width); i < Date.now(); i+=timelineStepSize) {
+        for (let i = Date.now() - (timelineStepSize * width); i < Date.now(); i += timelineStepSize) {
             var x = ' '
             for (let j = 0; j < this.timeline.length; j += 2) {
-                if (this.timeline[j] >= (i- timelineStepSize) && this.timeline[j] <= i) {
+                if (this.timeline[j] >= (i - timelineStepSize) && this.timeline[j] <= i) {
                     x = timeline[this.timeline[j + 1]]
                     if (this.timeline[j + 1] == 2) { break }
                 }
@@ -484,12 +521,12 @@ class LogManager {
         if (this.loadingOverride == '') {
             txt += '│ ' + genLine(genLine('Ready at:', 20) + GetTime(this.bot.readyAt), window.width - 4) + ' ┃\n'
             var dfdfdf = new Date(0)
-            dfdfdf.setSeconds(this.bot.uptime/1000)
-            dfdfdf.setHours(0)
+            dfdfdf.setSeconds(this.bot.uptime / 1000)
+            dfdfdf.setHours(dfdfdf.getHours() - 1)
             txt += '│ ' + genLine(genLine('Uptime:', 20) + GetTime(dfdfdf), window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('WS State:', 20) + StateText(WsStatus[this.bot.ws.status]), window.width - 4) + ' ┃\n'
-            txt += '│ ' + genLine(genLine('BOT State:', 20) + this.statesManager.botLoadingState, window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine('BOT State:', 20) + StateTextBot(this.statesManager.botLoadingState), window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('Timeouts:', 20) + timeout[this.statesManager.heartbeat] + ' ' + timeout[this.statesManager.hello], window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.handlebarsErrorMessage, this.statesManager.handlebarsDone, this.statesManager.handlebarsURL), window.width - 4) + ' ┃\n'
@@ -515,7 +552,7 @@ class LogManager {
             }
             if (this.statesManager.ytdlCurrentlyLoading == true) {
                 txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width - 4) + ' ┃\n'
-            }    
+            }
             txt += '│ ' + genLine(genLine('Timeline:', 20) + this.GetTimelineText(), window.width - 4) + ' ┃\n'
         } else {
             txt += '│ ' + spinner[this.loadingIndex] + genLine(this.loadingOverride, window.width - 4) + ' ┃\n'

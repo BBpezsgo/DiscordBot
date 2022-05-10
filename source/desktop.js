@@ -259,6 +259,8 @@ process.stdin.on('data', function (b) {
             '9',
         ]
 
+        //console.error(s, s, b) //([0x1b, 0x5b, 0x31, 0x7e]));
+
         if (s.charCodeAt(0) == 13) {
             ProcessCliCommand(cliCurrentlyTyping)
             cliCurrentlyTyping = ''
@@ -2392,80 +2394,46 @@ bot.on('messageCreate', async message => { //Message
     userstatsAddUserToMemory(sender)
     if (message.channel.id === '744979145460547746') { //Memes channel
         if (message.content.includes('https://cdn.discordapp.com/attachments')) {
-            message.react('😂')
-            message.react('😐')
-            message.react('😕')
             userstatsSendMeme(sender)
         }
         if (message.content.includes('https://www.youtube.com/watch?v=')) {
-            message.react('😂')
-            message.react('😐')
-            message.react('😕')
             userstatsSendMeme(sender)
         }
         if (message.content.includes('https://www.reddit.com/r/')) {
-            message.react('😂')
-            message.react('😐')
-            message.react('😕')
             userstatsSendMeme(sender)
         }
         if (message.content.includes('https://media.discordapp.net/attachments/')) {
-            message.react('😂')
-            message.react('😐')
-            message.react('😕')
             userstatsSendMeme(sender)
         }
         if (message.content.includes('https://tenor.com/view/')) {
-            message.react('😂')
-            message.react('😐')
-            message.react('😕')
             userstatsSendMeme(sender)
         }
         if (message.attachments.size) {
-            message.react('😂')
-            message.react('😐')
-            message.react('😕')
             userstatsSendMeme(sender)
         }
     }
     if (message.channel.id === '775430473626812447') { //Youtube channel
         if (message.content.includes('https://www.youtube.com/')) {
-            message.react('👍')
-            message.react('👎')
-            message.react('😲')
             userstatsSendYoutube(sender)
         }
         if (message.content.includes('https://youtu.be/')) {
-            message.react('👍')
-            message.react('👎')
-            message.react('😲')
             userstatsSendYoutube(sender)
         }
     }
     if (message.channel.id === '738772392385577061') { //Music channel
         if (message.content.includes('https://cdn.discordapp.com/attachments')) {
-            message.react('👍')
-            message.react('👎')
             userstatsSendMusic(sender)
         }
         if (message.content.includes('https://www.youtube.com/watch?v=')) {
-            message.react('👍')
-            message.react('👎')
             userstatsSendMusic(sender)
         }
         if (message.content.includes('https://media.discordapp.net/attachments/')) {
-            message.react('👍')
-            message.react('👎')
             userstatsSendMusic(sender)
         }
         if (message.content.includes('https://youtu.be/')) {
-            message.react('👍')
-            message.react('👎')
             userstatsSendMusic(sender)
         }
         if (message.attachments.size) {
-            message.react('👍')
-            message.react('👎')
             userstatsSendMusic(sender)
         }
     }
@@ -2828,10 +2796,10 @@ function commandMarket(user, privateCommand = false) {
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/balance-scale_2696-fe0f.png')
         .addField('\\💵 Egyenleged:', '**' + abbrev(database.dataBasic[user.id].money) + '**', true)
         .addField('Ajánlatok: ',
-            '> 1\\🎫[' + database.dataBackpacks[user.id].quizTokens + ' db hátizsákban] ➜ ' + dataMarket.prices.token + '\\💵\n' +
-            '> 1\\🎟️[' + database.dataBackpacks[user.id].tickets + ' db hátizsákban] ➜ ' + dataMarket.prices.coupon + '\\💵\n' +
-            '> 1\\💍[' + database.dataBackpacks[user.id].jewel + ' db hátizsákban] ➜ ' + dataMarket.prices.jewel + '\\💵\n' +
-            '> ' + dataMarket.prices.jewel + '\\💵 ➜ 1\\💍[' + database.dataBackpacks[user.id].jewel + ' db hátizsákban]')
+            '> 1\\🎫||' + database.dataBackpacks[user.id].quizTokens + ' db a hátizsákban|| ➜ ' + dataMarket.prices.token + '\\💵\n' +
+            '> 1\\🎟️||' + database.dataBackpacks[user.id].tickets + ' db a hátizsákban|| ➜ ' + dataMarket.prices.coupon + '\\💵\n' +
+            '> 1\\💍||' + database.dataBackpacks[user.id].jewel + ' db a hátizsákban|| ➜ ' + dataMarket.prices.jewel + '\\💵\n' +
+            '> ' + dataMarket.prices.jewel + '\\💵 ➜ 1\\💍||' + database.dataBackpacks[user.id].jewel + ' db a hátizsákban||')
         .setColor(Color.Highlight)
     const buttonTokenToMoney = new MessageButton()
         .setLabel("🎫➜💵")

@@ -8,7 +8,10 @@ class StatesManager {
         this.ping = 0
         /**@type {string} */
         this.loadingProgressText = 'Betöltés...'
-        /**@type {string} */
+        /**
+         * @type {string}
+         * Error; Warning; Close; Destroyed; Invalid Session; All Ready; Ready; Reconnecting; Disconnect; Resume
+         */
         this.botLoadingState = ''
 
         /**@type {boolean} */
@@ -120,6 +123,7 @@ class StatesManager {
             this.shardErrorText = ''
             this.heartbeat = 1
         } else if (message.startsWith('[WS => Shard 0] [HeartbeatTimer] Sending a heartbeat.')) {
+            this.shardCurrentlyLoadingText = '\'Heartbeat\' küldése'
             this.stateCurrentlyHearthbeat = true
             this.shardErrorText = ''
             this.heartbeat = 2
@@ -191,7 +195,8 @@ class StatesManager {
             this.shardCurrentlyLoadingText = 'Folytatás...'
             this.shardErrorText = ''
         } else if (message.startsWith('[WS => Shard 0] [ResumeHeartbeat] Sending a heartbeat')) {
-            this.shardCurrentlyLoading = false
+            this.shardCurrentlyLoadingText = '\'Heartbeat\' küldése'
+            this.shardCurrentlyLoading = true
             this.shardErrorText = ''
             this.heartbeat = 1
         } else if (message.startsWith('[WS => Shard 0] [INVALID SESSION] Resumable: false.')) {
