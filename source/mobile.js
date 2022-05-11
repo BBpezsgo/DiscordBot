@@ -1,7 +1,7 @@
 //#region Imports, variables
 
 const { LogManager } = require('./functions/log.js')
-var logManager = new LogManager(false, null, null)
+var logManager = new LogManager(true, null, null)
 
 logManager.Loading("Loading extensions", 'weather')
 const CommandWeather = require('./commands/weather')
@@ -91,7 +91,7 @@ logManager.Loading('Loading', "bot")
 const { perfix, token } = require('./config.json')
 const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
 logManager.Destroy()
-logManager = new LogManager(false, bot, statesManager)
+logManager = new LogManager(true, bot, statesManager)
 statesManager.botLoaded = true
 logManager.BlankScreen()
 

@@ -283,6 +283,7 @@ function StateTextBot(state) {
 class LogManager {
     /**@param {boolean} isPhone */
     constructor(isPhone, bot, statesManager) {
+
         /** @type {[LogMsg]}*/
         this.logs = []
         /** @type {number}*/
@@ -354,22 +355,8 @@ class LogManager {
                     }
                 }
 
-                if (this.loading.botLoading == true || this.loading.handlebarsLoading == true) {
-                    var txt = ''
-                    if (this.loading.botLoading) {
-                        txt += '\nBot        ' + spinner[this.loadingIndex] + ' (' + this.loading.botPercent + ')  |'
-                    }
-                    if (this.loading.handlebarsLoading) {
-                        txt += '\nHandlebars ' + spinner[this.loadingIndex] + '  |'
-                    }
-                    if (txt.startsWith('\n')) {
-                        txt = txt.trimStart()
-                    }
-                    reprint(txt)
-                }
-
-                this.loadingIndex += 1
-                if (this.loadingIndex >= spinner.length) {
+                this.loadingIndex += (this.deltaTime / 2)
+                if (Math.round(this.loadingIndex) >= spinner.length) {
                     this.loadingIndex = 0
                 }
 
@@ -419,8 +406,8 @@ class LogManager {
             }, 100);
         } else {
             this.timer = setInterval(async () => {
-                this.loadingIndex += 1
-                if (this.loadingIndex >= spinner.length) {
+                this.loadingIndex += (this.deltaTime / 2)
+                if (Math.round(this.loadingIndex) >= spinner.length) {
                     this.loadingIndex = 0
                 }
 
@@ -472,7 +459,7 @@ class LogManager {
 
     GetSocketState(socket) {
         if (socket.connecting == true) {
-            return spinner[this.loadingIndex]
+            return spinner[Math.round(this.loadingIndex)]
         }
         if (socket.destroyed == true) {
             return CliColor.FgRed + "X" + CliColor.FgDefault
@@ -483,17 +470,35 @@ class LogManager {
 
     Loading(loadingName, packetName) {
         this.loadingOverride = loadingName + ': ' + packetName
+        this.RefreshScreen()
+
+        this.loadingIndex += (this.deltaTime / 2)
+        if (Math.round(this.loadingIndex) >= spinner.length) {
+            this.loadingIndex = 0
+        }
+
+        this.blinkerTime += this.deltaTime
+
+        if (this.blinkerTime > 1) {
+            this.blinkerTime = -1
+        }
+        const now = Date.now()
+        this.deltaTime = now - this.lastTime
+        this.lastTime = now
+
+        this.RefreshScreen()
     }
 
     BlankScreen() {
         this.loadingOverride = ''
 
-        const window = { width: 60, height: 20 }
+        const window = { width: 80, height: 20 }
         if (this.isPhone == true) {
             window.width = 48
         } else {
             window.width = 80
         }
+
         var txt = '┌' + chars('─', window.width - 2) + '┒\n'
         txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
         const remaingHeight = window.height - txt.split('\n').length - 1
@@ -510,12 +515,13 @@ class LogManager {
     //txt += '˹˺˻˼' + '\n'
 
     RefreshScreen() {
-        const window = { width: 60, height: 20 }
+        const window = { width: 80, height: 20 }
         if (this.isPhone == true) {
             window.width = 48
         } else {
             window.width = 80
         }
+
         var txt = '┌' + chars('─', window.width - 2) + '┒\n'
 
         if (this.loadingOverride == '') {
@@ -545,17 +551,17 @@ class LogManager {
                 txt += '│ ' + genLine(genLine('Shard State:', 20) + StateText(WsStatus[this.bot.ws.shards.first().status]), window.width - 4) + ' ┃\n'
             }
             if (this.statesManager.shardCurrentlyLoading == true) {
-                txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' Loading Shard:', 20) + this.statesManager.shardCurrentlyLoadingText, window.width - 4) + ' ┃\n'
+                txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading Shard:', 20) + this.statesManager.shardCurrentlyLoadingText, window.width - 4) + ' ┃\n'
             }
             if (this.statesManager.shardErrorText.length > 0) {
                 txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.shardErrorText + CliColor.FgDefault, window.width - 4) + ' ┃\n'
             }
             if (this.statesManager.ytdlCurrentlyLoading == true) {
-                txt += '│ ' + genLine(genLine(spinner[this.loadingIndex] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width - 4) + ' ┃\n'
+                txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width - 4) + ' ┃\n'
             }
             txt += '│ ' + genLine(genLine('Timeline:', 20) + this.GetTimelineText(), window.width - 4) + ' ┃\n'
         } else {
-            txt += '│ ' + spinner[this.loadingIndex] + genLine(this.loadingOverride, window.width - 4) + ' ┃\n'
+            txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width - 4) + ' ┃\n'
         }
 
         const remaingHeight = window.height - txt.split('\n').length - 2 - 1
