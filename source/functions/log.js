@@ -126,7 +126,7 @@ function RemoveColorcodes(text) {
 function genLine(text, width) {
     var txt = text + ''
     if (RemoveColorcodes(text).length > width) {
-        txt = txt.substring(0, width - 3) + '...'
+        txt = txt.substring(0, width - 3) + CliColor.FgDefault + '...'
     }
     txt += chars(' ', width - RemoveColorcodes(text).length)
     return txt
