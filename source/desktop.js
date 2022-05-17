@@ -170,12 +170,11 @@ process.stdin.resume()
 process.stdin.on('data', function (b) {
     var s = b.toString('utf8')
     if (s === '\u0003') {
-        process.stdin.pause()
         if (botStopped == true) {
+            process.stdin.pause()
             process.exit()
         } else {
             StopBot()
-            log(DONE + ': A BOT leállítva!')
         }
         //} else if (s === ' ') {
         //    console.clear()
