@@ -560,6 +560,9 @@ class LogManager {
                 txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width - 4) + ' ┃\n'
             }
             txt += '│ ' + genLine(genLine('Timeline:', 20) + this.GetTimelineText(), window.width - 4) + ' ┃\n'
+            if (this.statesManager.commandAllCommandCount != this.statesManager.commandCreatedCount) {
+                txt += '│ ' + genLine(genLine('Loading commands:', 20) + (this.statesManager.commandCreatedCount / this.statesManager.commandAllCommandCount * 100) + "%", window.width - 4) + ' ┃\n'
+            }
         } else {
             txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width - 4) + ' ┃\n'
         }

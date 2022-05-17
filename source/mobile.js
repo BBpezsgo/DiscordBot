@@ -89,7 +89,7 @@ const Discord = require("discord.js");
 const { MessageActionRow, MessageButton } = require('discord.js');
 logManager.Loading('Loading', "bot")
 const { perfix, token } = require('./config.json')
-const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS"] })
+const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_VOICE_STATES"] })
 logManager.Destroy()
 logManager = new LogManager(true, bot, statesManager)
 statesManager.botLoaded = true
@@ -131,8 +131,10 @@ const WS = require('./ws/ws')
 var ws = new WS('1234', '192.168.1.102', 5665, bot, logManager, null, null, null, statesManager)
 logManager.BlankScreen()
 
+
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
+/**@type {string[]} */
 let musicArray = []
 let musicFinished = true
 
@@ -461,81 +463,91 @@ function musicGetLengthText(videoLengthSeconds) {
     return lengthText
 }
 
-/**
-* @param {Discord.Message} message
-* @returns {boolean}
-*/
-async function playAudio(message) {
+/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand @returns {boolean} */
+async function playAudio(command) {
     const link = musicArray[musicArray.length - 1]
 
-    var voiceChannel = message.member.voice.channel;
-    voiceChannel.join().then(async connection => {
-        musicFinished = false
-        musicArray.shift()
+    musicFinished = false
+    musicArray.shift()
 
-        let stream = ytdl(link)
-        let info = await ytdl.getInfo(link);
-        const dispatcher = connection.play(stream)
-            .on("finish", () => {
-                musicFinished = true
-                if (musicArray.length > 0) {
-                    playAudio(message)
-                }
-            })
-            .on("error", (error) => { })
-            .on("start", () => { })
-            .on("debug", (message) => { })
-            .on("close", () => { });
+    const stream = ytdl(link, { filter: 'audioonly' })
+    const player = createAudioPlayer()
 
-        const embed = new Discord.MessageEmbed()
-            .setColor(Color.Purple)
-            .setURL(info.videoDetails.video_url)
-            .setAuthor({ name: message.author.username, iconURL: message.author.displayAvatarURL() })
-            .setTitle(info.videoDetails.title)
-            .setThumbnail(info.videoDetails.thumbnails[0].url)
-            .addField('Csatorna', info.videoDetails.author.name, true)
-            .addField('Hossz', musicGetLengthText(info.videoDetails.lengthSeconds), true)
-        message.channel.send('> **\\✔️ Most hallható: \\🎧**', { embeds: [embed] })
-        return true
-    }).catch(err => {
-        if (err.toString().startsWith('Error: No video id found:')) {
-            message.channel.send('> **\\❌ A videó nem található! \\🎧**')
-        } else {
-            message.channel.send('> **\\❌ ' + err.toString() + '**')
-        }
-    });
-    return false
+    /** @type {Discord.VoiceChannel} */
+    const voiceChannel = command.member.voice.channel;
+    const connection = joinVoiceChannel({
+        channelId: voiceChannel.id,
+        guildId: voiceChannel.guild.id,
+        adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+    })
+
+    let resource = createAudioResource(stream);
+
+    connection.subscribe(player)
+    
+    player.play(resource)
+
+    const info = await ytdl.getInfo(link);
+
+    /*const dispatcher = connection.play(stream)
+        .on("finish", () => {
+            musicFinished = true
+            if (musicArray.length > 0) {
+                playAudio(command)
+            }
+        })
+        .on("error", (error) => { log(ERROR + ': ' + error, 24) })
+        .on("start", () => { statesManager.ytdlCurrentlyPlaying = true; log('') })
+        .on("debug", (message) => { log(DEBUG + ': ytdl: ' + message) })
+        .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') });
+    */
+
+    const embed = new Discord.MessageEmbed()
+        .setColor(Color.Purple)
+        .setURL(info.videoDetails.video_url)
+        .setAuthor({ name: command.member.displayName, iconURL: command.member.displayAvatarURL() })
+        .setTitle(info.videoDetails.title)
+        .setThumbnail(info.videoDetails.thumbnails[0].url)
+        .addField('Csatorna', info.videoDetails.author.name, true)
+        .addField('Hossz', musicGetLengthText(info.videoDetails.lengthSeconds), true)
+    if (command.replied == true) {
+        command.editReply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
+    } else {
+        command.reply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
+    }
+    statesManager.ytdlCurrentlyPlayingText = info.videoDetails.title
+    statesManager.ytdlCurrentlyPlayingUrl = link
+    return true
 };
 
 //#endregion
 
-/**
-* @param {Discord.Message} message
-*/
-async function commandMusic(message, link) {
-    if (message.member.voice.channel) {
-        musicArray.unshift(link)
-        message.channel.send('> **\\➕ Hozzáadva a lejátszólistába \\🎧**')
-        if (musicFinished) {
-            playAudio(message)
+/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand @param {string} link */
+async function commandMusic(command, link) {
+    if (command.member.voice.channel) {
+        if (link.startsWith('https://www.youtube.com/watch?v=')) {
+            musicArray.unshift(link)
+            await command.reply({ content: '> **\\➕ Hozzáadva a lejátszólistába! \\🎧**' })
+            if (musicFinished) {
+                playAudio(command)
+            }
+        } else {
+            command.reply({ content: '> **\\❌ Érvénytelen URL! \\🎧**' })
         }
-
     } else {
-        message.channel.send('> **\\❗  Előbb jépj be egy hangcsatornába! \\🎧**')
+        command.reply({ content: '> **\\❗  Előbb jépj be egy hangcsatornába! \\🎧**' })
     }
 }
 
-/**
-* @param {Discord.Message} message
-*/
-async function commandMusicList(message) {
-    if (musicArray.length === 0 && ytdlCurrentlyPlaying === false) {
-        message.channel.send('> **\\➖ A lejátszólista üres \\🎧**')
+/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
+async function commandMusicList(command) {
+    if (musicArray.length === 0 && statesManager.ytdlCurrentlyPlaying === false) {
+        command.reply({ content: '> **\\➖ A lejátszólista üres \\🎧**' })
     } else {
         const embed = new Discord.MessageEmbed()
-        embed.setAuthor({ name: message.member.displayName, iconURL: message.author.avatarURL() })
+            .setAuthor({ name: command.member.displayName, iconURL: command.member.avatarURL() })
         embed.setColor(Color.Purple)
-        await ytdl.getBasicInfo(ytdlCurrentlyPlayingUrl).then(info => {
+        await ytdl.getBasicInfo(statesManager.ytdlCurrentlyPlayingUrl).then(info => {
             embed.addField('\\🎧 Most hallható: ' + info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
         })
         musicArray.forEach(async (_link) => {
@@ -543,24 +555,22 @@ async function commandMusicList(message) {
                 embed.addField(info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
             })
         });
-        message.channel.send('> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', { embeds: [embed] })
+        command.reply({ content: '> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', embeds: [embed] })
     }
 }
 
-/**
- * @param {Discord.Message} message 
- */
-async function commandSkip(message) {
-    if (message.member.voice.channel) {
+/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
+async function commandSkip(command) {
+    if (command.member.voice.channel) {
         musicFinished = true
         if (musicArray.length === 0) {
-            message.channel.send('> **\\❌ Nincs következő zene! \\🎧**')
+            command.reply({ content: '> **\\❌ Nincs következő zene! \\🎧**' })
             return
         }
-        playAudio(message)
-        message.channel.send('> **\\▶️ Zene átugorva \\🎧**')
+        playAudio(command)
+        command.reply({ content: '> **\\▶️ Zene átugorva! \\🎧**' })
     } else {
-        message.channel.send('> **\\❗  Előbb jépj be egy hangcsatornába! \\🎧**')
+        command.reply({ content: '> **\\❗  Előbb jépj be egy hangcsatornába! \\🎧**' })
     }
 }
 
@@ -1126,6 +1136,18 @@ async function processApplicationCommand(command) {
 
     if (command.commandName === `font`) {
         CommandFont(command)
+        return
+    }
+
+    if (command.commandName === `music`) {
+        if (command.options.getSubcommand() == 'play') {
+            commandMusic(command, command.options.getString('url'))
+        } else if (command.options.getSubcommand() == `skip`) {
+            commandSkip(command)
+        } else if (command.options.getSubcommand() == `list`) {
+            commandMusicList(command)
+        }
+        userstatsSendCommand(command.user)
         return
     }
 }

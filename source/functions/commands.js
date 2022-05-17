@@ -1,11 +1,11 @@
-const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, SlashCommandStringOption, SlashCommandUserOption } = require('@discordjs/builders');
+const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, SlashCommandStringOption, SlashCommandUserOption, SlashCommandSubcommandBuilder, ContextMenuCommandAssertions, ContextMenuCommandBuilder, SlashCommandSubcommandGroupBuilder } = require('@discordjs/builders');
 const { Client } = require('discord.js')
 const { GetFonts, StringToFont } = require('../commands/fonts')
 const Discord = require('discord.js')
+const { StatesManager } = require('./statesManager')
 
-/**@param {Client} bot */
-function CreateCommands(bot) {
-    return
+/**@param {Client} bot @param {StatesManager} statesManager */
+function CreateCommands(bot, statesManager) {
     const commandPing = new SlashCommandBuilder()
         .setName('ping')
         .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e');
@@ -118,6 +118,34 @@ function CreateCommands(bot) {
         .setName('text')
         .setDescription('Text')
         .setRequired(true)
+
+    const commandMusic = new SlashCommandBuilder()
+        .setName('music')
+        .setDescription('YouTube zenelejátszó')
+    const commandMusicSub0 = new SlashCommandSubcommandBuilder()
+        .setName('play')
+        .setDescription('YouTube zene lejátszása')
+    const commandMusicSub0a = new SlashCommandStringOption()
+        .setName('url')
+        .setDescription('YouTube link')
+        .setRequired(true)
+    commandMusicSub0.addStringOption(commandMusicSub0a)
+
+    const commandMusicSub1 = new SlashCommandSubcommandBuilder()
+        .setName('skip')
+        .setDescription('A most hallható zene átugrása')
+
+    const commandMusicSub2 = new SlashCommandSubcommandBuilder()
+        .setName('list')
+        .setDescription('A lejátszólista megtekintése')
+    
+    commandMusic.addSubcommand(commandMusicSub0)
+    commandMusic.addSubcommand(commandMusicSub1)
+    commandMusic.addSubcommand(commandMusicSub2)
+    const testContextMenu = new ContextMenuCommandBuilder()
+        .setName('teszt')
+        .setType(2)
+
     const fonts = GetFonts()
     for (let i = 0; i < fonts.length; i++) {
         if (i == 1) { continue }
@@ -127,22 +155,27 @@ function CreateCommands(bot) {
     commandFont.addStringOption(commandFontSub0)
 
     try {
+        statesManager.commandAllCommandCount = 17
+        statesManager.commandCreatedCount = 0
+
         const guildCommands = bot.guilds.cache.get('737954264386764812').commands
-        guildCommands?.create(commandPing.toJSON())
-        guildCommands?.create(commandWeather.toJSON())
-        guildCommands?.create(commandGift.toJSON())
-        guildCommands?.create(commandXp.toJSON())
-        guildCommands?.create(commandDev.toJSON())
-        guildCommands?.create(commandHelp.toJSON())
-        guildCommands?.create(commandCrate.toJSON())
-        guildCommands?.create(commandNapi.toJSON())
-        guildCommands?.create(commandProfil.toJSON())
-        guildCommands?.create(commandBackpack.toJSON())
-        guildCommands?.create(commandShop.toJSON())
-        guildCommands?.create(commandQuiz.toJSON())
-        guildCommands?.create(commandMarket.toJSON())
-        guildCommands?.create(commandCrossout.toJSON())
-        guildCommands?.create(commandFont.toJSON())
+        guildCommands?.create(commandPing.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandWeather.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandGift.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandXp.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandDev.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandHelp.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandCrate.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandNapi.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandProfil.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandBackpack.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandShop.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandQuiz.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandMarket.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandCrossout.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandFont.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandMusic.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(testContextMenu.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
     } catch (error) {
         console.log(error)
     }

@@ -56,6 +56,10 @@ class StatesManager {
         this.heartbeat = 0
         /**@type {number} */
         this.hello = 0
+
+        /**@type {number} */
+        this.commandCreatedCount = 0
+        this.commandAllCommandCount = 0
     }
 
     /**@param {string} message */

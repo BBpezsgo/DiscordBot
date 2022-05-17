@@ -8,6 +8,7 @@ const { MessageAttachment, MessageEmbed, MessageActionRow, MessageButton } = req
 const ERROR = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/cross-mark_274c.png'
 const SPINNER = 'https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif'
 const DONE = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/check-mark-button_2705.png'
+const WARNING = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/322/warning_26a0-fe0f.png'
 
 function showProgress(cur) {
     //stateDetails = 'Downloading ' + (cur / 1048576).toFixed(2) + ' MB'
@@ -106,29 +107,45 @@ async function DownloadVideo(message, url, replymessage, postInfo) {
     })
 }
 
+/** @param {string} text @returns {boolean} */
+function IsLargerThan8Mb(text) {
+    const hahaha = text.split(' ')
+    const xd = hahaha[1]
+    const number = Number.parseFloat(hahaha[0])
+    if (xd.includes('MB')) {
+        if (number >= 8) {
+            return true
+        } else {
+            return false
+        }
+    } else if (xd.includes('KB')) {
+        return false
+    }
+    return true
+}
+
 /** @param {Discord.Message} message */
 module.exports = async (message) => {
     const messageContentUrl = message.content
 
     const button1 = new MessageButton()
-        .setLabel("Letöltés")
+        .setLabel("⬇️ Letöltés")
         .setStyle("LINK")
-        .setURL("https://www.google.com")
+        .setURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
         .setDisabled(true)
     const button2 = new MessageButton()
-        .setLabel("Törlés")
+        .setLabel("🗑️ Törlés")
         .setCustomId("redditsaveDelete" + message.author.id)
         .setStyle("SECONDARY")
         .setDisabled(true)
     const button3 = new MessageButton()
-        .setLabel("Üzenetem törlése")
+        .setLabel("🗑️ Üzenetem törlése")
         .setCustomId("redditsaveDeleteMain" + message.author.id + '.' + message.id)
-        .setStyle("SECONDARY")
+        .setStyle("DANGER")
         .setDisabled(true)
     const row = new MessageActionRow()
         .addComponents(button1, button2, button3)
     const embed = new MessageEmbed()
-        .setAuthor({ iconURL: 'https://www.reddit.com/favicon.ico', name: 'Reddit' })
         .setFooter({ text: 'Betöltés...', iconURL: SPINNER })
 
     const replyMessage = await message.reply({ embeds: [embed], components: [row] })
@@ -152,23 +169,29 @@ module.exports = async (message) => {
                     const videoUrl = GetVideoLink(rawHtml.toString('utf8'))
 
                     const button1 = new MessageButton()
-                        .setLabel("Letöltés (" + postInfo.filesize + ")")
+                        .setLabel("⬇️ Letöltés (" + postInfo.filesize + ")")
                         .setStyle("LINK")
                         .setURL(videoUrl)
                     const button2 = new MessageButton()
-                        .setLabel("Törlés")
+                        .setLabel("🗑️ Törlés")
                         .setCustomId("redditsaveDelete" + message.author.id)
                         .setStyle("SECONDARY")
                     const button3 = new MessageButton()
-                        .setLabel("Üzenetem törlése")
+                        .setLabel("🗑️ Üzenetem törlése")
                         .setCustomId("redditsaveDeleteMain" + message.author.id + '.' + message.id)
-                        .setStyle("SECONDARY")
+                        .setStyle("DANGER")
                     const row = new MessageActionRow()
                         .addComponents(button1, button2, button3)
-                    
+
                     const embed = new MessageEmbed()
-                        .setAuthor({ iconURL: 'https://www.reddit.com/favicon.ico', name: postInfo.subreddit, url: postInfo.permalink })
+                        .setFooter({ text: 'Kész!', iconURL: DONE })
                         .setURL(videoUrl)
+                        .setColor('#ff4500')
+
+                    if (IsLargerThan8Mb(postInfo.filesize) == true) {
+                        embed.setFooter({ text: 'Vigyázat! Nagyobb mint 8 MB', iconURL: WARNING })
+                    }
+
                     await replyMessage.edit({ embeds: [embed], components: [row] })
 
                     fs.unlinkSync('./' + message.id)
@@ -178,23 +201,29 @@ module.exports = async (message) => {
                     const videoUrl = GetGifLink(rawHtml.toString('utf8'))
 
                     const button1 = new MessageButton()
-                        .setLabel("Letöltés (" + postInfo.filesize + ")")
+                        .setLabel("⬇️ Letöltés (" + postInfo.filesize + ")")
                         .setStyle("LINK")
                         .setURL(videoUrl)
                     const button2 = new MessageButton()
-                        .setLabel("Törlés")
+                        .setLabel("🗑️ Törlés")
                         .setCustomId("redditsaveDelete" + message.author.id)
                         .setStyle("SECONDARY")
                     const button3 = new MessageButton()
-                        .setLabel("Üzenetem törlése")
+                        .setLabel("🗑️ Üzenetem törlése")
                         .setCustomId("redditsaveDeleteMain" + message.author.id + '.' + message.id)
-                        .setStyle("SECONDARY")
+                        .setStyle("DANGER")
                     const row = new MessageActionRow()
                         .addComponents(button1, button2, button3)
-                    
+
                     const embed = new MessageEmbed()
-                        .setAuthor({ iconURL: 'https://www.reddit.com/favicon.ico', name: postInfo.subreddit, url: postInfo.permalink })
+                        .setFooter({ text: 'Kész!', iconURL: DONE })
                         .setURL(videoUrl)
+                        .setColor('#ff4500')
+
+                    if (IsLargerThan8Mb(postInfo.filesize) == true) {
+                        embed.setFooter({ text: 'Vigyázat! Nagyobb mint 8 MB', iconURL: WARNING })
+                    }
+
                     await replyMessage.edit({ embeds: [embed], components: [row] })
 
                     fs.unlinkSync('./' + message.id)
