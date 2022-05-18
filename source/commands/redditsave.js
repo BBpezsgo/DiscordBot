@@ -228,7 +228,24 @@ module.exports = async (message) => {
 
                     fs.unlinkSync('./' + message.id)
                 } else {
-                    message.reply("Other")
+                    const button2 = new MessageButton()
+                        .setLabel("🗑️ Törlés")
+                        .setCustomId("redditsaveDelete" + message.author.id)
+                        .setStyle("SECONDARY")
+                    const button3 = new MessageButton()
+                        .setLabel("🗑️ Üzenetem törlése")
+                        .setCustomId("redditsaveDeleteMain" + message.author.id + '.' + message.id)
+                        .setStyle("DANGER")
+                    const row = new MessageActionRow()
+                        .addComponents(button2, button3)
+
+                    const embed = new MessageEmbed()
+                        .setFooter({ text: 'Ez nem egy videó/GIF!', iconURL: ERROR })
+                        .setColor('#ff4500')
+
+                    await replyMessage.edit({ embeds: [embed], components: [row] })
+
+                    fs.unlinkSync('./' + message.id)
                 }
 
             }, 1000)
