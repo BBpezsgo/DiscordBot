@@ -563,6 +563,9 @@ class LogManager {
             if (this.statesManager.commandAllCommandCount != this.statesManager.commandCreatedCount) {
                 txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading commands:', 20) + Math.round(this.statesManager.commandCreatedCount / this.statesManager.commandAllCommandCount * 100) + "%", window.width - 4) + ' ┃\n'
             }
+            if (this.statesManager.allNewsProcessed == false) {
+                txt += '│ ' + genLine(spinner[Math.round(this.loadingIndex)] + ' Loading news', window.width - 4) + ' ┃\n'
+            }
         } else {
             txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width - 4) + ' ┃\n'
         }

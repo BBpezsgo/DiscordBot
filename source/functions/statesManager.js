@@ -60,6 +60,9 @@ class StatesManager {
         /**@type {number} */
         this.commandCreatedCount = 0
         this.commandAllCommandCount = 0
+
+        /**@type {boolean} */
+        this.allNewsProcessed = false
     }
 
     /**@param {string} message */

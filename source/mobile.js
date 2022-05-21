@@ -216,14 +216,15 @@ if (process.stdin.setRawMode) {
 }
 
 // Enable "mouse reporting"
-process.stdout.write('\x1b[?1005h');
-process.stdout.write('\x1b[?1003h');
+process.stdout.write('\x1b[?1005h')
+process.stdout.write('\x1b[?1003h')
 
 process.on('exit', function () {
     // don't forget to turn off mouse reporting
-    process.stdout.write('\x1b[?1005l');
-    process.stdout.write('\x1b[?1003l');
-    console.log("Exit...")
+    process.stdout.write('\x1b[?1005l')
+    process.stdout.write('\x1b[?1003l')
+    console.clear()
+    console.log("The application is closed")
 });
 
 //#region Functions
@@ -757,17 +758,26 @@ bot.on('clickMenu', async (menu) => {
 });
 
 bot.once('ready', async () => { //Ready
-    if (false) {
-        await DeleteCommands(bot)
-    } else {
-        //CreateCommands(bot)
+    statesManager.botLoadingState = 'Ready'
+    try {
+        //DeleteCommands(bot)
+        //CreateCommands(bot, statesManager)
+    } catch (error) {
+        console.log(error)
     }
+    
+    setInterval(() => {
+        const index = Math.floor(Math.random() * (activitiesMobile.length - 1));
+        bot.user.setActivity(activitiesMobile[index]);
+    }, 10000);
+
+    logManager.AddTimeline(2)
+
+    log(DONE + ': A BOT kész!')
 
     const channel = bot.channels.cache.get(incomingNewsChannel)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
-        /**
-         * @type {[Discord.Message]}
-         */
+        /** @type {[Discord.Message]} */
         const listOfMessage = []
 
         messages.forEach((message) => {
@@ -785,42 +795,36 @@ bot.once('ready', async () => { //Ready
         }
     })
 
-    log(DONE + ': A BOT kész!')
+    setInterval(() => {
+        if (listOfNews.length > 0) {
+            const newsMessage = listOfNews.shift()
+            /** @type {Discord.TextChannel} */
+            const newsChannel = bot.channels.cache.get(processedNewsChannel)
+            const embed = newsMessage.embed
+            if (newsMessage.NotifyRoleId.length == 0) {
+                newsChannel.send({ embeds: [ embed ] })
+                    .then(() => { newsMessage.message.delete() })
+            } else {
+                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [ embed ] })
+                    .then(() => { newsMessage.message.delete() })
+            }
+            lastNoNews = false
+            statesManager.allNewsProcessed = false
+        } else if (lastNoNews == false) {
+            lastNoNews = true
+            statesManager.allNewsProcessed = true
+            log(DONE + ': Minden hír közzétéve')
+        }
+    }, 2000);
 })
 
 /**
  * @param {Discord.Message} message
  */
 function processNewsMessage(message) {
+    statesManager.allNewsProcessed = false
     listOfNews.push(CreateNews(message))
 }
-
-bot.on('ready', () => { //Change status
-    setInterval(() => {
-        const index = Math.floor(Math.random() * (activitiesMobile.length - 1) + 1);
-        bot.user.setActivity(activitiesMobile[index], { type: 3, browser: "DISCORD IOS" });
-    }, 10000);
-    setInterval(() => {
-        if (listOfNews.length > 0) {
-            const newsMessage = listOfNews.shift()
-            const newsChannel = bot.channels.cache.get(processedNewsChannel)
-            const embed = newsMessage.embed
-            if (true && newsMessage.NotifyRoleId.length == 0) {
-                newsChannel.send({ embeds: [ embed ] })
-                    .then(() => { newsMessage.message.delete() })
-            } else {
-                newsChannel.send({ content: '<@&' + newsMessage.NotifyRoleId + '>', embeds: [ embed ] })
-                    .then(() => { newsMessage.message.delete() })
-            }
-            lastNoNews = false
-        } else if (lastNoNews == false) {
-            lastNoNews = true
-            log(DONE + ': Minden hír közzétéve')
-        }
-
-    }, 2000);
-})
-
 bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
     if (message.author.bot && thisIsPrivateMessage === false) { return }
@@ -1068,13 +1072,13 @@ async function processApplicationCommand(command) {
                 '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
                 '> Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
             )
-            .addField('\\📡 WebSocket:',
+            .addField('\\📡 Web Socket:',
                 '> Átjáró: ' + bot.ws.gateway + '\n' +
                 '> Ping: ' + bot.ws.ping + ' ms\n' +
                 '> Státusz: ' + WsStatus
             )
         if (bot.shard != null) {
-            embed.addField('Shard:',
+            embed.addField('\\📼 Shard:',
                 '> Fő port: ' + bot.shard.parentPort + '\n' +
                 '> Mód: ' + bot.shard.mode
             )

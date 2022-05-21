@@ -63,17 +63,19 @@ const { databaseManager } = require('./functions/databaseManager.js')
 const statesManager = new StatesManager()
 logManager.BlankScreen()
 
-const ColorRoles = {
-    red: "850016210422464534",
-    yellow: "850016458544250891",
-    blue: "850016589155401758",
-    orange: "850016531848888340",
-    green: "850016722039078912",
-    purple: "850016668352643072",
-    invisible: "850016786186371122"
-}
-
-const { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesDesktop, usersWithTax, ChannelId } = require('./functions/enums.js')
+const {
+    INFO,
+    ERROR,
+    WARNING,
+    SHARD,
+    DEBUG,
+    DONE,
+    Color,
+    ColorRoles,
+    activitiesDesktop,
+    usersWithTax,
+    ChannelId
+} = require('./functions/enums.js')
 
 const consoleWidth = 80 - 2
 
@@ -137,6 +139,8 @@ const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 /**@type {string[]} */
 let musicArray = []
 let musicFinished = true
+
+let lastNoNews = false
 
 const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
 
@@ -327,20 +331,21 @@ function SpamMessage(count, channel, content) {
 
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
-    process.stdin.setRawMode(true);
+    process.stdin.setRawMode(true)
 } else {
-    require('tty').setRawMode(true);
+    require('tty').setRawMode(true)
 }
 
 // Enable "mouse reporting"
-process.stdout.write('\x1b[?1005h');
-process.stdout.write('\x1b[?1003h');
+process.stdout.write('\x1b[?1005h')
+process.stdout.write('\x1b[?1003h')
 
 process.on('exit', function () {
     // don't forget to turn off mouse reporting
-    process.stdout.write('\x1b[?1005l');
-    process.stdout.write('\x1b[?1003l');
-    console.log("Exit...")
+    process.stdout.write('\x1b[?1005l')
+    process.stdout.write('\x1b[?1003l')
+    console.clear()
+    console.log("The application is closed")
 });
 
 //#region Functions 
@@ -2289,14 +2294,16 @@ const getApp = (guildId) => {
 bot.once('ready', async () => {
     statesManager.botLoadingState = 'Ready'
     try {
-        if (false) {
-            await DeleteCommands(bot)
-        } else {
-            CreateCommands(bot, statesManager)
-        }
+        //DeleteCommands(bot)
+        //CreateCommands(bot, statesManager)
     } catch (error) {
         console.log(error)
     }
+
+    setInterval(() => {
+        const index = Math.floor(Math.random() * (activitiesDesktop.length - 1));
+        bot.user.setActivity(activitiesDesktop[index]);
+    }, 10000);
 
     logManager.AddTimeline(2)
 
@@ -2352,38 +2359,35 @@ bot.once('ready', async () => {
             log(`No news recived`)
         }
     })
+
+    setInterval(() => {
+        if (listOfNews.length > 0) {
+            const newsMessage = listOfNews.shift()
+            /** @type {Discord.TextChannel} */
+            const newsChannel = bot.channels.cache.get(processedNewsChannel)
+            const embed = newsMessage.embed
+            if (newsMessage.NotifyRoleId.length == 0) {
+                newsChannel.send({ embeds: [ embed ] })
+                    .then(() => { newsMessage.message.delete() })
+            } else {
+                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [ embed ] })
+                    .then(() => { newsMessage.message.delete() })
+            }
+            lastNoNews = false
+            statesManager.allNewsProcessed = false
+        } else if (lastNoNews == false) {
+            lastNoNews = true
+            statesManager.allNewsProcessed = true
+            log(DONE + ': Minden hír közzétéve')
+        }
+    }, 2000);
 })
 
 /** @param {Discord.Message} message */
 function processNewsMessage(message) {
+    statesManager.allNewsProcessed = false
     listOfNews.push(CreateNews(message))
 }
-
-bot.on('ready', () => { //Change status
-    setInterval(() => {
-        const index = Math.floor(Math.random() * (activitiesDesktop.length - 1) + 1);
-        bot.user.setActivity(activitiesDesktop[index]);
-    }, 10000);
-    setInterval(() => {
-        if (listOfNews.length > 0) {
-            const newsMessage = listOfNews.shift()
-            /**
-             * @type {Discord.TextChannel}
-             */
-            const newsChannel = bot.channels.cache.get(processedNewsChannel)
-            const embed = newsMessage.embed
-            if (newsMessage.NotifyRoleId.length == 0) {
-                newsChannel.send({ embeds: [embed] })
-                    .then(() => { newsMessage.message.delete() })
-            } else {
-                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
-                    .then(() => { newsMessage.message.delete() })
-            }
-        }
-
-    }, 2000);
-})
-
 bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
     if (message.author.bot && thisIsPrivateMessage === false) return
