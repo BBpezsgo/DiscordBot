@@ -61,7 +61,7 @@ const ColorRoles = {
 
 const activitiesDesktop = [
     { name: 'Nothing 2', type: 'PLAYING' },
-    { name: 'Visual Studio', type: 'PLAYING' },
+    { name: 'Microsoft Visual Studio', type: 'PLAYING' },
     { name: 'Unity', type: 'PLAYING' },
 ]
 
