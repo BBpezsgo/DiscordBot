@@ -5,6 +5,7 @@ var logManager = new LogManager(false, null, null)
 
 logManager.Loading("Loading extensions", 'weather')
 const CommandWeather = require('./commands/weather')
+const CommandDailyWeatherReport = require('./commands/dailyWeatherReport')
 logManager.Loading("Loading extensions", 'help')
 const CommandHelp = require('./commands/help')
 logManager.Loading("Loading extensions", 'database/xp')
@@ -2291,6 +2292,28 @@ const getApp = (guildId) => {
     return app
 }
 
+/** @returns {Promise<Discord.Message>} */
+async function GetOldDailyWeatherReport(channelId) {
+    /** @type {Discord.TextChannel} */
+    const channel = bot.channels.cache.get(channelId)
+    console.log('Fetch messages...')
+    await channel.messages.fetch({ limit: 10 })
+    console.log('Loop messages...')
+    for (let i = 0; i < channel.messages.cache.size; i++) {
+        const element = channel.messages.cache.at(i);
+        if (element.embeds.length == 1) {
+            console.log(element.embeds[0])
+            if (element.embeds[0].title == 'Napi időjárás jelentés') {
+                console.log('Message found')
+                return element
+            }
+        }
+    }
+
+    console.log('No message found')
+    return null
+}
+
 bot.once('ready', async () => {
     statesManager.botLoadingState = 'Ready'
     try {
@@ -2304,6 +2327,20 @@ bot.once('ready', async () => {
         const index = Math.floor(Math.random() * (activitiesDesktop.length - 1));
         bot.user.setActivity(activitiesDesktop[index]);
     }, 10000);
+
+    await bot.channels.fetch(processedNewsChannel)
+    setTimeout(async () => {
+        const oldWeatherMessage = await GetOldDailyWeatherReport(processedNewsChannel)
+        console.log(oldWeatherMessage)
+        if (oldWeatherMessage == null) {
+            CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel))
+        } else {
+            if (new Date(oldWeatherMessage.createdTimestamp).getDate() == new Date(Date.now()).getDate()) {
+                oldWeatherMessage.delete()
+                CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel))
+            }
+        }
+    }, 100);
 
     logManager.AddTimeline(2)
 

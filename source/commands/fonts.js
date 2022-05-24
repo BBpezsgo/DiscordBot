@@ -1,8 +1,6 @@
 const https = require('https')
 const fs = require('fs')
 const Discord = require('discord.js')
-const jsdom = require("jsdom")
-const { JSDOM } = jsdom
 const { MessageAttachment, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
 
 /**@param {string} str */

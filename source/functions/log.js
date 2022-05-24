@@ -515,6 +515,7 @@ class LogManager {
     //txt += '˹˺˻˼' + '\n'
 
     RefreshScreen() {
+        return
         const window = { width: 80, height: 20 }
         if (this.isPhone == true) {
             window.width = 48
