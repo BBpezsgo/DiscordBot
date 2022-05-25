@@ -88,20 +88,20 @@ module.exports = async (channel) => {
         .setColor(Color.Highlight)
         .setAuthor({ name: 'Békéscsaba', iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
         .setTitle('Napi időjárás jelentés betöltése...')
-    
+
     const loadingMessage = await channel.send({ embeds: [loadingEmbed] })
 
     const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=46.678889&lon=21.090833&appid=' + openweatherToken + '&cnt=24&units=metric'
 
-    //request(url, function (err, res, body) {
-    //if (err) {
-    //    loadingMessage.edit({ content: '> \\❌ **OpenWeatherMap Error:** ' + err.toString })
-    //} else {
-    const weather = JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/forecast.json'))
-    const embed = getEmbedEarth(weather)
+    request(url, function (err, res, body) {
+        if (err) {
+            loadingMessage.edit({ content: '> \\❌ **OpenWeatherMap Error:** ' + err.toString })
+        } else {
+            const weather = JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/forecast.json'))
+            const embed = getEmbedEarth(weather)
 
-    loadingMessage.delete()
-    channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
-    //}
-    //})
+            loadingMessage.delete()
+            channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
+        }
+    })
 }
