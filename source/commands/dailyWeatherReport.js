@@ -2,6 +2,7 @@ const Discord = require('discord.js')
 const fs = require('fs')
 const request = require("request");
 const { openweatherToken } = require('../config.json')
+const { StatesManager } = require('../functions/statesManager')
 
 let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
 if (fs.existsSync('./Helper/output.txt') == true) {
@@ -82,8 +83,10 @@ function getEmbedEarth(weatherData) {
     return embed
 }
 
-/** @param {Discord.TextChannel} channel */
-module.exports = async (channel) => {
+/** @param {Discord.TextChannel} channel @param {StatesManager} statesManager */
+module.exports = async (channel, statesManager) => {
+    statesManager.dailyWeatherReportLoadingText = 'Send loading message...'
+
     const loadingEmbed = new Discord.MessageEmbed()
         .setColor(Color.Highlight)
         .setAuthor({ name: 'Békéscsaba', iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
@@ -93,15 +96,21 @@ module.exports = async (channel) => {
 
     const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=46.678889&lon=21.090833&appid=' + openweatherToken + '&cnt=24&units=metric'
 
-    request(url, function (err, res, body) {
+    statesManager.dailyWeatherReportLoadingText = 'Get weather data...'
+    request(url, async function (err, res, body) {
         if (err) {
-            loadingMessage.edit({ content: '> \\❌ **OpenWeatherMap Error:** ' + err.toString })
+            statesManager.dailyWeatherReportLoadingText = 'Get weather is fault!'
+            await loadingMessage.edit({ content: '> \\❌ **OpenWeatherMap Error:** ' + err.toString })
         } else {
-            const weather = JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/forecast.json'))
+            statesManager.dailyWeatherReportLoadingText = 'Parse weather data...'
+            const weather = JSON.parse(body) // JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/forecast.json'))
             const embed = getEmbedEarth(weather)
 
-            loadingMessage.delete()
-            channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
+            statesManager.dailyWeatherReportLoadingText = 'Delete loading message...'
+            await loadingMessage.delete()
+            statesManager.dailyWeatherReportLoadingText = 'Send report message...'
+            await channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
+            statesManager.dailyWeatherReportLoadingText = ''
         }
     })
 }

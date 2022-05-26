@@ -331,6 +331,9 @@ class LogManager {
         /** @type number */
         this.lastTimelineTime = 0
 
+        /** @type number */
+        this.dailyWeatherReportLoadingTextTimeout = 0
+
         if (bot != null && statesManager != null) {
             this.timer = setInterval(async () => {
                 if (this.enableLog == true) {
@@ -378,6 +381,14 @@ class LogManager {
                     this.blinkerTime = -1000
                 }
 
+                if (this.statesManager.dailyWeatherReportLoadingText.length == 0) {
+                    this.dailyWeatherReportLoadingTextTimeout += this.deltaTime
+                } else {
+                    this.dailyWeatherReportLoadingTextTimeout = 0
+                }
+
+
+
                 const now = Date.now()
                 this.deltaTime = now - this.lastTime
                 this.lastTime = now
@@ -416,6 +427,14 @@ class LogManager {
                 if (this.blinkerTime > 1) {
                     this.blinkerTime = -1
                 }
+
+                if (this.statesManager.dailyWeatherReportLoadingText.length == 0) {
+                    this.dailyWeatherReportLoadingTextTimeout += this.deltaTime
+                } else {
+                    this.dailyWeatherReportLoadingTextTimeout = 0
+                }
+
+
                 const now = Date.now()
                 this.deltaTime = now - this.lastTime
                 this.lastTime = now
@@ -515,7 +534,6 @@ class LogManager {
     //txt += '˹˺˻˼' + '\n'
 
     RefreshScreen() {
-        return
         const window = { width: 80, height: 20 }
         if (this.isPhone == true) {
             window.width = 48
@@ -566,6 +584,13 @@ class LogManager {
             }
             if (this.statesManager.allNewsProcessed == false) {
                 txt += '│ ' + genLine(spinner[Math.round(this.loadingIndex)] + ' Loading news', window.width - 4) + ' ┃\n'
+            }
+            if (this.dailyWeatherReportLoadingTextTimeout < 30) {
+                if (this.statesManager.dailyWeatherReportLoadingText.length > 0) {
+                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Weather report:', 20) + this.statesManager.dailyWeatherReportLoadingText, window.width - 4) + ' ┃\n'
+                } else {
+                    txt += '│ ' + genLine(genLine('Weather report:', 20) + 'Kész', window.width - 4) + ' ┃\n'
+                }
             }
         } else {
             txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width - 4) + ' ┃\n'

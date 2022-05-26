@@ -63,6 +63,9 @@ class StatesManager {
 
         /**@type {boolean} */
         this.allNewsProcessed = false
+
+        /**@type {string} */
+        this.dailyWeatherReportLoadingText = ''
     }
 
     /**@param {string} message */

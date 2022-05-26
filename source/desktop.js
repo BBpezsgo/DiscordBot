@@ -2225,7 +2225,6 @@ bot.on('clickMenu', async (button) => {
             button.message.channel.send('> \\❌ **Hiba: ' + error.message + '**')
         }
         button.reply.defer()
-        console.log(dataPolls);
     } else if (button.id === 'pollFinish') {
         try {
             const savedMessageInfo = dataPolls.messages[button.message.id]
@@ -2296,21 +2295,20 @@ const getApp = (guildId) => {
 async function GetOldDailyWeatherReport(channelId) {
     /** @type {Discord.TextChannel} */
     const channel = bot.channels.cache.get(channelId)
-    console.log('Fetch messages...')
+    statesManager.dailyWeatherReportLoadingText = 'Fetch old messages...'
     await channel.messages.fetch({ limit: 10 })
-    console.log('Loop messages...')
+    statesManager.dailyWeatherReportLoadingText = 'Loop messages...'
     for (let i = 0; i < channel.messages.cache.size; i++) {
         const element = channel.messages.cache.at(i);
         if (element.embeds.length == 1) {
-            console.log(element.embeds[0])
             if (element.embeds[0].title == 'Napi időjárás jelentés') {
-                console.log('Message found')
+                statesManager.dailyWeatherReportLoadingText = 'Old report message found'
                 return element
             }
         }
     }
 
-    console.log('No message found')
+    statesManager.dailyWeatherReportLoadingText = 'No messages found'
     return null
 }
 
@@ -2328,16 +2326,18 @@ bot.once('ready', async () => {
         bot.user.setActivity(activitiesDesktop[index]);
     }, 10000);
 
+    statesManager.dailyWeatherReportLoadingText = 'Fetch channels...'
     await bot.channels.fetch(processedNewsChannel)
     setTimeout(async () => {
+        statesManager.dailyWeatherReportLoadingText = 'Search old report message...'
         const oldWeatherMessage = await GetOldDailyWeatherReport(processedNewsChannel)
-        console.log(oldWeatherMessage)
         if (oldWeatherMessage == null) {
-            CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel))
+            CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
         } else {
             if (new Date(oldWeatherMessage.createdTimestamp).getDate() == new Date(Date.now()).getDate()) {
-                oldWeatherMessage.delete()
-                CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel))
+                statesManager.dailyWeatherReportLoadingText = 'Delete old report message...'
+                await oldWeatherMessage.delete()
+                CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
             }
         }
     }, 100);
@@ -3341,7 +3341,6 @@ function getAllEMails(userId, folder) {
 }
 
 function getMailFromRawJSON(rawJSON, id) {
-    console.log(rawJSON)
     return new Mail(id,
         new MailUser(rawJSON.sender.name, rawJSON.sender.id),
         new MailUser(rawJSON.reciver.name, rawJSON.reciver.id),
