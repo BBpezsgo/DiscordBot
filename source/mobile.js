@@ -801,10 +801,12 @@ bot.once('ready', async () => {
         if (oldWeatherMessage == null) {
             CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
         } else {
-            if (new Date(oldWeatherMessage.createdTimestamp).getDate() == new Date(Date.now()).getDate()) {
+            if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate()) {
                 statesManager.dailyWeatherReportLoadingText = 'Delete old report message...'
                 await oldWeatherMessage.delete()
                 CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
+            } else {
+                statesManager.dailyWeatherReportLoadingText = ''
             }
         }
     }, 100);

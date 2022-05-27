@@ -358,7 +358,7 @@ class LogManager {
                     }
                 }
 
-                this.loadingIndex += (this.deltaTime / 2)
+                this.loadingIndex += (this.deltaTime * 12)
                 if (Math.round(this.loadingIndex) >= spinner.length) {
                     this.loadingIndex = 0
                 }
@@ -389,8 +389,9 @@ class LogManager {
 
 
 
-                const now = Date.now()
+                const now = (Date.now() / 1000)
                 this.deltaTime = now - this.lastTime
+                if (this.deltaTime < 0) { this.deltaTime = 0 }
                 this.lastTime = now
 
                 if (this.lastTimelineTime < Date.now() - timelineStepSize) {
@@ -417,7 +418,7 @@ class LogManager {
             }, 100);
         } else {
             this.timer = setInterval(async () => {
-                this.loadingIndex += (this.deltaTime / 2)
+                this.loadingIndex += (this.deltaTime * 12)
                 if (Math.round(this.loadingIndex) >= spinner.length) {
                     this.loadingIndex = 0
                 }
@@ -435,8 +436,9 @@ class LogManager {
                 }
 
 
-                const now = Date.now()
+                const now = (Date.now() / 1000)
                 this.deltaTime = now - this.lastTime
+                if (this.deltaTime < 0) { this.deltaTime = 0 }
                 this.lastTime = now
 
                 if (this.lastTimelineTime < Date.now() - timelineStepSize) {
@@ -544,6 +546,7 @@ class LogManager {
         var txt = '┌' + chars('─', window.width - 2) + '┒\n'
 
         if (this.loadingOverride == '') {
+            txt += '│ ' + genLine(genLine('Delta time:', 20) + genLine(Math.round((this.deltaTime-0.1)*1000)/1000, 5) + ' sec', window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('Ready at:', 20) + GetTime(this.bot.readyAt), window.width - 4) + ' ┃\n'
             var dfdfdf = new Date(0)
             dfdfdf.setSeconds(this.bot.uptime / 1000)
@@ -593,6 +596,7 @@ class LogManager {
                 }
             }
         } else {
+            txt += '│ ' + genLine(genLine('Delta time:', 20) + genLine(Math.round((this.deltaTime-0.1)*1000)/1000, 5) + ' sec', window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width - 4) + ' ┃\n'
         }
 
