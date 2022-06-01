@@ -325,14 +325,16 @@ class LogManager {
         /** @type {NodeJS.Timer} */
         this.timer = null
 
-        /** @type number[] */
+        /** @type {number[]} */
         this.timeline = []
 
-        /** @type number */
+        /** @type {number} */
         this.lastTimelineTime = 0
 
-        /** @type number */
+        /** @type {number} */
         this.dailyWeatherReportLoadingTextTimeout = 0
+        /** @type {number} */
+        this.newsLoadingTextTimeout = 0
 
         if (bot != null && statesManager != null) {
             this.timer = setInterval(async () => {
@@ -387,6 +389,12 @@ class LogManager {
                     this.dailyWeatherReportLoadingTextTimeout = 0
                 }
 
+                if (this.statesManager.newsLoadingText.length == 0) {
+                    this.newsLoadingTextTimeout += this.deltaTime
+                } else {
+                    this.newsLoadingTextTimeout = 0
+                }
+
 
 
                 const now = (Date.now() / 1000)
@@ -433,6 +441,12 @@ class LogManager {
                     this.dailyWeatherReportLoadingTextTimeout += this.deltaTime
                 } else {
                     this.dailyWeatherReportLoadingTextTimeout = 0
+                }
+
+                if (this.statesManager.newsLoadingText.length == 0) {
+                    this.newsLoadingTextTimeout += this.deltaTime
+                } else {
+                    this.newsLoadingTextTimeout = 0
                 }
 
 
@@ -585,15 +599,25 @@ class LogManager {
             if (this.statesManager.commandAllCommandCount != this.statesManager.commandCreatedCount) {
                 txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading commands:', 20) + Math.round(this.statesManager.commandCreatedCount / this.statesManager.commandAllCommandCount * 100) + "%", window.width - 4) + ' ┃\n'
             }
-            if (this.statesManager.allNewsProcessed == false) {
-                txt += '│ ' + genLine(spinner[Math.round(this.loadingIndex)] + ' Loading news', window.width - 4) + ' ┃\n'
-            }
             if (this.dailyWeatherReportLoadingTextTimeout < 30) {
                 if (this.statesManager.dailyWeatherReportLoadingText.length > 0) {
                     txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Weather report:', 20) + this.statesManager.dailyWeatherReportLoadingText, window.width - 4) + ' ┃\n'
                 } else {
-                    txt += '│ ' + genLine(genLine('Weather report:', 20) + 'Kész', window.width - 4) + ' ┃\n'
+                    txt += '│ ' + genLine(genLine('Weather report:', 20) + 'Done', window.width - 4) + ' ┃\n'
                 }
+            }
+            if (this.newsLoadingTextTimeout < 30) {
+                if (this.statesManager.newsLoadingText.length > 0) {
+                    if (this.statesManager.newsLoadingText2.length > 0) {
+                        txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.newsLoadingText + ' (' + this.statesManager.newsLoadingText2 + ')', window.width - 4) + ' ┃\n'
+                    } else {
+                        txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.newsLoadingText, window.width - 4) + ' ┃\n'
+                    }
+                } else {
+                    txt += '│ ' + genLine(genLine('News:', 20) + 'Done', window.width - 4) + ' ┃\n'
+                }
+            } else if (this.statesManager.allNewsProcessed == false) {
+                txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + 'Loading...', window.width - 4) + ' ┃\n'
             }
         } else {
             txt += '│ ' + genLine(genLine('Delta time:', 20) + genLine(Math.round((this.deltaTime-0.1)*1000)/1000, 5) + ' sec', window.width - 4) + ' ┃\n'

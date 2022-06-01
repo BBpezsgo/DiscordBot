@@ -63,6 +63,10 @@ class StatesManager {
 
         /**@type {boolean} */
         this.allNewsProcessed = false
+        /**@type {string} */
+        this.newsLoadingText = ''
+        /**@type {string} */
+        this.newsLoadingText2 = ''
 
         /**@type {string} */
         this.dailyWeatherReportLoadingText = ''

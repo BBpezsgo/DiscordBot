@@ -2377,6 +2377,7 @@ bot.once('ready', async () => {
     savePollDefaults()
     saveDatabase()
 
+    statesManager.newsLoadingText = 'Fetch news...'
     const channel = bot.channels.cache.get(incomingNewsChannel)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
         /**
@@ -2384,10 +2385,12 @@ bot.once('ready', async () => {
          */
         const listOfMessage = []
 
+        statesManager.newsLoadingText = 'Looping messages...'
         messages.forEach((message) => {
             listOfMessage.push(message)
         })
 
+        statesManager.newsLoadingText = 'Processing messages...'
         listOfMessage.reverse()
         listOfMessage.forEach(message => {
             processNewsMessage(message)
@@ -2405,16 +2408,29 @@ bot.once('ready', async () => {
             /** @type {Discord.TextChannel} */
             const newsChannel = bot.channels.cache.get(processedNewsChannel)
             const embed = newsMessage.embed
+            statesManager.newsLoadingText2 = 'Send new message...'
             if (newsMessage.NotifyRoleId.length == 0) {
-                newsChannel.send({ embeds: [ embed ] })
-                    .then(() => { newsMessage.message.delete() })
+                newsChannel.send({ embeds: [embed] })
+                    .then(() => {
+                        statesManager.newsLoadingText2 = 'Delete raw message...'
+                        newsMessage.message.delete().then(() => {
+                            statesManager.newsLoadingText2 = ''
+                        })
+                    })
             } else {
-                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [ embed ] })
-                    .then(() => { newsMessage.message.delete() })
+                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
+                    .then(() => {
+                        statesManager.newsLoadingText2 = 'Delete raw message...'
+                        newsMessage.message.delete().then(() => {
+                            statesManager.newsLoadingText2 = ''
+                        })
+                    })
             }
             lastNoNews = false
             statesManager.allNewsProcessed = false
         } else if (lastNoNews == false) {
+            statesManager.newsLoadingText = ''
+            statesManager.newsLoadingText2 = ''
             lastNoNews = true
             statesManager.allNewsProcessed = true
             log(DONE + ': Minden hír közzétéve')
@@ -2429,7 +2445,7 @@ function processNewsMessage(message) {
 }
 bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
-    if (message.author.bot && thisIsPrivateMessage === false) return
+    if (message.author.bot && thisIsPrivateMessage === false) { return }
     if (!message.type) return
     let args = message.content.substring(perfix.length).split(' ')
     let sender = message.author
