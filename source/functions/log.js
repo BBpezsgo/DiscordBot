@@ -11,7 +11,7 @@ const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + fontColor + ']'
 
 const timelineStepSize = 20000
 
-const enabled = false
+const enabled = true
 
 const CliColor = {
     FgBlack: "\x1b[30m",
