@@ -286,6 +286,8 @@ const {
 
 logManager.BlankScreen()
 
+const selfId = '738030244367433770'
+
 const consoleWidth = 80 - 2
 
 /** @type {string[]} */
@@ -1922,6 +1924,36 @@ bot.on('interactionCreate', async interaction => {
             interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 5, newColorRoleId, privateCommand))
             return
         }
+    } else if (interaction.isUserContextMenu()) {
+        console.log(interaction)
+        if (interaction.commandName == 'Megajándékozás') {
+            try {
+                const giftableMember = interaction.targetMember
+                if (database.dataBackpacks[interaction.user.id].gifts > 0) {
+                    if (giftableMember.id === interaction.user.id) {
+                        interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
+                    } else {
+                        if (database.dataBackpacks[giftableMember.id] != undefined && giftableMember.id != selfId) {
+                            database.dataBackpacks[giftableMember.id].getGift += 1;
+                            database.dataBackpacks[interaction.user.id].gifts -= 1
+                            interaction.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
+                            giftableMember.send('> **\\✨ ' + interaction.user.username + ' megajándékozott! \\🎆**');
+                            database.SaveDatabase()
+                        } else {
+                            interaction.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
+                        }
+                    }
+                } else {
+                    if (giftableMember.id === interaction.user.id) {
+                        interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true })
+                    } else {
+                        interaction.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true })
+                    }
+                }
+            } catch (error) {
+                interaction.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
+            }
+        }
     }
 });
 
@@ -2612,7 +2644,7 @@ async function processApplicationCommand(command, privateCommand) {
                 if (giftableMember.id === command.user.id) {
                     command.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
                 } else {
-                    if (database.dataBackpacks[giftableMember.id] != undefined) {
+                    if (database.dataBackpacks[giftableMember.id] != undefined && giftableMember.id != selfId) {
                         database.dataBackpacks[giftableMember.id].getGift += 1;
                         database.dataBackpacks[command.user.id].gifts -= 1
                         command.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
@@ -2633,7 +2665,7 @@ async function processApplicationCommand(command, privateCommand) {
             command.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
         }
 
-        return;
+        return
     }
 
     if (command.commandName === `crossout`) {

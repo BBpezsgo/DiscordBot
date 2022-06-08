@@ -1,4 +1,15 @@
-const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, SlashCommandStringOption, SlashCommandUserOption, SlashCommandSubcommandBuilder, ContextMenuCommandAssertions, ContextMenuCommandBuilder, SlashCommandSubcommandGroupBuilder } = require('@discordjs/builders');
+const {
+    SlashCommandBuilder,
+    SlashCommandIntegerOption,
+    SlashCommandBooleanOption,
+    SlashCommandStringOption,
+    SlashCommandUserOption,
+    SlashCommandSubcommandBuilder,
+    ContextMenuCommandAssertions,
+    ContextMenuCommandBuilder,
+    SlashCommandSubcommandGroupBuilder,
+    ContextMenuCommandType
+} = require('@discordjs/builders');
 const { Client } = require('discord.js')
 const { GetFonts, StringToFont } = require('../commands/fonts')
 const Discord = require('discord.js')
@@ -143,13 +154,13 @@ function CreateCommands(bot, statesManager) {
     commandMusic.addSubcommand(commandMusicSub1)
     commandMusic.addSubcommand(commandMusicSub2)
     const testContextMenu = new ContextMenuCommandBuilder()
-        .setName('teszt')
+        .setName('Megajándékozás')
         .setType(2)
 
     const fonts = GetFonts()
     for (let i = 0; i < fonts.length; i++) {
         if (i == 1) { continue }
-        commandFontSub0.addChoice(StringToFont("Lorem ipsum", i), i.toString())
+        commandFontSub0.addChoices({ name: StringToFont("Lorem ipsum", i), value: i.toString() })
     }
     commandFont.addStringOption(commandFontSub1)
     commandFont.addStringOption(commandFontSub0)
@@ -159,23 +170,23 @@ function CreateCommands(bot, statesManager) {
         statesManager.commandCreatedCount = 0
 
         const guildCommands = bot.guilds.cache.get('737954264386764812').commands
-        guildCommands?.create(commandPing.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandWeather.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandGift.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandXp.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandDev.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandHelp.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandCrate.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandNapi.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandProfil.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandBackpack.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandShop.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandQuiz.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandMarket.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandCrossout.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandFont.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandMusic.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(testContextMenu.toJSON()).finally(() => { statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandPing.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandWeather.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandGift.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandXp.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandDev.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandHelp.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandCrate.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandNapi.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandProfil.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandBackpack.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandShop.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandQuiz.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandMarket.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandCrossout.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandFont.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandMusic.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(testContextMenu.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
     } catch (error) {
         console.log(error)
     }
@@ -202,7 +213,5 @@ async function DeleteCommands(bot) {
         console.log(error)
     }
 }
-
-
 
 module.exports = { CreateCommands, DeleteCommands }

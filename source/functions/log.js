@@ -11,6 +11,8 @@ const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + fontColor + ']'
 
 const timelineStepSize = 20000
 
+const enabled = false
+
 const CliColor = {
     FgBlack: "\x1b[30m",
     FgRed: "\x1b[31m",
@@ -532,6 +534,7 @@ class LogManager {
     }
 
     BlankScreen() {
+        if (enabled == false) { return }
         this.loadingOverride = ''
 
         const window = { width: 80, height: 20 }
@@ -557,6 +560,7 @@ class LogManager {
     //txt += '˹˺˻˼' + '\n'
 
     RefreshScreen() {
+        if (enabled == false) { return }
         const window = { width: 80, height: 20 }
         if (this.isPhone == true) {
             window.width = 48
