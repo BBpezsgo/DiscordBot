@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
 const { LogManager, LogMsg, MessageCodes } = require('../functions/log.js')
-const { databaseManager } = require('../functions/databaseManager.js')
+const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
 
 const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
@@ -21,7 +21,7 @@ class WebSocket {
      * @param {number} port
      * @param {Discord.Client} client
      * @param {LogManager} logManager
-     * @param {databaseManager} database
+     * @param {DatabaseManager} database
      * @param {StatesManager} statesManager
      */
     constructor(password, ip, port, client, logManager, database, StartBot, StopBot, statesManager) {

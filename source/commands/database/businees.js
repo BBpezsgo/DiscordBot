@@ -1,7 +1,6 @@
 const Discord = require('discord.js')
 const fs = require('fs')
-let scores = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
-let businesses = JSON.parse(fs.readFileSync('./database/businesses.json', 'utf-8'))
+const { DatabaseManager } = require('../../functions/databaseManager.js')
 
 const now = new Date()
 const start = new Date(now.getFullYear(), 0, 0)
@@ -25,64 +24,47 @@ function dayName(dayOfWeek) {
 function toDateString(date) {
     return date.getFullYear().toString() + ':' + date.getMonth().toString() + ':' + date.getDate().toString()
 }
-function resetDatabase() {
-    fs.writeFile('./database/basic.json', JSON.stringify(scores), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
-    fs.writeFile('./database/businesses.json', JSON.stringify(businesses), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
-}
+
 /**
 * @param {Discord.User} sender
+* @param {DatabaseManager} database
 */
-function businessAddToMemory(sender) {
-    if (!businesses[sender.id]) {
-        businesses[sender.id] = {};
+function businessAddToMemoryDetails(sender, database) {
+    if (!database.dataBusinesses[sender.id]) {
+        database.dataBusinesses[sender.id] = {};
     };
-    if (!businesses[sender.id].username) {
-        businesses[sender.id].username = sender.username;
+    if (!database.dataBusinesses[sender.id].username) {
+        database.dataBusinesses[sender.id].username = sender.username;
     };
-    if (!businesses[sender.id].businessIndex) {
-        businesses[sender.id].businessIndex = 0;
+    if (!database.dataBusinesses[sender.id].businessIndex) {
+        database.dataBusinesses[sender.id].businessIndex = 0;
+    };
+    if (!database.dataBusinesses[sender.id].businessName) {
+        database.dataBusinesses[sender.id].businessName = "Névtelen biznisz";
+    };
+    if (!database.dataBusinesses[sender.id].businessLevel) {
+        database.dataBusinesses[sender.id].businessLevel = 0;
+    };
+    if (!database.dataBusinesses[sender.id].businessUses) {
+        database.dataBusinesses[sender.id].businessUses = {};
+    };
+    if (!database.dataBusinesses[sender.id].businessUses.date) {
+        database.dataBusinesses[sender.id].businessUses.date = toDateString(new Date());
+    };
+    if (!database.dataBusinesses[sender.id].businessUses.day) {
+        database.dataBusinesses[sender.id].businessUses.day = dayOfYear;
     };
 
-    resetDatabase()
+    database.SaveDatabase()
 }
-/**
-* @param {Discord.User} sender
-*/
-function businessAddToMemoryDetails(sender) {
-    if (!businesses[sender.id]) {
-        businesses[sender.id] = {};
-    };
-    if (!businesses[sender.id].username) {
-        businesses[sender.id].username = sender.username;
-    };
-    if (!businesses[sender.id].businessIndex) {
-        businesses[sender.id].businessIndex = 0;
-    };
-    if (!businesses[sender.id].businessName) {
-        businesses[sender.id].businessName = "Névtelen biznisz";
-    };
-    if (!businesses[sender.id].businessLevel) {
-        businesses[sender.id].businessLevel = 0;
-    };
-    if (!businesses[sender.id].businessUses) {
-        businesses[sender.id].businessUses = {};
-    };
-    if (!businesses[sender.id].businessUses.date) {
-        businesses[sender.id].businessUses.date = toDateString(new Date());
-    };
-    if (!businesses[sender.id].businessUses.day) {
-        businesses[sender.id].businessUses.day = dayOfYear;
-    };
 
-    resetDatabase()
-}
 /**
  * @returns {string}
  * @param {Discord.User} sender
  * @param {number} type
  */
-function calculateAddMoney(sender, type) {
-    const aaa = businesses[sender.id].businessUses.date.toString().split(':')
+function calculateAddMoney(sender, type, database) {
+    const aaa = database.dataBusinesses[sender.id].businessUses.date.toString().split(':')
     const lastDate = new Date(aaa[0], aaa[1], aaa[2])
     const nowDate = new Date()
     const difference = nowDate - lastDate
@@ -130,36 +112,37 @@ function calculateAddMoney(sender, type) {
 * @param {Discord.Channel} channel
 * @param {Discord.User} sender
 * @param {boolean} isPrivate
+* @param {DatabaseManager} database
 */
-module.exports = (channel, sender, isPrivate) => {
+module.exports = (channel, sender, isPrivate, database) => {
 
-    businessAddToMemory(sender)
+    database.SaveUserToMemoryAll(sender, sender.username)
 
-    var businessIndex = businesses[sender.id].businessIndex
+    var businessIndex = database.dataBusinesses[sender.id].businessIndex
 
-    var money = scores[sender.id].money;
+    var money = database.dataBasic[sender.id].money;
 
-    if (businesses[sender.id].businessIndex > 0) {
-        var moneyMakerName = businesses[sender.id].businessName;
-        var moneyMakerLevel = businesses[sender.id].businessLevel;
+    if (database.dataBusinesses[sender.id].businessIndex > 0) {
+        var moneyMakerName = database.dataBusinesses[sender.id].businessName;
+        var moneyMakerLevel = database.dataBusinesses[sender.id].businessLevel;
 
         var moneyMakerImage = ''
         var moneyMakerLevelText = ''
 
         var uprageCost = 0
 
-        let addMoney = calculateAddMoney(sender, businesses[sender.id].businessIndex)
-        if (businesses[sender.id].businessIndex === 1) {
-            addMoney *= 1335 * businesses[sender.id].businessLevel
-        } else if (businesses[sender.id].businessIndex === 2) {
-            addMoney *= 181 * businesses[sender.id].businessLevel
-        } else if (businesses[sender.id].businessIndex === 3) {
-            addMoney *= 189 * businesses[sender.id].businessLevel
-        } else if (businesses[sender.id].businessIndex === 4) {
+        let addMoney = calculateAddMoney(sender, database.dataBusinesses[sender.id].businessIndex, database)
+        if (database.dataBusinesses[sender.id].businessIndex === 1) {
+            addMoney *= 1335 * database.dataBusinesses[sender.id].businessLevel
+        } else if (database.dataBusinesses[sender.id].businessIndex === 2) {
+            addMoney *= 181 * database.dataBusinesses[sender.id].businessLevel
+        } else if (database.dataBusinesses[sender.id].businessIndex === 3) {
+            addMoney *= 189 * database.dataBusinesses[sender.id].businessLevel
+        } else if (database.dataBusinesses[sender.id].businessIndex === 4) {
 
         }
 
-        if (businesses[sender.id].businessIndex === 1) {
+        if (database.dataBusinesses[sender.id].businessIndex === 1) {
             if (moneyMakerLevel === 1) {
                 moneyMakerImage = '\\🚏'
                 moneyMakerLevelText = 'Városi buszmegálló'
@@ -176,7 +159,7 @@ module.exports = (channel, sender, isPrivate) => {
                 moneyMakerImage = '\\🛫'
                 moneyMakerLevelText = 'Globális repülőtér'
             }
-        } else if (businesses[sender.id].businessIndex === 2) {
+        } else if (database.dataBusinesses[sender.id].businessIndex === 2) {
             if (moneyMakerLevel === 1) {
                 moneyMakerImage = '\\🏪'
                 moneyMakerLevelText = 'Vegyesbolt'
@@ -185,7 +168,7 @@ module.exports = (channel, sender, isPrivate) => {
                 moneyMakerImage = '\\🏬'
                 moneyMakerLevelText = 'Bevásárló központ'
             }
-        } else if (businesses[sender.id].businessIndex === 3) {
+        } else if (database.dataBusinesses[sender.id].businessIndex === 3) {
             if (moneyMakerLevel === 1) {
                 moneyMakerImage = '\\🏗️'
                 moneyMakerLevelText = 'Építőanyag gyár'
@@ -194,7 +177,7 @@ module.exports = (channel, sender, isPrivate) => {
                 moneyMakerImage = '\\🏭'
                 moneyMakerLevelText = 'Autógyár'
             }
-        } else if (businesses[sender.id].businessIndex === 4) {
+        } else if (database.dataBusinesses[sender.id].businessIndex === 4) {
             if (moneyMakerLevel === 1) {
                 moneyMakerImage = '\\🏤'
                 moneyMakerLevelText = 'Városszintű irodák'
@@ -210,7 +193,7 @@ module.exports = (channel, sender, isPrivate) => {
         }
 
         const embed = new Discord.MessageEmbed()
-            .setAuthor(sender.username, sender.displayAvatarURL())
+            .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle(moneyMakerName)
             .setDescription(moneyMakerImage + ' ' + moneyMakerLevelText + ' (lvl' + (moneyMakerLevel - 1) + ')')
             //.addField('Átnevezés', '`.pms name [új név]`')
@@ -232,7 +215,7 @@ module.exports = (channel, sender, isPrivate) => {
             }
         }
         if (addMoney > 0) {
-                const aaaaaaaaaaaaaa = businesses[sender.id].businessUses.date.toString().split(':')
+                const aaaaaaaaaaaaaa = database.dataBusinesses[sender.id].businessUses.date.toString().split(':')
                 const lastDate = new Date(aaaaaaaaaaaaaa[0], aaaaaaaaaaaaaa[1], aaaaaaaaaaaaaa[2])
             if (isPrivate === true) {
                 embed.addField('Beszedés: 💰',
@@ -255,8 +238,8 @@ module.exports = (channel, sender, isPrivate) => {
                     if (collected.first().emoji.name == '⬆️') {
                         if (uprageCost > 0) {
                             if (money >= uprageCost) {
-                                businesses[sender.id].businessLevel += 1
-                                scores[sender.id].money -= uprageCost
+                                database.dataBusinesses[sender.id].businessLevel += 1
+                                database.dataBasic[sender.id].money -= uprageCost
                                 channel.send('> \\⬆️ **Fejlesztve!**')
                             } else {
                                 channel.send('> \\❌ **Nincs elég pénzed!**')
@@ -269,9 +252,9 @@ module.exports = (channel, sender, isPrivate) => {
                             try {
                                 addMoney += Math.floor(Math.random() * 10) - 5
 
-                                scores[sender.id].money += addMoney
-                                businesses[sender.id].businessUses.day = dayOfYear;
-                                businesses[sender.id].businessUses.date = toDateString(new Date());
+                                database.dataBasic[sender.id].money += addMoney
+                                database.dataBusinesses[sender.id].businessUses.day = dayOfYear;
+                                database.dataBusinesses[sender.id].businessUses.date = toDateString(new Date());
 
                                 channel.send('> \\💰 Beszedtél \\💵**' + addMoney + '** pénzt')
                             } catch (error) {
@@ -281,12 +264,12 @@ module.exports = (channel, sender, isPrivate) => {
                             channel.send('> \\❌ **Még nem termelt semmit**')
                         }
                     } else if (collected.first().emoji.name == '💥') {
-                        businesses[sender.id] = {}
-                        businesses[sender.id].username = sender.username
-                        businesses[sender.id].businessIndex = 0
+                        database.dataBusinesses[sender.id] = {}
+                        database.dataBusinesses[sender.id].username = sender.username
+                        database.dataBusinesses[sender.id].businessIndex = 0
                         channel.send('> \\💥 **A biznisz megszüntetve**')
                     }
-                    resetDatabase()
+                    database.SaveDatabase()
                     embedMessage.reactions.removeAll()
                 }).catch(() => {
                     embedMessage.reactions.removeAll()
@@ -297,7 +280,7 @@ module.exports = (channel, sender, isPrivate) => {
             message.channel.send('> \\⛔ **Nincs bizniszed. Hogy vegyél egyet, használd a `.pms` parancsot egy szerveren.**')
         } else {
             const embed = new Discord.MessageEmbed()
-                .setAuthor(sender.username, sender.displayAvatarURL())
+                .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
                 .setTitle('Bizniszek')
                 .addField('Utasszállító szolgálat',
                     '> **Ikon:** 🚗\n' +
@@ -333,44 +316,44 @@ module.exports = (channel, sender, isPrivate) => {
                     { max: 1, time: 60000 }).then(collected => {
                         if (collected.first().emoji.name == '🚗') {
                             if (money >= 6040) {
-                                businessAddToMemoryDetails(sender)
-                                scores[sender.id].money -= 6040
-                                businesses[sender.id].businessIndex = 1
-                                businesses[sender.id].businessLevel = 1
-                                businesses[sender.id].businessName = sender.username + ' utasszállító szolgálata'
+                                businessAddToMemoryDetails(sender, database)
+                                database.dataBasic[sender.id].money -= 6040
+                                database.dataBusinesses[sender.id].businessIndex = 1
+                                database.dataBusinesses[sender.id].businessLevel = 1
+                                database.dataBusinesses[sender.id].businessName = sender.username + ' utasszállító szolgálata'
                                 channel.send('> \\✔️ **Sikeresen megvásároltad: Utasszállító szolgálat**')
                             } else {
                                 channel.send('> \\❌ **Nincs elég pénzed!**')
                             }
                         } else if (collected.first().emoji.name == '📠') {
                             if (money >= 7100) {
-                                businessAddToMemoryDetails(sender)
-                                scores[sender.id].money -= 7100
-                                businesses[sender.id].businessIndex = 2
-                                businesses[sender.id].businessLevel = 1
-                                businesses[sender.id].businessName = sender.username + ' kereskedelmi szaküzlete'
+                                businessAddToMemoryDetails(sender, database)
+                                database.dataBasic[sender.id].money -= 7100
+                                database.dataBusinesses[sender.id].businessIndex = 2
+                                database.dataBusinesses[sender.id].businessLevel = 1
+                                database.dataBusinesses[sender.id].businessName = sender.username + ' kereskedelmi szaküzlete'
                                 channel.send('> \\✔️ **Sikeresen megvásároltad: Kereskedelmi szaküzlet**')
                             } else {
                                 channel.send('> \\❌ **Nincs elég pénzed!**')
                             }
                         } else if (collected.first().emoji.name == '⚙️') {
                             if (money >= 11200) {
-                                businessAddToMemoryDetails(sender)
-                                scores[sender.id].money -= 11200
-                                businesses[sender.id].businessIndex = 3
-                                businesses[sender.id].businessLevel = 1
-                                businesses[sender.id].businessName = sender.username + ' gyára'
+                                businessAddToMemoryDetails(sender, database)
+                                database.dataBasic[sender.id].money -= 11200
+                                database.dataBusinesses[sender.id].businessIndex = 3
+                                database.dataBusinesses[sender.id].businessLevel = 1
+                                database.dataBusinesses[sender.id].businessName = sender.username + ' gyára'
                                 channel.send('> \\✔️ **Sikeresen megvásároltad: Gyár**')
                             } else {
                                 channel.send('> \\❌ **Nincs elég pénzed!**')
                             }
                         } else if (collected.first().emoji.name == '💳') {
                             /*if (money >= 36800) {
-                                businessAddToMemoryDetails(sender)
-                                scores[sender.id].money -= 36800
-                                businesses[sender.id].businessIndex = 4
-                                businesses[sender.id].businessLevel = 1
-                                businesses[sender.id].businessName = sender.username + ' pénzügyi szervezete'
+                                businessAddToMemoryDetails(sender, database)
+                                database.dataBasic[sender.id].money -= 36800
+                                database.dataBusinesses[sender.id].businessIndex = 4
+                                database.dataBusinesses[sender.id].businessLevel = 1
+                                database.dataBusinesses[sender.id].businessName = sender.username + ' pénzügyi szervezete'
                                 channel.send('> \\✔️ **Sikeresen megvásároltad!**')
                             } else {
                                 channel.send('> \\❌ **Nincs elég pénzed!**')
@@ -385,5 +368,5 @@ module.exports = (channel, sender, isPrivate) => {
         }
     }
 
-    resetDatabase()
+    database.SaveDatabase()
 }

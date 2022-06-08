@@ -1,3 +1,25 @@
+const fs = require('fs')
+
+/** @returns {number} */
+function calculateAddXp(message) {
+    const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
+
+    let addScoreValue = message.content.length;
+    if (addScoreValue > 20) {
+        addScoreValue = 20
+    }
+
+    for (let i = 0; i < 5; i++) {
+        if (message.content.includes(settings['addXp'][i].link.toString())) {
+            addScoreValue = settings['addXp'][i].xp
+        }
+    }
+    if (message.attachments.size) {
+        addScoreValue = settings['addXp'][5].xp
+    }
+
+    return addScoreValue
+}
 
 function xpRankIcon(score) {
     if (score < 1000) {
@@ -136,4 +158,4 @@ function xpRankNext(score) {
     }
 }
 
-module.exports = {xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText}
+module.exports =  {xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText, calculateAddXp }

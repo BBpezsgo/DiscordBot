@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const fs = require('fs');
-let scores = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'));
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./xpFunctions')
+const GetUserColor = require('../../functions/userColor')
 
 let coloredProgressBarPart = '⬜'
 
@@ -27,22 +27,24 @@ function abbrev(num) {
 
  /** @param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
 async function execute(command, privateCommand) {
+    const scores = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'));
+
     try {
         const userColor = scores[command.user.id].color
 
-        if (userColor === "#ff0000") {
+        if (userColor === "red") {
             coloredProgressBarPart = '🟥'
-        } else if (userColor === "#ffff00") {
+        } else if (userColor === "yellow") {
             coloredProgressBarPart = '🟨'
-        } else if (userColor === "#0000ff") {
+        } else if (userColor === "blue") {
             coloredProgressBarPart = '🟦'
-        } else if (userColor === "#ffbb00") {
+        } else if (userColor === "orange") {
             coloredProgressBarPart = '🟧'
-        } else if (userColor === "#9d00ff") {
+        } else if (userColor === "purple") {
             coloredProgressBarPart = '🟪'
-        } else if (userColor === "#00ff00") {
+        } else if (userColor === "green") {
             coloredProgressBarPart = '🟩'
-        } else if (userColor === "#734c09") {
+        } else if (userColor === "brown") {
             coloredProgressBarPart = '🟫'
         }
 
@@ -70,7 +72,7 @@ async function execute(command, privateCommand) {
             .setTitle('Rang')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/beer-mug_1f37a.png')
             .addField(rankName,'\\' + xpRankIcon(score) + ' ' + progressBar + ' \\❔')
-            .setColor(userColor)
+            .setColor(GetUserColor(userColor))
             .setFooter({ text: abbrev(score) + ' / ' + abbrev(next) + '\nKell még: 🍺' + abbrev(next - score) + ' xp' })
         command.reply({ embeds: [embed], ephemeral: privateCommand });
     } catch (error) {

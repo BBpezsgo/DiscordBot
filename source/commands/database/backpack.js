@@ -1,5 +1,7 @@
 const Discord = require('discord.js')
 const fs = require('fs')
+const GetUserColor = require('../../functions/userColor')
+const { DatabaseManager } = require('../../functions/databaseManager')
 
 let dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
 let dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
@@ -10,13 +12,6 @@ function saveDatabase() {
     fs.writeFile('./database/backpacks.json', JSON.stringify(dataBackpacks), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
     fs.writeFile('./database/basic.json', JSON.stringify(dataBasic), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
     fs.writeFile('./database/stickers.json', JSON.stringify(dataStickers), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
-}
-
-function resetDatabase() {
-    dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
-    dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
-    dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8'))
-    dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
 }
 
 /**
@@ -108,8 +103,9 @@ function log(message) {
 * @param {Discord.Message} message
 * @param {Discord.User} sender
 * @param {boolean} isPrivate
+* @param {DatabaseManager} database
 */
-module.exports = (message, sender, isPrivate) => {
+module.exports = (message, sender, isPrivate, database) => {
     var currentDay = new Date().getDay();
     var dayCrates = dataBot.day - dataBasic[sender.id].day
     var crates = dataBackpacks[sender.id].crates
@@ -122,7 +118,7 @@ module.exports = (message, sender, isPrivate) => {
     var money = dataBasic[sender.id].money
 
     const embed = new Discord.MessageEmbed()
-        .setAuthor(sender.username, sender.displayAvatarURL())
+        .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
         .setTitle('Hátizasák')
         .addField('Pénz', '\\💵 ' + abbrev(money), false)
         .addField('Alap cuccok',
@@ -133,11 +129,11 @@ module.exports = (message, sender, isPrivate) => {
             , false)
         .addField('Sorsjegyek', '> \\💶 ' + smallLuckyCard + ' Black Jack\n> \\💷 ' + mediumLuckyCard + ' Buksza\n> \\💴 ' + largeLuckyCard + ' Fáraók Kincse', false)
         if (isPrivate === true) {
-            embed.setFooter('Ha használni szeretnéd az egyik cuccodat, használd a .store parancsot egy szerveren!')
+            embed.setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, használd a .store parancsot egy szerveren!' })
         } else {
-            embed.setFooter('Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!')
+            embed.setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!' })
         }
-        embed.setColor(dataBasic[sender.id].color)
+        embed.setColor(GetUserColor(dataBasic[sender.id].color))
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/briefcase_1f4bc.png')
     if (getGifts > 0) {
         if (isPrivate === true) {

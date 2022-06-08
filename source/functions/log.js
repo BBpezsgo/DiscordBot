@@ -336,6 +336,13 @@ class LogManager {
         /** @type {number} */
         this.newsLoadingTextTimeout = 0
 
+        /** @type {(pressedButton: string) => void} */
+        this.promtCallback
+        /** @type {string[]} */
+        this.promtButtons
+        /** @type {string} */
+        this.promtMessage
+
         if (bot != null && statesManager != null) {
             this.timer = setInterval(async () => {
                 if (this.enableLog == true) {
@@ -752,6 +759,28 @@ class LogManager {
         Shard: 4,
         Warn: 5,
         Err: 6,
+    }
+
+    /**
+     * @param {string} captionText
+     * @param {string[]} buttons
+     * @param {(pressedButton: string) => void} callback
+     */
+    Promt(captionText, buttons, callback) {
+        this.promtCallback = callback
+
+
+    }
+
+    /**
+     * @param {string} key
+     */
+    OnKeyDown(key) {
+
+    }
+
+    CurrentlyPromt() {
+        return (this.promtCallback != null)
     }
 }
 
