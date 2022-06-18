@@ -153,9 +153,18 @@ function CreateCommands(bot, statesManager) {
     commandMusic.addSubcommand(commandMusicSub0)
     commandMusic.addSubcommand(commandMusicSub1)
     commandMusic.addSubcommand(commandMusicSub2)
+
+    const commandSettings = new SlashCommandBuilder()
+        .setName('settings')
+        .setDescription('Értesítési, és parancs beállítások')
+        
     const testContextMenu = new ContextMenuCommandBuilder()
         .setName('Megajándékozás')
         .setType(2)
+
+    const commandWordle = new SlashCommandBuilder()
+        .setName('wordle')
+        .setDescription('Wordle játék (angol)')
 
     const fonts = GetFonts()
     for (let i = 0; i < fonts.length; i++) {
@@ -166,29 +175,31 @@ function CreateCommands(bot, statesManager) {
     commandFont.addStringOption(commandFontSub0)
 
     try {
-        statesManager.commandAllCommandCount = 17
+        statesManager.commandAllCommandCount = 19
         statesManager.commandCreatedCount = 0
 
         const guildCommands = bot.guilds.cache.get('737954264386764812').commands
-        guildCommands?.create(commandPing.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandWeather.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandGift.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandXp.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandDev.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandHelp.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandCrate.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandNapi.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandProfil.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandBackpack.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandShop.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandQuiz.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandMarket.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandCrossout.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandFont.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandMusic.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(testContextMenu.toJSON()).finally(() => { console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%'); statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandPing.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandWeather.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandGift.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandXp.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandDev.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandHelp.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandCrate.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandNapi.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandProfil.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandBackpack.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandShop.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandQuiz.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandMarket.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandCrossout.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandFont.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandMusic.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(testContextMenu.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandWordle.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandSettings.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 }
 

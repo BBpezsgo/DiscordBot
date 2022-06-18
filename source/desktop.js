@@ -201,6 +201,8 @@ logManager.Loading("Loading commands", 'database/businees')
 const CommandBusiness = require('./commands/database/businees')
 logManager.Loading("Loading commands", 'database/market')
 const CommandMarket = require('./commands/database/market')
+logManager.Loading("Loading commands", 'database/settings')
+const CommandSettings = require('./commands/settings')
 
 logManager.Loading("Loading extensions", 'database/xpFunctions')
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText, calculateAddXp } = require('./commands/database/xpFunctions')
@@ -533,7 +535,7 @@ function addXp(user, channel, ammount) {
             .addField('Jutalmad', addMoney.toString() + '\\💵', true)
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/clinking-beer-mugs_1f37b.png')
             .setColor(Color.Highlight)
-        channel.send({ embeds: [embed] })
+        //channel.send({ embeds: [embed] })
     }
 
     database.SaveDatabase()
@@ -1924,6 +1926,106 @@ bot.on('interactionCreate', async interaction => {
             interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, 5, newColorRoleId, privateCommand))
             return
         }
+
+        if (interaction.customId == 'userSettings') {
+
+            const roles = {
+                szavazas: '795935996982198272',
+                quiz: '799342836931231775',
+                crossoutBejelentes: '902877945876598784',
+                crossoutBejelentesPC: '902878695742652437',
+                crossoutBejelentesKonzol: '902878741364105238',
+                crossoutEgyeb: '902881176719622145',
+                ingyenesJatek: '902878798956093510',
+                warzone: '902878851938517043',
+                minecraft: '902878964438143026',
+                napiIdojaras: '978665941753806888'
+            }
+
+            const selectedIndex = interaction.values[0]
+            const money = database.dataBasic[interaction.user.id].money;
+
+            var newColorRoleId = ''
+
+            try {
+                if (selectedIndex == 'szavazas') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.szavazas) == true) {
+                        await interaction.member.roles.remove(roles.szavazas)
+                    } else {
+                        await interaction.member.roles.add(roles.szavazas)
+                    }
+                } else if (selectedIndex == 'quiz') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.quiz) == true) {
+                        await interaction.member.roles.remove(roles.quiz)
+                    } else {
+                        await interaction.member.roles.add(roles.quiz)
+                    }
+                } else if (selectedIndex == 'crossoutBejelentes') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.crossoutBejelentes) == true) {
+                        await interaction.member.roles.remove(roles.crossoutBejelentes)
+                    } else {
+                        await interaction.member.roles.add(roles.crossoutBejelentes)
+                    }
+                } else if (selectedIndex == 'crossoutBejelentesPC') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.crossoutBejelentesPC) == true) {
+                        await interaction.member.roles.remove(roles.crossoutBejelentesPC)
+                    } else {
+                        await interaction.member.roles.add(roles.crossoutBejelentesPC)
+                    }
+                } else if (selectedIndex == 'crossoutBejelentesKonzol') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.crossoutBejelentesKonzol) == true) {
+                        await interaction.member.roles.remove(roles.crossoutBejelentesKonzol)
+                    } else {
+                        await interaction.member.roles.add(roles.crossoutBejelentesKonzol)
+                    }
+                } else if (selectedIndex == 'crossoutEgyeb') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.crossoutEgyeb) == true) {
+                        await interaction.member.roles.remove(roles.crossoutEgyeb)
+                    } else {
+                        await interaction.member.roles.add(roles.crossoutEgyeb)
+                    }
+                } else if (selectedIndex == 'ingyenesJatek') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.ingyenesJatek) == true) {
+                        await interaction.member.roles.remove(roles.ingyenesJatek)
+                    } else {
+                        await interaction.member.roles.add(roles.ingyenesJatek)
+                    }
+                } else if (selectedIndex == 'warzone') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.warzone) == true) {
+                        await interaction.member.roles.remove(roles.warzone)
+                    } else {
+                        await interaction.member.roles.add(roles.warzone)
+                    }
+                } else if (selectedIndex == 'minecraft') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.minecraft) == true) {
+                        await interaction.member.roles.remove(roles.minecraft)
+                    } else {
+                        await interaction.member.roles.add(roles.minecraft)
+                    }
+                } else if (selectedIndex == 'napiIdojaras') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.napiIdojaras) == true) {
+                        await interaction.member.roles.remove(roles.napiIdojaras)
+                    } else {
+                        await interaction.member.roles.add(roles.napiIdojaras)
+                    }
+                } else if (selectedIndex == 'privateCommands') {
+                    if (privateCommand == true) {
+                        database.dataBasic[interaction.member.id].privateCommands = false                        
+                    } else {
+                        database.dataBasic[interaction.member.id].privateCommands = true
+                    }
+                    database.SaveDatabase()
+                }
+                await interaction.member.fetch()
+                setTimeout(() => {
+                    interaction.update(CommandSettings(database, interaction.member, privateCommand))
+                }, 1500);
+            } catch (error) {
+                interaction.channel.send({ content: '> \\❌ **Error: ' + error + '**' })
+            }
+
+            return
+        }
     } else if (interaction.isUserContextMenu()) {
         console.log(interaction)
         if (interaction.commandName == 'Megajándékozás') {
@@ -2636,6 +2738,13 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
 async function processApplicationCommand(command, privateCommand) {
 
+
+    if (command.commandName === `wordle`) {
+        command.deferReply({ ephemeral: privateCommand }).then(() => {
+            CrossoutTest(command, command.options.getString('search'), privateCommand)
+        })
+    }
+
     if (command.commandName == `gift`) {
         userstatsSendCommand(command.user)
         try {
@@ -2816,6 +2925,12 @@ async function processApplicationCommand(command, privateCommand) {
         } else if (command.options.getSubcommand() == `list`) {
             commandMusicList(command)
         }
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `settings`) {
+        command.reply(CommandSettings(database, command.member, privateCommand))
         userstatsSendCommand(command.user)
         return
     }

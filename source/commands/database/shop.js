@@ -69,6 +69,10 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
             .addField('Profil testreszabása: ',
                 '> \\🖍️ Neved színe\n' +
                 '> \\🛍️ Hátizsákod színe')
+            .addField('Mást keresel?',
+                'Statisztika és jelvények: `/profil`\n' + 
+                'Beállítások: `/settings`'
+            )
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
@@ -102,6 +106,10 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                 '> \\🟧\\🟪\\🟩 Alap kevert színek   [\\💵 2499]\n' +
                 '> \\🟫 Barna   [\\💵 2999]\n' +
                 '> \\⬜ Fehér   [\\💵 3299]')
+            .addField('Mást keresel?',
+                'Statisztika és jelvények: `/profil`\n' + 
+                'Beállítások: `/settings`'
+            )
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
@@ -117,6 +125,10 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                 '> \\🔴\\🟡\\🔵 Alap színek   [\\💵 2999]\n' +
                 '> \\🟠\\🟣\\🟢 Alap kevert színek   [\\💵 3499]\n' +
                 '> \\🚫 Láthatatlan   [\\💵 3999]')
+            .addField('Mást keresel?',
+                'Statisztika és jelvények: `/profil`\n' + 
+                'Beállítások: `/settings`'
+            )
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     

@@ -34,7 +34,8 @@ function getEmbedMessage(isPrivate, isMobile) {
                 '>  \\⛅  `/weather` Békéscsaba időjárása.\n' +
                 '>  \\🚸  `/crossout <search>` Egy Crossout-os tárgy adatai.\n' +
                 '>  \\🏓  `/ping` A BOT ping-elése, avagy megnézni hogy most épp online e.\n' +
-                '>  \\📯  `.mail` E-mailek megtekintése vagy írása.'
+                '>  \\📯  `.mail` E-mailek megtekintése vagy írása.\n' +
+                '>  \\⚙️   `/settings` Beállítások.'
             )
             .addField('Pénzek',
                 '>  \\🍺   `/xp` Rangod.\n' +
