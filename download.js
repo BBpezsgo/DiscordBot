@@ -117,23 +117,6 @@ function GetDataSize(bytes) {
     return Math.floor(val) + " " + txt
 }
 
-/**@param {string} text */
-function Capitalize(text) {
-    var str = text
-    if (str.includes(' ') == true) {
-        return str.charAt(0).toUpperCase() + str.slice(1)
-    }
-
-    const arr = str.split(" ")
-
-    for (var i = 0; i < arr.length; i++) {
-        arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1)
-    }
-
-    const str2 = arr.join(" ")
-    return str2
-}
-
 function RefreshScreen() {
     const window = { width: 60, height: 5 }
     if (this.isPhone == true) {
@@ -188,10 +171,10 @@ const request = https.get(url, function (response) {
 
         setTimeout(async () => {
             state = spinner[spinnerIndex] + ' Install'
-            await Unzip()
+            Unzip()
 
             state = spinner[spinnerIndex] + ' Finishing up'
-            await fs.unlinkSync('./' + fileName)
+            fs.unlinkSync('./' + fileName)
 
             clearInterval(timer)
 
@@ -222,10 +205,10 @@ function showProgress(cur) {
     RefreshScreen()
 }
 
-async function Unzip() {
+function Unzip() {
     try {
         const zip = new AdmZip('./' + fileName)
-        await zip.extractAllTo('./', true)
+        zip.extractAllTo('./', true)
         RefreshScreen()
     } catch (err) {
         clearInterval(timer)
