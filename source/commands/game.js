@@ -19,17 +19,7 @@ class Game {
 }
 
 const Discord = require('discord.js')
-const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
-
-const ColorRoles = {
-	red: "850016210422464534",
-	yellow: "850016458544250891",
-	blue: "850016589155401758",
-	orange: "850016531848888340",
-	green: "850016722039078912",
-	purple: "850016668352643072",
-	invisible: "850016786186371122"
-}
+const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js')
 
 function distance(x1, y1, x2, y2) {
     return Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)))
@@ -81,7 +71,7 @@ function getView(cameraX, cameraY, gameMap, isOnPhone) {
             for (let i = 0; i < map.length; i++) {
                 if (map[i].x === xVal && map[i].y === yVal) {
                     mapP = map[i]
-                    break;
+                    break
                 }
             }
 
@@ -490,14 +480,14 @@ function getPlayerIndex(userId, game) {
     let index = -1
 
     if (game.gameMap == null) {
-        return index;
+        return index
     }
 
     for (let i = 0; i < game.gameMap.players.length; i++) {
         const player = game.gameMap.players[i]
         if (player.ownerUser.id === userId) {
             index = i
-            break;
+            break
         }
     }
 
@@ -623,39 +613,39 @@ function getGameMessage(user, isOnPhone, isInDebugMode, game) {
     const buttonW = new MessageButton()
         .setLabel("  ↑  ")
         .setCustomId("gameW")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonA = new MessageButton()
         .setLabel(" ←")
         .setCustomId("gameA")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonS = new MessageButton()
         .setLabel("  ↓  ")
         .setCustomId("gameS")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonD = new MessageButton()
         .setLabel(" →")
         .setCustomId("gameD")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonHit = new MessageButton()
         .setLabel("👊")
         .setCustomId("gameHit")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonUse = new MessageButton()
         .setLabel("🤚")
         .setCustomId("gameUse")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonSwitchPhone = new MessageButton()
         .setLabel("📱 Telefonon vagyok")
         .setCustomId("gameSwitchPhone")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonSwitchDebug = new MessageButton()
         .setLabel("📟")
         .setCustomId("gameSwitchDebug")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonRestart = new MessageButton()
         .setLabel("↺")
         .setCustomId("gameRestart")
-        .setStyle("DANGER");
+        .setStyle("DANGER")
 
 
 
@@ -699,7 +689,7 @@ function getGameMessage(user, isOnPhone, isInDebugMode, game) {
  */
 function resetGameMessage(user, message, isOnPhone, isInDebugMode, integration, game) {
     for (let i = 0; i < game.allGameMessages.length; i++) {
-        const savedGameMsg = game.allGameMessages[i];
+        const savedGameMsg = game.allGameMessages[i]
 
         const _message = getGameMessage(savedGameMsg.user, isOnPhone, isInDebugMode, game)
         savedGameMsg.message.edit({ embeds: [_message.embed], components: _message.actionRows })
@@ -709,7 +699,7 @@ function resetGameMessage(user, message, isOnPhone, isInDebugMode, integration, 
 
 function getGameUserSettings(userId, game) {
     for (let i = 0; i < game.gameUserSettings.length; i++) {
-        const userSettings = game.gameUserSettings[i];
+        const userSettings = game.gameUserSettings[i]
         if (userSettings.userId === userId) {
             return userSettings
         }
@@ -724,9 +714,9 @@ class Table {
      * @param {number[]} points
      */
     constructor(width, height, points) {
-        this.width = width;
-        this.height = height;
-        this.points = points;
+        this.width = width
+        this.height = height
+        this.points = points
     }
 
     /**
@@ -734,7 +724,7 @@ class Table {
      * @param {number} y
      */
     valueAt(x, y) {
-        return this.points[y * this.width + x];
+        return this.points[y * this.width + x]
     }
 
     /**
@@ -743,14 +733,14 @@ class Table {
      * @param {number} value
      */
     setValue(x, y, value) {
-        this.points[y * this.width + x] = value;
+        this.points[y * this.width + x] = value
     }
 
     /**
      * @param {number} value
      */
     push(value) {
-        this.points.push(value);
+        this.points.push(value)
     }
 }
 
@@ -761,22 +751,22 @@ class NoisePoint {
      * @param {number} value 
      */
     constructor(x, y, value) {
-        this.x = x;
-        this.y = y;
-        this.value = value;
+        this.x = x
+        this.y = y
+        this.value = value
     }
 
     /*
         get xValue() {
-            return this.x;
+            return this.x
         }
     
         get yValue() {
-            return this.y;
+            return this.y
         }
     
         get zValue() {
-            return this.value;
+            return this.value
         }
         */
 }
@@ -853,8 +843,8 @@ class GameItem {
      * @param {number} count
      */
     constructor(type, count) {
-        this.type = type;
-        this.count = count;
+        this.type = type
+        this.count = count
     }
 }
 
@@ -866,10 +856,10 @@ class GameTool {
      * @param {number} efficiency
      */
     constructor(type, health, efficiency) {
-        this.type = type;
-        this.health = health;
-        this.maxHealth = health;
-        this.efficiency = efficiency;
+        this.type = type
+        this.health = health
+        this.maxHealth = health
+        this.efficiency = efficiency
     }
 }
 
@@ -881,10 +871,10 @@ class GameMap {
      * @param {GamePlayer[]} players
      */
     constructor(width, height, map, players) {
-        this.width = width;
-        this.height = height;
-        this.map = map;
-        this.players = players;
+        this.width = width
+        this.height = height
+        this.map = map
+        this.players = players
     }
 }
 
@@ -897,31 +887,31 @@ class MapPoint {
      * @param {MapObject} object
      */
     constructor(x, y, biome, height, object) {
-        this.x = x;
-        this.y = y;
-        this.biome = biome;
-        this.height = height;
-        this.object = object;
+        this.x = x
+        this.y = y
+        this.biome = biome
+        this.height = height
+        this.object = object
     }
     /*
         get xValue() {
-            return this.x;
+            return this.x
         }
     
         get yValue() {
-            return this.y;
+            return this.y
         }
     
         get biomeValue() {
-            return this.biome;
+            return this.biome
         }
     
         get heightValue() {
-            return this.height;
+            return this.height
         }
     
         get objectValue() {
-            return this.object;
+            return this.object
         }
         */
 }
@@ -933,13 +923,13 @@ class MapObject {
      * @param {number} breakValue
      */
     constructor(type, walkable, breakValue) {
-        this.type = type;
-        this.walkable = walkable;
-        this.breakValue = breakValue;
+        this.type = type
+        this.walkable = walkable
+        this.breakValue = breakValue
     }
     /*
         get typeValue() {
-            return this.type;
+            return this.type
         }
         */
 }
@@ -957,15 +947,15 @@ class GamePlayer {
      * @param {boolean} aggreeToRestart
      */
     constructor(x, y, ownerUser, health = 10, direction = 0, selectedToolIndex = 0, tools = [], items = [], aggreeToRestart = false) {
-        this.x = x;
-        this.y = y;
-        this.ownerUser = ownerUser;
-        this.health = health;
-        this.direction = direction;
-        this.selectedToolIndex = selectedToolIndex;
-        this.tools = tools;
-        this.items = items;
-        this.aggreeToRestart = false;
+        this.x = x
+        this.y = y
+        this.ownerUser = ownerUser
+        this.health = health
+        this.direction = direction
+        this.selectedToolIndex = selectedToolIndex
+        this.tools = tools
+        this.items = items
+        this.aggreeToRestart = false
     }
 }
 
@@ -975,8 +965,8 @@ class GameMessage {
      * @param {MessageActionRow[]} actionRows
      */
     constructor(embed, actionRows) {
-        this.embed = embed;
-        this.actionRows = actionRows;
+        this.embed = embed
+        this.actionRows = actionRows
     }
 }
 
@@ -987,9 +977,9 @@ class GameUserSettings {
      * @param {boolean} isInDebugMode
      */
     constructor(userId, isOnPhone = false, isInDebugMode = false) {
-        this.userId = userId;
-        this.isOnPhone = isOnPhone;
-        this.isInDebugMode = isInDebugMode;
+        this.userId = userId
+        this.isOnPhone = isOnPhone
+        this.isInDebugMode = isInDebugMode
     }
 }
 
@@ -999,8 +989,8 @@ class savedGameMessage {
      * @param {Discord.User]} user
      */
     constructor(message, user) {
-        this.message = message;
-        this.user = user;
+        this.message = message
+        this.user = user
     }
 }
 

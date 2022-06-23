@@ -3,7 +3,7 @@ const fs = require('fs')
 const Discord = require('discord.js')
 const jsdom = require("jsdom")
 const { JSDOM } = jsdom
-const { MessageAttachment, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
 
 const ERROR = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/cross-mark_274c.png'
 const SPINNER = 'https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif'
@@ -39,13 +39,13 @@ function GifOrVideo(rawHtmlFile) {
 
 /**@param {string} rawHtmlFile @returns {string} */
 function GetVideoLink(rawHtmlFile) {
-    const dom = new JSDOM(rawHtmlFile);
+    const dom = new JSDOM(rawHtmlFile)
     return dom.window.document.getElementsByClassName('downloadbutton')[0].getAttribute('href')
 }
 
 /**@param {string} rawHtmlFile @returns {string} */
 function GetGifLink(rawHtmlFile) {
-    const dom = new JSDOM(rawHtmlFile);
+    const dom = new JSDOM(rawHtmlFile)
     return 'https://redditsave.com' + dom.window.document.getElementsByClassName('downloadbutton')[0].getAttribute('href')
 }
 
@@ -63,11 +63,11 @@ function GetInformations(rawHtmlFile, redditLink) {
 async function DownloadVideo(message, url, replymessage, postInfo) {
     const videoFile = fs.createWriteStream(message.id + '.mp4')
     const request = https.get(url, function (response) {
-        var cur = 0;
+        var cur = 0
 
         response.on('data', function (chunk) {
-            cur += chunk.length;
-            showProgress(cur);
+            cur += chunk.length
+            showProgress(cur)
         })
 
         response.on('end', async function () {
@@ -152,11 +152,11 @@ module.exports = async (message) => {
 
     const rawHtmlFile = fs.createWriteStream(message.id)
     const request = https.get(ConvertToRedditsaveLink(messageContentUrl), function (response) {
-        var cur = 0;
+        var cur = 0
 
         response.on('data', function (chunk) {
-            cur += chunk.length;
-            showProgress(cur);
+            cur += chunk.length
+            showProgress(cur)
         })
 
         response.on('end', async function () {

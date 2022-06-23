@@ -5,10 +5,7 @@ const {
     SlashCommandStringOption,
     SlashCommandUserOption,
     SlashCommandSubcommandBuilder,
-    ContextMenuCommandAssertions,
-    ContextMenuCommandBuilder,
-    SlashCommandSubcommandGroupBuilder,
-    ContextMenuCommandType
+    ContextMenuCommandBuilder
 } = require('@discordjs/builders');
 const { Client } = require('discord.js')
 const { GetFonts, StringToFont } = require('../commands/fonts')
@@ -19,19 +16,19 @@ const { StatesManager } = require('./statesManager')
 function CreateCommands(bot, statesManager) {
     const commandPing = new SlashCommandBuilder()
         .setName('ping')
-        .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e');
+        .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e')
     const commandWeather = new SlashCommandBuilder()
         .setName('weather')
-        .setDescription('Békéscsaba időjárása');
+        .setDescription('Békéscsaba időjárása')
     const commandXp = new SlashCommandBuilder()
         .setName('xp')
-        .setDescription('Rangod');
+        .setDescription('Rangod')
     const commandDev = new SlashCommandBuilder()
         .setName('dev')
-        .setDescription('Fejlesztői segítség');
+        .setDescription('Fejlesztői segítség')
     const commandHelp = new SlashCommandBuilder()
         .setName('help')
-        .setDescription('A parancsok listája');
+        .setDescription('A parancsok listája')
     const commandCrateSub = new SlashCommandIntegerOption()
         .setName('darab')
         .setDescription('Ládák mennyisége')
@@ -212,14 +209,14 @@ async function DeleteCommands(bot) {
         guildCommands.cache.forEach(async (val, key) => {
             await guildCommands.delete(val)
             console.log('Szerver parancsok törölése... (' + guildCommands.cache.size + ')')
-        });
+        })
     
         const appCommands = bot.application?.commands
         await appCommands.fetch()
         appCommands.cache.forEach(async (val, key) => {
             await appCommands.delete(val)
             console.log('Bot parancsok törölése... (' + appCommands.cache.size + ')')
-        });
+        })
     } catch (error) {
         console.log(error)
     }

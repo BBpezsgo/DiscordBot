@@ -3,16 +3,18 @@ const { engine } = require('express-handlebars')
 const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
-const { LogManager, LogMsg, MessageCodes } = require('../functions/log.js')
+const { LogManager, MessageCodes } = require('../functions/log.js')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
+const { 
+    INFO,
+    ERROR,
+    WARNING,
+    DEBUG,
+    DONE
+ } = require('../functions/enums')
 
-const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
-const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
-const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + '\033[37m' + ']'
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
-const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
-const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
 
 class WebSocket {
     /**
@@ -52,7 +54,7 @@ class WebSocket {
         this.app.get('/data/status', function(req, res) {
             var dataToSendToClient = {'message': 'error message from server'}
             res.send(JSON.stringify(dataToSendToClient))
-         });
+         })
 
         this.server = this.app.listen(port, ip, () => {
             this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
@@ -61,9 +63,9 @@ class WebSocket {
         })
         this.server.on('error', (err) => {
             if (err.message.startsWith('listen EADDRNOTAVAIL: address not available')) {
-                this.statesManager.handlebarsErrorMessage = 'Address not available';
+                this.statesManager.handlebarsErrorMessage = 'Address not available'
             } else {
-                this.statesManager.handlebarsErrorMessage = err.message;
+                this.statesManager.handlebarsErrorMessage = err.message
             }
         })
         this.server.on('checkContinue', () => {
@@ -152,7 +154,7 @@ class WebSocket {
                     if (log.priv == false) {
                         logs.push({ message: log.message, time: log.time, type: log.type })
                     }
-                });
+                })
 
                 logs = logs.reverse()
 
@@ -253,7 +255,7 @@ class WebSocket {
                     })
                 }
 
-                chans.sort(function (a, b) { return a.pos - b.pos });
+                chans.sort(function (a, b) { return a.pos - b.pos })
 
                 var _selectedChannel = null
                 var _messages = []
@@ -309,7 +311,7 @@ class WebSocket {
                 })
             } else if (view == 3) {
                 var userId = req.query.user
-                var _dataBasic, _dataBackpacks, __score;
+                var _dataBasic, _dataBackpacks, __score
 
                 if (userId != undefined) {
                     _dataBasic = this.database.dataBasic[userId]
@@ -631,25 +633,6 @@ function xpRankNext(score) {
         next = 1800000
     }
     return next
-}
-function abbrev(num) {
-    if (!num || isNaN(num)) return "0";
-    if (typeof num === "string") num = parseInt(num);
-    let decPlaces = Math.pow(10, 1);
-    var abbrev = ["E", "m", "M", "b", "B", "tr", "TR", "qa", "QA", "qi", "QI", "sx", "SX", "sp", "SP"];
-    for (var i = abbrev.length - 1; i >= 0; i--) {
-        var size = Math.pow(10, (i + 1) * 3);
-        if (size <= num) {
-            num = Math.round((num * decPlaces) / size) / decPlaces;
-            if (num == 1000 && i < abbrev.length - 1) {
-                num = 1;
-                i++;
-            }
-            num += abbrev[i];
-            break;
-        }
-    }
-    return num;
 }
 
 module.exports = WebSocket

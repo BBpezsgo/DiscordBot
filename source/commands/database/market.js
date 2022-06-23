@@ -1,7 +1,6 @@
 const Discord = require('discord.js')
 const fs = require('fs')
 const { DatabaseManager } = require('../../functions/databaseManager.js')
-const request = require("request");
 const { Color } = require('../../functions/enums')
 const { MessageActionRow, MessageButton } = require('discord.js')
 const { abbrev } = require('../../functions/abbrev')
@@ -25,19 +24,19 @@ module.exports = (database, dataMarket, user, privateCommand = false) => {
     const buttonTokenToMoney = new MessageButton()
         .setLabel("🎫➜💵")
         .setCustomId("marketTokenToMoney")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonTicketToMoney = new MessageButton()
         .setLabel("🎟️➜💵")
         .setCustomId("marketTicketToMoney")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonJewelToMoney = new MessageButton()
         .setLabel("💍➜💵")
         .setCustomId("marketJewelToMoney")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonMoneyToJewel = new MessageButton()
         .setLabel("💵➜💍")
         .setCustomId("marketMoneyToJewel")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
 
     if (database.dataBackpacks[user.id].quizTokens <= 0) {
         buttonTokenToMoney.setDisabled(true)
@@ -55,7 +54,7 @@ module.exports = (database, dataMarket, user, privateCommand = false) => {
     const buttonExit = new MessageButton()
         .setLabel("❌")
         .setCustomId("marketClose")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
 
     const row = new MessageActionRow()
         .addComponents(buttonTokenToMoney, buttonTicketToMoney, buttonJewelToMoney, buttonMoneyToJewel)

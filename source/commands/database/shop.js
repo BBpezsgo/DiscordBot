@@ -210,6 +210,19 @@ function colorRankToIndex2(roleId) {
     return 0
 }
 
+/** @param {Discord.GuildMember} member  @param {string} exceptRoleId  */
+async function removeAllColorRoles(member, exceptRoleId) {
+    const roleList = [ColorRoles.blue, ColorRoles.green, ColorRoles.invisible, ColorRoles.orange, ColorRoles.purple, ColorRoles.red, ColorRoles.yellow]
+    for (let i = 0; i < roleList.length; i++) {
+        const role = roleList[i]
+        if (role == exceptRoleId) { continue; }
+        if (member == undefined || member == null) { break; }
+        if (member.roles.cache.some(role => role.id == role)) {
+            member.roles.remove(member.guild.roles.cache.get(role))
+        }
+    }
+}
+
  /**
  * @param {Discord.Channel} channel
  * @param {Discord.User} sender
@@ -218,8 +231,8 @@ function colorRankToIndex2(roleId) {
  * @param {DatabaseManager} databaseManager
  * @param {boolean} privateCommand
  */
-module.exports = (channel, sender, senderMember, databaseManager, menuIndex = 0, newColorRole = '', privateCommand = false) => {
-    const money = databaseManager.dataBasic[sender.id].money;
+function CommandShop(channel, sender, senderMember, databaseManager, menuIndex = 0, newColorRole = '', privateCommand = false) {
+    const money = databaseManager.dataBasic[sender.id].money
 
     const selectMenu = new MessageSelectMenu()
         .setCustomId("shopMenu")
@@ -368,35 +381,35 @@ module.exports = (channel, sender, senderMember, databaseManager, menuIndex = 0,
     const buttonExit = new MessageButton()
         .setLabel("❌")
         .setCustomId("shopClose")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonBuyCrate = new MessageButton()
         .setLabel("🧱")
         .setCustomId("shopBuyCrate")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonBuyGift = new MessageButton()
         .setLabel("🎁")
         .setCustomId("shopBuyGift")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonBuyTicket = new MessageButton()
         .setLabel("🎟️")
         .setCustomId("shopBuyTicket")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonBuyWC = new MessageButton()
         .setLabel("🧻")
         .setCustomId("shopBuyWC")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonBuyLuckySmall = new MessageButton()
         .setLabel("💶")
         .setCustomId("shopBuyLuckySmall")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonBuyLuckyMedium = new MessageButton()
         .setLabel("💷")
         .setCustomId("shopBuyLuckyMedium")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonBuyLuckyLarge = new MessageButton()
         .setLabel("💴")
         .setCustomId("shopBuyLuckyLarge")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
 
     if (!money >= 2099) { buttonBuyCrate.setDisabled(true) }
     if (!money >= 3999) { buttonBuyGift.setDisabled(true) }
@@ -440,3 +453,5 @@ module.exports = (channel, sender, senderMember, databaseManager, menuIndex = 0,
 
     return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary] }
 }
+
+module.exports = { CommandShop, removeAllColorRoles }

@@ -1,6 +1,8 @@
 
 const ChannelId = {
-    Quiz: "799340273431478303"
+    Quiz: "799340273431478303",
+    IncomingNews: "902894789874311198",
+    ProcessedNews: "746266528508411935"
 }
 
 const fontColor = '\033[37m'
@@ -78,4 +80,4 @@ const usersWithTax = [
     '750748417373896825', '504304776033468438', '551299555698671627'
 ]
 
-module.exports = { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, ColorRoles, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId }
+module.exports = { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, ColorRoles, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId, CliColor }

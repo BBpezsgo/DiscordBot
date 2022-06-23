@@ -59,10 +59,10 @@ let weatherData2
  * @returns {Discord.MessageEmbed}
  */
 function getEmbedEarth(data0, data1, data2, index, data3) {
-    var current = data0[0].current;
+    var current = data0[0].current
     const embed = new Discord.MessageEmbed()
         .setColor('#00AE86')
-        .setAuthor({ name: current.observationpoint.replace(', Hungary', '') + ' ' + current.date.toString().replace('-', '.').replace('-', '.') + '. [' + dayName(new Date().getDay()) + '] ' + current.observationtime.replace(':00:00', ':00 -kor'), url: 'https://openweathermap.org/city/' + data1.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png'});
+        .setAuthor({ name: current.observationpoint.replace(', Hungary', '') + ' ' + current.date.toString().replace('-', '.').replace('-', '.') + '. [' + dayName(new Date().getDay()) + '] ' + current.observationtime.replace(':00:00', ':00 -kor'), url: 'https://openweathermap.org/city/' + data1.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png'})
 
     { //Ma
         let skyTxt = current.skytext
@@ -134,14 +134,14 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
         }
     }
     { //Tegnap
-        let skyTxt = data0[0].forecast[0].skytextday;
-        const skyIcon = weatherSkytextIcon(skyTxt, false);
+        let skyTxt = data0[0].forecast[0].skytextday
+        const skyIcon = weatherSkytextIcon(skyTxt, false)
         skyTxt = weatherSkytxt(skyTxt)
 
-        const tempMinValue = data0[0].forecast[0].low;
+        const tempMinValue = data0[0].forecast[0].low
 
-        const tempMaxValue = data0[0].forecast[0].high;
-        const tempMaxIcon = weatherTempIcon(tempMaxValue);
+        const tempMaxValue = data0[0].forecast[0].high
+        const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
             .addField(dayName(new Date().getDay() - 1),
@@ -151,14 +151,14 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
                 true)
     }
     { //Ma2
-        let skyTxt = data0[0].forecast[1].skytextday;
-        const skyIcon = weatherSkytextIcon(skyTxt, false);
+        let skyTxt = data0[0].forecast[1].skytextday
+        const skyIcon = weatherSkytextIcon(skyTxt, false)
         skyTxt = weatherSkytxt(skyTxt)
 
-        const tempMinValue = data0[0].forecast[1].low;
+        const tempMinValue = data0[0].forecast[1].low
 
-        const tempMaxValue = data0[0].forecast[1].high;
-        const tempMaxIcon = weatherTempIcon(tempMaxValue);
+        const tempMaxValue = data0[0].forecast[1].high
+        const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
             .addField(dayName(new Date().getDay()) + ' (ma)',
@@ -169,14 +169,14 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
                 true)
     }
     { //Holnap
-        let skyTxt = data0[0].forecast[2].skytextday;
-        const skyIcon = weatherSkytextIcon(skyTxt, false);
+        let skyTxt = data0[0].forecast[2].skytextday
+        const skyIcon = weatherSkytextIcon(skyTxt, false)
         skyTxt = weatherSkytxt(skyTxt)
 
-        const tempMinValue = data0[0].forecast[2].low;
+        const tempMinValue = data0[0].forecast[2].low
 
-        const tempMaxValue = data0[0].forecast[2].high;
-        const tempMaxIcon = weatherTempIcon(tempMaxValue);
+        const tempMaxValue = data0[0].forecast[2].high
+        const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
             .addField(dayName(new Date().getDay() + 1),
@@ -187,14 +187,14 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
                 true)
     }
     { //Holnap után
-        let skyTxt = data0[0].forecast[3].skytextday;
-        const skyIcon = weatherSkytextIcon(skyTxt, false);
+        let skyTxt = data0[0].forecast[3].skytextday
+        const skyIcon = weatherSkytextIcon(skyTxt, false)
         skyTxt = weatherSkytxt(skyTxt)
 
-        const tempMinValue = data0[0].forecast[3].low;
+        const tempMinValue = data0[0].forecast[3].low
 
-        const tempMaxValue = data0[0].forecast[3].high;
-        const tempMaxIcon = weatherTempIcon(tempMaxValue);
+        const tempMaxValue = data0[0].forecast[3].high
+        const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
             .addField(dayName(new Date().getDay() + 2),
@@ -205,14 +205,14 @@ function getEmbedEarth(data0, data1, data2, index, data3) {
                 true)
     }
     { //Holnap után-után
-        let skyTxt = data0[0].forecast[4].skytextday;
-        const skyIcon = weatherSkytextIcon(skyTxt, false);
+        let skyTxt = data0[0].forecast[4].skytextday
+        const skyIcon = weatherSkytextIcon(skyTxt, false)
         skyTxt = weatherSkytxt(skyTxt)
 
-        const tempMinValue = data0[0].forecast[4].low;
+        const tempMinValue = data0[0].forecast[4].low
 
-        const tempMaxValue = data0[0].forecast[4].high;
-        const tempMaxIcon = weatherTempIcon(tempMaxValue);
+        const tempMaxValue = data0[0].forecast[4].high
+        const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
             .addField(dayName(new Date().getDay() + 3),
@@ -281,15 +281,15 @@ module.exports = async (command, privateCommand) => {
                         
                         const skyImgName = weatherSkytextImgName(weatherData0[0].current.skytext, unixToTime(weatherData1.sys.sunset).split(':')[0], unixToTime(weatherData1.sys.sunrise).split(':')[0], weatherData1.clouds.all)
                         if (ImgExists(skyImgName) === true) {
-                            const attachment = new Discord.MessageAttachment('./commands/weatherImages/' + skyImgName + '.jpg', skyImgName + '.jpg');
+                            const attachment = new Discord.MessageAttachment('./commands/weatherImages/' + skyImgName + '.jpg', skyImgName + '.jpg')
                             command.editReply({ embeds: [embed], files: [attachment] })
                         } else {
                             command.editReply({ embeds: [embed] })
                         }
                     }
                 })
-            });
-        });
+            })
+        })
     } catch (error) {
         command.editReply({ content: '> \\❌ **MSN Error:** ' + error.toString() })
     }

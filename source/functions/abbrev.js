@@ -4,23 +4,23 @@
  * @returns {string}
  */
 function abbrev(num) {
-    if (!num || isNaN(num)) return "0";
-    if (typeof num === "string") num = parseInt(num);
-    let decPlaces = Math.pow(10, 1);
-    var abbrev = ["E", "m", "M", "b", "B", "tr", "TR", "qa", "QA", "qi", "QI", "sx", "SX", "sp", "SP"];
+    if (!num || isNaN(num)) return "0"
+    if (typeof num === "string") num = parseInt(num)
+    let decPlaces = Math.pow(10, 1)
+    var abbrev = ["E", "m", "M", "b", "B", "tr", "TR", "qa", "QA", "qi", "QI", "sx", "SX", "sp", "SP"]
     for (var i = abbrev.length - 1; i >= 0; i--) {
-        var size = Math.pow(10, (i + 1) * 3);
+        var size = Math.pow(10, (i + 1) * 3)
         if (size <= num) {
-            num = Math.round((num * decPlaces) / size) / decPlaces;
+            num = Math.round((num * decPlaces) / size) / decPlaces
             if (num == 1000 && i < abbrev.length - 1) {
-                num = 1;
-                i++;
+                num = 1
+                i++
             }
-            num += abbrev[i];
-            break;
+            num += abbrev[i]
+            break
         }
     }
-    return num;
+    return num
 }
 
 module.exports = { abbrev }

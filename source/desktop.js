@@ -1,5 +1,7 @@
 //#region Imports, variables
 
+var autoStartBot = true
+
 const { LogManager } = require('./functions/log.js')
 var logManager = new LogManager(false, null, null)
 
@@ -10,13 +12,18 @@ var botStopped = false
 var cliCurrentlyTyping = ''
 
 process.stdin.on('mousepress', function (info) {
-    console.log('got "mousepress" event at %d x %d', info.x, info.y)
+    console.log('Got "mousepress" event at %d x %d', info.x, info.y)
 })
 
 process.stdin.resume()
 
 process.stdin.on('data', function (b) {
     var s = b.toString('utf8')
+    
+    if (logManager.CurrentlyPromt()) {
+        logManager.OnKeyDown(s)
+    }
+
     if (s === '\u0003') {
         if (botStopped == true) {
             process.stdin.pause()
@@ -54,10 +61,9 @@ process.stdin.on('data', function (b) {
                 default: return;
             }
         }
-        console.error(key);
+        console.error(key)
     } else {
-        if (logManager.CurrentlyPromt()) {
-            logManager.OnKeyDown(s)
+        if (true) {
         } else {
             const validChars = [
                 'a',
@@ -117,7 +123,7 @@ process.stdin.on('data', function (b) {
                 '9',
             ]
 
-            //console.error(s, s, b) //([0x1b, 0x5b, 0x31, 0x7e]));
+            //console.error(s, s, b) //([0x1b, 0x5b, 0x31, 0x7e]))
 
             if (s.charCodeAt(0) == 13 && false) { //Enter
                 ProcessCliCommand(cliCurrentlyTyping)
@@ -130,7 +136,7 @@ process.stdin.on('data', function (b) {
                 cliCurrentlyTyping += s
                 logManager.currentlyTyping = cliCurrentlyTyping
             } else {
-                console.error(0, s, b);
+                console.error(0, s, b)
             }
         }
     }
@@ -172,16 +178,11 @@ process.stdout.write('\x1b[?1005h')
 process.stdout.write('\x1b[?1003h')
 
 process.on('exit', function () {
-    // don't forget to turn off mouse reporting
+    // Turn off mouse reporting
     process.stdout.write('\x1b[?1005l')
     process.stdout.write('\x1b[?1003l')
-    console.clear()
     console.log("The application is closed")
 })
-
-if (fs.readFileSync('./database/basic.json', 'utf-8').length < 2) {
-    
-}
 
 // Loading npm packages
 
@@ -193,10 +194,12 @@ const CommandProfil = require('./commands/profil')
 logManager.Loading("Loading commands", 'help')
 const CommandHelp = require('./commands/help')
 
+logManager.Loading("Loading commands", 'poll')
+const { addNewPoll, savePollDefaults } = require('./commands/poll')
 logManager.Loading("Loading commands", 'database/xp')
 const CommandXp = require('./commands/database/xp')
 logManager.Loading("Loading commands", 'database/shop')
-const CommandShop = require('./commands/database/shop')
+const { CommandShop, removeAllColorRoles } = require('./commands/database/shop')
 logManager.Loading("Loading commands", 'database/businees')
 const CommandBusiness = require('./commands/database/businees')
 logManager.Loading("Loading commands", 'database/market')
@@ -205,7 +208,7 @@ logManager.Loading("Loading commands", 'database/settings')
 const CommandSettings = require('./commands/settings')
 
 logManager.Loading("Loading extensions", 'database/xpFunctions')
-const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText, calculateAddXp } = require('./commands/database/xpFunctions')
+const { xpRankIcon, xpRankText, calculateAddXp } = require('./commands/database/xpFunctions')
 
 logManager.Loading("Loading commands", 'crossout')
 const { CrossoutTest } = require('./commands/crossout')
@@ -263,15 +266,15 @@ const WS = require('./ws/ws')
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
 
-const { MessageActionRow, MessageButton } = require('discord.js');
-const { joinVoiceChannel, AudioPlayer, AudioResource, createAudioPlayer, createAudioResource } = require('@discordjs/voice');
+const { MessageActionRow, MessageButton } = require('discord.js')
+const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
 const { perfix, token } = require('./config.json')
 
 logManager.Loading('Loading packet', "other functions")
 const GetUserColor = require('./functions/userColor')
 const { abbrev } = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
-const { DateToStringNews, ConvertNewsIdToName, NewsMessage, CreateNews } = require('./functions/news')
+const { NewsMessage, CreateNews } = require('./functions/news')
 const {
     INFO,
     ERROR,
@@ -283,14 +286,14 @@ const {
     ColorRoles,
     activitiesDesktop,
     usersWithTax,
-    ChannelId
+    ChannelId,
+    CliColor
 } = require('./functions/enums.js')
+const { exit } = require('process')
 
 logManager.BlankScreen()
 
 const selfId = '738030244367433770'
-
-const consoleWidth = 80 - 2
 
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
@@ -300,6 +303,7 @@ logManager.Destroy()
 
 const statesManager = new StatesManager()
 logManager = new LogManager(false, bot, statesManager)
+
 statesManager.botLoaded = true
 
 /** @param {string} message */
@@ -307,24 +311,29 @@ function log(message = '', translateResult = null) {
     logManager.Log(message, false, translateResult)
 }
 
-
 logManager.Loading('Loading database', 'Manager')
-const database = new DatabaseManager('./database/')
+const database = new DatabaseManager('./database/', './database-copy/', statesManager)
 logManager.Loading('Loading database', 'datas')
-database.LoadDatabase()
-/*
-database.dataBasic = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
-database.dataBackpacks = JSON.parse(fs.readFileSync('./database/backpacks.json', 'utf-8'))
-database.dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8'))
-database.dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
-database.dataMail = JSON.parse(fs.readFileSync('./database/mails.json', 'utf-8'))
-database.userNames = JSON.parse(fs.readFileSync('./database/userNames.json', 'utf-8'))
-database.dataPolls = JSON.parse(fs.readFileSync('./database/polls.json', 'utf-8'))
-database.dataMarket = JSON.parse(fs.readFileSync('./database/market.json', 'utf-8'))
-database.userstats = JSON.parse(fs.readFileSync('./database/userstats.json', 'utf-8'))
-*/
+const databaseIsSuccesfullyLoaded = database.LoadDatabase()
 
-var ws = new WS('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager)
+if (!databaseIsSuccesfullyLoaded) {
+    console.log(CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
+    autoStartBot = false
+
+    logManager.Promt('Betölti a biztonsági másolatokat?', ['Igen', 'Nem']).then(pressed => {
+        if (pressed == 'Igen') {
+            database.BackupDatabase()
+
+            setTimeout(() => {
+                StartBot()
+            }, 1000)
+        } else {
+            process.exit()
+        }
+    })
+}
+
+const ws = new WS('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager)
 logManager.BlankScreen()
 
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
@@ -335,8 +344,6 @@ let musicFinished = true
 
 let lastNoNews = false
 
-const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
-
 const game = new Game()
 
 /** @type {CurrentlyWritingMail[]} */
@@ -346,8 +353,6 @@ let currentlyWritingEmails = []
 
 /** @type [NewsMessage] */
 const listOfNews = []
-const incomingNewsChannel = '902894789874311198'
-const processedNewsChannel = '746266528508411935'
 
 /**@param {number} count @param {Discord.TextChannel} channel @param {string} content */
 function SpamMessage(count, channel, content) {
@@ -364,116 +369,7 @@ function SpamMessage(count, channel, content) {
     })
 }
 
-
 //#region Functions 
-
-function savePollDefaults() {
-    if (!database.dataPolls.messageIds) {
-        database.dataPolls.messageIds = ''
-    }
-    if (!database.dataPolls.messages) {
-        database. dataPolls.messages = {}
-    }
-}
-
-/**
- * @param {string} messageId
- * @param {string} title
- * @param {string[]} optionTexts
- * @param {string[]} optionIcons
- */
-function addNewPoll(messageId, title, optionTexts, optionIcons) {
-    savePollDefaults()
-
-    /**
-     * @type {number[]}
-     */
-    let vals = []
-    /**
-     * @type {string[]}
-     */
-    let usrs = []
-    for (let v = 0; v < optionTexts.length; v++) {
-        vals.push(0)
-    }
-
-    database.dataPolls.messages[messageId] = {}
-    database.dataPolls.messages[messageId].title = title
-    database.dataPolls.messages[messageId].optionTexts = optionTexts
-    database.dataPolls.messages[messageId].optionIcons = optionIcons
-    database.dataPolls.messages[messageId].optionValues = vals
-    database.dataPolls.messages[messageId].userIds = usrs
-
-    database.dataPolls.messageIds += "|" + messageId
-
-    database.SaveDatabase()
-}
-
-/*
-/**
-* @param {Discord.Message} message The message context
-* @param {string} username The message's author name
-* @param {boolean} private This is a private message?
-* @param {Discord.User} author This is a private message?
-/
-async function logMessage(message, username, private = false.valueOf, author) {
-    if (private === false) {
-        if (message.content.startsWith('https://tenor.com/view/')) {
-            log(`<${username}> - <GIF>`, 0);
-        } else if (message.content.startsWith('https://www.youtube.com/') || message.content.startsWith('https://youtu.be/')) {
-            log(`<${username}> - ${message.content}`, 0)
-
-            const link = message.content
-
-            let info = await ytdl.getInfo(link);
-
-            let videoLengthSeconds = info.videoDetails.lengthSeconds
-            let videoLengthMinutes = 0
-            let videoLengthHours = 0
-            for (let l = 0; videoLengthSeconds > 60; l += 1) {
-                videoLengthMinutes += 1
-                videoLengthSeconds -= 60
-            }
-            for (let l = 0; videoLengthMinutes > 60; l += 1) {
-                videoLengthHours += 1
-                videoLengthMinutes -= 60
-            }
-
-            let lengthText = '0:00'
-            let minutes = videoLengthMinutes
-            if (videoLengthMinutes < 10) { minutes = '0' + minutes }
-            let seconds = videoLengthSeconds
-            if (videoLengthSeconds < 10) { seconds = '0' + seconds }
-
-            if (videoLengthHours = 0) {
-                lengthText = videoLengthMinutes + ':' + seconds
-            } else {
-                lengthText = videoLengthHours + ':' + minutes + ':' + seconds
-            }
-
-        } else if (message.content.startsWith('https://www.reddit.com/')) {
-            log(`<${username}> - ${message.content}`, 0)
-        } else if (message.content.startsWith('https://cdn.discordapp.com/attachments/')) {
-            log(`<${username}> - <Discord fájl>`, 0)
-        } else if (message.content.startsWith('https://')) {
-            log(`<${username}> - ${message.content}`, 0)
-        } else if (message.attachments.size) {
-            log(`<${username}> - <fájl>`, 0)
-        } else {
-            log(`<${username}> - ${message.content}`, 0)
-        }
-
-    } else {
-
-        if (message.channel.guild) {
-            log(`<${username}> - ${message.content}`, 0)
-        } else {
-            log(`<${username}> ` + '\033[30m<Privált>' + '\033[37m' + '' + ` - ${message.content.slice(0, consoleWidth)}`, 16)
-        }
-    };
-
-}
-*/
 
 /**
 * @param {Discord.User} user
@@ -486,11 +382,11 @@ function addXp(user, channel, ammount) {
     database.dataBasic[user.id].score += ammount
     const newScore = database.dataBasic[user.id].score
 
-    log(DEBUG + ': Add XP: ' + ammount);
+    log(DEBUG + ': Add XP: ' + ammount)
 
     if (oldScore < 1000 && newScore > 999 || oldScore < 5000 && newScore > 4999 || oldScore < 10000 && newScore > 9999 || oldScore < 50000 && newScore > 49999 || oldScore < 100000 && newScore > 99999) {
 
-        log(DEBUG + ': New level');
+        log(DEBUG + ': New level')
         let rank = xpRankIcon(newScore)
         let rankName = xpRankText(newScore)
         let addMoney = 0
@@ -548,97 +444,97 @@ function addXp(user, channel, ammount) {
 bot.on('reconnecting', () => {
     log(INFO + ': Újracsatlakozás...')
     statesManager.botLoadingState = 'Reconnecting'
-});
+})
 
 bot.on('disconnect', () => {
     log(ERROR + ': Megszakadt a kapcsolat!')
     statesManager.botLoadingState = 'Disconnect'
-});
+})
 
 bot.on('resume', () => {
     log(INFO + ': Folytatás')
     statesManager.botLoadingState = 'Resume'
-});
+})
 
 bot.on('error', error => {
     log(ERROR + ': ' + error)
     statesManager.botLoadingState = 'Error'
-});
+})
 
 bot.on('debug', debug => {
     statesManager.ProcessDebugMessage(debug)
     const translatedDebug = TranslateMessage(debug)
 
-    if (translatedDebug == null) return;
+    if (translatedDebug == null) return
 
     if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
         logManager.AddTimeline(2)
     }
 
-    if (translatedDebug.secret == true) return;
+    if (translatedDebug.secret == true) return
 
     log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
-});
+})
 
 bot.on('warn', warn => {
     log(WARNING + ': ' + warn)
     statesManager.botLoadingState = 'Warning'
-});
+})
 
 bot.on('shardError', (error, shardID) => {
     log(ERROR + ': shardError: ' + error)
-});
+})
 
 bot.on('invalidated', () => {
     log(ERROR + ': Érvénytelen')
-});
+})
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
     log(SHARD + ': Lecsatlakozva')
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
-});
+})
 
 bot.on('shardReady', (shardID) => {
     const mainGuild = bot.guilds.cache.get('737954264386764812')
     const quizChannel = mainGuild.channels.cache.get('799340273431478303')
     quizChannel.messages.fetch()
     statesManager.shardCurrentlyLoading = false
-});
+})
 
 bot.on('shardReconnecting', (shardID) => {
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Újracsatlakozás...'
-});
+})
 
 bot.on('shardResume', (shardID, replayedEvents) => {
     log(SHARD & ': Folytatás: ' + replayedEvents.toString())
     statesManager.shardCurrentlyLoading = false
-});
+})
 
 bot.on('raw', async event => {
     log(DEBUG & ': raw')
-});
+})
 
 bot.on('close', () => {
     log(SHARD & ': close')
     statesManager.botLoadingState = 'Close'
-});
+})
 
 bot.on('destroyed', () => {
     log(SHARD & ': destroyed')
     statesManager.botLoadingState = 'Destroyed'
-});
+})
 
 bot.on('invalidSession', () => {
     log(SHARD & ': invalidSession')
     statesManager.botLoadingState = 'Invalid Session'
-});
+})
 
 bot.on('allReady', () => {
     log(SHARD & ': allReady')
     statesManager.botLoadingState = 'All Ready'
-});
+})
 
 bot.on('presenceUpdate', (oldPresence, newPresence) => {
     log(DEBUG & ': newStatus: ' + newPresence.status.toString())
@@ -661,20 +557,20 @@ async function playAudio(command) {
     const player = createAudioPlayer()
 
     /** @type {Discord.VoiceChannel} */
-    const voiceChannel = command.member.voice.channel;
+    const voiceChannel = command.member.voice.channel
     const connection = joinVoiceChannel({
         channelId: voiceChannel.id,
         guildId: voiceChannel.guild.id,
         adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     })
 
-    let resource = createAudioResource(stream);
+    let resource = createAudioResource(stream)
 
     connection.subscribe(player)
     
     player.play(resource)
 
-    const info = await ytdl.getInfo(link);
+    const info = await ytdl.getInfo(link)
 
     /*const dispatcher = connection.play(stream)
         .on("finish", () => {
@@ -686,7 +582,7 @@ async function playAudio(command) {
         .on("error", (error) => { log(ERROR + ': ' + error, 24) })
         .on("start", () => { statesManager.ytdlCurrentlyPlaying = true; log('') })
         .on("debug", (message) => { log(DEBUG + ': ytdl: ' + message) })
-        .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') });
+        .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') })
     */
 
     const embed = new Discord.MessageEmbed()
@@ -709,28 +605,28 @@ async function playAudio(command) {
 
 function userstatsSendMeme(user) {
     database.dataUserstats[user.id].memes += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 function userstatsSendMusic(user) {
     database.dataUserstats[user.id].musics += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 function userstatsSendYoutube(user) {
     database.dataUserstats[user.id].youtubevideos += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 function userstatsSendMessage(user) {
     database.dataUserstats[user.id].messages += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 function userstatsSendChars(user, text) {
     database.dataUserstats[user.id].chars += text.length
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 function userstatsSendCommand(user) {
     console.log(database.dataUserstats)
     database.dataUserstats[user.id].commands += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 function userstatsAddUserToMemory(user) {
     if (!database.dataUserstats[user.id]) {
@@ -757,7 +653,7 @@ function userstatsAddUserToMemory(user) {
     if (!database.dataUserstats[user.id].commands) {
         database.dataUserstats[user.id].commands = 0
     }
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 
 /**
@@ -833,43 +729,43 @@ function commandStore(sender, privateCommand) {
     const buttonCrate = new MessageButton()
         .setLabel("🧱")
         .setCustomId("openCrate")
-        .setStyle("PRIMARY");
+        .setStyle("PRIMARY")
     const buttonDayCrate = new MessageButton()
         .setLabel("🧰")
         .setCustomId("openDayCrate")
-        .setStyle("PRIMARY");
+        .setStyle("PRIMARY")
     const buttonLuckyCardSmall = new MessageButton()
         .setLabel("💶")
         .setCustomId("useLuckyCardSmall")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonLuckyCardMedium = new MessageButton()
         .setLabel("💷")
         .setCustomId("useLuckyCardMedium")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonLuckyCardLarge = new MessageButton()
         .setLabel("💴")
         .setCustomId("useLuckyCardLarge")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const buttonOpenGift = new MessageButton()
         .setLabel("🎀")
         .setCustomId("openGift")
-        .setStyle("PRIMARY");
+        .setStyle("PRIMARY")
     const buttonSendGift = new MessageButton()
         .setLabel("🎁")
         .setCustomId("sendGift")
-        .setStyle("SECONDARY");
-    if (!crates > 0) { buttonCrate.setDisabled(true) };
-    if (!dayCrates > 0) { buttonDayCrate.setDisabled(true) };
-    if (!smallLuckyCard > 0) { buttonLuckyCardSmall.setDisabled(true) };
-    if (!mediumLuckyCard > 0) { buttonLuckyCardMedium.setDisabled(true) };
-    if (!largeLuckyCard > 0) { buttonLuckyCardLarge.setDisabled(true) };
-    if (!getGifts > 0) { buttonOpenGift.setDisabled(true) };
-    if (!gifts > 0) { buttonSendGift.setDisabled(true) };
+        .setStyle("SECONDARY")
+    if (!crates > 0) { buttonCrate.setDisabled(true) }
+    if (!dayCrates > 0) { buttonDayCrate.setDisabled(true) }
+    if (!smallLuckyCard > 0) { buttonLuckyCardSmall.setDisabled(true) }
+    if (!mediumLuckyCard > 0) { buttonLuckyCardMedium.setDisabled(true) }
+    if (!largeLuckyCard > 0) { buttonLuckyCardLarge.setDisabled(true) }
+    if (!getGifts > 0) { buttonOpenGift.setDisabled(true) }
+    if (!gifts > 0) { buttonSendGift.setDisabled(true) }
     const rowPrimary = new MessageActionRow()
         .addComponents(buttonCrate, buttonDayCrate, buttonLuckyCardSmall, buttonLuckyCardMedium, buttonLuckyCardLarge)
     const rowSecondary = new MessageActionRow()
         .addComponents(buttonSendGift)
-    if (getGifts > 0) { rowSecondary.addComponents(buttonOpenGift) };
+    if (getGifts > 0) { rowSecondary.addComponents(buttonOpenGift) }
     return { embeds: [embed], components: [rowPrimary, rowSecondary], ephemeral: privateCommand }
 }
 
@@ -940,8 +836,8 @@ function commandAllCrate(sender, ammount, privateCommand) {
         let getMoney = 0
         for (let i = 0; i < Crates; i++) {
 
-            let replies = ['xp', 'money', 'gift'];
-            let random = Math.floor(Math.random() * 3);
+            let replies = ['xp', 'money', 'gift']
+            let random = Math.floor(Math.random() * 3)
             let out = replies[random]
             let val = 0
 
@@ -949,16 +845,16 @@ function commandAllCrate(sender, ammount, privateCommand) {
                 val = Math.floor(Math.random() * 110) + 100
                 getXpS += val
                 database.dataBasic[sender.id].score += val
-            };
+            }
             if (out === 'money') {
                 val = Math.floor(Math.random() * 2000) + 2000
                 getMoney += val
                 database.dataBasic[sender.id].money += val
-            };
+            }
             if (out === 'gift') {
                 getGiftS += 1
                 database.dataBackpacks[sender.id].gifts += 1
-            };
+            }
         }
 
         database.dataBackpacks[sender.id].crates = database.dataBackpacks[sender.id].crates - Crates
@@ -972,7 +868,7 @@ function commandAllCrate(sender, ammount, privateCommand) {
             ephemeral: privateCommand
         }
 
-    };
+    }
 }
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand @param {string} link */
@@ -1007,7 +903,7 @@ async function commandMusicList(command) {
             await ytdl.getBasicInfo(_link).then(info => {
                 embed.addField(info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
             })
-        });
+        })
         command.reply({ content: '> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', embeds: [embed] })
     }
 }
@@ -1098,7 +994,7 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
     const embed = new Discord.MessageEmbed()
         .setColor(Color.DarkPink)
         .setTitle('Szavazás!')
-        .addField(`${titleText}`, `${optionText}`);
+        .addField(`${titleText}`, `${optionText}`)
 
     bot.channels.cache.get('795935090026086410').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&795935996982198272>')
@@ -1154,7 +1050,7 @@ async function quizDone(quizMessageId, correctIndex) {
             let finalText = '**A helyes válasz: ' + correctAnswerEmoji + ' ' + correctAnswerText + '**'
 
             for (let i = 0; i < answersEmoji.length; i++) {
-                const currentAnswerEmoji = answersEmoji[i];
+                const currentAnswerEmoji = answersEmoji[i]
                 await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(async (userList1) => {
                     const users = userList1.map((user) => user.id)
                     for (let j = 0; j < users.length; j++) {
@@ -1180,26 +1076,13 @@ async function quizDone(quizMessageId, correctIndex) {
                             }
                         }
                     }
-                });
+                })
             }
             bot.channels.cache.get(ChannelId.Quiz).send(finalText)
-        });
+        })
     })
 }
 //#endregion
-
-/** @param {Discord.GuildMember} member  @param {string} exceptRoleId  */
-async function removeAllColorRoles(member, exceptRoleId) {
-    const roleList = [ColorRoles.blue, ColorRoles.green, ColorRoles.invisible, ColorRoles.orange, ColorRoles.purple, ColorRoles.red, ColorRoles.yellow]
-    for (let i = 0; i < roleList.length; i++) {
-        const role = roleList[i];
-        if (role == exceptRoleId) { continue; }
-        if (member == undefined || member == null) { break; }
-        if (member.roles.cache.some(role => role.id == role)) {
-            member.roles.remove(member.guild.roles.cache.get(role))
-        }
-    }
-}
 
 bot.on('interactionCreate', async interaction => {
     database.SaveUserToMemoryAll(interaction.user, interaction.member.displayName)
@@ -1238,7 +1121,7 @@ bot.on('interactionCreate', async interaction => {
 
         if (interaction.component.customId === 'openDayCrate') {
             if (dayOfYear === database.dataBasic[interaction.user.id].day) {
-                interaction.reply({ content: '> **\\❌ Már kinyitottad a napi ládádat!*', ephemeral: true });
+                interaction.reply({ content: '> **\\❌ Már kinyitottad a napi ládádat!*', ephemeral: true })
             } else {
                 const rewald = openDayCrate(interaction.user.id)
                 const rewaldIndex = rewald.split('|')[0]
@@ -1273,7 +1156,7 @@ bot.on('interactionCreate', async interaction => {
 
         if (interaction.component.customId === 'openCrate') {
             database.dataBackpacks[interaction.user.id].crates -= 1
-            var replies = ['xp', 'money', 'gift'];
+            var replies = ['xp', 'money', 'gift']
             var random = Math.floor(Math.random() * 3)
             var out = replies[random]
             var val = 0
@@ -1312,7 +1195,7 @@ bot.on('interactionCreate', async interaction => {
             }
 
             if (val === 0) {
-                interaction.reply({ content: '> \\💶 Nyertél:  **semmit**', ephemeral: true });
+                interaction.reply({ content: '> \\💶 Nyertél:  **semmit**', ephemeral: true })
             } else {
                 interaction.reply({ content: '> \\💶 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true })
             }
@@ -1369,8 +1252,8 @@ bot.on('interactionCreate', async interaction => {
 
         if (interaction.component.customId === 'openGift') {
             database.dataBackpacks[interaction.user.id].getGift -= 1
-            var replies = ['xp', 'money'];
-            var random = Math.floor(Math.random() * 2);
+            var replies = ['xp', 'money']
+            var random = Math.floor(Math.random() * 2)
             var out = replies[random]
             var val = 0
             var txt = ''
@@ -1379,18 +1262,18 @@ bot.on('interactionCreate', async interaction => {
                 val = Math.floor(Math.random() * 530) + 210
                 txt = '**\\🍺 ' + val + '** xp-t'
                 database.dataBasic[interaction.user.id].score += val
-            };
+            }
             if (out === 'money') {
                 val = Math.floor(Math.random() * 2300) + 1000
                 txt = '**\\💵' + val + '** pénzt'
                 database.dataBasic[interaction.user.id].money += val
-            };
+            }
 
             interaction.reply({ content: '> \\🎀 Kaptál ' + txt, ephemeral: true })
             interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             database.SaveDatabase()
-            return;
+            return
         }
 
         if (interaction.component.customId === 'sendGift') {
@@ -1398,7 +1281,7 @@ bot.on('interactionCreate', async interaction => {
             interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             database.SaveDatabase()
-            return;
+            return
         }
 
         if (interaction.component.customId.startsWith('game')) {
@@ -1526,7 +1409,7 @@ bot.on('interactionCreate', async interaction => {
 
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
-                    log(game.gameUserSettings);
+                    log(game.gameUserSettings)
                 } else if (interaction.component.customId === 'gameSwitchDebug') {
                     for (let i = 0; i < game.gameUserSettings.length; i++) {
                         if (game.gameUserSettings[i].userId === interaction.user.id) {
@@ -1544,7 +1427,7 @@ bot.on('interactionCreate', async interaction => {
 
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
 
-                    log(game.gameUserSettings);
+                    log(game.gameUserSettings)
                 } else if (interaction.component.customId === 'gameRestart') {
                     game.gameMap = createGame(50, 50)
                     connectTogame(interaction.user, game)
@@ -1553,7 +1436,7 @@ bot.on('interactionCreate', async interaction => {
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
                 }
             }
-            return;
+            return
         }
 
         if (interaction.component.customId == 'shopClose') {
@@ -1561,7 +1444,7 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId.startsWith('shopBuy')) {
-            const money = database.dataBasic[interaction.user.id].money;
+            const money = database.dataBasic[interaction.user.id].money
             const buyItem = interaction.component.customId.replace('shopBuy', '')
             if (buyItem == 'Crate') {
                 if (money >= 2099) {
@@ -1637,7 +1520,7 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId.startsWith('market')) {
-            const money = database.dataBasic[interaction.user.id].money;
+            const money = database.dataBasic[interaction.user.id].money
             const buyItem = interaction.component.customId.replace('market', '')
             if (buyItem == 'TokenToMoney') {
                 if (database.dataBackpacks[interaction.user.id].quizTokens > 0) {
@@ -1741,7 +1624,7 @@ bot.on('interactionCreate', async interaction => {
 
         if (interaction.customId == 'shopBackpackColors') {
             const selectedIndex = interaction.values[0]
-            const money = database.dataBasic[interaction.user.id].money;
+            const money = database.dataBasic[interaction.user.id].money
 
             if (selectedIndex == 0) {
                 if (money >= 3299) {
@@ -1832,7 +1715,7 @@ bot.on('interactionCreate', async interaction => {
 
         if (interaction.customId == 'shopNameColors') {
             const selectedIndex = interaction.values[0]
-            const money = database.dataBasic[interaction.user.id].money;
+            const money = database.dataBasic[interaction.user.id].money
 
             var newColorRoleId = ''
 
@@ -1943,7 +1826,7 @@ bot.on('interactionCreate', async interaction => {
             }
 
             const selectedIndex = interaction.values[0]
-            const money = database.dataBasic[interaction.user.id].money;
+            const money = database.dataBasic[interaction.user.id].money
 
             var newColorRoleId = ''
 
@@ -2019,7 +1902,7 @@ bot.on('interactionCreate', async interaction => {
                 await interaction.member.fetch()
                 setTimeout(() => {
                     interaction.update(CommandSettings(database, interaction.member, privateCommand))
-                }, 1500);
+                }, 1500)
             } catch (error) {
                 interaction.channel.send({ content: '> \\❌ **Error: ' + error + '**' })
             }
@@ -2036,10 +1919,10 @@ bot.on('interactionCreate', async interaction => {
                         interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
                     } else {
                         if (database.dataBackpacks[giftableMember.id] != undefined && giftableMember.id != selfId) {
-                            database.dataBackpacks[giftableMember.id].getGift += 1;
+                            database.dataBackpacks[giftableMember.id].getGift += 1
                             database.dataBackpacks[interaction.user.id].gifts -= 1
                             interaction.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
-                            giftableMember.send('> **\\✨ ' + interaction.user.username + ' megajándékozott! \\🎆**');
+                            giftableMember.send('> **\\✨ ' + interaction.user.username + ' megajándékozott! \\🎆**')
                             database.SaveDatabase()
                         } else {
                             interaction.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
@@ -2057,13 +1940,13 @@ bot.on('interactionCreate', async interaction => {
             }
         }
     }
-});
+})
 
 bot.on('clickMenu', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
             button.reply.send('> \\❗ **Ez nem a tied!**', true)
-            return;
+            return
         }
     } catch (error) { }
 
@@ -2164,7 +2047,7 @@ bot.on('clickMenu', async (button) => {
     }
 
     button.reply.defer()
-});
+})
 
 /** @returns {Promise<Discord.Message>} */
 async function GetOldDailyWeatherReport(channelId) {
@@ -2174,7 +2057,7 @@ async function GetOldDailyWeatherReport(channelId) {
     await channel.messages.fetch({ limit: 10 })
     statesManager.dailyWeatherReportLoadingText = 'Loop messages...'
     for (let i = 0; i < channel.messages.cache.size; i++) {
-        const element = channel.messages.cache.at(i);
+        const element = channel.messages.cache.at(i)
         if (element.embeds.length == 1) {
             if (element.embeds[0].title == 'Napi időjárás jelentés') {
                 statesManager.dailyWeatherReportLoadingText = 'Old report message found'
@@ -2197,27 +2080,27 @@ bot.once('ready', async () => {
     }
 
     setInterval(() => {
-        const index = Math.floor(Math.random() * (activitiesDesktop.length - 1));
-        bot.user.setActivity(activitiesDesktop[index]);
-    }, 10000);
+        const index = Math.floor(Math.random() * (activitiesDesktop.length - 1))
+        bot.user.setActivity(activitiesDesktop[index])
+    }, 10000)
 
     statesManager.dailyWeatherReportLoadingText = 'Fetch channels...'
-    await bot.channels.fetch(processedNewsChannel)
+    await bot.channels.fetch(ChannelId.ProcessedNews)
     setTimeout(async () => {
         statesManager.dailyWeatherReportLoadingText = 'Search old report message...'
-        const oldWeatherMessage = await GetOldDailyWeatherReport(processedNewsChannel)
+        const oldWeatherMessage = await GetOldDailyWeatherReport(ChannelId.ProcessedNews)
         if (oldWeatherMessage == null) {
-            CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
+            CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
         } else {
             if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate()) {
                 statesManager.dailyWeatherReportLoadingText = 'Delete old report message...'
                 await oldWeatherMessage.delete()
-                CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
+                CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
             } else {
                 statesManager.dailyWeatherReportLoadingText = ''
             }
         }
-    }, 100);
+    }, 100)
 
     logManager.AddTimeline(2)
 
@@ -2233,7 +2116,7 @@ bot.once('ready', async () => {
 
     for (let i = 0; i < dayOfYear - lastDay; i++) {
         for (let i = 0; i < usersWithTax.length; i++) {
-            const element = usersWithTax[i];
+            const element = usersWithTax[i]
             try {
                 const userMoney = database.dataBasic[element].money
                 const finalTax = Math.floor(userMoney * 0.001) * 2
@@ -2250,7 +2133,7 @@ bot.once('ready', async () => {
     database.SaveDatabase()
 
     statesManager.newsLoadingText = 'Fetch news...'
-    const channel = bot.channels.cache.get(incomingNewsChannel)
+    const channel = bot.channels.cache.get(ChannelId.IncomingNews)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
         /**
          * @type {[Discord.Message]}
@@ -2278,7 +2161,7 @@ bot.once('ready', async () => {
         if (listOfNews.length > 0) {
             const newsMessage = listOfNews.shift()
             /** @type {Discord.TextChannel} */
-            const newsChannel = bot.channels.cache.get(processedNewsChannel)
+            const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
             const embed = newsMessage.embed
             statesManager.newsLoadingText2 = 'Send new message...'
             if (newsMessage.NotifyRoleId.length == 0) {
@@ -2307,7 +2190,7 @@ bot.once('ready', async () => {
             statesManager.allNewsProcessed = true
             log(DONE + ': Minden hír közzétéve')
         }
-    }, 2000);
+    }, 2000)
 })
 
 /** @param {Discord.Message} message */
@@ -2394,7 +2277,7 @@ bot.on('messageCreate', async message => { //Message
     }
 
     //#region News
-    if (message.channel.id == incomingNewsChannel) {
+    if (message.channel.id == ChannelId.IncomingNews) {
         processNewsMessage(message)
 
         log(`Received a news message`)
@@ -2419,7 +2302,7 @@ bot.on('messageCreate', async message => { //Message
 
     if (message.content.startsWith(`${perfix}`)) {
         processCommand(message, thisIsPrivateMessage, sender, message.content.substring(1))
-        return;
+        return
     }
 
     if (listOfHelpRequiestUsers.includes(message.author.id) === true) {
@@ -2428,7 +2311,7 @@ bot.on('messageCreate', async message => { //Message
         } else if (message.content.toLowerCase().includes('nem')) {
             message.reply('Ja ok')
         }
-        delete listOfHelpRequiestUsers[listOfHelpRequiestUsers.indexOf(message.author.id)];
+        delete listOfHelpRequiestUsers[listOfHelpRequiestUsers.indexOf(message.author.id)]
     } else {
         if (message.content.includes('<@!738030244367433770>')) {
             message.reply('Segítség kell?')
@@ -2468,19 +2351,19 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     if (command === `pms`) {
         CommandBusiness(message.channel, sender, thisIsPrivateMessage, database)
         userstatsSendCommand(sender)
-        return;
-    };
+        return
+    }
 
     if (command === `test`) {
         /*
         const button0 = new MessageButton()
             .setLabel("This is a button!")
             .setID("myid0")
-            .setStyle("grey");
+            .setStyle("grey")
         const button1 = new MessageButton()
             .setLabel("This is a button!")
             .setID("myid1")
-            .setStyle("blurple");
+            .setStyle("blurple")
         const option = new MessageMenuOption()
             .setLabel('Your Label')
             .setEmoji('🍔')
@@ -2495,10 +2378,10 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             .addOption(option)
 
         const row0 = new MessageActionRow()
-            .addComponents(button0, button1);
+            .addComponents(button0, button1)
         const row1 = new MessageActionRow()
-            .addComponents(select);
-        message.channel.send("Message with a button!", { components: [row0, row1] });
+            .addComponents(select)
+        message.channel.send("Message with a button!", { components: [row0, row1] })
 
         userstatsSendCommand(sender)
         return
@@ -2575,7 +2458,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         message.channel.send('> \\⛔ **Ez a parancs átmenetileg nem elérhető!**')
         //commandPmsName(message.channel, sender, command.replace(`pms name `, ''))
         userstatsSendCommand(sender)
-        return;
+        return
     }
 
     if (command.startsWith(`quiz\n`)) {
@@ -2586,7 +2469,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
         }
         userstatsSendCommand(sender)
-        return;
+        return
     }
 
     if (command.startsWith(`quiz help`)) {
@@ -2604,7 +2487,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             )
             .setColor(Color.Highlight)
         message.channel.send({ embeds: [embed] })
-        return;
+        return
     }
 
     if (command.startsWith(`quizdone help`)) {
@@ -2615,7 +2498,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             )
             .setColor(Color.Highlight)
         message.channel.send({ embeds: [embed] })
-        return;
+        return
     }
 
     if (command.startsWith(`quizdone `)) {
@@ -2703,22 +2586,22 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         /*
         let buttons = []
         for (let i = 0; i < icons.length; i++) {
-            const icon = icons[i];
+            const icon = icons[i]
             const button0 = new MessageButton()
                 .setLabel(icon)
                 .setID("pollOption" + i)
-                .setStyle("gray");
+                .setStyle("gray")
             buttons.push(button0)
         }
         const row0 = new MessageActionRow()
-            .addComponents(buttons);
+            .addComponents(buttons)
 
         const buttonFinish = new MessageButton()
             .setLabel('Befejezés')
             .setID("pollFinish")
-            .setStyle("green");
+            .setStyle("green")
         const row1 = new MessageActionRow()
-            .addComponent(buttonFinish);
+            .addComponent(buttonFinish)
 
         let optionText = ''
         for (let i = 0; i < texts.length; i++) {
@@ -2726,13 +2609,13 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         }
 
         message.channel.send(`**${title}**\n${optionText}`, { components: [row0, row1] }).then(msg => {
-            addNewPoll(msg.id, title, texts, icons)
+            addNewPoll(msg.id, title, texts, icons, database)
         })
         return
         */
     }
 
-    message.channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**");
+    message.channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**")
 }
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
@@ -2754,10 +2637,10 @@ async function processApplicationCommand(command, privateCommand) {
                     command.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
                 } else {
                     if (database.dataBackpacks[giftableMember.id] != undefined && giftableMember.id != selfId) {
-                        database.dataBackpacks[giftableMember.id].getGift += 1;
+                        database.dataBackpacks[giftableMember.id].getGift += 1
                         database.dataBackpacks[command.user.id].gifts -= 1
                         command.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
-                        giftableMember.send('> **\\✨ ' + command.user.username + ' megajándékozott! \\🎆**');
+                        giftableMember.send('> **\\✨ ' + command.user.username + ' megajándékozott! \\🎆**')
                         database.SaveDatabase()
                     } else {
                         command.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
@@ -2784,7 +2667,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `market`) {
-        command.reply(CommandMarket(database, database.dataMarket, command.user, privateCommand));
+        command.reply(CommandMarket(database, database.dataMarket, command.user, privateCommand))
         userstatsSendCommand(command.user)
         return
     }
@@ -2951,7 +2834,9 @@ function StopBot() {
     botStopped = true
 }
 
-StartBot()
+if (autoStartBot) {
+    StartBot()
+}
 
 //#region Mails
 
@@ -2961,7 +2846,7 @@ StartBot()
  */
 function getCurrentlyEditingMailIndex(userId) {
     for (let i = 0; i < currentlyWritingEmails.length; i++) {
-        const mail = currentlyWritingEmails[i];
+        const mail = currentlyWritingEmails[i]
         if (mail.user.id === userId) {
             return i
         }
@@ -2987,19 +2872,19 @@ function getMailMessage(user, selectedIndex = 0) {
     const button0 = new MessageButton()
         .setLabel("Kezdőlap")
         .setCustomId("mailFolderMain")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const button1 = new MessageButton()
         .setLabel("Beérkező e-mailek")
         .setCustomId("mailFolderInbox")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const button2 = new MessageButton()
         .setLabel("Elküldött e-mailek")
         .setCustomId("mailFolderOutbox")
-        .setStyle("SECONDARY");
+        .setStyle("SECONDARY")
     const button3 = new MessageButton()
         .setLabel("✍️ Levél írása")
         .setCustomId("mailWrite")
-        .setStyle("PRIMARY");
+        .setStyle("PRIMARY")
 
     const row0 = new MessageActionRow()
 
@@ -3007,7 +2892,7 @@ function getMailMessage(user, selectedIndex = 0) {
         .setAuthor({ name: user.username, iconURL: user.avatarURL() })
 
     if (selectedIndex === 0) {
-        embed.setTitle("Kezdőlap");
+        embed.setTitle("Kezdőlap")
         const allInboxMails = getAllEMails(user.id, MailFolder.inbox)
         const allOutboxMails = getAllEMails(user.id, MailFolder.outbox)
         let unreaded = 0
@@ -3015,15 +2900,15 @@ function getMailMessage(user, selectedIndex = 0) {
             if (mail.readed === false) {
                 unreaded += 1
             }
-        });
+        })
         embed.addField("📥 Beérkező levelek", 'Olvasatlan: ' + unreaded + '\nÖsszes: ' + allInboxMails.length)
         embed.addField("📤 Elküldött levelek", 'Összes: ' + allOutboxMails.length)
 
         button0.setLabel("↻")
         button0.setStyle('PRIMARY')
-        row0.addComponents(button3, button0, button1, button2);
+        row0.addComponents(button3, button0, button1, button2)
     } else if (selectedIndex === 1) {
-        embed.setTitle("📥 Beérkező levelek");
+        embed.setTitle("📥 Beérkező levelek")
 
         const allMails = getAllEMails(user.id, MailFolder.inbox)
         log(allMails)
@@ -3036,11 +2921,11 @@ function getMailMessage(user, selectedIndex = 0) {
 
         button1.setLabel("↻")
         button1.setStyle('PRIMARY')
-        row0.addComponents(button3, button1, button0, button2);
+        row0.addComponents(button3, button1, button0, button2)
 
         setReadAllMessages(user.id)
     } else if (selectedIndex === 2) {
-        embed.setTitle("📤 Elküldött levelek");
+        embed.setTitle("📤 Elküldött levelek")
 
         const allMails = getAllEMails(user.id, MailFolder.outbox)
         log(allMails)
@@ -3053,7 +2938,7 @@ function getMailMessage(user, selectedIndex = 0) {
 
         button2.setLabel("↻")
         button2.setStyle('PRIMARY')
-        row0.addComponents(button3, button2, button0, button1);
+        row0.addComponents(button3, button2, button0, button1)
     } else if (selectedIndex === 3) {
         embed.setTitle("Levél írása")
 
@@ -3065,7 +2950,7 @@ function getMailMessage(user, selectedIndex = 0) {
             if (wMail.user.id === user.id) {
                 mail = wMail.mail
             }
-        });
+        })
 
         embed.addField('Cím: "' + mail.title + '"', 'Üzenet: "' + mail.context + '"\n' + 'Fogadó: @' + mail.reciver.name)
             .setFooter({
@@ -3077,12 +2962,12 @@ function getMailMessage(user, selectedIndex = 0) {
         const button4 = new MessageButton()
             .setLabel("Küldés")
             .setCustomId("mailWriteSend")
-            .setStyle("SUCCESS");
+            .setStyle("SUCCESS")
         const button5 = new MessageButton()
             .setLabel("Elvetés")
             .setCustomId("mailWriteAbort")
-            .setStyle("DANGER");
-        row0.addComponents(button4, button5);
+            .setStyle("DANGER")
+        row0.addComponents(button4, button5)
     }
     return new MailMessage(embed, [row0])
 }
@@ -3103,10 +2988,10 @@ function sendMail(userSender, userReciver, mail) {
  * @param {Mail} mail
  */
 function sendMailOM(mail) {
-    if (!database.dataMail[mail.reciver.id]) return false;
-    if (!database.dataMail[mail.sender.id]) return false;
-    if (!database.dataMail[mail.reciver.id].inbox) return false;
-    if (!database.dataMail[mail.sender.id].outbox) return false;
+    if (!database.dataMail[mail.reciver.id]) return false
+    if (!database.dataMail[mail.sender.id]) return false
+    if (!database.dataMail[mail.reciver.id].inbox) return false
+    if (!database.dataMail[mail.sender.id].outbox) return false
 
     database.   dataMail[mail.reciver.id].inbox[mail.id] = {}
     database.  dataMail[mail.reciver.id].inbox[mail.id].sender = {}
@@ -3165,8 +3050,8 @@ function getAllMailIds() {
  * @param {MailFolder} folder
  */
 function getAllEMails(userId, folder) {
-    if (!database.dataMail[userId]) return [];
-    if (!database.dataMail[userId].inbox) return [];
+    if (!database.dataMail[userId]) return []
+    if (!database.dataMail[userId].inbox) return []
 
     const allMailIds = getAllMailIds()
     /**
@@ -3175,7 +3060,7 @@ function getAllEMails(userId, folder) {
     let allMails = []
 
     for (let i = 0; i < allMailIds.length; i++) {
-        const mailId = allMailIds[i];
+        const mailId = allMailIds[i]
         if (folder === MailFolder.inbox) {
             if (database.dataMail[userId].inbox[mailId]) {
                 allMails.push(getMailFromRawJSON(database.dataMail[userId].inbox[mailId], mailId))
@@ -3202,12 +3087,12 @@ function getMailFromRawJSON(rawJSON, id) {
 }
 
 function setReadAllMessages(userId) {
-    if (!database.dataMail[userId]) return;
-    if (!database.dataMail[userId].inbox) return;
+    if (!database.dataMail[userId]) return
+    if (!database.dataMail[userId].inbox) return
 
     const allMailIds = getAllMailIds()
     for (let i = 0; i < allMailIds.length; i++) {
-        const mailId = allMailIds[i];
+        const mailId = allMailIds[i]
         if (database.dataMail[userId].inbox[mailId]) {
             database.dataMail[userId].inbox[mailId].readed = true
         }
@@ -3228,14 +3113,14 @@ class Mail {
  * @param {string} icon
  */
     constructor(id, sender, reciver, title, context, date = Date.now(), readed = false, icon = "✉️") {
-        this.id = id;
-        this.sender = sender;
-        this.reciver = reciver;
-        this.title = title;
-        this.context = context;
-        this.date = date;
-        this.readed = readed;
-        this.icon = icon;
+        this.id = id
+        this.sender = sender
+        this.reciver = reciver
+        this.title = title
+        this.context = context
+        this.date = date
+        this.readed = readed
+        this.icon = icon
     }
 }
 
@@ -3252,9 +3137,9 @@ class MailUser {
      * @param {MailUserType} type
      */
     constructor(name, id, type = MailUserType.user) {
-        this.name = name;
-        this.id = id;
-        this.type = type;
+        this.name = name
+        this.id = id
+        this.type = type
     }
 }
 
@@ -3264,8 +3149,8 @@ class MailMessage {
      * @param {MessageActionRow[]} actionRows
      */
     constructor(embed, actionRows) {
-        this.embed = embed;
-        this.actionRows = actionRows;
+        this.embed = embed
+        this.actionRows = actionRows
     }
 }
 
@@ -3281,9 +3166,9 @@ class CurrentlyWritingMail {
      * @param {Discord.Message} message
      */
     constructor(user, mail, message) {
-        this.user = user;
-        this.mail = mail;
-        this.message = message;
+        this.user = user
+        this.mail = mail
+        this.message = message
     }
 }
 

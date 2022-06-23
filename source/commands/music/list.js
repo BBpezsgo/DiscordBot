@@ -12,7 +12,7 @@ module.exports = (channel) => {
             ytdl.getBasicInfo(_link).then( info => {
                 embed.addField(info.videoDetails.title, ' ', false)
             })
-        });
+        })
         channel.send('> **\\❔ Lejátszólista: \\🎧**', embed)
     }
 }

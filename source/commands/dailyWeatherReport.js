@@ -17,24 +17,13 @@ const Dawn = dataToAvoidErrors_Dawn
 const Dusk = dataToAvoidErrors_Dusk
 
 const {
-    ImgExists,
     weatherSkytxt,
     weatherWindIcon,
     weatherTempIcon,
-    weatherMoonIcon,
-    weatherMoonText,
     weatherHumidityIcon,
-    weatherThumbnailUrl,
     DirectionToArrow,
     unixToTime,
-    weatherPressureIcon,
-    Average,
-    GetReadableNumber,
-    GetPollutionIndex,
-    GetPollutionText,
-    dayName,
-    weatherSkytextIcon,
-    weatherSkytextImgName
+    weatherSkytextIcon
 } = require('../commands/weatherFunctions')
 
 const { Color } = require('../functions/enums')
@@ -46,7 +35,7 @@ const { Color } = require('../functions/enums')
 function getEmbedEarth(weatherData) {
     const embed = new Discord.MessageEmbed()
         .setColor(Color.Highlight)
-        .setAuthor({ name: weatherData.city.name, url: 'https://openweathermap.org/city/' + weatherData.city.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' });
+        .setAuthor({ name: weatherData.city.name, url: 'https://openweathermap.org/city/' + weatherData.city.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
     embed
         .setTitle(`Napi időjárás jelentés`)

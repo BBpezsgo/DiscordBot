@@ -1,5 +1,4 @@
 const fontColor = '\033[37m'
-const timestampForeColor = '\033[30m'
 
 const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + fontColor + ']'
 const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + fontColor + ']'
@@ -66,7 +65,7 @@ const print = async (text) => {
 
 /**Sleep for 'ms' milliseconds */
 const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 function chars(char, len) {
@@ -204,13 +203,13 @@ function Capitalize(text) {
         return str.charAt(0).toUpperCase() + str.slice(1)
     }
 
-    const arr = str.split(" ");
+    const arr = str.split(" ")
 
     for (var i = 0; i < arr.length; i++) {
-        arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+        arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1)
     }
 
-    const str2 = arr.join(" ");
+    const str2 = arr.join(" ")
     return str2
 }
 
@@ -300,7 +299,7 @@ class LogManager {
         this.blinkerTime = 0
 
         /** @type {LoadingProgress}*/
-        this.loading = new LoadingProgress();
+        this.loading = new LoadingProgress()
         /** @type {number}*/
         this.loadingIndex = 0
 
@@ -339,27 +338,23 @@ class LogManager {
         this.newsLoadingTextTimeout = 0
 
         /** @type {(pressedButton: string) => void} */
-        this.promtCallback
+        this.promtCallback = (a) => {}
         /** @type {string[]} */
-        this.promtButtons
+        this.promtButtons = []
         /** @type {string} */
-        this.promtMessage
+        this.promtMessage = ''
+        /** @type {number} */
+        this.promtSelectedButton = 0
+        /** @type {string} */
+        this.promtPressedButton = ''
 
         if (bot != null && statesManager != null) {
             this.timer = setInterval(async () => {
                 if (this.enableLog == true) {
                     if (this.timer > 3) {
                         for (let i = 0; i < this.logs.length; i++) {
-                            const log = this.logs[i];
+                            const log = this.logs[i]
                             if (log.printed == false) {
-                                if (log.priv == false && this.isPhone == false) { } else {
-                                    var nl = (this.loggedCount == 0) ? '\n' : ''
-                                    if (log.count == 1) {
-                                        //print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | ' + log.count + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
-                                    } else {
-                                        //print(nl + ' ' + fontColor + timestampForeColor + log.time + ' | \x1b[31m' + log.count + timestampForeColor + ' │' + fontColor + '  ' + log.prefix + ': ' + log.message + '\x1b[1m' + fontColor)
-                                    }
-                                }
                                 this.loggedCount += 1
                                 this.logs[i].printed = true
                             }
@@ -432,7 +427,7 @@ class LogManager {
                 }
 
                 this.RefreshScreen()
-            }, 100);
+            }, 100)
         } else {
             this.timer = setInterval(async () => {
                 this.loadingIndex += (this.deltaTime * 12)
@@ -470,7 +465,7 @@ class LogManager {
                 }
 
                 this.RefreshScreen()
-            }, 100);
+            }, 100)
         }
     }
 
@@ -537,7 +532,7 @@ class LogManager {
         if (enabled == false) { return }
         this.loadingOverride = ''
 
-        const window = { width: 80, height: 20 }
+        const window = { width: 80, height: 25 }
         if (this.isPhone == true) {
             window.width = 48
         } else {
@@ -546,10 +541,28 @@ class LogManager {
 
         var txt = '┌' + chars('─', window.width - 2) + '┒\n'
         txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-        const remaingHeight = window.height - txt.split('\n').length - 1
-        for (let i = 0; i < remaingHeight; i++) {
-            txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+        
+        if (this.promtMessage.length > 0) {
+            const remaingHeight = (window.height - txt.split('\n').length - 1) - 2
+            for (let i = 0; i < remaingHeight; i++) {
+                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+            }
+
+            txt += '│ ' + genLine(this.promtMessage, window.width - 4) + ' ┃\n'
+            const buttons = this.promtButtons
+            var buttonsText = ''
+            for (let i = 0; i < buttons.length; i++) {
+                const button = buttons[i]
+                buttonsText += CliColor.BgWhite + CliColor.FgBlack + '| ' + button + ' |' + CliColor.FgDefault + CliColor.BgBlack + '  '
+            }
+            txt += '│ ' + genLine(buttonsText, window.width - 4) + ' ┃\n'
+        } else {
+            const remaingHeight = window.height - txt.split('\n').length - 1
+            for (let i = 0; i < remaingHeight; i++) {
+                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+            }
         }
+
         txt += '┕' + chars('━', window.width - 2) + '┛\n'
         txt += chars(' ', window.width) + '\n'
 
@@ -561,7 +574,7 @@ class LogManager {
 
     RefreshScreen() {
         if (enabled == false) { return }
-        const window = { width: 80, height: 20 }
+        const window = { width: 80, height: 25 }
         if (this.isPhone == true) {
             window.width = 48
         } else {
@@ -585,7 +598,7 @@ class LogManager {
             txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.handlebarsErrorMessage, this.statesManager.handlebarsDone, this.statesManager.handlebarsURL), window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine('HB Requiests:', 20) + this.statesManager.handlebarsRequiests.length, window.width - 4) + ' ┃\n'
             for (let i = 0; i < this.statesManager.handlebarsClients.length; i++) {
-                const socket = this.statesManager.handlebarsClients[i];
+                const socket = this.statesManager.handlebarsClients[i]
                 if (i == 0) {
                     txt += '│ ' + genLine(genLine('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width - 4) + ' ┃\n'
                 } else {
@@ -634,10 +647,41 @@ class LogManager {
             txt += '│ ' + genLine(genLine('Delta time:', 20) + genLine(Math.round((this.deltaTime-0.1)*1000)/1000, 5) + ' sec', window.width - 4) + ' ┃\n'
             txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width - 4) + ' ┃\n'
         }
+        if (this.statesManager != undefined) {
+            if (this.statesManager.databaseLoadText.length > 0) {
+                txt += '│ ' + genLine(genLine('Loading database:', 20) + this.statesManager.databaseLoadText, window.width - 4) + ' ┃\n'
+            }
+            if (this.statesManager.databaseParsingText.length > 0) {
+                txt += '│ ' + genLine(genLine('Parsing database:', 20) + this.statesManager.databaseParsingText, window.width - 4) + ' ┃\n'
+            }
+            if (this.statesManager.databaseSaveText.length > 0) {
+                txt += '│ ' + genLine(genLine('Saving database:', 20) + this.statesManager.databaseSaveText, window.width - 4) + ' ┃\n'
+            }
+        }
 
-        const remaingHeight = window.height - txt.split('\n').length - 2 - 1
-        for (let i = 0; i < remaingHeight; i++) {
-            txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+        if (this.promtMessage.length > 0) {
+            const remaingHeight = ((window.height - txt.split('\n').length - 2) - 1) - 2
+            for (let i = 0; i < remaingHeight; i++) {
+                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+            }
+
+            txt += '│ ' + genLine(this.promtMessage, window.width - 4) + ' ┃\n'
+            const buttons = this.promtButtons
+            var buttonsText = ''
+            for (let i = 0; i < buttons.length; i++) {
+                const button = buttons[i]
+                if (i == this.promtSelectedButton) {
+                    buttonsText += CliColor.BgBlue + CliColor.FgWhite + '| ' + button + ' |' + CliColor.FgDefault + CliColor.BgBlack + '  '
+                } else {
+                    buttonsText += CliColor.BgWhite + CliColor.FgBlack + '| ' + button + ' |' + CliColor.FgDefault + CliColor.BgBlack + '  '
+                }
+            }
+            txt += '│ ' + genLine(buttonsText, window.width - 4) + ' ┃\n'
+        } else {
+            const remaingHeight = window.height - txt.split('\n').length - 2 - 1
+            for (let i = 0; i < remaingHeight; i++) {
+                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+            }
         }
 
         var cursor = ''
@@ -662,10 +706,10 @@ class LogManager {
      * @param {number} code
      */
     Log(message, privateLog, translateResult = null, code = null) {
-        if (message === '') return;
-        if (message === ' ') return;
-        if (!message) return;
-        if (message.length == 0) return;
+        if (message === '') return
+        if (message === ' ') return
+        if (!message) return
+        if (message.length == 0) return
 
         if (this.logs.length == 0) {
             console.log('\x1b[1m' + fontColor)
@@ -695,15 +739,15 @@ class LogManager {
         }
         */
 
-        let hour = new Date().getHours();
-        let minute = new Date().getMinutes();
+        let hour = new Date().getHours()
+        let minute = new Date().getMinutes()
         if (minute < 10) {
-            minute = '0' + new Date().getMinutes();
-        };
-        let seconds = new Date().getSeconds();
+            minute = '0' + new Date().getMinutes()
+        }
+        let seconds = new Date().getSeconds()
         if (seconds < 10) {
-            seconds = '0' + new Date().getSeconds();
-        };
+            seconds = '0' + new Date().getSeconds()
+        }
         const timeStamp = hour + ':' + minute + ':' + seconds
 
         var msg = message
@@ -768,23 +812,46 @@ class LogManager {
     /**
      * @param {string} captionText
      * @param {string[]} buttons
-     * @param {(pressedButton: string) => void} callback
      */
-    Promt(captionText, buttons, callback) {
-        this.promtCallback = callback
+    Promt(captionText, buttons) {
+        this.promtButtons = buttons
+        this.promtMessage = captionText
+        this.promtSelectedButton = 0
+        this.promtPressedButton = ''
+        return new Promise(resolve => {
+            setInterval(() => {
+                if (this.promtPressedButton.length > 0) {
+                    resolve(this.promtPressedButton)
 
-
+                    this.promtCallback = null
+                    this.promtButtons = []
+                    this.promtMessage = ''
+                    this.promtSelectedButton = 0
+                    this.promtPressedButton = ''
+                }
+            }, 500)
+        })
     }
 
     /**
      * @param {string} key
      */
     OnKeyDown(key) {
-
+        if (key == 'a') {
+            if (this.promtSelectedButton > 0) {
+                this.promtSelectedButton -= 1
+            }
+        } else if (key == 'd') {
+            if (this.promtSelectedButton < this.promtButtons.length-1) {
+                this.promtSelectedButton += 1
+            }
+        } else if (key == '\r') {
+            this.promtPressedButton = (this.promtButtons[this.promtSelectedButton])
+        }
     }
 
     CurrentlyPromt() {
-        return (this.promtCallback != null)
+        return (this.promtMessage.length > 0)
     }
 }
 
@@ -797,11 +864,11 @@ class LoadingProgress {
      * @param {boolean} handlebarsLoading
     */
     constructor() {
-        this.botState = 'Betöltés';
-        this.botPercent = 0;
-        this.botLoading = false;
-        this.handlebarsState = 'Betöltés';
-        this.handlebarsLoading = false;
+        this.botState = 'Betöltés'
+        this.botPercent = 0
+        this.botLoading = false
+        this.handlebarsState = 'Betöltés'
+        this.handlebarsLoading = false
     }
 }
 
@@ -817,13 +884,13 @@ class LogMsg {
      * @param {TranslateResult} translateResult
     */
     constructor(message, time, type, priv, prefix, translateResult) {
-        this.message = message;
-        this.time = time;
-        this.type = type;
-        this.count = 1;
-        this.priv = priv;
-        this.printed = false;
-        this.prefix = prefix;
+        this.message = message
+        this.time = time
+        this.type = type
+        this.count = 1
+        this.priv = priv
+        this.printed = false
+        this.prefix = prefix
         this.translateResult = translateResult
     }
 }

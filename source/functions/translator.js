@@ -1,9 +1,12 @@
-const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + '\033[37m' + ']'
-const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + '\033[37m' + ']'
-const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + '\033[37m' + ']'
-const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + '\033[37m' + ']'
-const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + '\033[37m' + ']'
-const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + '\033[37m' + ']'
+const { 
+    INFO,
+    ERROR,
+    WARNING,
+    SHARD,
+    DEBUG,
+    DONE
+ } = require('../functions/enums')
+
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
 const groupNames = {
@@ -159,7 +162,7 @@ function TranslateMessage(message) {
         } else {
             return new TranslateResult(message, message, DEBUG, false, "?")
         }
-    };
+    }
 }
 
 class TranslateResult {

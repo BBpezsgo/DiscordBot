@@ -67,9 +67,9 @@ class NewsMessage {
      * @param {Discord.Message} message
     */
     constructor(embed, NotifyRoleId, message) {
-        this.embed = embed;
-        this.NotifyRoleId = NotifyRoleId;
-        this.message = message;
+        this.embed = embed
+        this.NotifyRoleId = NotifyRoleId
+        this.message = message
     }
 }
 
@@ -81,7 +81,7 @@ function CreateNews(message) {
         .setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
         .setDescription(message.content)
         .setColor(Color.Highlight)
-        .setFooter({ text: '• ' + DateToStringNews(newDate) });
+        .setFooter({ text: '• ' + DateToStringNews(newDate) })
     if (message.author.id == '802864588877856789') {
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
         if (message.embeds.length > 0) {
@@ -115,7 +115,7 @@ function CreateNews(message) {
                 .replace('[Special]', '')
                 .replace('[PC]', '')
                 .replace('[Stories]', '')
-                .replace('[Calendar]', '');
+                .replace('[Calendar]', '')
             while (title.startsWith(' ')) {
                 title = title.substring(1)
             }

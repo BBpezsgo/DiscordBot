@@ -70,6 +70,15 @@ class StatesManager {
 
         /**@type {string} */
         this.dailyWeatherReportLoadingText = ''
+
+        /**@type {string} */
+        this.databaseSaveText = ''
+        /**@type {string} */
+        this.databaseLoadText = ''
+        /**@type {string} */
+        this.databaseParsingText = ''
+        /**@type {string} */
+        this.databaseBackupText = ''
     }
 
     /**@param {string} message */

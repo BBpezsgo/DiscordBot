@@ -1,5 +1,4 @@
 const Discord = require('discord.js')
-const fs = require('fs')
 const { DatabaseManager } = require('../../functions/databaseManager.js')
 
 const now = new Date()
@@ -13,8 +12,8 @@ function dayName(dayOfWeek) {
         dayOfWeek -= 7
     }
     let dayName = '???'
-    let days = ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'];
-    dayName = days[dayOfWeek];
+    let days = ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat']
+    dayName = days[dayOfWeek]
     return dayName
 }
 /**
@@ -31,29 +30,29 @@ function toDateString(date) {
 */
 function businessAddToMemoryDetails(sender, database) {
     if (!database.dataBusinesses[sender.id]) {
-        database.dataBusinesses[sender.id] = {};
-    };
+        database.dataBusinesses[sender.id] = {}
+    }
     if (!database.dataBusinesses[sender.id].username) {
-        database.dataBusinesses[sender.id].username = sender.username;
-    };
+        database.dataBusinesses[sender.id].username = sender.username
+    }
     if (!database.dataBusinesses[sender.id].businessIndex) {
-        database.dataBusinesses[sender.id].businessIndex = 0;
-    };
+        database.dataBusinesses[sender.id].businessIndex = 0
+    }
     if (!database.dataBusinesses[sender.id].businessName) {
-        database.dataBusinesses[sender.id].businessName = "Névtelen biznisz";
-    };
+        database.dataBusinesses[sender.id].businessName = "Névtelen biznisz"
+    }
     if (!database.dataBusinesses[sender.id].businessLevel) {
-        database.dataBusinesses[sender.id].businessLevel = 0;
-    };
+        database.dataBusinesses[sender.id].businessLevel = 0
+    }
     if (!database.dataBusinesses[sender.id].businessUses) {
-        database.dataBusinesses[sender.id].businessUses = {};
-    };
+        database.dataBusinesses[sender.id].businessUses = {}
+    }
     if (!database.dataBusinesses[sender.id].businessUses.date) {
-        database.dataBusinesses[sender.id].businessUses.date = toDateString(new Date());
-    };
+        database.dataBusinesses[sender.id].businessUses.date = toDateString(new Date())
+    }
     if (!database.dataBusinesses[sender.id].businessUses.day) {
-        database.dataBusinesses[sender.id].businessUses.day = dayOfYear;
-    };
+        database.dataBusinesses[sender.id].businessUses.day = dayOfYear
+    }
 
     database.SaveDatabase()
 }
@@ -120,11 +119,11 @@ module.exports = (channel, sender, isPrivate, database) => {
 
     var businessIndex = database.dataBusinesses[sender.id].businessIndex
 
-    var money = database.dataBasic[sender.id].money;
+    var money = database.dataBasic[sender.id].money
 
     if (database.dataBusinesses[sender.id].businessIndex > 0) {
-        var moneyMakerName = database.dataBusinesses[sender.id].businessName;
-        var moneyMakerLevel = database.dataBusinesses[sender.id].businessLevel;
+        var moneyMakerName = database.dataBusinesses[sender.id].businessName
+        var moneyMakerLevel = database.dataBusinesses[sender.id].businessLevel
 
         var moneyMakerImage = ''
         var moneyMakerLevelText = ''
@@ -229,7 +228,7 @@ module.exports = (channel, sender, isPrivate, database) => {
             }
         }
         channel.send({ embeds: [embed] }).then(embedMessage => {
-            if (isPrivate === true) return;
+            if (isPrivate === true) return
             if (uprageCost > 0) { if (money >= uprageCost) { embedMessage.react('⬆️'); }; }
             if (addMoney > 0) { embedMessage.react('💰'); }
             embedMessage.react('💥')
@@ -253,8 +252,8 @@ module.exports = (channel, sender, isPrivate, database) => {
                                 addMoney += Math.floor(Math.random() * 10) - 5
 
                                 database.dataBasic[sender.id].money += addMoney
-                                database.dataBusinesses[sender.id].businessUses.day = dayOfYear;
-                                database.dataBusinesses[sender.id].businessUses.date = toDateString(new Date());
+                                database.dataBusinesses[sender.id].businessUses.day = dayOfYear
+                                database.dataBusinesses[sender.id].businessUses.date = toDateString(new Date())
 
                                 channel.send('> \\💰 Beszedtél \\💵**' + addMoney + '** pénzt')
                             } catch (error) {
@@ -364,7 +363,7 @@ module.exports = (channel, sender, isPrivate, database) => {
                     }).catch(() => {
                         embedMessage.reactions.removeAll()
                     })
-            });
+            })
         }
     }
 

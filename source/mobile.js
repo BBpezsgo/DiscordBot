@@ -76,7 +76,6 @@ const ColorRoles = {
 
 const { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesMobile } = require('./functions/enums.js')
 
-const consoleWidth = 80 - 2
 
 
 
@@ -141,9 +140,9 @@ let musicFinished = true
 
 let lastNoNews = false
 
-const { abbrev } = require('./functions/abbrev')
+
 const { DateToString } = require('./functions/dateToString')
-const { DateToStringNews, ConvertNewsIdToName, NewsMessage, CreateNews } = require('./functions/news')
+const { NewsMessage, CreateNews } = require('./functions/news')
 
 
 
@@ -202,18 +201,18 @@ process.stdin.on('data', function (b) {
                 default: return;
             }
         }
-        console.error(key);
+        console.error(key)
     } else {
         // something else...
-        console.error(0, s, b);
+        console.error(0, s, b)
     }
 })
 
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
-    process.stdin.setRawMode(true);
+    process.stdin.setRawMode(true)
 } else {
-    require('tty').setRawMode(true);
+    require('tty').setRawMode(true)
 }
 
 // Enable "mouse reporting"
@@ -226,7 +225,7 @@ process.on('exit', function () {
     process.stdout.write('\x1b[?1003l')
     console.clear()
     console.log("The application is closed")
-});
+})
 
 //#region Functions
 /**@param {number} days @returns {number} */
@@ -248,7 +247,7 @@ async function logMessage(message, username, private = false.valueOf, author) {
 
             const link = message.content
 
-            let info = await ytdl.getInfo(link);
+            let info = await ytdl.getInfo(link)
 
             let videoLengthSeconds = info.videoDetails.lengthSeconds
             let videoLengthMinutes = 0
@@ -284,7 +283,7 @@ async function logMessage(message, username, private = false.valueOf, author) {
         if (message.channel.guild) {
         } else {
         }
-    };
+    }
 
 }
 
@@ -295,101 +294,101 @@ async function logMessage(message, username, private = false.valueOf, author) {
 bot.on('reconnecting', () => {
     log(INFO + ': Újracsatlakozás...')
     statesManager.botLoadingState = 'Reconnecting'
-});
+})
 
 bot.on('disconnect', () => {
     log(ERROR + ': Megszakadt a kapcsolat!')
     statesManager.botLoadingState = 'Disconnect'
-});
+})
 
 bot.on('resume', () => {
     log(INFO + ': Folytatás')
     statesManager.botLoadingState = 'Resume'
-});
+})
 
 bot.on('error', error => {
     log(ERROR + ': ' + error)
     statesManager.botLoadingState = 'Error'
-});
+})
 
 bot.on('debug', debug => {
     statesManager.ProcessDebugMessage(debug)
     const translatedDebug = TranslateMessage(debug)
 
-    if (translatedDebug == null) return;
+    if (translatedDebug == null) return
 
     if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
         logManager.AddTimeline(2)
     }
 
-    if (translatedDebug.secret == true) return;
+    if (translatedDebug.secret == true) return
 
     log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
-});
+})
 
 bot.on('warn', warn => {
     log(WARNING + ': ' + warn)
     statesManager.botLoadingState = 'Warning'
-});
+})
 
 bot.on('shardError', (error, shardID) => {
     log(ERROR + ': shardError: ' + error)
-});
+})
 
 bot.on('invalidated', () => {
     log(ERROR + ': Érvénytelen')
-});
+})
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
     log(ERROR + ': Lecsatlakozva')
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
-});
+})
 
 bot.on('shardReady', (shardID) => {
     const mainGuild = bot.guilds.cache.get('737954264386764812')
     const quizChannel = mainGuild.channels.cache.get('799340273431478303')
     quizChannel.messages.fetch()
     statesManager.shardCurrentlyLoading = false
-});
+})
 
 bot.on('shardReconnecting', (shardID) => {
     statesManager.shardCurrentlyLoading = true
     statesManager.shardCurrentlyLoadingText = 'Újracsatlakozás...'
-});
+})
 
 bot.on('shardResume', (shardID, replayedEvents) => {
     log(SHARD & ': Folytatás: ' + replayedEvents.toString())
     statesManager.shardCurrentlyLoading = false
-});
+})
 
 bot.on('raw', async event => {
     log(DEBUG & ': raw')
-});
+})
 
 bot.on('close', () => {
     log(SHARD & ': close')
     statesManager.botLoadingState = 'Close'
-});
+})
 
 bot.on('destroyed', () => {
     log(SHARD & ': destroyed')
     statesManager.botLoadingState = 'Destroyed'
-});
+})
 
 bot.on('invalidSession', () => {
     log(SHARD & ': invalidSession')
     statesManager.botLoadingState = 'Invalid Session'
-});
+})
 
 bot.on('allReady', () => {
     log(SHARD & ': allReady')
     statesManager.botLoadingState = 'All Ready'
-});
+})
 
 bot.on('presenceUpdate', (oldPresence, newPresence) => {
     log(DEBUG & ': newStatus: ' + newPresence.status.toString())
-});
+})
 
 bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => { })
 
@@ -424,7 +423,7 @@ bot.on('interactionCreate', interaction => {
             }
         } catch (error) { }
     }
-});
+})
 
 //#region Commands
 
@@ -476,20 +475,20 @@ async function playAudio(command) {
     const player = createAudioPlayer()
 
     /** @type {Discord.VoiceChannel} */
-    const voiceChannel = command.member.voice.channel;
+    const voiceChannel = command.member.voice.channel
     const connection = joinVoiceChannel({
         channelId: voiceChannel.id,
         guildId: voiceChannel.guild.id,
         adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     })
 
-    let resource = createAudioResource(stream);
+    let resource = createAudioResource(stream)
 
     connection.subscribe(player)
     
     player.play(resource)
 
-    const info = await ytdl.getInfo(link);
+    const info = await ytdl.getInfo(link)
 
     /*const dispatcher = connection.play(stream)
         .on("finish", () => {
@@ -501,7 +500,7 @@ async function playAudio(command) {
         .on("error", (error) => { log(ERROR + ': ' + error, 24) })
         .on("start", () => { statesManager.ytdlCurrentlyPlaying = true; log('') })
         .on("debug", (message) => { log(DEBUG + ': ytdl: ' + message) })
-        .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') });
+        .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') })
     */
 
     const embed = new Discord.MessageEmbed()
@@ -520,7 +519,7 @@ async function playAudio(command) {
     statesManager.ytdlCurrentlyPlayingText = info.videoDetails.title
     statesManager.ytdlCurrentlyPlayingUrl = link
     return true
-};
+}
 
 //#endregion
 
@@ -556,7 +555,7 @@ async function commandMusicList(command) {
             await ytdl.getBasicInfo(_link).then(info => {
                 embed.addField(info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
             })
-        });
+        })
         command.reply({ content: '> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', embeds: [embed] })
     }
 }
@@ -642,7 +641,7 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
     const embed = new Discord.MessageEmbed()
         .setColor(Color.DarkPink)
         .setTitle('Szavazás!')
-        .addField(`${titleText}`, `${optionText}`);
+        .addField(`${titleText}`, `${optionText}`)
 
     bot.channels.cache.get('795935090026086410').send(embed).then(message => {
         message.channel.send('> <@&795935996982198272>')
@@ -698,7 +697,7 @@ async function quizDone(quizMessageId, correctIndex) {
             let finalText = '**A helyes válasz: ' + correctAnswerEmoji + ' ' + correctAnswerText + '**'
 
             for (let i = 0; i < answersEmoji.length; i++) {
-                const currentAnswerEmoji = answersEmoji[i];
+                const currentAnswerEmoji = answersEmoji[i]
                 await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(async (userList1) => {
                     const users = userList1.map((user) => user.id)
                     for (let j = 0; j < users.length; j++) {
@@ -724,10 +723,10 @@ async function quizDone(quizMessageId, correctIndex) {
                             }
                         }
                     }
-                });
+                })
             }
             bot.channels.cache.get('799340273431478303').send(finalText)
-        });
+        })
     })
 }
 //#endregion
@@ -736,7 +735,7 @@ bot.on('clickButton', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
             button.reply.send('> \\❗ **Ez nem a tied!**', true)
-            return;
+            return
         }
     } catch (error) { }
 
@@ -747,16 +746,16 @@ bot.on('clickButton', async (button) => {
         button.reply.defer()
         button.message.delete()
 
-        return;
+        return
     }
 
     button.reply.defer()
-});
+})
 
 bot.on('clickMenu', async (menu) => {
     menu.message.channel.send(menu.id)
     menu.reply.defer()
-});
+})
 
 /** @returns {Promise<Discord.Message>} */
 async function GetOldDailyWeatherReport(channelId) {
@@ -766,7 +765,7 @@ async function GetOldDailyWeatherReport(channelId) {
     await channel.messages.fetch({ limit: 10 })
     statesManager.dailyWeatherReportLoadingText = 'Loop messages...'
     for (let i = 0; i < channel.messages.cache.size; i++) {
-        const element = channel.messages.cache.at(i);
+        const element = channel.messages.cache.at(i)
         if (element.embeds.length == 1) {
             if (element.embeds[0].title == 'Napi időjárás jelentés') {
                 statesManager.dailyWeatherReportLoadingText = 'Old report message found'
@@ -789,9 +788,9 @@ bot.once('ready', async () => {
     }
     
     setInterval(() => {
-        const index = Math.floor(Math.random() * (activitiesMobile.length - 1));
-        bot.user.setActivity(activitiesMobile[index]);
-    }, 10000);
+        const index = Math.floor(Math.random() * (activitiesMobile.length - 1))
+        bot.user.setActivity(activitiesMobile[index])
+    }, 10000)
 
     statesManager.dailyWeatherReportLoadingText = 'Fetch channels...'
     await bot.channels.fetch(processedNewsChannel)
@@ -809,7 +808,7 @@ bot.once('ready', async () => {
                 statesManager.dailyWeatherReportLoadingText = ''
             }
         }
-    }, 100);
+    }, 100)
     
     logManager.AddTimeline(2)
 
@@ -871,7 +870,7 @@ bot.once('ready', async () => {
             statesManager.allNewsProcessed = true
             log(DONE + ': Minden hír közzétéve')
         }
-    }, 2000);
+    }, 2000)
 })
 
 /** @param {Discord.Message} message */
@@ -895,7 +894,7 @@ bot.on('messageCreate', async message => { //Message
         } else {
             logMessage(message, sender.username, true, sender)
         }
-    };
+    }
 
     //#endregion
 
@@ -911,7 +910,7 @@ bot.on('messageCreate', async message => { //Message
 
     if (message.content.startsWith(`${perfix}`)) {
         processCommand(message, thisIsPrivateMessage, sender, message.content.replace('. ', '.').substring(1), message.channel, null)
-        return;
+        return
     }
 
     if (listOfHelpRequiestUsers.includes(message.author.id) === true) {
@@ -920,7 +919,7 @@ bot.on('messageCreate', async message => { //Message
         } else if (message.content.toLowerCase().includes('nem')) {
             message.reply('Ja ok')
         }
-        delete listOfHelpRequiestUsers[listOfHelpRequiestUsers.indexOf(message.author.id)];
+        delete listOfHelpRequiestUsers[listOfHelpRequiestUsers.indexOf(message.author.id)]
     } else {
         if (message.content.includes('<@!738030244367433770>')) {
             message.reply('Segítség kell?')
@@ -945,18 +944,18 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     if (command === `pms`) {
         channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return;
-    };
+        return
+    }
     
     if (command === `test`) {
         const button0 = new disbut.MessageButton()
             .setLabel("This is a button!")
             .setID("myid0")
-            .setStyle("grey");
+            .setStyle("grey")
         const button1 = new disbut.MessageButton()
             .setLabel("This is a button!")
             .setID("myid1")
-            .setStyle("blurple");
+            .setStyle("blurple")
         const option = new disbut.MessageMenuOption()
             .setLabel('Your Label')
             .setEmoji('🍔')
@@ -971,10 +970,10 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
             .addOption(option)
 
         const row0 = new disbut.MessageActionRow()
-            .addComponents(button0, button1);
+            .addComponents(button0, button1)
         const row1 = new disbut.MessageActionRow()
-            .addComponents(select);
-        channel.send("Message with a button!", { components: [row0, row1] });
+            .addComponents(select)
+        channel.send("Message with a button!", { components: [row0, row1] })
         return
     }
 
@@ -993,7 +992,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     if (command.startsWith(`pms name `)) {
         message.channel.send('> \\⛔ **Ez a parancs átmenetileg nem elérhető!**')
-        return;
+        return
     }
 
     if (command.startsWith(`quiz\n`)) {
@@ -1003,7 +1002,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
         } else {
             quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
         }
-        return;
+        return
     } else if (command.startsWith(`quiz help`)) {
         const embed = new Discord.MessageEmbed()
             .addField('Quiz szintaxis',
@@ -1018,7 +1017,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
             )
             .setColor(Color.Highlight)
         message.channel.send({embeds: [ embed ]})
-        return;
+        return
     } else if (command.startsWith(`quizdone help`)) {
         const embed = new Discord.MessageEmbed()
             .addField('Quizdone szintaxis',
@@ -1026,7 +1025,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
             )
             .setColor(Color.Highlight)
         message.channel.send({embeds: [ embed ]})
-        return;
+        return
     } else if (command.startsWith(`quizdone `)) {
         quizDone(command.replace(`quizdone `, '').split(' ')[0], command.replace(`quizdone `, '').split(' ')[1])
         return
@@ -1065,7 +1064,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     //#endregion
 
-    channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**");
+    channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**")
 }
 
 
@@ -1077,7 +1076,7 @@ async function processApplicationCommand(command) {
 
     if (command.commandName == `gift`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
-        return;
+        return
     }
 
     if (command.commandName === `crossout`) {
@@ -1174,12 +1173,12 @@ async function processApplicationCommand(command) {
 
     if (command.commandName === `napi`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
-        return;
+        return
     }
 
     if (command.commandName === `profil`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
-        return;
+        return
     }
 
     if (command.commandName === `store`) {

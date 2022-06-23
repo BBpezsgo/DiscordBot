@@ -13,7 +13,7 @@ function GetObjectFromKey(key, data) {
     const dataList = data.sortedStats
     if (dataList == undefined) { return null }
     for (let i = 0; i < dataList.length; i++) {
-        const dataElement = dataList[i];
+        const dataElement = dataList[i]
         if (dataElement.key == key) {
             return dataElement
         }

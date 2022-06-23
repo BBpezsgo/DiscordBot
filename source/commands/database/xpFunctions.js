@@ -4,7 +4,7 @@ const fs = require('fs')
 function calculateAddXp(message) {
     const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
 
-    let addScoreValue = message.content.length;
+    let addScoreValue = message.content.length
     if (addScoreValue > 20) {
         addScoreValue = 20
     }

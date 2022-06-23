@@ -9,9 +9,9 @@ let dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8
 let dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
 
 function saveDatabase() {
-    fs.writeFile('./database/backpacks.json', JSON.stringify(dataBackpacks), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
-    fs.writeFile('./database/basic.json', JSON.stringify(dataBasic), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
-    fs.writeFile('./database/stickers.json', JSON.stringify(dataStickers), (err) => { if (err) { log(ERROR & ': ' & err.message) }; });
+    fs.writeFile('./database/backpacks.json', JSON.stringify(dataBackpacks), (err) => { if (err) { log(ERROR & ': ' & err.message) }; })
+    fs.writeFile('./database/basic.json', JSON.stringify(dataBasic), (err) => { if (err) { log(ERROR & ': ' & err.message) }; })
+    fs.writeFile('./database/stickers.json', JSON.stringify(dataStickers), (err) => { if (err) { log(ERROR & ': ' & err.message) }; })
 }
 
 /**
@@ -21,9 +21,9 @@ function saveDatabase() {
  * @returns {string}
  */
 function shorten(text, len) {
-    if (typeof text !== "string") return "";
-    if (text.length <= len) return text;
-    return text.substr(0, len).trim() + "...";
+    if (typeof text !== "string") return ""
+    if (text.length <= len) return text
+    return text.substr(0, len).trim() + "..."
 }
 
 /**
@@ -40,15 +40,15 @@ function log(message) {
 
     if (text != null) {
         //#region Timestamp
-        let hour = new Date().getHours();
-        let minute = new Date().getMinutes();
+        let hour = new Date().getHours()
+        let minute = new Date().getMinutes()
         if (minute < 10) {
-            minute = '0' + new Date().getMinutes();
-        };
-        let seconds = new Date().getSeconds();
+            minute = '0' + new Date().getMinutes()
+        }
+        let seconds = new Date().getSeconds()
         if (seconds < 10) {
-            seconds = '0' + new Date().getSeconds();
-        };
+            seconds = '0' + new Date().getSeconds()
+        }
         const timeStamp = hour + ':' + minute + ':' + seconds
         //#endregion
         allConsoleText += '' + timestampForeColor + '' + timeStamp + fontColor + '  ' + text + '\x1b[1m' + fontColor + '\n'
@@ -106,7 +106,7 @@ function log(message) {
 * @param {DatabaseManager} database
 */
 module.exports = (message, sender, isPrivate, database) => {
-    var currentDay = new Date().getDay();
+    var currentDay = new Date().getDay()
     var dayCrates = dataBot.day - dataBasic[sender.id].day
     var crates = dataBackpacks[sender.id].crates
     var gifts = dataBackpacks[sender.id].gifts
@@ -153,17 +153,17 @@ module.exports = (message, sender, isPrivate, database) => {
     
     message.channel.send({ embeds: [embed] }).then(embedMessage => {
         if (isPrivate === true) return; 
-        if (crates > 0) { embedMessage.react('🧱') };
-        if (gifts > 0) { embedMessage.react('🎁') };
-        if (getGifts > 0) { embedMessage.react('🎀') };
-        if (smallLuckyCard > 0) { embedMessage.react('💶') };
-        if (mediumLuckyCard > 0) { embedMessage.react('💷') };
-        if (largeLuckyCard > 0) { embedMessage.react('💴') };
-        if (dayCrates > 0) { embedMessage.react('🧰') };
+        if (crates > 0) { embedMessage.react('🧱') }
+        if (gifts > 0) { embedMessage.react('🎁') }
+        if (getGifts > 0) { embedMessage.react('🎀') }
+        if (smallLuckyCard > 0) { embedMessage.react('💶') }
+        if (mediumLuckyCard > 0) { embedMessage.react('💷') }
+        if (largeLuckyCard > 0) { embedMessage.react('💴') }
+        if (dayCrates > 0) { embedMessage.react('🧰') }
 
         const filter = (reaction, user) => {
-            return ['🧱', '🎁', '🎀', '💶', '💷', '💴', '🧰'].includes(reaction.emoji.name) && user.id == sender.id;
-        };
+            return ['🧱', '🎁', '🎀', '💶', '💷', '💴', '🧰'].includes(reaction.emoji.name) && user.id == sender.id
+        }
 
         console.log(embedMessage)
 
@@ -172,8 +172,8 @@ module.exports = (message, sender, isPrivate, database) => {
                 if (collected.first().emoji.name == '🧱') {
                     dataBackpacks[sender.id].crates -= 1
                     { //Láda kinyitása
-                        let replies = ['xp', 'money', 'gift'];
-                        let random = Math.floor(Math.random() * 3);
+                        let replies = ['xp', 'money', 'gift']
+                        let random = Math.floor(Math.random() * 3)
                         let out = replies[random]
                         let val = 0
                         let txt = ''
@@ -193,15 +193,15 @@ module.exports = (message, sender, isPrivate, database) => {
                             dataBackpacks[sender.id].gifts += 1
                         }
 
-                        message.channel.send('> \\🧱 Kaptál:  ' + txt);
-                    };
+                        message.channel.send('> \\🧱 Kaptál:  ' + txt)
+                    }
                 } else if (collected.first().emoji.name == '🎁') {
-                    message.channel.send('> **\\❔ Használd a **`' + perfix + 'gift @Felhasználó`** parancsot, egy személy megajándékozásához!**');
+                    message.channel.send('> **\\❔ Használd a **`' + perfix + 'gift @Felhasználó`** parancsot, egy személy megajándékozásához!**')
                 } else if (collected.first().emoji.name == '🎀') {
                     dataBackpacks[sender.id].getGift -= 1
                     { //Ajándék kinyitása
-                        let replies = ['xp', 'money'];
-                        let random = Math.floor(Math.random() * 2);
+                        let replies = ['xp', 'money']
+                        let random = Math.floor(Math.random() * 2)
                         let out = replies[random]
                         let val = 0
                         let txt = ''
@@ -210,15 +210,15 @@ module.exports = (message, sender, isPrivate, database) => {
                             val = Math.floor(Math.random() * 530) + 210
                             txt = '**\\🍺 ' + val + '** xp-t'
                             dataBasic[sender.id].score += val
-                        };
+                        }
                         if (out === 'money') {
                             val = Math.floor(Math.random() * 2300) + 1000
                             txt = '**\\💵' + val + '** pénzt'
                             dataBasic[sender.id].money += val
-                        };
+                        }
 
-                        message.channel.send('> \\🎀 Kaptál:  ' + txt + ' pénzt');
-                    };
+                        message.channel.send('> \\🎀 Kaptál:  ' + txt + ' pénzt')
+                    }
                 } else if (collected.first().emoji.name == '💶') {
                     dataBackpacks[sender.id].luckyCards.small -= 1
                     let val = 0
@@ -267,11 +267,11 @@ module.exports = (message, sender, isPrivate, database) => {
 
                 } else if (collected.first().emoji.name == '🧰') {
                     commandNapi(message, sender)
-                };
+                }
                 embedMessage.reactions.removeAll()
                 saveDatabase()
             }).catch(() => {
-                embedMessage.reactions.removeAll();
-            });
-    });
+                embedMessage.reactions.removeAll()
+            })
+    })
 }
