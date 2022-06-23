@@ -2129,7 +2129,7 @@ bot.once('ready', async () => {
         }
         log("Mindenki megadózva")
     }
-    savePollDefaults()
+    savePollDefaults(database)
     database.SaveDatabase()
 
     statesManager.newsLoadingText = 'Fetch news...'

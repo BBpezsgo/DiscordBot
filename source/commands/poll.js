@@ -1,6 +1,9 @@
 const { DatabaseManager } = require('../functions/databaseManager')
 
-function savePollDefaults() {
+/**
+ * @param {DatabaseManager} database
+ */
+function savePollDefaults(database) {
     if (!database.dataPolls.messageIds) {
         database.dataPolls.messageIds = ''
     }
@@ -17,7 +20,7 @@ function savePollDefaults() {
  * @param {DatabaseManager} database
  */
 function addNewPoll(messageId, title, optionTexts, optionIcons, database) {
-    savePollDefaults()
+    savePollDefaults(database)
 
     /**
      * @type {number[]}
