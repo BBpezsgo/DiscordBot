@@ -118,12 +118,7 @@ function GetDataSize(bytes) {
 }
 
 function RefreshScreen() {
-    const window = { width: 60, height: 5 }
-    if (this.isPhone == true) {
-        window.width = 48
-    } else {
-        window.width = 80
-    }
+    const window = { width: 40, height: 5 }
     var txt = '┌' + chars('─', window.width - 2) + '┒\n'
 
     if (error == '') {
