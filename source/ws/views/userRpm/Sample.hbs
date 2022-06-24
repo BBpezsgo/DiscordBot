@@ -1,0 +1,173 @@
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+	<link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
+	<script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
+	<script language="javascript" src="/dynaform/custom.js" type="text/javascript"></script>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onload="setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+	marginheight="0">
+	<table id="autoWidth" style="width: 598px;">
+		<tbody>
+			<tr>
+				<td class="h1" colspan="3" id="t_title">Status</td>
+			</tr>
+			<tr>
+				<td class="blue" colspan="3"></td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_firm_vs">Firmware Version:</td>
+				<td colspan="2">
+					<div id="fversion">3.17.38 Build 140613 Rel.55867n </div>
+				</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_hd_vs">Hardware Version:</td>
+				<td colspan="2">
+					<div id="hversion">WR1043 v2 00000000</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="blue" colspan="3"></td>
+			</tr>
+			<tr>
+				<td class="h2" colspan="3" id="t_lan">LAN</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">MAC Address:</td>
+				<td colspan="2">
+					<div id="lanMac">E8-DE-27-D7-C8-D8</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_ip_addr" name="t_ip_addr">IP Address:</td>
+				<td colspan="2">
+					<div id="lanIP">192.168.0.1</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_sub_mask" name="t_sub_mask">Subnet Mask:</td>
+				<td colspan="2">
+					<div id="lanMask">255.255.255.0</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="blue" colspan="3"></td>
+			</tr>
+			<tr>
+				<td class="h2" colspan="3" id="t_wireless">Wireless</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_wl_radio">Wireless Radio:</td>
+				<td colspan="2"><span id="t_enable">Enable</span></td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_name_ssid">Name (SSID):</td>
+				<td colspan="2">SANTA</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_mode">Mode:</td>
+				<td colspan="2"><span id="t_11bgnm">11bgn mixed</span></td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_channel">Channel:</td>
+				<td colspan="2"><span id="t_auto" name="t_auto">Auto</span> (<span id="t_cur_chl"
+						name="t_cur_chl">Current channel</span> 11)</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_chanel_width">Channel Width:</td>
+				<td><span id="t_automatic" name="t_automatic">Automatic</span></td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_mac_addr" name="t_mac_addr">MAC Address:</td>
+				<td colspan="2">E8-DE-27-D7-C8-D8</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_wds_status">WDS Status:</td>
+				<td colspan="2"><span id="t_wds_dis">Disable</span></td>
+			</tr>
+			<tr>
+				<td class="blue" colspan="3"></td>
+			</tr>
+			<tr>
+				<td class="h2" colspan="3" id="t_wan1">WAN</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_mac_addr" name="t_mac_addr">MAC Address:</td>
+				<td colspan="2">E8-DE-27-D7-C8-D9</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_ip_addr" name="t_ip_addr">IP Address:</td>
+				<td>84.236.9.165</td>
+				<td><span id="t_pppoe">PPPoE</span><span id="t_conn_auto">(Connect Automatically)</span></td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_sub_mask" name="t_sub_mask">Subnet Mask:</td>
+				<td>255.255.255.255</td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_def_gt">Default Gateway:</td>
+				<td>84.236.9.165</td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_ddns_ser">DNS Server:</td>
+				<td colspan="2">193.110.57.4 , 193.110.56.8</td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_online_time">Online Time:</td>
+				<td>4 day(s) 01:11:24</td>
+				<td><input name="Disconnect" type="button" class="button" id="Disconnect" value="Disconnect"
+						onclick="return doDisConnect(1);"></td>
+			</tr>
+			<tr>
+				<td class="blue" colspan="3"></td>
+			</tr>
+			<tr>
+				<td class="h2" colspan="3" id="t_trff_stat">Traffic Statistics</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<table border="0">
+						<tbody>
+							<tr>
+								<td width="30%"></td>
+								<td class="ListTC2" width="30%" id="t_received">Received</td>
+								<td class="ListTC2" id="t_sent">Sent</td>
+							</tr>
+							<tr>
+								<td class="Item" id="t_byt">Bytes:</td>
+								<td class="ListC2">1918209447</td>
+								<td class="ListC2">1822663598</td>
+							</tr>
+							<tr>
+								<td class="Item" id="t_pcks">Packets:</td>
+								<td class="ListC2">37657801</td>
+								<td class="ListC2">11873774</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="blue" colspan="3"></td>
+			</tr>
+			<tr>
+				<td class="Item" id="t_sys_up_time">System Up Time:</td>
+				<td>
+					<div id="activeTime">4 <span id="t_days">days</span> 01:12:47</div>
+				</td>
+				<td><input name="Refresh" class="button" type="button" id="Refresh" value="Refresh"
+						onclick="return doRefresh();"></td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+
+</html>

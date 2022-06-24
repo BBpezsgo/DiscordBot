@@ -1,3 +1,6 @@
+const { GetTime, GetDataSize, Capitalize } = require('../functions/functions')
+const { WsStatus } = require('../functions/enums')
+
 const fontColor = '\033[37m'
 
 const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + fontColor + ']'
@@ -133,54 +136,6 @@ function genLine(text, width) {
     return txt
 }
 
-const WsStatus = [
-    'READY',
-    'CONNECTING',
-    'RECONNECTING',
-    'IDLE',
-    'NEARLY',
-    'DISCONNECTED',
-    'WAITING_FOR_GUILDS',
-    'IDENTIFYING',
-    'RESUMING'
-]
-
-function AddZeros(num) {
-    if (num < 10) {
-        return '0' + num
-    } else {
-        return num
-    }
-}
-/**@param {Date} date */
-function GetTime(date) {
-    if (date) {
-        return date.getHours() + ':' + AddZeros(date.getMinutes()) + ':' + AddZeros(date.getSeconds())
-    } else {
-        return '--:--:--'
-    }
-}
-
-/**@param {number} bytes */
-function GetDataSize(bytes) {
-    var txt = "byte"
-    var val = bytes
-    if (val > 1024) {
-        txt = "Kb"
-        val = val / 1024
-    }
-    if (val > 1024) {
-        txt = "Mb"
-        val = val / 1024
-    }
-    if (val > 1024) {
-        txt = "Gb"
-        val = val / 1024
-    }
-
-    return Math.floor(val) + " " + txt
-}
-
 /**@param {string} error @param {boolean} ready @param {string} url */
 function StateText_HB(error, ready, url) {
     if (error.length > 0) {
@@ -194,23 +149,6 @@ function StateText_HB(error, ready, url) {
     } else {
         return "Loading"
     }
-}
-
-/**@param {string} text */
-function Capitalize(text) {
-    var str = text
-    if (str.includes(' ') == true) {
-        return str.charAt(0).toUpperCase() + str.slice(1)
-    }
-
-    const arr = str.split(" ")
-
-    for (var i = 0; i < arr.length; i++) {
-        arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1)
-    }
-
-    const str2 = arr.join(" ")
-    return str2
 }
 
 function StateText(state) {

@@ -1,0 +1,242 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+    <link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
+    <script language="javascript" src="/dynaform/custom.js" type="text/javascript"></script>
+    <script language="javascript" src="/dynaform/tree.js" type="text/javascript"></script>
+    <script language="javascript" src="/dynaform/dropdown.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body onload="setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+    marginheight="0">
+    <table id="autoWidth" style="width: 598px;">
+        <tbody>
+            <tr>
+                <td class="h1" colspan="3" id="t_title">Cache</td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td class="h2" colspan="3" id="t_lan">Channels</td>
+            </tr>
+            <tr>
+                <td width="698" align="center">
+                    <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td class="ListM">
+                                    <div class="caret-all"></div>
+                                </td>
+                                <td class="ListM" style="width: 100%;">
+                                    <b>Name</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>ID</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>delb.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>mange.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>viewb.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>edit.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>invt.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>join.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>lock.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>send.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>spek.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>uarc.</b>
+                                </td>
+                                <td class="ListM">
+                                    
+                                </td>
+                            </tr>
+                            {{#each channels}}
+                            <tr>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.deletable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.manageable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.viewable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.editable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.invitable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.joinable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.locked}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.sendable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.speakable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.unarchivable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <div class="dropdown">
+                                        <div onclick="dropdownClick(this)" id="dropdown-{{this.id}}" class="dropbtn"><i class="material-icons">&#xe8b8;</i></div>
+                                            <div id="dropdown-content-{{this.id}}" class="dropdown-content">
+                                                {{#each commands}}
+                                                <form action="/commands/{{this}}" method="post"
+                                                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000); return false;">
+                                                    <input type="text" value="{{../this.id}}">
+                                                    <input type="submit" value="{{this}}">
+                                                </form>
+                                                {{/each}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{/each}}
+                            {{#each groups}}
+                            <tr>
+                                <td style="padding:0 2 0 2;word-break:break-all; width: 16px;">
+                                    <div class="caret" id="{{this.id}}"></div>
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.deletable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.manageable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.viewable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all" colspan="7">
+                                    
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <div class="dropdown">
+                                        <div onclick="dropdownClick(this)" id="dropdown-{{this.id}}" class="dropbtn"><i class="material-icons">&#xe8b8;</i></div>
+                                            <div id="dropdown-content-{{this.id}}" class="dropdown-content">
+                                                {{#each commands}}
+                                                <form action="/commands/{{this}}" method="post"
+                                                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000); return false;">
+                                                    <input type="text" value="{{../this.id}}">
+                                                    <input type="submit" value="{{this}}">
+                                                </form>
+                                                {{/each}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{#each channels}}
+                            <tr class="nested {{this.parentId}}">
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                    <span class="tag-{{this.nsfw}}">NSFW</span>
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.deletable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.manageable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.viewable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.editable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.invitable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.joinable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.locked}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.sendable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.speakable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.unarchivable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <div class="dropdown">
+                                        <div onclick="dropdownClick(this)" id="dropdown-{{this.id}}" class="dropbtn"><i class="material-icons">&#xe8b8;</i></div>
+                                            <div id="dropdown-content-{{this.id}}" class="dropdown-content">
+                                                {{#each commands}}
+                                                <form action="/commands/{{this}}" method="post"
+                                                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000); return false;">
+                                                    <input type="text" value="{{../this.id}}">
+                                                    <input type="submit" value="{{this}}">
+                                                </form>
+                                                {{/each}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{/each}}
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -1,0 +1,369 @@
+TABLE {
+	Width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+TABLE.guage {
+	background-color: #3369ba;
+}
+
+BODY {
+	FONT-SIZE: 12px;
+	MARGIN: 42 30 30 30;
+	FONT-FAMILY: "Arial", "Helvetica", "Geneva", "Swiss", "SunSans-Regular", "sans-serif";
+	color: black;
+	background-color: #fafafa;
+}
+
+TEXTAREA.same {
+	overflow: auto;
+	border: 1;
+	border-style: dashed;
+	font-family: Arial, Helvetica;
+	FONT-SIZE: 12px;
+	background-color: #fafafa;
+}
+
+TD {
+	FONT-SIZE: 12px;
+	height: 24px;
+	text-align: left;
+	white-space: nowrap;
+	vertical-align: middle;
+}
+
+TD.h1 {
+	FONT-SIZE: 16px;
+	COLOR: WHITE;
+	background-color: #3362ba;
+	FONT-WEIGHT: bold;
+	padding-left: 15;
+}
+
+TD.h2 {
+	FONT-SIZE: 16px;
+	height: 30px;
+	FONT-WEIGHT: bold;
+	padding-left: 15;
+	white-space: normal;
+}
+
+TD.h3 {
+	FONT-SIZE: 14px;
+	height: 30px;
+	white-space: normal;
+}
+
+TD.info {
+	padding-left: 25;
+}
+
+TD.info1 {
+	padding-left: 35;
+}
+
+TD.clk {
+	padding-left: 25;
+	Width: 5%
+}
+
+TD.mbtn {
+	padding-left: 30%
+}
+
+TD.blue {
+	border-bottom: 2px solid #00000070;
+	background-position: 0% 10%;
+	height: 30px;
+}
+
+TD.Item {
+	FONT-WEIGHT: bold;
+	text-align: right;
+	padding-right: 30;
+	width: 30%;
+}
+
+TD.emp {
+	FONT-WEIGHT: bold;
+	color: #003399;
+	font-size: 13px;
+}
+
+TD.ListTC1 {
+	text-align: right;
+	padding-right: 20;
+	FONT-WEIGHT: bold;
+	font-size: 13px;
+}
+
+TD.ListTC2 {
+	text-align: left;
+	FONT-WEIGHT: bold;
+	padding-left: 20;
+	font-size: 13px;
+}
+
+TD.ListC1 {
+	text-align: right;
+	padding-right: 20;
+}
+
+TD.ListC2 {
+	text-align: left;
+	FONT-WEIGHT: bold;
+	padding-left: 20;
+}
+
+TD.ListB {
+	text-align: left;
+	FONT-WEIGHT: bold;
+	white-space: nowrap;
+}
+
+TD.Listm {
+	text-align: center;
+}
+
+TD.Listr {
+	text-align: right;
+	padding-right: 5;
+}
+
+input {
+	vertical-align: middle;
+}
+
+input.text {
+	height: 22px;
+	color: black;
+	padding-right: 3px;
+	padding-left: 3px;
+}
+
+input.radio {
+	vertical-align: middle;
+}
+
+input.button {
+	line-height: normal;
+	color: black;
+	height: 22px;
+	width: 75px;
+}
+
+input.buttonL {
+	line-height: normal;
+	color: black;
+	height: 22px;
+	width: 160px;
+}
+
+input.buttonLL {
+	line-height: normal;
+	color: black;
+	height: 22px;
+}
+
+input.buttonBig {
+	FONT-SIZE: 14px;
+	line-height: normal;
+	color: black;
+	height: 22px;
+	width: 100px;
+}
+
+input.buttonBigL {
+	FONT-SIZE: 14px;
+	line-height: normal;
+	color: black;
+	height: 22px;
+}
+
+select {
+	vertical-align: middle;
+	height: 22px;
+	color: black;
+}
+
+select.list {
+	width: 120px;
+}
+
+select.listL {
+	width: 150px;
+}
+
+select.listS {
+	width: 80px;
+}
+
+select.listLL {
+	width: 230px;
+}
+
+select.listLLL {
+	width: 300px;
+}
+
+TD[type="h1"]:disabled,
+TD[type="emp"]:disabled,
+input[type="submit"]:disabled,
+input[type="text"]:disabled,
+input[type="button"]:disabled,
+input[type="buttonL"]:disabled,
+input[type="buttonLL"]:disabled,
+input[type="buttonBig"]:disabled,
+input[type="buttonBigL"]:disabled {
+	color: gray;
+}
+
+table.datas>tbody>tr>td {
+	padding: 5;
+}
+
+/* Tooltip container */
+.tooltip {
+	position: relative;
+	display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip>.tooltiptext {
+	visibility: hidden;
+	text-align: center;
+	padding: 5px;
+	background: #fff;
+	border-radius: 6px;
+	border: 0.5px solid #555;
+
+	transform: translateY(calc(-100% + 16px));
+
+	box-shadow: #0007 1px 1px 5px;
+
+	/* Position the tooltip text - see examples below! */
+	position: absolute;
+	z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+	visibility: visible;
+}
+
+.caret,
+.caret-all {
+	cursor: pointer;
+	-webkit-user-select: none;
+	/* Safari 3.1+ */
+	-moz-user-select: none;
+	/* Firefox 2+ */
+	-ms-user-select: none;
+	/* IE 10+ */
+	user-select: none;
+	width: 20px;
+}
+
+.caret::before {
+	content: url('../images/expand.png');
+	color: black;
+	display: inline-block;
+}
+
+.caret-down::before {
+	content: url('../images/collapse.png') !important;
+}
+
+.caret-up::before {
+	content: url('../images/expand.png') !important;
+}
+
+.caret-all::before {
+	content: url('../images/both.png');
+	color: black;
+	display: inline-block;
+}
+
+.nested {
+	display: none;
+}
+
+.nested-show {
+	display: table-row !important;
+}
+
+.tag-true {
+	background-color: #0003;
+	font-size: .9em;
+	padding: 2px 4px;
+	border-radius: 2px;
+	border: 1px solid #0008;
+}
+
+.tag-false,
+.tag- {
+	display: none;
+}
+
+.server-icon {
+	background-color: #3362ba;
+	color: #fff;
+	text-align: center;
+	font-weight: bold;
+}
+
+.dropbtn {
+	color: #000;
+	cursor: pointer;
+}
+
+.dropbtn > i {
+	pointer-events: none;
+}
+
+.dropdown {
+	position: relative;
+	display: inline-block;
+}
+
+.dropdown-content {
+	display: none;
+	position: absolute;
+	background-color: #f1f1f1;
+	overflow: auto;
+	box-shadow: #0007 1px 1px 5px;
+	z-index: 1;
+	transform: translate(-100%, 0%);
+}
+
+.dropdown-content > form {
+	padding: 5px 8px;
+	margin: 0;
+	padding: 0;
+}
+
+.dropdown-content input[type='submit'] {
+	padding: 5px 8px;
+	margin: 0;
+	padding: 4px 6px;
+	border: none;
+	min-width: 100px;
+}
+
+.dropdown-content  input[type='text'] {
+	display: none;
+}
+
+.dropdown input[type='submit']:hover,
+.dropdown input[type='submit']:active {
+	background: #1c68ff;
+}
+
+.show {
+	display: block;
+}
+
+.show-, .show-false {
+	display: none;
+}

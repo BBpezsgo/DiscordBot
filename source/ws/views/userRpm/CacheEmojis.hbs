@@ -1,0 +1,97 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+    <link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
+    <script language="javascript" src="/dynaform/custom.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onload="setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+    marginheight="0">
+    <table id="autoWidth" style="width: 598px;">
+        <tbody>
+            <tr>
+                <td class="h1" colspan="3" id="t_title">Cache</td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td class="h2" colspan="3" id="t_lan">Emojis</td>
+            </tr>
+            <tr>
+                <td width="698" align="center">
+                    <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td class="ListM">
+                                    <b>Emoji</b>
+                                </td>
+                                <td class="ListM" style="width: 100%;">
+                                    <b>Name</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>ID</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Created At</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Identifier</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Anim.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Aval.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Dela.</b>
+                                </td>
+                            </tr>
+                            {{#each emojis}}
+                            <tr>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <div class="tooltip">
+                                        <img src="{{this.url}}" width="16" height="16">
+                                        <span class="tooltiptext">
+                                            <img src="{{this.url}}" width="128" height="128">
+                                        </span>
+                                    </div>
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.createdAt}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <:{{this.identifier}}>
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.animated}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.available}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.deletable}}
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -6,13 +6,15 @@ const Discord = require('discord.js')
 const { LogManager, MessageCodes } = require('../functions/log.js')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
-const { 
+const {
     INFO,
     ERROR,
     WARNING,
     DEBUG,
-    DONE
- } = require('../functions/enums')
+    DONE,
+    WsStatusText
+} = require('../functions/enums')
+const { GetTime, GetDataSize, Capitalize, GetDate } = require('../functions/functions')
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
@@ -49,12 +51,26 @@ class WebSocket {
         this.app.use(bodyParser.urlencoded({ extended: false }))
         this.app.use(bodyParser.json())
 
+        this.app.use((req, res, next) => {
+            const auth = { login: 'bb', password: 'bb' }
+
+            const b64auth = (req.headers.authorization || '').split(' ')[1] || ''
+            const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':')
+
+            if (login && password && login === auth.login && password === auth.password) {
+                return next()
+            }
+
+            res.set('WWW-Authenticate', 'Basic realm="401"')
+            res.status(401).render('userRpm/401')
+        })
+
         this.registerRoots()
 
-        this.app.get('/data/status', function(req, res) {
-            var dataToSendToClient = {'message': 'error message from server'}
+        this.app.get('/data/status', function (req, res) {
+            var dataToSendToClient = { 'message': 'error message from server' }
             res.send(JSON.stringify(dataToSendToClient))
-         })
+        })
 
         this.server = this.app.listen(port, ip, () => {
             this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
@@ -97,10 +113,6 @@ class WebSocket {
         })
     }
 
-    checkPassword(_password) {
-        return (_password == this.password)
-    }
-
     GetClientStats() {
         if (this.client.user != undefined) {
             return { username: this.client.user.username, avatar: this.client.user.avatarURL(), discriminator: this.client.user.discriminator, ping: this.client.ws.ping, status: 'online', enStart: 'none', enStop: 'block' }
@@ -113,239 +125,403 @@ class WebSocket {
         this.app.get('/', (req, res) => {
             const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
-            const _password = req.query.password
-
-            if (_password == undefined) {
-                res.render('login', {})
-                return
-            }
-
-            if (!this.checkPassword(_password)) {
-                res.render('error', {})
-                return
-            }
-
             const view = req.query.view
 
-            if (view == 0) {
-                var servers = []
-                this.client.guilds.cache.forEach(s => {
-                    //s.id
-                    //s.createdAt
-                    //s.joinedAt
-                    //s.ownerID
-                    //s.fetch
-                    servers.push({ id: s.id, iconUrl: s.iconURL() })
-                })
-
-                var users = []
-                this.client.users.cache.forEach(u => {
-                    //u.bot
-                    //u.createdAt
-                    //u.id
-                    //u.fetch
-                    if (u.id != "738030244367433770") {
-                        users.push({ id: u.id, username: u.username, avatar: u.avatarURL(), status: 'offline', selected: 0, bannerColor: "#00000000", discriminator: u.discriminator })
-                    }
-                })
-
-                var logs = []
-                this.logManager.logs.forEach(log => {
-                    if (log.priv == false) {
-                        logs.push({ message: log.message, time: log.time, type: log.type })
-                    }
-                })
-
-                logs = logs.reverse()
-
-                res.render('botView', {
-                    title: 'Ügyintéző Dashboard',
-                    token: _password,
-                    users,
-                    servers,
-                    client: this.GetClientStats(),
-                    logs
-                })
-            } else if (view == 1) {
-                var servers = []
-                this.client.guilds.cache.forEach(s => {
-                    servers.push({ id: s.id, iconUrl: s.iconURL() })
-                })
-
-                var _selectedServer = null
-                if (req.query.server != undefined) {
-                    const s = this.client.guilds.cache.get(req.query.server)
-                    var _selectedServer = { id: s.id, name: s.name, banner: s.bannerURL() }
-                }
-
-                var users = []
-                this.client.users.cache.forEach(u => {
-                    if (u.id != "738030244367433770") {
-                        users.push({ id: u.id, username: u.username, avatar: u.avatarURL(), status: 'offline', selected: 0, bannerColor: "#00000000", discriminator: u.discriminator })
-                    }
-                })
-
-                var _selectedChannel = null
-                var _selectedUser = null
-                var _messages = []
-                if (req.query.user != undefined) {
-                    const u = this.client.users.cache.get(req.query.user.toString())
-                    _selectedUser = { id: u.id, username: u.username, avatar: u.avatarURL(), status: 'offline', channel: null, actions: { deleteDM: '0', createDM: '0' } }
-                    const c = u.dmChannel
-                    if (c != undefined) {
-                        _selectedChannel = { id: c.id, userId: u.id, username: u.username }
-                        _selectedUser.channel = _selectedChannel
-                        c.messages.cache.forEach(m => {
-                            _messages.push({ id: m.id, context: m.content, time: dateToHumanTime(m.createdAt), author: { id: m.author.id, username: m.author.username, avatar: m.author.avatarURL() } })
-                        })
-                        _selectedUser.actions.createDM = ''
-                        _selectedUser.actions.name = 'deleteUserDM'
-                    } else {
-                        _selectedUser.actions.deleteDM = ''
-                        _selectedUser.actions.name = 'createUserDM'
-                    }
-                }
-
-                if (_selectedUser != null) {
-
-                    for (let i = 0; i < users.length; i++) {
-                        const c = users[i]
-                        if (c.id == _selectedUser.id) {
-                            c.selected = 1
-                            break
-                        }
-                    }
-                }
-
-                res.render('discordView', {
-                    title: 'Ügyintéző Dashboard',
-                    token: _password,
-                    users,
-                    servers,
-                    selectedServer: _selectedServer,
-                    selectedUser: _selectedUser,
-                    client: this.GetClientStats(),
-                    messages: _messages
-                })
-            } else if (view == 2) {
-                var servers = []
-                this.client.guilds.cache.forEach(s => {
-                    servers.push({ id: s.id, iconUrl: s.iconURL() })
-                })
-
-                var _selectedServer = null
-                if (req.query.server != undefined) {
-                    const s = this.client.guilds.cache.get(req.query.server)
-                    var _selectedServer = { id: s.id, name: s.name, banner: s.bannerURL() }
-                }
-
-                var chans = []
-                if (_selectedServer != null) {
-                    let _p = 0
-                    this.client.guilds.cache.get(_selectedServer.id).channels.cache.forEach(c => {
-                        if (c.type == "GUILD_NEWS" || c.type == "GUILD_TEXT" || c.type == "GUILD_STORE") {
-                            if (c.parent == undefined) {
-                                chans.push({ id: c.id, name: c.name, type: c.type, selected: 0, pos: -100 + c.rawPosition, channelType: 'channel' })
-                            } else {
-                                chans.push({ id: c.id, name: c.name, type: c.type, selected: 0, pos: _p + (c.rawPosition / 100) + c.parent.rawPosition, channelType: 'channel' })
-                            }
-                        } else if (c.type == "GUILD_CATEGORY") {
-                            chans.push({ id: 0, name: c.name, type: c.type, selected: 0, pos: _p + c.rawPosition, channelType: 'group' })
-                        }
-                    })
-                }
-
-                chans.sort(function (a, b) { return a.pos - b.pos })
-
-                var _selectedChannel = null
-                var _messages = []
-                var _members = []
-                if (req.query.channel != undefined) {
-                    const c = this.client.channels.cache.get(req.query.channel.toString())
-                    if (c != undefined) {
-                        _selectedChannel = { id: c.id, name: c.name, type: c.type }
-                        if (c.type == "GUILD_TEXT") {
-                            /**
-                             * @type {Discord.TextChannel}
-                             */
-                            const cT = c
-                            _selectedChannel = { id: c.id, name: c.name, type: c.type, description: cT.topic }
-                            cT.messages.cache.forEach(m => {
-                                _messages.push({ id: m.id, context: m.content, time: dateToHumanTime(m.createdAt), author: { id: m.author.id, username: m.author.username, avatar: m.author.avatarURL() } })
-                            })
-                            cT.members.forEach(u => {
-                                _members.push({ id: u.id, displayName: u.displayName, avatar: u.user.avatarURL(), displayColor: u.displayHexColor, status: 'offline' })
-                            })
-                        }
-                    }
-                }
-
-                if (_selectedChannel != null) {
-
-                    for (let i = 0; i < chans.length; i++) {
-                        const c = chans[i]
-                        if (c.id == _selectedChannel.id) {
-                            c.selected = 1
-                            break
-                        }
-                    }
-                }
-
-                var _title = "?"
-                if (_selectedChannel == null) {
-                    _title = "Ügyintéző Dashboard"
-                } else {
-                    _title = _selectedChannel.name
-                }
-
-                res.render('serverView', {
-                    title: _title,
-                    token: _password,
-                    channels: chans,
-                    servers,
-                    selectedServer: _selectedServer,
-                    selectedChannel: _selectedChannel,
-                    client: this.GetClientStats(),
-                    messages: _messages,
-                    members: _members
-                })
-            } else if (view == 3) {
-                var userId = req.query.user
-                var _dataBasic, _dataBackpacks, __score
-
-                if (userId != undefined) {
-                    _dataBasic = this.database.dataBasic[userId]
-                    _dataBackpacks = this.database.dataBackpacks[userId]
-                    var __score = _dataBasic.score
-                }
-
-                var _rankName = xpRankText(__score)
-                var next = xpRankNext(__score)
-                var _scorePercent = __score / next * 100
-                var _rankIcon = xpRankIcon(__score)
-
-                var _score = {rankName: _rankName, rankIcon: _rankIcon, percent: _scorePercent}
-
-                res.render('databaseIframe', {
-                    token: _password,
-                    dataBasic: _dataBasic,
-                    dataBackpacks: _dataBackpacks,
-                    score: _score
-                })
-            } else if (view == 5) {
-                res.render('statusPanel', {
-                    token: _password,
-                    client: this.GetClientStats()
-                })
+            if (view == 'default' || view == null || view == undefined) {
+                res.render('default')
+            } else {
+                res.status(404).send("Not found")
             }
         })
 
+        this.app.get('/frames/top', (req, res) => {
+            res.render('frames/top')
+        })
+
+        this.app.get('/userRpm/MenuRpm', (req, res) => {
+            res.render('userRpm/MenuRpm')
+        })
+
+        this.app.get('/userRpm/Status', (req, res) => {
+            var uptime = new Date(0)
+            uptime.setSeconds(this.client.uptime / 1000)
+            uptime.setHours(uptime.getHours() - 1)
+
+            var shardState = 'none'
+            if (this.client.ws.shards.size > 0) {
+                shardState = WsStatusText[this.client.ws.shards.first().status]
+            }
+
+            const clientData = {
+                readyTime: GetTime(this.client.readyAt),
+                uptime: GetTime(uptime),
+                botStarted: this.client.isReady(),
+                botStopped: (!this.client.isReady()),
+                ws: {
+                    ping: this.client.ws.ping.toString().replace('NaN', '-'),
+                    status: WsStatusText[this.client.ws.status],
+                    readyAt: this.client.ws.client.readyAt
+                },
+                statesManager: this.statesManager,
+                shard: {
+                    state: shardState,
+                },
+            }
+
+            res.render('userRpm/Status', { bot: clientData })
+        })
+
+        this.app.get('/userRpm/CacheEmojis', (req, res) => {
+            var emojis = []
+            
+            this.client.emojis.cache.forEach(emoji => {
+                const newEmoji = {
+                    animated: emoji.animated,
+                    available: emoji.available,
+                    deletable: emoji.deletable,
+                    createdAt: GetDate(emoji.createdAt),
+                    id: emoji.id,
+                    identifier: emoji.identifier,
+                    name: emoji.name,
+                    url: emoji.url
+                }
+
+                emojis.push(newEmoji)
+            });
+
+            res.render('userRpm/CacheEmojis', { emojis: emojis })
+        })
+
+        this.app.get('/userRpm/CacheUsers', (req, res) => {
+            var users = []
+            
+            this.client.users.cache.forEach(user => {
+                const newUser = {
+                    defaultAvatarUrl: user.defaultAvatarURL,
+                    avatarUrlSmall: user.avatarURL({ size: 16 }),
+                    avatarUrlBig: user.avatarURL({ size: 128 }),
+                    id: user.id,
+                    hexAccentColor: user.hexAccentColor,
+                    bot: user.bot,
+                    createdAt: GetDate(user.createdAt),
+                    discriminator: user.discriminator,
+                    system: user.system,
+                    username: user.username,
+                }
+
+                users.push(newUser)
+            });
+
+            res.render('userRpm/CacheUsers', { users: users })
+        })
+
+        this.app.get('/userRpm/CacheChannels', (req, res) => {
+            const GetTypeUrl = (type) => {
+                if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+                    return 'text'
+                }
+                if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+                    return 'voice'
+                }
+            }
+
+            const GetTypeText = (type) => {
+                if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+                    return 'Text channel'
+                }
+                if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+                    return 'Voice channel'
+                }
+            }
+
+            var groups = []
+            var singleChannels = []
+            
+            this.client.channels.cache.forEach(channel => {
+                if (channel.type == "GUILD_CATEGORY") {
+                    const channels = []
+
+                    channel.children.forEach(child => {
+                        const newChannel = {
+                            id: child.id,
+                            createdAt: GetDate(child.createdAt),
+                            deletable: child.deletable,
+                            editable: child.editable,
+                            invitable: child.invitable,
+                            joinable: child.joinable,
+                            locked: child.locked,
+                            manageable: child.manageable,
+                            name: child.name,
+                            nsfw: child.nsfw,
+                            sendable: child.sendable,
+                            speakable: child.speakable,
+                            type: child.type,
+                            unarchivable: child.unarchivable,
+                            viewable: child.viewable,
+                            parentId: child.parentId,
+                            typeText: GetTypeText(child.type),
+                            typeUrl: GetTypeUrl(child.type),
+                            commands: ['fetch'],
+                        }
+        
+                        channels.push(newChannel)
+                    })
+
+                    const newGroup = {
+                        id: channel.id,
+                        createdAt: GetDate(channel.createdAt),
+                        deletable: channel.deletable,
+                        manageable: channel.manageable,
+                        name: channel.name,
+                        viewable: channel.viewable,
+                        channels: channels,
+                        commands: ['fetch'],
+                    }
+
+                    groups.push(newGroup)
+                } else if (channel.parentId == null) {
+                    const newChannel = {
+                        id: channel.id,
+                        createdAt: GetDate(channel.createdAt),
+                        deletable: channel.deletable,
+                        editable: channel.editable,
+                        invitable: channel.invitable,
+                        joinable: channel.joinable,
+                        locked: channel.locked,
+                        manageable: channel.manageable,
+                        name: channel.name,
+                        nsfw: channel.nsfw,
+                        sendable: channel.sendable,
+                        speakable: channel.speakable,
+                        type: channel.type,
+                        unarchivable: channel.unarchivable,
+                        viewable: channel.viewable,
+                        parentId: channel.parentId,
+                        typeText: GetTypeText(channel.type),
+                        typeUrl: GetTypeUrl(channel.type),
+                        commands: ['fetch'],
+                    }
+
+                    singleChannels.push(newChannel)
+                }
+            });
+
+            res.render('userRpm/CacheChannels', { groups: groups, channels: singleChannels })
+        })
+
+        this.app.get('/userRpm/CacheServers', (req, res) => {
+            var servers = []
+            
+            this.client.guilds.cache.forEach(server => {
+                const newServer = {
+                    iconUrlSmall: server.iconURL({ size: 16 }),
+                    iconUrlLarge: server.iconURL({ size: 128 }),
+
+                    name: (server.name),
+                    id: server.id,
+
+                    createdAt: GetDate(server.createdAt),
+                    joinedAt: GetDate(server.joinedAt),
+
+                    memberCount: (server.memberCount),
+                    nsfwLevel: (server.nsfwLevel),
+                    nameAcronym: (server.nameAcronym),
+                    mfaLevel: (server.mfaLevel),
+                    verificationLevel: (server.verificationLevel),
+                    splash: (server.splash),
+
+                    available: server.available,
+                    large: (server.large),
+                    partnered: (server.partnered),
+                    verified: (server.verified),
+                }
+
+                servers.push(newServer)
+            });
+
+            res.render('userRpm/CacheServers', { servers: servers })
+        })
+
+        this.app.get('/userRpm/Application', (req, res) => {
+            const app = this.client.application
+            
+            const newApp = {
+                id: app.id,
+                createdAt: GetDate(app.createdAt),
+                botRequireCodeGrant: app.botRequireCodeGrant,
+                iconUrl: app.iconURL({ size: 16 }),
+                coverUrl: app.coverURL({ size: 16 }),
+                name: app.name,
+                botPublic: app.botPublic,
+                customInstallURL: app.customInstallURL,
+                description: app.description,
+                partial: app.partial,
+                rpcOrigins: app.rpcOrigins,
+                tags: app.tags,
+            }
+            res.render('userRpm/Application', { app: newApp })
+        })
+
+        this.app.get('/userRpm/Process', (req, res) => {
+            const uptime = new Date()
+            uptime.setSeconds(Math.floor(process.uptime()))
+
+            const proc = {
+
+                argv: process.argv,
+                connected: process.connected,
+                debugPort: process.debugPort,
+                execArgv: process.execArgv,
+                noAsar: process.noAsar,
+                release: process.release,
+                version: process.version,
+
+                arch: process.arch,
+                config:{
+                    variables: process.config.variables,
+                    target_defaults: process.config.target_defaults,
+                },
+                execPath: process.execPath,
+                platform: process.platform,
+                chrome: process.chrome,
+                contextId: process.contextId,
+                contextIsolated: process.contextIsolated,
+                defaultApp: process.defaultApp,
+                exitCode: process.exitCode,
+                features: process.features,
+                isMainFrame: process.isMainFrame,
+                mas: process.mas,
+                noDeprecation: process.noDeprecation,
+                pid: process.pid,
+                ppid: process.ppid,
+                resourcesPath: process.resourcesPath,
+                sandboxed: process.sandboxed,
+                throwDeprecation: process.throwDeprecation,
+                title: process.title,
+                traceDeprecation: process.traceDeprecation,
+                traceProcessWarnings: process.traceProcessWarnings,
+                type: process.type,
+                windowsStore: process.windowsStore,
+                uptime: GetTime(uptime)
+            }
+
+            res.render('userRpm/Process', { process: proc })
+        })
+
+        this.app.get('/userRpm/*', (req, res) => {
+            res.render('userRpm/404', { message: req.path })
+        })
+
+        this.app.post('/command/fetch', (req, res) => {
+            this.client.channels.cache.get(req.body.id).fetch()
+            const GetTypeUrl = (type) => {
+                if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+                    return 'text'
+                }
+                if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+                    return 'voice'
+                }
+            }
+
+            const GetTypeText = (type) => {
+                if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+                    return 'Text channel'
+                }
+                if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+                    return 'Voice channel'
+                }
+            }
+
+            var groups = []
+            var singleChannels = []
+            
+            this.client.channels.cache.forEach(channel => {
+                if (channel.type == "GUILD_CATEGORY") {
+                    const channels = []
+
+                    channel.children.forEach(child => {
+                        const newChannel = {
+                            id: child.id,
+                            createdAt: GetDate(child.createdAt),
+                            deletable: child.deletable,
+                            editable: child.editable,
+                            invitable: child.invitable,
+                            joinable: child.joinable,
+                            locked: child.locked,
+                            manageable: child.manageable,
+                            name: child.name,
+                            nsfw: child.nsfw,
+                            sendable: child.sendable,
+                            speakable: child.speakable,
+                            type: child.type,
+                            unarchivable: child.unarchivable,
+                            viewable: child.viewable,
+                            parentId: child.parentId,
+                            typeText: GetTypeText(child.type),
+                            typeUrl: GetTypeUrl(child.type),
+                            commands: ['fetch'],
+                        }
+        
+                        channels.push(newChannel)
+                    })
+
+                    const newGroup = {
+                        id: channel.id,
+                        createdAt: GetDate(channel.createdAt),
+                        deletable: channel.deletable,
+                        manageable: channel.manageable,
+                        name: channel.name,
+                        viewable: channel.viewable,
+                        channels: channels,
+                        commands: ['fetch'],
+                    }
+
+                    groups.push(newGroup)
+                } else if (channel.parentId == null) {
+                    const newChannel = {
+                        id: channel.id,
+                        createdAt: GetDate(channel.createdAt),
+                        deletable: channel.deletable,
+                        editable: channel.editable,
+                        invitable: channel.invitable,
+                        joinable: channel.joinable,
+                        locked: channel.locked,
+                        manageable: channel.manageable,
+                        name: channel.name,
+                        nsfw: channel.nsfw,
+                        sendable: channel.sendable,
+                        speakable: channel.speakable,
+                        type: channel.type,
+                        unarchivable: channel.unarchivable,
+                        viewable: channel.viewable,
+                        parentId: channel.parentId,
+                        typeText: GetTypeText(channel.type),
+                        typeUrl: GetTypeUrl(channel.type),
+                        commands: ['fetch'],
+                    }
+
+                    singleChannels.push(newChannel)
+                }
+            });
+
+            res.render('userRpm/CacheChannels', { groups: groups, channels: singleChannels })
+        })
+
+        this.app.post('/userRpm/Process/Exit', (req, res) => {
+            process.exit()
+        })
+
+        this.app.post('/userRpm/Process/Abort', (req, res) => {
+            process.abort()
+        })
+
+        this.app.post('/userRpm/Process/Disconnect', (req, res) => {
+            process.disconnect()
+        })
+
         this.app.post('/sendMessage', (req, res) => {
-            var _pass = req.body.token
             var text = req.body.text
             var channelId = req.body.channel
-
-            if (!this.checkPassword(_pass)) { return }
 
             var chan = this.client.channels.cache.get(channelId)
 
@@ -355,17 +531,13 @@ class WebSocket {
 
             res.render('serverView', {
                 title: chan.name,
-                token: _pass,
                 chans
             })
         })
 
         this.app.post('/sendMessageUser', (req, res) => {
-            var _pass = req.body.token
             var text = req.body.text
             var userId = req.body.user
-
-            if (!this.checkPassword(_pass)) { return }
 
             var chan = this.client.users.cache.get(userId).dmChannel
 
@@ -374,23 +546,16 @@ class WebSocket {
             }
 
             res.render('serverView', {
-                title: 'Ügyintéző Dashboard',
-                token: _pass
+                title: 'Ügyintéző Dashboard'
             })
         })
 
         this.app.post('/fetchChannelMessages', (req, res) => {
-            var _pass = req.body.token
             var channelId = req.body.id
-
-            if (!this.checkPassword(_pass)) {
-                res.status(401).send("Unauthorized")
-                return
-            }
 
             var chan = this.client.channels.cache.get(channelId)
 
-            if (!chan) { 
+            if (!chan) {
                 res.status(500).send("Internal Server Error")
                 return
             }
@@ -401,58 +566,51 @@ class WebSocket {
         })
 
         this.app.post('/deleteUserDM', (req, res) => {
-            var _pass = req.body.token
             var userId = req.body.id
-
-            if (!this.checkPassword(_pass)) { return }
 
             var user = this.client.users.cache.get(userId)
 
             if (!user) { return }
 
             user.deleteDM()
+
+            res.send(200).send("OK")
         })
 
         this.app.post('/createUserDM', (req, res) => {
-            var _pass = req.body.token
             var userId = req.body.id
-
-            if (!this.checkPassword(_pass)) { return }
 
             var user = this.client.users.cache.get(userId)
 
             if (!user) { return }
 
             user.createDM()
+
+            res.send(200).send("OK")
         })
 
         this.app.post('/fetchUser', (req, res) => {
-            var _pass = req.body.token
             var userId = req.body.id
-
-            if (!this.checkPassword(_pass)) { return }
 
             var user = this.client.users.cache.get(userId)
 
             if (!user) { return }
 
             user.fetch()
+
+            res.send(200).send("OK")
         })
 
         this.app.post('/startBot', (req, res) => {
-            var _pass = req.body.token
-
-            if (!this.checkPassword(_pass)) { return }
-
             this.StartBot()
+
+            res.send(200).send("OK")
         })
 
         this.app.post('/stopBot', (req, res) => {
-            var _pass = req.body.token
-
-            if (!this.checkPassword(_pass)) { return }
-
             this.StopBot()
+
+            res.send(200).send("OK")
         })
     }
 }

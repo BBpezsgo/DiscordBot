@@ -80,4 +80,28 @@ const usersWithTax = [
     '750748417373896825', '504304776033468438', '551299555698671627'
 ]
 
-module.exports = { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, ColorRoles, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId, CliColor }
+const WsStatus = [
+    'READY',
+    'CONNECTING',
+    'RECONNECTING',
+    'IDLE',
+    'NEARLY',
+    'DISCONNECTED',
+    'WAITING_FOR_GUILDS',
+    'IDENTIFYING',
+    'RESUMING'
+]
+
+const WsStatusText = [
+    'Ready',
+    'Connecting...',
+    'Reconnecting...',
+    'Idle',
+    'Nearly',
+    'Disconnected',
+    'Waiting for guilds...',
+    'Identifying...',
+    'Resuming...'
+]
+
+module.exports = { WsStatusText, WsStatus, INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, ColorRoles, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId, CliColor }

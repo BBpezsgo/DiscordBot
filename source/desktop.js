@@ -1,4 +1,3 @@
-//#region Imports, variables
 
 var autoStartBot = true
 
@@ -7,6 +6,10 @@ var logManager = new LogManager(false, null, null)
 
 logManager.Loading('Loading packet', "fs")
 const fs = require('fs')
+
+process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
+
+//proc.stderr.pipe(fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', { flags: 'a' }))
 
 var botStopped = false
 var cliCurrentlyTyping = ''
