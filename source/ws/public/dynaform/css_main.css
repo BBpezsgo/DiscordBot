@@ -252,47 +252,6 @@ table.datas>tbody>tr>td {
 	visibility: visible;
 }
 
-.caret,
-.caret-all {
-	cursor: pointer;
-	-webkit-user-select: none;
-	/* Safari 3.1+ */
-	-moz-user-select: none;
-	/* Firefox 2+ */
-	-ms-user-select: none;
-	/* IE 10+ */
-	user-select: none;
-	width: 20px;
-}
-
-.caret::before {
-	content: url('../images/expand.png');
-	color: black;
-	display: inline-block;
-}
-
-.caret-down::before {
-	content: url('../images/collapse.png') !important;
-}
-
-.caret-up::before {
-	content: url('../images/expand.png') !important;
-}
-
-.caret-all::before {
-	content: url('../images/both.png');
-	color: black;
-	display: inline-block;
-}
-
-.nested {
-	display: none;
-}
-
-.nested-show {
-	display: table-row !important;
-}
-
 .tag-true {
 	background-color: #0003;
 	font-size: .9em;

@@ -111,6 +111,10 @@ class WebSocket {
         this.server.on('upgrade', (req, socket, head) => {
             this.logManager.Log(DEBUG + ': ' + "upgrade", true)
         })
+
+
+
+        this.databaseSearchedUserId = ''
     }
 
     GetClientStats() {
@@ -119,6 +123,245 @@ class WebSocket {
         } else {
             return { username: "Username", avatar: "defaultAvatar.png", discriminator: "0000", ping: 0, status: 'offline', enStart: 'block', enStop: 'none' }
         }
+    }
+
+    RenderPage_Status(req, res) {
+        var uptime = new Date(0)
+        uptime.setSeconds(this.client.uptime / 1000)
+        uptime.setHours(uptime.getHours() - 1)
+
+        var shardState = 'none'
+        if (this.client.ws.shards.size > 0) {
+            shardState = WsStatusText[this.client.ws.shards.first().status]
+        }
+
+        const clientData = {
+            readyTime: GetTime(this.client.readyAt),
+            uptime: GetTime(uptime),
+            botStarted: this.client.isReady(),
+            botStopped: (!this.client.isReady()),
+            ws: {
+                ping: this.client.ws.ping.toString().replace('NaN', '-'),
+                status: WsStatusText[this.client.ws.status],
+                readyAt: this.client.ws.client.readyAt
+            },
+            statesManager: this.statesManager,
+            shard: {
+                state: shardState,
+            },
+        }
+
+        res.render('userRpm/Status', { bot: clientData })
+    }
+
+    RenderPage_CacheChannels(req, res) {
+        const GetTypeUrl = (type) => {
+            if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+                return 'text'
+            }
+            if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+                return 'voice'
+            }
+        }
+
+        const GetTypeText = (type) => {
+            if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+                return 'Text channel'
+            }
+            if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+                return 'Voice channel'
+            }
+        }
+
+        var groups = []
+        var singleChannels = []
+
+        this.client.channels.cache.forEach(channel => {
+            if (channel.type == "GUILD_CATEGORY") {
+                const channels = []
+
+                channel.children.forEach(child => {
+                    const newChannel = {
+                        id: child.id,
+                        createdAt: GetDate(child.createdAt),
+                        deletable: child.deletable,
+                        editable: child.editable,
+                        invitable: child.invitable,
+                        joinable: child.joinable,
+                        locked: child.locked,
+                        manageable: child.manageable,
+                        name: child.name,
+                        nsfw: child.nsfw,
+                        sendable: child.sendable,
+                        speakable: child.speakable,
+                        type: child.type,
+                        unarchivable: child.unarchivable,
+                        viewable: child.viewable,
+                        parentId: child.parentId,
+                        typeText: GetTypeText(child.type),
+                        typeUrl: GetTypeUrl(child.type),
+                        commands: ['Fetch'],
+                    }
+
+                    if (child.joinable) {
+                        newChannel.commands.push('Join')
+                    }
+
+                    channels.push(newChannel)
+                })
+
+                const newGroup = {
+                    id: channel.id,
+                    createdAt: GetDate(channel.createdAt),
+                    deletable: channel.deletable,
+                    manageable: channel.manageable,
+                    name: channel.name,
+                    viewable: channel.viewable,
+                    channels: channels,
+                    commands: ['Fetch'],
+                }
+
+                groups.push(newGroup)
+            } else if (channel.parentId == null) {
+                const newChannel = {
+                    id: channel.id,
+                    createdAt: GetDate(channel.createdAt),
+                    deletable: channel.deletable,
+                    editable: channel.editable,
+                    invitable: channel.invitable,
+                    joinable: channel.joinable,
+                    locked: channel.locked,
+                    manageable: channel.manageable,
+                    name: channel.name,
+                    nsfw: channel.nsfw,
+                    sendable: channel.sendable,
+                    speakable: channel.speakable,
+                    type: channel.type,
+                    unarchivable: channel.unarchivable,
+                    viewable: channel.viewable,
+                    parentId: channel.parentId,
+                    typeText: GetTypeText(channel.type),
+                    typeUrl: GetTypeUrl(channel.type),
+                    commands: ['Fetch'],
+                }
+
+                if (channel.joinable) {
+                    newChannel.commands.push('Join')
+                }
+
+                singleChannels.push(newChannel)
+            }
+        });
+
+        res.render('userRpm/CacheChannels', { groups: groups, channels: singleChannels })
+    }
+
+    RenderPage_Database(req, res, userId) {
+        try {
+            const userDatabase = {
+                userId: userId,
+                score: this.database.dataBasic[userId].score,
+                money: this.database.dataBasic[userId].money,
+                day: this.database.dataBasic[userId].day,
+                color: this.database.dataBasic[userId].color,
+                privateCommands: this.database.dataBasic[userId].privateCommands,
+
+                crates: this.database.dataBackpacks[userId].crates,
+                gifts: this.database.dataBackpacks[userId].gifts,
+                getGift: this.database.dataBackpacks[userId].getGift,
+                tickets: this.database.dataBackpacks[userId].tickets,
+                quizTokens: this.database.dataBackpacks[userId].quizTokens,
+                luckyCards: {
+                    small: this.database.dataBackpacks[userId].luckyCards.small,
+                    medium: this.database.dataBackpacks[userId].luckyCards.medium,
+                    large: this.database.dataBackpacks[userId].luckyCards.large,
+                },
+
+                businessIndex: this.database.dataBusinesses[userId].businessIndex,
+                businessName: this.database.dataBusinesses[userId].businessName,
+                businessLevel: this.database.dataBusinesses[userId].businessLevel,
+
+                stickersMeme: this.database.dataStickers[userId].stickersMeme,
+                stickersMusic: this.database.dataStickers[userId].stickersMusic,
+                stickersYoutube: this.database.dataStickers[userId].stickersYoutube,
+                stickersMessage: this.database.dataStickers[userId].stickersMessage,
+                stickersCommand: this.database.dataStickers[userId].stickersCommand,
+                stickersTip: this.database.dataStickers[userId].stickersTip,
+
+                memes: this.database.dataUserstats[userId].memes,
+                musics: this.database.dataUserstats[userId].musics,
+                youtubevideos: this.database.dataUserstats[userId].youtubevideos,
+                messages: this.database.dataUserstats[userId].messages,
+                chars: this.database.dataUserstats[userId].chars,
+                commands: this.database.dataUserstats[userId].commands,
+            }
+
+            const cacheUser = this.client.users.cache.get(userId)
+
+            const user = {
+                id: cacheUser.id,
+                name: cacheUser.username,
+                avatarUrlSmall: cacheUser.avatarURL({ size: 32 }),
+                avatarUrlLarge: cacheUser.avatarURL({ size: 128 }),
+            }
+
+            const info = {
+                backupFolder: this.database.backupFolderPath,
+                folder: this.database.databaseFolderPath,
+            }
+
+            const bot = {
+                day: this.database.dataBot.day,
+            }
+
+            const market = {
+                day: this.database.dataMarket.day,
+                prices: {
+                    token: this.database.dataMarket.prices.token,
+                    coupon: this.database.dataMarket.prices.coupon,
+                    jewel: this.database.dataMarket.prices.jewel,
+                },
+            }
+
+            res.render('userRpm/Database', { userDatabase: userDatabase, user: user, bot: bot, market: market, info: info })
+        } catch (error) {
+            this.databaseSearchedUserId = ''
+            this.RenderPage_DatabaseSearch(req, res, "User's database not found")
+        }
+    }
+
+    RenderPage_DatabaseSearch(req, res, searchError) {
+        if (this.databaseSearchedUserId.length > 0) {
+            this.RenderPage_Database(req, res, this.databaseSearchedUserId)
+            return
+        }
+
+        const cacheUsers = this.client.users.cache;
+        const users = []
+
+        cacheUsers.forEach(cacheUser => {
+            users.push({ id: cacheUser.id, name: cacheUser.username, avatarUrlSmall: cacheUser.avatarURL({ size: 16 }), avatarUrlLarge: cacheUser.avatarURL({ size: 128 }) })
+        });
+
+        const info = {
+            backupFolder: this.database.backupFolderPath,
+            folder: this.database.databaseFolderPath,
+        }
+
+        const bot = {
+            day: this.database.dataBot.day,
+        }
+
+        const market = {
+            day: this.database.dataMarket.day,
+            prices: {
+                token: this.database.dataMarket.prices.token,
+                coupon: this.database.dataMarket.prices.coupon,
+                jewel: this.database.dataMarket.prices.jewel,
+            },
+        }
+
+        res.render('userRpm/DatabaseSearch', { users: users, searchError: searchError, bot: bot, market: market, info: info })
     }
 
     registerRoots() {
@@ -143,37 +386,12 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/Status', (req, res) => {
-            var uptime = new Date(0)
-            uptime.setSeconds(this.client.uptime / 1000)
-            uptime.setHours(uptime.getHours() - 1)
-
-            var shardState = 'none'
-            if (this.client.ws.shards.size > 0) {
-                shardState = WsStatusText[this.client.ws.shards.first().status]
-            }
-
-            const clientData = {
-                readyTime: GetTime(this.client.readyAt),
-                uptime: GetTime(uptime),
-                botStarted: this.client.isReady(),
-                botStopped: (!this.client.isReady()),
-                ws: {
-                    ping: this.client.ws.ping.toString().replace('NaN', '-'),
-                    status: WsStatusText[this.client.ws.status],
-                    readyAt: this.client.ws.client.readyAt
-                },
-                statesManager: this.statesManager,
-                shard: {
-                    state: shardState,
-                },
-            }
-
-            res.render('userRpm/Status', { bot: clientData })
+            this.RenderPage_Status(req, res)
         })
 
         this.app.get('/userRpm/CacheEmojis', (req, res) => {
             var emojis = []
-            
+
             this.client.emojis.cache.forEach(emoji => {
                 const newEmoji = {
                     animated: emoji.animated,
@@ -194,7 +412,7 @@ class WebSocket {
 
         this.app.get('/userRpm/CacheUsers', (req, res) => {
             var users = []
-            
+
             this.client.users.cache.forEach(user => {
                 const newUser = {
                     defaultAvatarUrl: user.defaultAvatarURL,
@@ -216,102 +434,12 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/CacheChannels', (req, res) => {
-            const GetTypeUrl = (type) => {
-                if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
-                    return 'text'
-                }
-                if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
-                    return 'voice'
-                }
-            }
-
-            const GetTypeText = (type) => {
-                if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
-                    return 'Text channel'
-                }
-                if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
-                    return 'Voice channel'
-                }
-            }
-
-            var groups = []
-            var singleChannels = []
-            
-            this.client.channels.cache.forEach(channel => {
-                if (channel.type == "GUILD_CATEGORY") {
-                    const channels = []
-
-                    channel.children.forEach(child => {
-                        const newChannel = {
-                            id: child.id,
-                            createdAt: GetDate(child.createdAt),
-                            deletable: child.deletable,
-                            editable: child.editable,
-                            invitable: child.invitable,
-                            joinable: child.joinable,
-                            locked: child.locked,
-                            manageable: child.manageable,
-                            name: child.name,
-                            nsfw: child.nsfw,
-                            sendable: child.sendable,
-                            speakable: child.speakable,
-                            type: child.type,
-                            unarchivable: child.unarchivable,
-                            viewable: child.viewable,
-                            parentId: child.parentId,
-                            typeText: GetTypeText(child.type),
-                            typeUrl: GetTypeUrl(child.type),
-                            commands: ['fetch'],
-                        }
-        
-                        channels.push(newChannel)
-                    })
-
-                    const newGroup = {
-                        id: channel.id,
-                        createdAt: GetDate(channel.createdAt),
-                        deletable: channel.deletable,
-                        manageable: channel.manageable,
-                        name: channel.name,
-                        viewable: channel.viewable,
-                        channels: channels,
-                        commands: ['fetch'],
-                    }
-
-                    groups.push(newGroup)
-                } else if (channel.parentId == null) {
-                    const newChannel = {
-                        id: channel.id,
-                        createdAt: GetDate(channel.createdAt),
-                        deletable: channel.deletable,
-                        editable: channel.editable,
-                        invitable: channel.invitable,
-                        joinable: channel.joinable,
-                        locked: channel.locked,
-                        manageable: channel.manageable,
-                        name: channel.name,
-                        nsfw: channel.nsfw,
-                        sendable: channel.sendable,
-                        speakable: channel.speakable,
-                        type: channel.type,
-                        unarchivable: channel.unarchivable,
-                        viewable: channel.viewable,
-                        parentId: channel.parentId,
-                        typeText: GetTypeText(channel.type),
-                        typeUrl: GetTypeUrl(channel.type),
-                        commands: ['fetch'],
-                    }
-
-                    singleChannels.push(newChannel)
-                }
-            });
-
-            res.render('userRpm/CacheChannels', { groups: groups, channels: singleChannels })
+            this.RenderPage_CacheChannels(req, res)
         })
 
         this.app.get('/userRpm/CacheServers', (req, res) => {
             var servers = []
-            
+
             this.client.guilds.cache.forEach(server => {
                 const newServer = {
                     iconUrlSmall: server.iconURL({ size: 16 }),
@@ -344,7 +472,7 @@ class WebSocket {
 
         this.app.get('/userRpm/Application', (req, res) => {
             const app = this.client.application
-            
+
             const newApp = {
                 id: app.id,
                 createdAt: GetDate(app.createdAt),
@@ -377,7 +505,7 @@ class WebSocket {
                 version: process.version,
 
                 arch: process.arch,
-                config:{
+                config: {
                     variables: process.config.variables,
                     target_defaults: process.config.target_defaults,
                 },
@@ -408,103 +536,26 @@ class WebSocket {
             res.render('userRpm/Process', { process: proc })
         })
 
-        this.app.get('/userRpm/*', (req, res) => {
-            res.render('userRpm/404', { message: req.path })
+        this.app.get('/userRpm/Testing', (req, res) => {
+            res.render('userRpm/Testing')
         })
 
-        this.app.post('/command/fetch', (req, res) => {
-            this.client.channels.cache.get(req.body.id).fetch()
-            const GetTypeUrl = (type) => {
-                if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
-                    return 'text'
-                }
-                if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
-                    return 'voice'
-                }
-            }
+        this.app.post('/userRpm/CacheChannels/Fetch', (req, res) => {
+            const channel = this.client.channels.cache.get(req.body.id)
+            channel.fetch()
 
-            const GetTypeText = (type) => {
-                if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
-                    return 'Text channel'
-                }
-                if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
-                    return 'Voice channel'
-                }
-            }
+            console.log('userRpm/CacheChannels/Fetch')
 
-            var groups = []
-            var singleChannels = []
-            
-            this.client.channels.cache.forEach(channel => {
-                if (channel.type == "GUILD_CATEGORY") {
-                    const channels = []
+            this.RenderPage_CacheChannels(req, res)
+        })
 
-                    channel.children.forEach(child => {
-                        const newChannel = {
-                            id: child.id,
-                            createdAt: GetDate(child.createdAt),
-                            deletable: child.deletable,
-                            editable: child.editable,
-                            invitable: child.invitable,
-                            joinable: child.joinable,
-                            locked: child.locked,
-                            manageable: child.manageable,
-                            name: child.name,
-                            nsfw: child.nsfw,
-                            sendable: child.sendable,
-                            speakable: child.speakable,
-                            type: child.type,
-                            unarchivable: child.unarchivable,
-                            viewable: child.viewable,
-                            parentId: child.parentId,
-                            typeText: GetTypeText(child.type),
-                            typeUrl: GetTypeUrl(child.type),
-                            commands: ['fetch'],
-                        }
-        
-                        channels.push(newChannel)
-                    })
+        this.app.post('/userRpm/CacheChannels/Join', (req, res) => {
+            const voiceChannel = this.client.channels.cache.get(req.body.id)
+            voiceChannel.join()
 
-                    const newGroup = {
-                        id: channel.id,
-                        createdAt: GetDate(channel.createdAt),
-                        deletable: channel.deletable,
-                        manageable: channel.manageable,
-                        name: channel.name,
-                        viewable: channel.viewable,
-                        channels: channels,
-                        commands: ['fetch'],
-                    }
+            console.log('userRpm/CacheChannels/Join')
 
-                    groups.push(newGroup)
-                } else if (channel.parentId == null) {
-                    const newChannel = {
-                        id: channel.id,
-                        createdAt: GetDate(channel.createdAt),
-                        deletable: channel.deletable,
-                        editable: channel.editable,
-                        invitable: channel.invitable,
-                        joinable: channel.joinable,
-                        locked: channel.locked,
-                        manageable: channel.manageable,
-                        name: channel.name,
-                        nsfw: channel.nsfw,
-                        sendable: channel.sendable,
-                        speakable: channel.speakable,
-                        type: channel.type,
-                        unarchivable: channel.unarchivable,
-                        viewable: channel.viewable,
-                        parentId: channel.parentId,
-                        typeText: GetTypeText(channel.type),
-                        typeUrl: GetTypeUrl(channel.type),
-                        commands: ['fetch'],
-                    }
-
-                    singleChannels.push(newChannel)
-                }
-            });
-
-            res.render('userRpm/CacheChannels', { groups: groups, channels: singleChannels })
+            this.RenderPage_CacheChannels(req, res)
         })
 
         this.app.post('/userRpm/Process/Exit', (req, res) => {
@@ -611,6 +662,77 @@ class WebSocket {
             this.StopBot()
 
             res.send(200).send("OK")
+        })
+
+        this.app.get('/userRpm/Database', (req, res) => {
+            this.RenderPage_DatabaseSearch(req, res, '')
+        })
+
+        this.app.post('/userRpm/Database/Search', (req, res) => {
+            const userId = req.body.id
+
+            if (this.client.users.cache.has(userId)) {
+                this.databaseSearchedUserId = userId
+
+                this.RenderPage_Database(req, res, userId)
+            } else {
+                this.RenderPage_DatabaseSearch(req, res, 'User not found')
+            }
+        })
+
+        this.app.post('/userRpm/Database/Back', (req, res) => {
+            this.databaseSearchedUserId = ''
+
+            this.RenderPage_DatabaseSearch(req, res, '')
+        })
+
+        this.app.post('/userRpm/Database/Modify/Stickers', (req, res) => {
+            if (this.databaseSearchedUserId.length > 0 && this.database.dataStickers[this.databaseSearchedUserId] != undefined) {
+                const datas = req.body
+
+                this.database.dataStickers[this.databaseSearchedUserId].stickersMeme = datas.stickersMeme
+                this.database.dataStickers[this.databaseSearchedUserId].stickersMusic = datas.stickersMusic
+                this.database.dataStickers[this.databaseSearchedUserId].stickersYoutube = datas.stickersYoutube
+                this.database.dataStickers[this.databaseSearchedUserId].stickersMessage = datas.stickersMessage
+                this.database.dataStickers[this.databaseSearchedUserId].stickersCommand = datas.stickersCommand
+                this.database.dataStickers[this.databaseSearchedUserId].stickersTip = datas.stickersTip
+                this.database.SaveDatabase()
+
+                this.RenderPage_Database(req, res, this.databaseSearchedUserId)
+            }
+        })
+
+        this.app.post('/userRpm/Database/Modify/Backpack', (req, res) => {
+            if (this.databaseSearchedUserId.length > 0 && this.database.dataBackpacks[this.databaseSearchedUserId] != undefined) {
+                const datas = req.body
+
+                this.database.dataBackpacks[this.databaseSearchedUserId].crates = datas.crates
+                this.database.dataBackpacks[this.databaseSearchedUserId].gifts = datas.gifts
+                this.database.dataBackpacks[this.databaseSearchedUserId].getGift = datas.getGift
+                this.database.dataBackpacks[this.databaseSearchedUserId].tickets = datas.tickets
+                this.database.dataBackpacks[this.databaseSearchedUserId].quizTokens = datas.quizTokens
+                this.database.dataBackpacks[this.databaseSearchedUserId].luckyCards.small = datas.luckyCardsSmall
+                this.database.dataBackpacks[this.databaseSearchedUserId].luckyCards.medium = datas.luckyCardsMedium
+                this.database.dataBackpacks[this.databaseSearchedUserId].luckyCards.large = datas.luckyCardsLarge
+
+                this.RenderPage_Database(req, res, this.databaseSearchedUserId)
+            }
+        })
+
+        this.app.post('/userRpm/Database/Modify/Basic', (req, res) => {
+            if (this.databaseSearchedUserId.length > 0 && this.database.dataBasic[this.databaseSearchedUserId] != undefined) {
+                const datas = req.body
+
+                this.database.dataBasic[this.databaseSearchedUserId].score = datas.score
+                this.database.dataBasic[this.databaseSearchedUserId].money = datas.money
+                this.database.dataBasic[this.databaseSearchedUserId].day = datas.day
+
+                this.RenderPage_Database(req, res, this.databaseSearchedUserId)
+            }
+        })
+
+        this.app.get('/userRpm/*', (req, res) => {
+            res.render('userRpm/404', { message: req.path })
         })
     }
 }

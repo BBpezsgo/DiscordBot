@@ -8,4 +8,6 @@ var str_menu =
     cacheServers:                  "Servers",
     application:                  "Application",
     process:                  "Process",
+    testing:                  "Testing",
+    database:                  "Database",
 }

@@ -5,13 +5,15 @@ var menuList = new Array(
     //	display: must be 0. 
     //	directory level: 0: directory has no branches;  1: directory level 1;  2:level 2;   and so on
     "Status", 0, 0, str_menu.status,
-    "", 0, 1, str_menu.cache,
+    "CacheEmojis", 0, 1, str_menu.cache,
     "CacheEmojis", 0, 2, str_menu.cacheEmojis,
     "CacheUsers", 0, 2, str_menu.cacheUsers,
     "CacheChannels", 0, 2, str_menu.cacheChannels,
     "CacheServers", 0, 2, str_menu.cacheServers,
     "Application", 0, 0, str_menu.application,
     "Process", 0, 0, str_menu.process,
+    "Database", 0, 0, str_menu.database,
+    "Testing", 0, 0, str_menu.testing,
 );
 
 var map = new Array();
