@@ -115,46 +115,83 @@ class WebSocket {
 
 
         this.databaseSearchedUserId = ''
+        this.moderatingSearchedServerId = ''
+        this.moderatingSearchedChannelId = ''
     }
 
-    GetClientStats() {
-        if (this.client.user != undefined) {
-            return { username: this.client.user.username, avatar: this.client.user.avatarURL(), discriminator: this.client.user.discriminator, ping: this.client.ws.ping, status: 'online', enStart: 'none', enStop: 'block' }
-        } else {
-            return { username: "Username", avatar: "defaultAvatar.png", discriminator: "0000", ping: 0, status: 'offline', enStart: 'block', enStop: 'none' }
-        }
+    Get_UsersCache() {
+        /** @type {{ defaultAvatarUrl: string; avatarUrlSmall: string | null; avatarUrlBig: string | null; id: string; hexAccentColor: `#${string}` | null | undefined; bot: boolean; createdAt: string; discriminator: string; system: boolean; username: string;}[]} */
+        const users = []
+
+        this.client.users.cache.forEach(user => {
+            const newUser = {
+                defaultAvatarUrl: user.defaultAvatarURL,
+                avatarUrlSmall: user.avatarURL({ size: 16 }),
+                avatarUrlBig: user.avatarURL({ size: 128 }),
+                id: user.id,
+                hexAccentColor: user.hexAccentColor,
+                bot: user.bot,
+                createdAt: GetDate(user.createdAt),
+                discriminator: user.discriminator,
+                system: user.system,
+                username: user.username,
+            }
+
+            users.push(newUser)
+        })
+        return users
     }
 
-    RenderPage_Status(req, res) {
-        var uptime = new Date(0)
-        uptime.setSeconds(this.client.uptime / 1000)
-        uptime.setHours(uptime.getHours() - 1)
+    Get_ServersCache() {
+        /** @type {{
+         * iconUrlSmall: string | null;
+         * iconUrlLarge: string | null;
+         * name: string; id: string;
+         * createdAt: string;
+         * joinedAt: string;
+         * memberCount: number;
+         * nsfwLevel: "DEFAULT" | "EXPLICIT" | "SAFE" | "AGE_RESTRICTED";
+         * nameAcronym: string;
+         * verificationLevel: "NONE" | "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
+         * splash: string | null;
+         * available: boolean;
+         * large: boolean;
+         * partnered: boolean;
+         * verified: boolean;
+         * }[]} */
+        const servers = []
 
-        var shardState = 'none'
-        if (this.client.ws.shards.size > 0) {
-            shardState = WsStatusText[this.client.ws.shards.first().status]
-        }
+        this.client.guilds.cache.forEach(server => {
+            const newServer = {
+                iconUrlSmall: server.iconURL({ size: 16 }),
+                iconUrlLarge: server.iconURL({ size: 128 }),
 
-        const clientData = {
-            readyTime: GetTime(this.client.readyAt),
-            uptime: GetTime(uptime),
-            botStarted: this.client.isReady(),
-            botStopped: (!this.client.isReady()),
-            ws: {
-                ping: this.client.ws.ping.toString().replace('NaN', '-'),
-                status: WsStatusText[this.client.ws.status],
-                readyAt: this.client.ws.client.readyAt
-            },
-            statesManager: this.statesManager,
-            shard: {
-                state: shardState,
-            },
-        }
+                name: (server.name),
+                id: server.id,
 
-        res.render('userRpm/Status', { bot: clientData })
+                createdAt: GetDate(server.createdAt),
+                joinedAt: GetDate(server.joinedAt),
+
+                memberCount: (server.memberCount),
+                nsfwLevel: (server.nsfwLevel),
+                nameAcronym: (server.nameAcronym),
+                mfaLevel: (server.mfaLevel),
+                verificationLevel: (server.verificationLevel),
+                splash: (server.splash),
+
+                available: server.available,
+                large: (server.large),
+                partnered: (server.partnered),
+                verified: (server.verified),
+            }
+
+            servers.push(newServer)
+        });
+
+        return servers
     }
 
-    RenderPage_CacheChannels(req, res) {
+    Get_ChannelsCache() {
         const GetTypeUrl = (type) => {
             if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
                 return 'text'
@@ -173,8 +210,8 @@ class WebSocket {
             }
         }
 
-        var groups = []
-        var singleChannels = []
+        const groups = []
+        const singleChannels = []
 
         this.client.channels.cache.forEach(channel => {
             if (channel.type == "GUILD_CATEGORY") {
@@ -253,7 +290,153 @@ class WebSocket {
             }
         });
 
-        res.render('userRpm/CacheChannels', { groups: groups, channels: singleChannels })
+        return {groups: groups,singleChannels: singleChannels}
+    }
+
+    /** @param {Discord.Guild} guild */
+    Get_ChannelsInGuild(guild) {
+        const GetTypeUrl = (type) => {
+            if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+                return 'text'
+            }
+            if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+                return 'voice'
+            }
+        }
+
+        const GetTypeText = (type) => {
+            if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+                return 'Text channel'
+            }
+            if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+                return 'Voice channel'
+            }
+        }
+
+        const groups = []
+        const singleChannels = []
+
+        guild.channels.cache.forEach(channel => {
+            if (channel.type == "GUILD_CATEGORY") {
+                const channels = []
+
+                channel.children.forEach(child => {
+                    const newChannel = {
+                        id: child.id,
+                        createdAt: GetDate(child.createdAt),
+                        deletable: child.deletable,
+                        editable: child.editable,
+                        invitable: child.invitable,
+                        joinable: child.joinable,
+                        locked: child.locked,
+                        manageable: child.manageable,
+                        name: child.name,
+                        nsfw: child.nsfw,
+                        sendable: child.sendable,
+                        speakable: child.speakable,
+                        type: child.type,
+                        unarchivable: child.unarchivable,
+                        viewable: child.viewable,
+                        parentId: child.parentId,
+                        typeText: GetTypeText(child.type),
+                        typeUrl: GetTypeUrl(child.type),
+                        commands: ['Fetch'],
+                    }
+
+                    if (child.joinable) {
+                        newChannel.commands.push('Join')
+                    }
+
+                    channels.push(newChannel)
+                })
+
+                const newGroup = {
+                    id: channel.id,
+                    createdAt: GetDate(channel.createdAt),
+                    deletable: channel.deletable,
+                    manageable: channel.manageable,
+                    name: channel.name,
+                    viewable: channel.viewable,
+                    channels: channels,
+                    commands: ['Fetch'],
+                }
+
+                groups.push(newGroup)
+            } else if (channel.parentId == null) {
+                const newChannel = {
+                    id: channel.id,
+                    createdAt: GetDate(channel.createdAt),
+                    deletable: channel.deletable,
+                    editable: channel.editable,
+                    invitable: channel.invitable,
+                    joinable: channel.joinable,
+                    locked: channel.locked,
+                    manageable: channel.manageable,
+                    name: channel.name,
+                    nsfw: channel.nsfw,
+                    sendable: channel.sendable,
+                    speakable: channel.speakable,
+                    type: channel.type,
+                    unarchivable: channel.unarchivable,
+                    viewable: channel.viewable,
+                    parentId: channel.parentId,
+                    typeText: GetTypeText(channel.type),
+                    typeUrl: GetTypeUrl(channel.type),
+                    commands: ['Fetch'],
+                }
+
+                if (channel.joinable) {
+                    newChannel.commands.push('Join')
+                }
+
+                singleChannels.push(newChannel)
+            }
+        });
+
+        return {groups: groups,singleChannels: singleChannels}
+    }
+
+    GetClientStats() {
+        if (this.client.user != undefined) {
+            return { username: this.client.user.username, avatar: this.client.user.avatarURL(), discriminator: this.client.user.discriminator, ping: this.client.ws.ping, status: 'online', enStart: 'none', enStop: 'block' }
+        } else {
+            return { username: "Username", avatar: "defaultAvatar.png", discriminator: "0000", ping: 0, status: 'offline', enStart: 'block', enStop: 'none' }
+        }
+    }
+
+    RenderPage_Status(req, res) {
+        var uptime = new Date(0)
+        uptime.setSeconds(this.client.uptime / 1000)
+        uptime.setHours(uptime.getHours() - 1)
+
+        var shardState = 'none'
+        if (this.client.ws.shards.size > 0) {
+            shardState = WsStatusText[this.client.ws.shards.first().status]
+        }
+
+        const clientData = {
+            readyTime: GetTime(this.client.readyAt),
+            uptime: GetTime(uptime),
+            botStarted: this.client.isReady(),
+            botStopped: (!this.client.isReady()),
+            ws: {
+                ping: this.client.ws.ping.toString().replace('NaN', '-'),
+                status: WsStatusText[this.client.ws.status],
+                readyAt: this.client.ws.client.readyAt
+            },
+            statesManager: this.statesManager,
+            shard: {
+                state: shardState,
+            },
+        }
+
+        res.render('userRpm/Status', { bot: clientData })
+    }
+
+    RenderPage_CacheChannels(req, res) {
+        const xd = this.Get_ChannelsCache()
+
+        res.render('userRpm/CacheChannels', { groups: xd.groups, channels: xd.singleChannels })
     }
 
     RenderPage_Database(req, res, userId) {
@@ -364,6 +547,117 @@ class WebSocket {
         res.render('userRpm/DatabaseSearch', { users: users, searchError: searchError, bot: bot, market: market, info: info })
     }
 
+    RenderPage_ModeratingSearch(req, res, searchError) {
+        if (this.moderatingSearchedServerId.length > 0) {
+            this.RenderPage_ModeratingGuildSearch(req, res, '')
+            return
+        }
+
+        res.render('userRpm/ModeratingSearch', { servers: this.Get_ServersCache(), searchError: searchError })
+    }
+
+    RenderPage_ModeratingGuildSearch(req, res, searchError) {
+        if (this.moderatingSearchedServerId.length == 0) {
+            this.RenderPage_ModeratingSearch(req, res, 'No server selected')
+            return
+        }
+        if (this.moderatingSearchedChannelId.length > 0) {
+            this.RenderPage_Moderating(req, res)
+            return
+        }
+
+        const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
+        const guild = {
+            iconUrlSmall: g.iconURL({ size: 32 }),
+            iconUrlLarge: g.iconURL({ size: 128 }),
+
+            name: (g.name),
+            id: g.id,
+
+            createdAt: GetDate(g.createdAt),
+            joinedAt: GetDate(g.joinedAt),
+
+            memberCount: (g.memberCount),
+            nsfwLevel: (g.nsfwLevel),
+            nameAcronym: (g.nameAcronym),
+            mfaLevel: (g.mfaLevel),
+            verificationLevel: (g.verificationLevel),
+            splash: (g.splash),
+
+            available: g.available,
+            large: (g.large),
+            partnered: (g.partnered),
+            verified: (g.verified),
+        }
+
+        res.render('userRpm/ModeratingGuildSearch', { server: guild, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError })
+    }
+
+    RenderPage_Moderating(req, res) {
+        if (this.moderatingSearchedServerId.length == 0) {
+            this.RenderPage_ModeratingSearch(req, res, 'No server selected')
+            return
+        }
+        if (this.moderatingSearchedChannelId.length == 0) {
+            this.RenderPage_ModeratingGuildSearch(req, res, 'No channel selected')
+            return
+        }
+
+        const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
+        const guild = {
+            iconUrlSmall: g.iconURL({ size: 32 }),
+            iconUrlLarge: g.iconURL({ size: 128 }),
+
+            name: (g.name),
+            id: g.id,
+
+            createdAt: GetDate(g.createdAt),
+            joinedAt: GetDate(g.joinedAt),
+
+            memberCount: (g.memberCount),
+            nsfwLevel: (g.nsfwLevel),
+            nameAcronym: (g.nameAcronym),
+            mfaLevel: (g.mfaLevel),
+            verificationLevel: (g.verificationLevel),
+            splash: (g.splash),
+
+            available: g.available,
+            large: (g.large),
+            partnered: (g.partnered),
+            verified: (g.verified),
+        }
+
+        /** @type {Discord.GuildBasedChannel} */
+        const c = g.channels.cache.get(this.moderatingSearchedChannelId)
+        const channel = {
+            id: c.id,
+            archived: c.archived,
+            archivedAt: GetDate(c.archivedAt),
+            createdAt: GetDate(c.createdAt),
+            deletable: c.deletable,
+            editable: c.editable,
+            full: c.full,
+            invitable: c.invitable,
+            joinable: c.joinable,
+            locked: c.locked,
+            manageable: c.manageable,
+            memberCount: c.memberCount,
+            messageCount: c.messageCount,
+            name: c.name,
+            nsfw: c.nsfw,
+            sendable: c.sendable,
+            speakable: c.speakable,
+            topic: c.topic,
+            type: c.type,
+            unarchivable: c.unarchivable,
+            userLimit: c.userLimit,
+            videoQualityMode: c.videoQualityMode,
+            viewable: c.viewable,
+        }
+
+        res.render('userRpm/Moderating', { server: guild, channel: channel })
+    }
+
     registerRoots() {
         this.app.get('/', (req, res) => {
             const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
@@ -411,26 +705,7 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/CacheUsers', (req, res) => {
-            var users = []
-
-            this.client.users.cache.forEach(user => {
-                const newUser = {
-                    defaultAvatarUrl: user.defaultAvatarURL,
-                    avatarUrlSmall: user.avatarURL({ size: 16 }),
-                    avatarUrlBig: user.avatarURL({ size: 128 }),
-                    id: user.id,
-                    hexAccentColor: user.hexAccentColor,
-                    bot: user.bot,
-                    createdAt: GetDate(user.createdAt),
-                    discriminator: user.discriminator,
-                    system: user.system,
-                    username: user.username,
-                }
-
-                users.push(newUser)
-            });
-
-            res.render('userRpm/CacheUsers', { users: users })
+            res.render('userRpm/CacheUsers', { users: this.Get_UsersCache() })
         })
 
         this.app.get('/userRpm/CacheChannels', (req, res) => {
@@ -438,36 +713,7 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/CacheServers', (req, res) => {
-            var servers = []
-
-            this.client.guilds.cache.forEach(server => {
-                const newServer = {
-                    iconUrlSmall: server.iconURL({ size: 16 }),
-                    iconUrlLarge: server.iconURL({ size: 128 }),
-
-                    name: (server.name),
-                    id: server.id,
-
-                    createdAt: GetDate(server.createdAt),
-                    joinedAt: GetDate(server.joinedAt),
-
-                    memberCount: (server.memberCount),
-                    nsfwLevel: (server.nsfwLevel),
-                    nameAcronym: (server.nameAcronym),
-                    mfaLevel: (server.mfaLevel),
-                    verificationLevel: (server.verificationLevel),
-                    splash: (server.splash),
-
-                    available: server.available,
-                    large: (server.large),
-                    partnered: (server.partnered),
-                    verified: (server.verified),
-                }
-
-                servers.push(newServer)
-            });
-
-            res.render('userRpm/CacheServers', { servers: servers })
+            res.render('userRpm/CacheServers', { servers: this.Get_ServersCache() })
         })
 
         this.app.get('/userRpm/Application', (req, res) => {
@@ -662,6 +908,46 @@ class WebSocket {
             this.StopBot()
 
             res.send(200).send("OK")
+        })
+
+        this.app.get('/userRpm/Moderating', (req, res) => {
+            this.RenderPage_ModeratingSearch(req, res, '')
+        })
+
+        this.app.post('/userRpm/Moderating/Search', (req, res) => {
+            const serverId = req.body.id
+
+            if (this.client.guilds.cache.has(serverId)) {
+                this.moderatingSearchedServerId = serverId
+
+                this.RenderPage_ModeratingGuildSearch(req, res, '')
+            } else {
+                this.RenderPage_ModeratingSearch(req, res, 'Server not found')
+            }
+        })
+
+        this.app.post('/userRpm/Moderating/Back', (req, res) => {
+            this.moderatingSearchedServerId = ''
+
+            this.RenderPage_ModeratingSearch(req, res, '')
+        })
+
+        this.app.post('/userRpm/Moderating/Server/Back', (req, res) => {
+            this.moderatingSearchedChannelId = ''
+
+            this.RenderPage_ModeratingGuildSearch(req, res, '')
+        })
+
+        this.app.post('/userRpm/Moderating/Server/Search', (req, res) => {
+            const channelId = req.body.id
+
+            if (this.client.channels.cache.has(channelId)) {
+                this.moderatingSearchedChannelId = channelId
+
+                this.RenderPage_Moderating(req, res)
+            } else {
+                this.RenderPage_ModeratingSearch(req, res, 'Channel not found')
+            }
         })
 
         this.app.get('/userRpm/Database', (req, res) => {

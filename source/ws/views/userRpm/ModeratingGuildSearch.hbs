@@ -10,7 +10,6 @@
     <script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
     <script language="javascript" src="/dynaform/tree.js" type="text/javascript"></script>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body onload="setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
@@ -18,8 +17,89 @@
     <table id="autoWidth" style="width: 598px;">
         <tbody>
             <tr>
-                <td class="h1" colspan="3" id="t_title">Cache</td>
+                <td class="h1" colspan="3" id="t_title">Moderating</td>
             </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td class="h2" colspan="3" id="t_lan">
+                    Moderating for guild
+                    <div class="tooltip" style="transform: translateY(10px);">
+                        <img class="server-icon" src="{{server.iconUrlSmall}}" width="32" height="32" title="{{server.nameAcronym}}">
+                        <span class="tooltiptext" style="font-weight: normal;">
+                            <img src="{{server.iconUrlLarge}}" title="Ennek a szervernek nincs ikonja">
+                        </span>
+                    </div>
+                    {{server.name}}
+                    <form action="/userRpm/Moderating/Back" method="post"
+                        style="display: inline-block; margin-left: 30px;"
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                        <input type="submit" value="Back">
+                    </form>
+                </td>
+            </tr>
+
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">ID:</td>
+				<td colspan="2">
+					{{server.id}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Created at:</td>
+				<td colspan="2">
+					{{server.createdAt}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Member count:</td>
+				<td colspan="2">
+					{{server.memberCount}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Nsfw level:</td>
+				<td colspan="2">
+					{{server.nsfwLevel}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Mfa level:</td>
+				<td colspan="2">
+					{{server.mfaLevel}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Verification level:</td>
+				<td colspan="2">
+					{{server.verificationLevel}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Available:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{server.available}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Partnered:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{server.partnered}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Large:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{server.large}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Verified:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{server.verified}}.png">
+				</td>
+			</tr>
             <tr>
                 <td class="blue" colspan="3"></td>
             </tr>
@@ -27,7 +107,7 @@
                 <td class="h2" colspan="3" id="t_lan">Channels</td>
             </tr>
             <tr>
-                <td width="698" align="center">
+                <td width="698" align="center" colspan="2">
                     <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
                         <tbody>
                             <tr>
@@ -47,7 +127,7 @@
                                     <b>Mange.</b>
                                 </td>
                                 <td class="ListM">
-                                    <b>viewb.</b>
+                                    <b>Viewb.</b>
                                 </td>
                                 <td class="ListM">
                                     <b>Edit.</b>
@@ -70,8 +150,11 @@
                                 <td class="ListM">
                                     <b>Uarc.</b>
                                 </td>
+                                <td class="ListM">
+                                    
+                                </td>
                             </tr>
-                            {{#each channels}}
+                            {{#each singleChannels}}
                             <tr>
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
@@ -112,6 +195,14 @@
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     <img width="16" height="16" src="/images/bool-{{this.unarchivable}}.png">
                                 </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <form action="/userRpm/Moderating/Server/Search" method="post"
+                                        style="margin: 0;"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                        <input type="submit" value="View">
+                                    </form>
+                                </td>
                             </tr>
                             {{/each}}
                             {{#each groups}}
@@ -134,8 +225,16 @@
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
                                 </td>
-                                <td style="padding:0 2 0 2;word-break:break-all" colspan="8">
+                                <td style="padding:0 2 0 2;word-break:break-all" colspan="7">
                                     
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <form action="/userRpm/Moderating/Server/Search" method="post"
+                                        style="margin: 0;"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                        <input type="submit" value="View">
+                                    </form>
                                 </td>
                             </tr>
                             {{#each channels}}
@@ -180,11 +279,32 @@
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     <img width="16" height="16" src="/images/bool-{{this.unarchivable}}.png">
                                 </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <form action="/userRpm/Moderating/Server/Search" method="post"
+                                        style="margin: 0;"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                        <input type="submit" value="View">
+                                    </form>
+                                </td>
                             </tr>
                             {{/each}}
                             {{/each}}
                         </tbody>
                     </table>
+                </td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td width="698" align="center">
+                    <form action="/userRpm/Moderating/Server/Search" method="post"
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                        <input type="text" name="id" value="{{channelId}}" placeholder="Channel ID" required>
+                        <input type="submit" value="Search">
+                        <span style="font-weight: bold; color: red;">{{searchError}}</span>
+                    </form>
                 </td>
             </tr>
         </tbody>

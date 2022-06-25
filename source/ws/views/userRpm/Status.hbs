@@ -4,9 +4,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta http-equiv="pragma" content="no-cache">
 	<meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+	<link href="/dynaform/css-vars.css" rel="stylesheet" type="text/css">
 	<link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
 	<script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
-	<script language="javascript" src="/dynaform/custom.js" type="text/javascript"></script>
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 
 	<meta http-equiv="refresh" content="5">
@@ -23,22 +23,37 @@
 				<td class="blue" colspan="3"></td>
 			</tr>
 			<tr>
+				<td class="h2" colspan="3" id="t_lan">Process</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td colspan="2">
+                    <form action="/userRpm/Process/Exit" method="post"
+                        style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
+                        <input type="submit" value="Exit">
+                    </form>
+				</td>
+			</tr>
+			<tr>
+				<td class="blue" colspan="3"></td>
+			</tr>
+			<tr>
 				<td class="h2" colspan="3" id="t_lan">BOT</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">readyTime:</td>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Ready time:</td>
 				<td colspan="2">
 					{{bot.readyTime}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">uptime:</td>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Uptime:</td>
 				<td colspan="2">
 					{{bot.uptime}}
 				</td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_sub_mask" name="t_sub_mask">botLoadingState:</td>
+				<td class="Item" id="t_sub_mask" name="t_sub_mask">Status:</td>
 				<td colspan="2">
 					{{bot.statesManager.botLoadingState}}
 				</td>
@@ -63,15 +78,15 @@
 				<td class="h2" colspan="3" id="t_wireless">Web Socket</td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_wl_radio">ping:</td>
+				<td class="Item" id="t_wl_radio">Ping:</td>
 				<td colspan="2"><span id="t_enable">{{bot.ws.ping}}ms</span></td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_wl_radio">status:</td>
+				<td class="Item" id="t_wl_radio">Status:</td>
 				<td colspan="2"><span id="t_enable">{{bot.ws.status}}</span></td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_sub_mask" name="t_sub_mask">shardState:</td>
+				<td class="Item" id="t_sub_mask" name="t_sub_mask">Shard status:</td>
 				<td colspan="2">
 					{{bot.shard.state}}
 				</td>
@@ -93,15 +108,15 @@
 				<td class="h2" colspan="3" id="t_wireless">News</td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_wl_radio">allNewsProcessed:</td>
+				<td class="Item" id="t_wl_radio">All processed:</td>
 				<td colspan="2"><span id="t_enable">{{bot.statesManager.allNewsProcessed}}</span></td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_wl_radio">newsLoadingText:</td>
+				<td class="Item" id="t_wl_radio">Loading text 1:</td>
 				<td colspan="2"><span id="t_enable">{{bot.statesManager.newsLoadingText}}</span></td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_wl_radio">newsLoadingText2:</td>
+				<td class="Item" id="t_wl_radio">Loading text 2:</td>
 				<td colspan="2"><span id="t_enable">{{bot.statesManager.newsLoadingText2}}</span></td>
 			</tr>
 		</tbody>

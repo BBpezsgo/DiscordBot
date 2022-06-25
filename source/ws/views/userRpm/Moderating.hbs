@@ -1,0 +1,397 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+	<link href="/dynaform/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
+    <link href="/dynaform/tree.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
+    <script language="javascript" src="/dynaform/tree.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onload="setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+    marginheight="0">
+    <table id="autoWidth" style="width: 598px;">
+        <tbody>
+            <tr>
+                <td class="h1" colspan="3" id="t_title">Moderating</td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td class="h2" colspan="3" id="t_lan">
+                    Moderating for channel
+                    {{channel.name}}
+                    in guild
+                    <div class="tooltip" style="transform: translateY(10px);">
+                        <img class="server-icon" src="{{server.iconUrlSmall}}" width="32" height="32" title="{{server.nameAcronym}}">
+                        <span class="tooltiptext" style="font-weight: normal;">
+                            <img src="{{server.iconUrlLarge}}" title="Ennek a szervernek nincs ikonja">
+                        </span>
+                    </div>
+                    {{server.name}}
+                    <form action="/userRpm/Moderating/Server/Back" method="post"
+                        style="display: inline-block; margin-left: 30px;"
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                        <input type="submit" value="Back">
+                    </form>
+                </td>
+            </tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">ID:</td>
+				<td colspan="2">
+					{{channel.id}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Topic:</td>
+				<td colspan="2">
+					<p
+                    style="word-wrap: break-word; max-width: 300px; overflow: auto; line-break: anywhere;"
+                    >{{channel.topic}}</p>
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Created at:</td>
+				<td colspan="2">
+					{{channel.createdAt}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Member count:</td>
+				<td colspan="2">
+					{{channel.memberCount}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Archived:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.archived}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Archived at:</td>
+				<td colspan="2">
+					{{channel.archivedAt}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Deletable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.deletable}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Editable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.editable}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Full:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.full}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Invitable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.invitable}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Joinable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.joinable}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Locked:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.locked}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Manageable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.manageable}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Message count:</td>
+				<td colspan="2">
+					{{channel.messageCount}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Nsfw:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.nsfw}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Sendable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.sendable}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Speakable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.speakable}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Type:</td>
+				<td colspan="2">
+					{{channel.type}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Unarchivable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.unarchivable}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">User limit:</td>
+				<td colspan="2">
+					{{channel.userLimit}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Video quality mode:</td>
+				<td colspan="2">
+					{{channel.videoQualityMode}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Viewable:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{channel.viewable}}.png">
+				</td>
+			</tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td class="h2" colspan="3" id="t_lan">Channels</td>
+            </tr>
+            <tr>
+                <td width="698" align="center" colspan="2">
+                    <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td class="ListM">
+                                    <div class="caret-all"></div>
+                                </td>
+                                <td class="ListM" style="width: 100%;">
+                                    <b>Name</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>ID</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Delb.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Mange.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Viewb.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Edit.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Invt.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Join.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Lock.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Send.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Spek.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Uarc.</b>
+                                </td>
+                                <td class="ListM">
+                                    
+                                </td>
+                            </tr>
+                            {{#each singleChannels}}
+                            <tr>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.deletable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.manageable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.viewable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.editable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.invitable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.joinable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.locked}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.sendable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.speakable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.unarchivable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <div class="dropdown">
+                                        <div onclick="dropdownClick(this)" id="dropdown-{{this.id}}" class="dropbtn"><i class="material-icons">&#xe8b8;</i></div>
+                                            <div id="dropdown-content-{{this.id}}" class="dropdown-content">
+                                                {{#each commands}}
+                                                <form action="/userRpm/CacheChannels//{{this}}" method="post"
+                                                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                                    <input type="text" name="id" value="{{../this.id}}">
+                                                    <input type="submit" value="{{this}}">
+                                                </form>
+                                                {{/each}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{/each}}
+                            {{#each groups}}
+                            <tr>
+                                <td style="padding:0 2 0 2;word-break:break-all; width: 16px;">
+                                    <div class="caret" id="{{this.id}}"></div>
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.deletable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.manageable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.viewable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all" colspan="7">
+                                    
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <div class="dropdown">
+                                        <div onclick="dropdownClick(this)" id="dropdown-{{this.id}}" class="dropbtn"><i class="material-icons">&#xe8b8;</i></div>
+                                            <div id="dropdown-content-{{this.id}}" class="dropdown-content">
+                                                {{#each commands}}
+                                                <form action="/userRpm/CacheChannels//{{this}}" method="post"
+                                                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                                    <input type="text" name="id" value="{{../this.id}}">
+                                                    <input type="submit" value="{{this}}">
+                                                </form>
+                                                {{/each}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{#each channels}}
+                            <tr class="nested {{this.parentId}}">
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                    <span class="tag-{{this.nsfw}}">NSFW</span>
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.deletable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.manageable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.viewable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.editable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.invitable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.joinable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.locked}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.sendable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.speakable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.unarchivable}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <div class="dropdown">
+                                        <div onclick="dropdownClick(this)" id="dropdown-{{this.id}}" class="dropbtn"><i class="material-icons">&#xe8b8;</i></div>
+                                            <div id="dropdown-content-{{this.id}}" class="dropdown-content">
+                                                {{#each commands}}
+                                                <form action="/userRpm/CacheChannels/{{this}}" method="post"
+                                                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                                    <input type="text" name="id" value="{{../this.id}}">
+                                                    <input type="submit" value="{{this}}">
+                                                </form>
+                                                {{/each}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{/each}}
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

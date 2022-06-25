@@ -13,6 +13,7 @@ var menuList = new Array(
     "Application", 0, 0, str_menu.application,
     "Process", 0, 0, str_menu.process,
     "Database", 0, 0, str_menu.database,
+    "Moderating", 0, 0, str_menu.moderating,
     "Testing", 0, 0, str_menu.testing,
 );
 

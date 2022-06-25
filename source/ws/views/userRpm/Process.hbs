@@ -4,9 +4,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta http-equiv="pragma" content="no-cache">
 	<meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+	<link href="/dynaform/css-vars.css" rel="stylesheet" type="text/css">
 	<link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
 	<script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
-	<script language="javascript" src="/dynaform/custom.js" type="text/javascript"></script>
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
@@ -18,151 +18,139 @@
                 <td class="h1" colspan="3" id="t_title">Process</td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">arch:</td>
-                <td colspan="2">
-                    {{process.arch}}
-                </td>
-            </tr>
-            <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">config.variables:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Config.Variables:</td>
                 <td colspan="2">
                     {{process.config.variables}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">config.target_defaults:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Config.Target defaults:</td>
                 <td colspan="2">
                     {{process.config.target_defaults}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">execPath:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Execute path:</td>
                 <td colspan="2">
                     {{process.execPath}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">platform:</td>
-                <td colspan="2">
-                    {{process.platform}}
-                </td>
-            </tr>
-            <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">chromevers:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Chrome Version:</td>
                 <td colspan="2">
                     {{process.chrome}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">contextId:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Context ID:</td>
                 <td colspan="2">
                     {{process.contextId}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">contextIsolated:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Context isolated:</td>
                 <td colspan="2">
-                    {{process.contextIsolated}}
+                    <img width="16" height="16" src="/images/bool-{{channel.contextIsolated}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">defaultApp:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Default app:</td>
                 <td colspan="2">
-                    {{process.defaultApp}}
+                    <img width="16" height="16" src="/images/bool-{{channel.defaultApp}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">exitCode:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Exit code:</td>
                 <td colspan="2">
                     {{process.exitCode}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">features:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Features:</td>
                 <td colspan="2">
                     {{process.features}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">isMainFrame:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Is main frame:</td>
                 <td colspan="2">
                     {{process.isMainFrame}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">mas:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Mas:</td>
                 <td colspan="2">
                     {{process.mas}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">noDeprecation:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">No deprecation:</td>
                 <td colspan="2">
-                    {{process.noDeprecation}}
+                    <img width="16" height="16" src="/images/bool-{{channel.noDeprecation}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">pid:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Process ID:</td>
                 <td colspan="2">
                     {{process.pid}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">ppid:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">pp ID:</td>
                 <td colspan="2">
                     {{process.ppid}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">resourcesPath:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Resources path:</td>
                 <td colspan="2">
                     {{process.resourcesPath}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">sandboxed:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Sandboxed:</td>
                 <td colspan="2">
-                    {{process.sandboxed}}
+                    <img width="16" height="16" src="/images/bool-{{channel.sandboxed}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">throwDeprecation:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Throw deprecation:</td>
                 <td colspan="2">
                     {{process.throwDeprecation}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">title:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Title:</td>
                 <td colspan="2">
                     {{process.title}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">traceDeprecation:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Trace deprecation:</td>
                 <td colspan="2">
                     {{process.traceDeprecation}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">traceProcessWarnings:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Trace process warnings:</td>
                 <td colspan="2">
                     {{process.traceProcessWarnings}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">type:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Type:</td>
                 <td colspan="2">
                     {{process.type}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">windowsStore:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Windows store:</td>
                 <td colspan="2">
-                    {{process.windowsStore}}
+                    <img width="16" height="16" src="/images/bool-{{channel.windowsStore}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">uptime:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Uptime:</td>
                 <td colspan="2">
                     {{process.uptime}}
                 </td>
@@ -184,18 +172,36 @@
                 <td class="blue" colspan="3"></td>
             </tr>
             <tr>
+                <td class="h2" colspan="3" id="t_lan">System</td>
+            </tr>
+            <tr>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Arch:</td>
+                <td colspan="2">
+                    {{process.arch}}
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Platform:</td>
+                <td colspan="2">
+                    {{process.platform}}
+                </td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
                 <td class="h2" colspan="3" id="t_lan">Node.js</td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">argv:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Argv:</td>
                 <td colspan="2">
                     {{process.argv}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">connected:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Connected:</td>
                 <td colspan="2">
-                    {{process.connected}}
+                    <img width="16" height="16" src="/images/bool-{{channel.connected}}.png">
                     <form action="/userRpm/Process/Disconnect" method="post"
                         style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
                         <input type="submit" class="show-{{bot.connected}}" value="Disconnect">
@@ -203,31 +209,31 @@
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">debugPort:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Debug port:</td>
                 <td colspan="2">
                     {{process.debugPort}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">execArgv:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Execute argv:</td>
                 <td colspan="2">
                     {{process.execArgv}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">noAsar:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">No asar:</td>
                 <td colspan="2">
                     {{process.noAsar}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">release:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Release:</td>
                 <td colspan="2">
                     {{process.release}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">version:</td>
+                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Version:</td>
                 <td colspan="2">
                     {{process.version}}
                 </td>

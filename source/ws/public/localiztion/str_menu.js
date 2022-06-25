@@ -10,4 +10,5 @@ var str_menu =
     process:                  "Process",
     testing:                  "Testing",
     database:                  "Database",
+    moderating:                  "Moderating",
 }

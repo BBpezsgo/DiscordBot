@@ -5,7 +5,7 @@ TABLE {
 }
 
 TABLE.guage {
-	background-color: #3369ba;
+	background-color: var(--main-primary-color);
 }
 
 BODY {
@@ -36,7 +36,7 @@ TD {
 TD.h1 {
 	FONT-SIZE: 16px;
 	COLOR: WHITE;
-	background-color: #3362ba;
+	background-color: var(--main-primary-color);
 	FONT-WEIGHT: bold;
 	padding-left: 15;
 }
@@ -87,7 +87,7 @@ TD.Item {
 
 TD.emp {
 	FONT-WEIGHT: bold;
-	color: #003399;
+	color: var(--main-primary-color);
 	font-size: 13px;
 }
 
@@ -266,7 +266,7 @@ table.datas>tbody>tr>td {
 }
 
 .server-icon {
-	background-color: #3362ba;
+	background-color: var(--main-primary-color);
 	color: #fff;
 	text-align: center;
 	font-weight: bold;
@@ -316,7 +316,7 @@ table.datas>tbody>tr>td {
 
 .dropdown input[type='submit']:hover,
 .dropdown input[type='submit']:active {
-	background: #1c68ff;
+	background: var(--main-primary-color);
 }
 
 .show {

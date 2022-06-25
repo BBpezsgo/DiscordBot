@@ -4,10 +4,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+	<link href="/dynaform/css-vars.css" rel="stylesheet" type="text/css">
     <link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
     <link href="/dynaform/tree-default.css" rel="stylesheet" type="text/css">
     <script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
-    <script language="javascript" src="/dynaform/custom.js" type="text/javascript"></script>
     <script language="javascript" src="/dynaform/tree-default.js" type="text/javascript"></script>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
@@ -70,15 +70,15 @@
                         <li><span class="caret caret-down">Prices</span>
                             <ul class="nested active">
                                 <li>
-                                    <span class="data-number">token: </span>
+                                    <span class="data-number">Token: </span>
                                     <b>{{market.prices.token}}</b>
                                 </li>
                                 <li>
-                                    <span class="data-number">coupon: </span>
+                                    <span class="data-number">Coupon: </span>
                                     <b>{{market.prices.coupon}}</b>
                                 </li>
                                 <li>
-                                    <span class="data-number">jewel: </span>
+                                    <span class="data-number">Jewel: </span>
                                     <b>{{market.prices.jewel}}</b>
                                 </li>
                             </ul>
@@ -128,7 +128,7 @@
                                         <input name="day" type="number" value="{{userDatabase.day}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-string"> color: </span>
+                                        <span class="data-string"> Color: </span>
                                         <div style="
                                             display: inline-block;
                                             transform: translateY(5px);
@@ -141,7 +141,7 @@
                                         </div>
                                     </li>
                                     <li>
-                                        <span class="data-bool">privateCommands: </span>
+                                        <span class="data-bool">Private commands: </span>
                                         <b>{{userDatabase.privateCommands}}</b>
                                     </li>
                                     <div style="height: 7px;"></div>
@@ -158,40 +158,40 @@
                                     setTimeout(() => {window.location.reload()}, 1000);
                                     ">
                                     <li>
-                                        <span class="data-number">crates: </span>
+                                        <span class="data-number">Crates: </span>
                                         <input name="crates" type="number" value="{{userDatabase.crates}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">gifts: </span>
+                                        <span class="data-number">Gifts: </span>
                                         <input name="gifts" type="number" value="{{userDatabase.gifts}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">getGift: </span>
+                                        <span class="data-number">Get gift: </span>
                                         <input name="getGift" type="number" value="{{userDatabase.getGift}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">tickets: </span>
+                                        <span class="data-number">Tickets: </span>
                                         <input name="tickets" type="number" value="{{userDatabase.tickets}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">quizTokens: </span>
+                                        <span class="data-number">Quiz tokens: </span>
                                         <input name="quizTokens" type="number" value="{{userDatabase.quizTokens}}"
                                             required>
                                     </li>
                                     <li><span class="caret">Lucky cards</span>
                                         <ul class="nested">
                                             <li>
-                                                <span class="data-number">small: </span>
+                                                <span class="data-number">Small: </span>
                                                 <input name="luckyCardsSmall" type="number"
                                                     value="{{userDatabase.luckyCards.small}}" required>
                                             </li>
                                             <li>
-                                                <span class="data-number">medium: </span>
+                                                <span class="data-number">Medium: </span>
                                                 <input name="luckyCardsMedium" type="number"
                                                     value="{{userDatabase.luckyCards.medium}}" required>
                                             </li>
                                             <li>
-                                                <span class="data-number">getGift: </span>
+                                                <span class="data-number">Large: </span>
                                                 <input name="luckyCardsLarge" type="number"
                                                     value="{{userDatabase.luckyCards.large}}" required>
                                             </li>
@@ -210,12 +210,12 @@
                                     this.style.opacity='20%';
                                     setTimeout(() => {window.location.reload()}, 1000);
                                     ">
-                                    <li><span class="data-number">businessIndex:
+                                    <li><span class="data-number">Index:
                                         </span><b>{{userDatabase.businessIndex}}</b></li>
-                                    <li><span class="data-string">businessName:
+                                    <li><span class="data-string">Name:
                                         </span><b>{{userDatabase.businessName}}</b>
                                     </li>
-                                    <li><span class="data-number">businessLevel:
+                                    <li><span class="data-number">Level:
                                         </span><b>{{userDatabase.businessLevel}}</b></li>
                                     <!--
                                     <input type="submit" value="Modify">
@@ -232,27 +232,27 @@
                                     setTimeout(() => {window.location.reload()}, 1000);
                                     ">
                                     <li>
-                                        <span class="data-number">stickersMeme: </span>
+                                        <span class="data-number">Meme: </span>
                                         <input name="stickersMeme" type="number" value="{{userDatabase.stickersMeme}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">stickersMusic: </span>
+                                        <span class="data-number">Music: </span>
                                         <input name="stickersMusic" type="number" value="{{userDatabase.stickersMusic}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">stickersYoutube: </span>
+                                        <span class="data-number">Youtube: </span>
                                         <input name="stickersYoutube" type="number" value="{{userDatabase.stickersYoutube}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">stickersMessage: </span>
+                                        <span class="data-number">Message: </span>
                                         <input name="stickersMessage" type="number" value="{{userDatabase.stickersMessage}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">stickersCommand: </span>
+                                        <span class="data-number">Command: </span>
                                         <input name="stickersCommand" type="number" value="{{userDatabase.stickersCommand}}" required>
                                     </li>
                                     <li>
-                                        <span class="data-number">stickersTip: </span>
+                                        <span class="data-number">Tip: </span>
                                         <input name="stickersTip" type="number" value="{{userDatabase.stickersTip}}" required>
                                     </li>
                                     <div style="height: 7px;"></div>
@@ -263,13 +263,13 @@
                         </li>
                         <li><span class="caret">Statistics</span>
                             <ul class="nested">
-                                <li><span class="data-number">memes: </span><b>{{userDatabase.memes}}</b></li>
-                                <li><span class="data-number">musics: </span><b>{{userDatabase.musics}}</b></li>
-                                <li><span class="data-number">youtubevideos:
+                                <li><span class="data-number">Memes: </span><b>{{userDatabase.memes}}</b></li>
+                                <li><span class="data-number">Musics: </span><b>{{userDatabase.musics}}</b></li>
+                                <li><span class="data-number">Youtube Videos:
                                     </span><b>{{userDatabase.youtubevideos}}</b></li>
-                                <li><span class="data-number">messages: </span><b>{{userDatabase.messages}}</b></li>
-                                <li><span class="data-number">chars: </span><b>{{userDatabase.chars}}</b></li>
-                                <li><span class="data-number">commands: </span><b>{{userDatabase.commands}}</b></li>
+                                <li><span class="data-number">Messages: </span><b>{{userDatabase.messages}}</b></li>
+                                <li><span class="data-number">Chars: </span><b>{{userDatabase.chars}}</b></li>
+                                <li><span class="data-number">Commands: </span><b>{{userDatabase.commands}}</b></li>
                             </ul>
                         </li>
                     </ul>
