@@ -5,8 +5,28 @@ const fs = require('fs')
  * @returns {boolean}
  */
  function ImgExists(name) {
+    const avaliableImages = [
+        '0000',
+        '0200',
+        '1000',
+        '1100',
+        '1110',
+        '1200',
+        '1230',
+        '1300',
+        '1330',
+        '1901',
+        '2000',
+        '2100',
+        '2200',
+        '3000',
+        '3200',
+        '3300',
+        '9310',
+        '9320'
+    ]
     try {
-        if (fs.existsSync('./commands/weatherImages/' + name + '.jpg')) {
+        if (avaliableImages.includes(name) == true) {
             return true
         } else {
             return false

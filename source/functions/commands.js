@@ -218,7 +218,7 @@ async function DeleteCommands(bot) {
             console.log('Bot parancsok törölése... (' + appCommands.cache.size + ')')
         })
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 }
 

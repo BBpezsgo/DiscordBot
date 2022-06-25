@@ -3,12 +3,13 @@ const fs = require('fs');
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./xpFunctions')
 const GetUserColor = require('../../functions/userColor')
 const { abbrev } = require('../../functions/abbrev')
+const { DatabaseManager } = require('../../functions/databaseManager')
 
 let coloredProgressBarPart = '⬜'
 
- /** @param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
-async function execute(command, privateCommand) {
-    const scores = JSON.parse(fs.readFileSync('./database/basic.json', 'utf-8'))
+ /** @param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand @param {DatabaseManager} database */
+async function execute(command, database, privateCommand) {
+    const scores = database.dataBasic
 
     try {
         const userColor = scores[command.user.id].color
@@ -64,5 +65,6 @@ async function execute(command, privateCommand) {
  /**
  * @param {Discord.CommandInteraction<Discord.CacheType>} command
  * @param {boolean} privateCommand
+ * @param {DatabaseManager} database
  */
-module.exports = (command, privateCommand) => { execute(command, privateCommand) }
+module.exports = (command, database, privateCommand) => { execute(command, database, privateCommand) }

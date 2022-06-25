@@ -627,7 +627,6 @@ function userstatsSendChars(user, text) {
     fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 function userstatsSendCommand(user) {
-    console.log(database.dataUserstats)
     database.dataUserstats[user.id].commands += 1
     fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
@@ -1158,32 +1157,37 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId === 'openCrate') {
-            database.dataBackpacks[interaction.user.id].crates -= 1
-            var replies = ['xp', 'money', 'gift']
-            var random = Math.floor(Math.random() * 3)
-            var out = replies[random]
-            var val = 0
-            var txt = ''
+            if (database.dataBackpacks[interaction.user.id].crates > 0) {
+                database.dataBackpacks[interaction.user.id].crates -= 1
+                var replies = ['xp', 'money', 'gift']
+                var random = Math.floor(Math.random() * 3)
+                var out = replies[random]
+                var val = 0
+                var txt = ''
 
-            if (out === 'xp') {
-                val = Math.floor(Math.random() * 110) + 10
-                txt = '**\\🍺 ' + val + '** xp-t'
-                database.dataBasic[interaction.user.id].score += val
-            }
-            if (out === 'money') {
-                val = Math.floor(Math.random() * 2000) + 3000
-                txt = '**\\💵' + val + '** pénzt'
-                database.dataBasic[interaction.user.id].money += val
-            }
-            if (out === 'gift') {
-                txt = '**\\🎁 1** ajándékot'
-                database.dataBackpacks[interaction.user.id].gifts += 1
+                if (out === 'xp') {
+                    val = Math.floor(Math.random() * 110) + 10
+                    txt = '**\\🍺 ' + val + '** xp-t'
+                    database.dataBasic[interaction.user.id].score += val
+                }
+                if (out === 'money') {
+                    val = Math.floor(Math.random() * 2000) + 3000
+                    txt = '**\\💵' + val + '** pénzt'
+                    database.dataBasic[interaction.user.id].money += val
+                }
+                if (out === 'gift') {
+                    txt = '**\\🎁 1** ajándékot'
+                    database.dataBackpacks[interaction.user.id].gifts += 1
+                }
+
+                interaction.message.edit(commandStore(interaction.user, privateCommand))
+                interaction.reply({ content: '> \\🧱 Kaptál:  ' + txt, ephemeral: true })
+                database.SaveDatabase()
+            } else {
+                interaction.message.edit(commandStore(interaction.user, privateCommand))
+                interaction.reply({ content: '> \\🧱 Nincs több ládád!', ephemeral: true })
             }
 
-            interaction.message.edit(commandStore(interaction.user, privateCommand))
-            interaction.reply({ content: '> \\🧱 Kaptál:  ' + txt, ephemeral: true })
-
-            database.SaveDatabase()
             return
         }
 
@@ -1913,7 +1917,6 @@ bot.on('interactionCreate', async interaction => {
             return
         }
     } else if (interaction.isUserContextMenu()) {
-        console.log(interaction)
         if (interaction.commandName == 'Megajándékozás') {
             try {
                 const giftableMember = interaction.targetMember
@@ -2079,7 +2082,7 @@ bot.once('ready', async () => {
         //DeleteCommands(bot)
         //CreateCommands(bot, statesManager)
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 
     setInterval(() => {
@@ -2676,7 +2679,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `xp`) {
-        CommandXp(command, privateCommand)
+        CommandXp(command, database, privateCommand)
         userstatsSendCommand(command.user)
         return
     }
@@ -2706,13 +2709,11 @@ async function processApplicationCommand(command, privateCommand) {
             .setTitle('Pong!')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
             .setColor(Color.Highlight)
-            .addField('\\🖥️ BOT:',
-                '> Készen áll: ' + DateToString(bot.readyAt) + '\n' +
+            .addField('\\🤖 BOT:',
                 '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
                 '> Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
             )
             .addField('\\📡 WebSocket:',
-                '> Átjáró: ' + bot.ws.gateway + '\n' +
                 '> Ping: ' + bot.ws.ping + ' ms\n' +
                 '> Státusz: ' + WsStatus
             )

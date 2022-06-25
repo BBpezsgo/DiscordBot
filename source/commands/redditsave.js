@@ -93,7 +93,7 @@ async function DownloadVideo(message, url, replymessage, postInfo) {
                 try {
                     await replymessage.edit({ embeds: [embed], components: [row] })
                 } catch (error) {
-                    console.log(error)
+                    console.error(error)
                 }
                 fs.unlinkSync('./' + message.id + '.mp4')
             }, 1000)

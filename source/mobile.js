@@ -784,7 +784,7 @@ bot.once('ready', async () => {
         //DeleteCommands(bot)
         //CreateCommands(bot, statesManager)
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
     
     setInterval(() => {
@@ -1120,13 +1120,12 @@ async function processApplicationCommand(command) {
             .setTitle('Pong!')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
             .setColor(Color.Highlight)
-            .addField('\\🖥️ BOT:',
-                '> \\⛔ **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
+            .addField('\\🤖 BOT:',
+                '> \\📱 **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
                 '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
                 '> Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
             )
             .addField('\\📡 Web Socket:',
-                '> Átjáró: ' + bot.ws.gateway + '\n' +
                 '> Ping: ' + bot.ws.ping + ' ms\n' +
                 '> Státusz: ' + WsStatus
             )

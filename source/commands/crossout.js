@@ -61,30 +61,30 @@ function CrossoutTest(command, searchName, privateCommand) {
                         lbl(data.faction) + '  ' + '\n\n' +
                         data.description
                     )
-                    .addField('Market',
-                        'Sell Offers: ' + data.sellOffers + '\n' +
-                        'Sell Price: ' + data.formatSellPrice + ' 🅒\n' +
-                        'Buy Orders: ' + data.buyOrders + '\n' +
-                        'Buy Price: ' + data.formatBuyPrice + ' 🅒\n' +
-                        'Popularity: ' + data.popularity + '\n' +
-                        'Demand/Supply: ' + data.popularity
+                    .addField('\\⚖️ Market',
+                        '\\👥 Sell Offers: ' + data.sellOffers + '\n' +
+                        '\\💲 Sell Price: ' + data.formatSellPrice + ' 🅒\n' +
+                        '\\👥 Buy Orders: ' + data.buyOrders + '\n' +
+                        '\\💲 Buy Price: ' + data.formatBuyPrice + ' 🅒\n' +
+                        '\\🎭 Popularity: ' + data.popularity + '\n' +
+                        '\\📊 Demand/Supply: ' + data.popularity
                     )
                     if (data.craftingResultAmount > 0) {
-                        embed.addField('Crafting ' + data.craftingResultAmount + 'x',
-                            'Crafting Cost (Sell): ' + data.formatCraftingSellSum + ' 🅒\n' +
-                            'Crafting Cost (Buy): ' + data.formatCraftingBuySum + ' 🅒'
+                        embed.addField('\\🛠️ Crafting ' + data.craftingResultAmount + 'x',
+                            '\\💲 Crafting Cost (Sell): ' + data.formatCraftingSellSum + ' 🅒\n' +
+                            '\\💲 Crafting Cost (Buy): ' + data.formatCraftingBuySum + ' 🅒'
                         )
                     }
                     if (data.sortedStats != undefined && data.sortedStats != null) {
                         embed.addField('Stats',
-                            'Damage:\n' + ProgressBar(GetObjectFromKey('StatPercentDamageRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentDamageRating', data).value + '%' + '\n' +
+                            '\\💥 Damage:\n' + ProgressBar(GetObjectFromKey('StatPercentDamageRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentDamageRating', data).value + '%' + '\n' +
                             'FireRate:\n' + ProgressBar(GetObjectFromKey('StatPercentFireRateRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentFireRateRating', data).value + '%' + '\n' +
-                            'Range:\n' + ProgressBar(GetObjectFromKey('StatPercentRangeRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentRangeRating', data).value + '%' + '\n' +
-                            'Accuracy:\n' + ProgressBar(GetObjectFromKey('StatPercentAccuracyRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentAccuracyRating', data).value + '%' + '\n' +
-                            'Overheat:\n' + ProgressBar(GetObjectFromKey('StatPercentOverheatRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentOverheatRating', data).value + '%' + '\n\n' +
-                            'Ammo: ' + GetObjectFromKey('StatAmmo', data).value + ' pcs\n' +
-                            'Structure: ' + GetObjectFromKey('StatStructure', data).value + ' pts\n' +
-                            'EnergyDrain: ' + GetObjectFromKey('StatEnergyDrain', data).value + ' \\⚡\n' +
+                            '\\☄️ Range:\n' + ProgressBar(GetObjectFromKey('StatPercentRangeRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentRangeRating', data).value + '%' + '\n' +
+                            '\\🔍 Accuracy:\n' + ProgressBar(GetObjectFromKey('StatPercentAccuracyRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentAccuracyRating', data).value + '%' + '\n' +
+                            '\\🔥 Overheat:\n' + ProgressBar(GetObjectFromKey('StatPercentOverheatRating', data).value, 16) + '  ' + GetObjectFromKey('StatPercentOverheatRating', data).value + '%' + '\n\n' +
+                            '\\🧰 Ammo: ' + GetObjectFromKey('StatAmmo', data).value + ' pcs\n' +
+                            '\\🛡️ Structure: ' + GetObjectFromKey('StatStructure', data).value + ' pts\n' +
+                            '\\⚡ EnergyDrain: ' + GetObjectFromKey('StatEnergyDrain', data).value + '\n' +
                             'Mass: ' + GetObjectFromKey('StatMass', data).value + ' kg'
                         )
                     }
