@@ -11,4 +11,5 @@ var str_menu =
     testing:                  "Testing",
     database:                  "Database",
     moderating:                  "Moderating",
+    log:                  "Log",
 }

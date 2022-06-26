@@ -14,6 +14,9 @@ var menuList = new Array(
     "Process", 0, 0, str_menu.process,
     "Database", 0, 0, str_menu.database,
     "Moderating", 0, 0, str_menu.moderating,
+    "Log", 0, 0, str_menu.log,
+
+
     "Testing", 0, 0, str_menu.testing,
 );
 

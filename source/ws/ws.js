@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
 const { LogManager, MessageCodes } = require('../functions/log.js')
+const fs = require('fs')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
 const {
@@ -225,7 +226,6 @@ class WebSocket {
                         id: child.id,
                         createdAt: GetDate(child.createdAt),
                         deletable: child.deletable,
-                        editable: child.editable,
                         invitable: child.invitable,
                         joinable: child.joinable,
                         locked: child.locked,
@@ -267,7 +267,6 @@ class WebSocket {
                     id: channel.id,
                     createdAt: GetDate(channel.createdAt),
                     deletable: channel.deletable,
-                    editable: channel.editable,
                     invitable: channel.invitable,
                     joinable: channel.joinable,
                     locked: channel.locked,
@@ -293,7 +292,7 @@ class WebSocket {
             }
         });
 
-        return {groups: groups,singleChannels: singleChannels}
+        return { groups: groups, singleChannels: singleChannels }
     }
 
     /** @param {Discord.Guild} guild */
@@ -396,7 +395,7 @@ class WebSocket {
             }
         });
 
-        return {groups: groups,singleChannels: singleChannels}
+        return { groups: groups, singleChannels: singleChannels }
     }
 
     GetClientStats() {
@@ -954,7 +953,7 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/Database', (req, res) => {
-            if (this.database == null || this.database == undefined || true) {
+            if (this.database == null || this.database == undefined) {
                 res.render('userRpm/DatabaseNotSupported')
             } else {
                 this.RenderPage_DatabaseSearch(req, res, '')
@@ -1022,6 +1021,53 @@ class WebSocket {
 
                 this.RenderPage_Database(req, res, this.databaseSearchedUserId)
             }
+        })
+
+        this.app.get('/userRpm/Log', (req, res) => {
+            const data = fs.readFileSync('./node.error.log', 'utf8')
+
+            const errors = []
+            const warnings = []
+
+            const lines = data.split('\n')
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i]
+                if (line.length < 2) { continue }
+                if (line.startsWith('Error: ')) {
+                    errors.push({ type: 'Error', title: line.replace('Error: ', ''), id: i })
+                } else if (line.startsWith('TypeError: ')) {
+                    errors.push({ type: 'TypeError', title: line.replace('Error: ', ''), id: i })
+                } else if (line.startsWith('    at ')) {
+                    if (errors[errors.length - 1].stack == undefined) {
+                        errors[errors.length - 1].stack = [line.replace('    at ', '')]
+                    } else {
+                        errors[errors.length - 1].stack.push(line.replace('    at ', ''))
+                    }
+                } else if (line.includes(' DeprecationWarning:')) {
+                    var xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(':', '')
+                    xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(': ', '')
+                    warnings.push({ type: 'DeprecationWarning', title: xd, id: i })
+                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
+                    warnings[warnings.length - 1].info = 'Use `node --trace-deprecation ...` to show where the warning was created'
+                } else {
+                    if (errors.length > 0) {
+                        if (errors[errors.length - 1].info == undefined) {
+                            errors[errors.length - 1].info = [line]
+                        } else {
+                            errors[errors.length - 1].info.push(line)
+                        }
+                    }
+                }
+            }
+
+            res.render('userRpm/Log', { errors: errors, warnings: warnings })
+        })
+
+        this.app.post('/userRpm/Log/Clear', (req, res) => {
+            fs.writeFileSync('./node.error.log', '')
         })
 
         this.app.get('/userRpm/*', (req, res) => {
