@@ -954,7 +954,11 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/Database', (req, res) => {
-            this.RenderPage_DatabaseSearch(req, res, '')
+            if (this.database == null || this.database == undefined) {
+                res.render('DatabaseNotSupported.hbs')
+            } else {
+                this.RenderPage_DatabaseSearch(req, res, '')
+            }
         })
 
         this.app.post('/userRpm/Database/Search', (req, res) => {
