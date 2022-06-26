@@ -955,7 +955,7 @@ class WebSocket {
 
         this.app.get('/userRpm/Database', (req, res) => {
             if (this.database == null || this.database == undefined) {
-                res.render('DatabaseNotSupported.hbs')
+                res.render('/userRpm/DatabaseNotSupported')
             } else {
                 this.RenderPage_DatabaseSearch(req, res, '')
             }
