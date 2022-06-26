@@ -12,7 +12,10 @@ const {
     WARNING,
     DEBUG,
     DONE,
-    WsStatusText
+    WsStatusText,
+    NsfwLevel,
+    VerificationLevel,
+    MFALevel
 } = require('../functions/enums')
 const { GetTime, GetDataSize, Capitalize, GetDate } = require('../functions/functions')
 
@@ -614,17 +617,17 @@ class WebSocket {
             createdAt: GetDate(g.createdAt),
             joinedAt: GetDate(g.joinedAt),
 
-            memberCount: (g.memberCount),
-            nsfwLevel: (g.nsfwLevel),
-            nameAcronym: (g.nameAcronym),
-            mfaLevel: (g.mfaLevel),
-            verificationLevel: (g.verificationLevel),
-            splash: (g.splash),
+            memberCount: g.memberCount,
+            nsfwLevel: g.nsfwLevel,
+            nameAcronym: g.nameAcronym,
+            mfaLevel: g.mfaLevel,
+            verificationLevel: g.verificationLevel,
+            splash: g.splash,
 
             available: g.available,
-            large: (g.large),
-            partnered: (g.partnered),
-            verified: (g.verified),
+            large: g.large,
+            partnered: g.partnered,
+            verified: g.verified,
         }
 
         /** @type {Discord.GuildBasedChannel} */

@@ -104,4 +104,24 @@ const WsStatusText = [
     'Resuming...'
 ]
 
-module.exports = { WsStatusText, WsStatus, INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, ColorRoles, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId, CliColor }
+const NsfwLevel = {
+    DEFAULT: 'Default',
+    EXPLICIT: 'Explicit',
+    SAFE: 'Safe',
+    AGE_RESTRICTED: 'Age restricted',
+}
+
+const MFALevel = {
+    NONE: 'None',
+    ELEVATED: 'Elevated',
+}
+
+const VerificationLevel = {
+    NONE: 'None',
+    LOW: 'Low',
+    MEDIUM: 'Medium',
+    HIGH: 'High',
+    VERY_HIGH: 'Very high',
+}
+
+module.exports = { VerificationLevel, MFALevel, NsfwLevel, WsStatusText, WsStatus, INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, ColorRoles, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId, CliColor }
