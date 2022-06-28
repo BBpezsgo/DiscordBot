@@ -1,0 +1,137 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+    <link href="/dynaform/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
+    <link href="/dynaform/tree-logs.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
+    <script language="javascript" src="/dynaform/tree-default.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+    <style>
+        .ping-panel {
+            width: 300px;
+            border: 1px solid #0007;
+            height: 10px;
+            font-size: 0;
+            display: inline-flex;
+            overflow-y: hidden;
+            transform: translate(22px, 4px);
+        }
+
+        .ping-element {
+            display: inline-block;
+            max-height: 10px;
+            min-height: 2px;
+            height: 3px;
+            width: 5px;
+            flex: 1 100%;
+            transition-duration: 200ms;
+            background-color: #fff;
+            border-bottom: 10px solid #a5a5a5;
+        }
+
+        .ping-element:hover {
+            border-bottom: 10px solid #535353;
+        }
+
+        .ping-element.good {
+            border-bottom: 10px solid #49d12e;
+        }
+
+        .ping-element.good:hover {
+            border-bottom: 10px solid #2d9419;
+        }
+
+        .ping-element.fair {
+            border-bottom: 10px solid #fff12e;
+        }
+
+        .ping-element.fair:hover {
+            border-bottom: 10px solid #918920;
+        }
+
+        .ping-element.bad {
+            border-bottom: 10px solid #ff951b;
+        }
+
+        .ping-element.bad:hover {
+            border-bottom: 10px solid #8d4e05;
+        }
+
+        .ping-element.verybad {
+            border-bottom: 10px solid #f52222;
+        }
+
+        .ping-element.verybad:hover {
+            border-bottom: 10px solid #831d1d;
+        }
+    </style>
+</head>
+
+<body onload="setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+    marginheight="0">
+    <table id="autoWidth" style="width: 598px;">
+        <tbody>
+            <tr>
+                <td class="h1" colspan="3" id="t_title">System Log</td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td>
+                    <ul id="myUL">
+                        {{#each logs}}
+                        <li style="margin-bottom: 10px;">
+                            <span class="caret log-file" style="font-weight: bold;">{{dateText}}</span>
+                            <ul class="nested">
+                                {{#each groups}}
+                                <li>
+                                    <span class="caret log-group-{{isInvisible}}" style="font-weight: bold;">
+                                        <img src="/images/user.png" class="miniicon show-{{startedByUser}}">
+                                        <img src="/images/system.png" class="miniicon show-invert-{{startedByUser}}">
+                                        {{startTime}}
+                                        -
+                                        <span class="show-{{this.running}}">
+                                            <img class="miniicon" src="/images/running.png">
+                                        </span>
+                                        <span class="show-invert-{{this.running}}">
+                                            <img src="/images/user.png" class="miniicon show-{{closedByUser}}">
+                                            <img src="/images/system.png" class="miniicon show-invert-{{closedByUser}}">
+                                            {{endTime}}
+                                        </span>
+                                    </span>
+                                    <ul class="nested">
+                                        <li>
+                                            <b>Ping:</b>
+                                            <div class="ping-panel">
+                                                {{#each pings}}
+                                                <div style="height: calc(100% / (({{ping}} - 100) / 10));"
+                                                    class="ping-element {{quality}}"> </div>
+                                                {{/each}}
+                                            </div>
+                                            </div>
+                                        </li>
+                                        {{#each logs}}
+                                        <li>
+                                            <b>{{time}}:</b> {{this.log}}
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                    {{/each}}
+                                </li>
+                            </ul>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -19,6 +19,7 @@ const {
     MFALevel
 } = require('../functions/enums')
 const { GetTime, GetDataSize, Capitalize, GetDate } = require('../functions/functions')
+const { SystemLog, GetLogs } = require('../functions/systemLog')
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
@@ -807,7 +808,8 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Process/Exit', (req, res) => {
-            process.exit()
+            SystemLog('Exit by user (handlebars)')
+            setTimeout(() => { process.exit() }, 500)
         })
 
         this.app.post('/userRpm/Process/Abort', (req, res) => {
@@ -907,6 +909,8 @@ class WebSocket {
         })
 
         this.app.post('/stopBot', (req, res) => {
+            SystemLog('Destroy bot by user (handlebars)')
+
             this.StopBot()
 
             res.send(200).send("OK")
@@ -1023,7 +1027,7 @@ class WebSocket {
             }
         })
 
-        this.app.get('/userRpm/Log', (req, res) => {
+        this.app.get('/userRpm/LogError', (req, res) => {
             const data = fs.readFileSync('./node.error.log', 'utf8')
 
             const errors = []
@@ -1063,7 +1067,11 @@ class WebSocket {
                 }
             }
 
-            res.render('userRpm/Log', { errors: errors, warnings: warnings })
+            res.render('userRpm/ErrorLogs', { errors: errors, warnings: warnings })
+        })
+
+        this.app.get('/userRpm/LogSystem', (req, res) => {
+            res.render('userRpm/SystemLogs', { logs: GetLogs() })
         })
 
         this.app.post('/userRpm/Log/Clear', (req, res) => {

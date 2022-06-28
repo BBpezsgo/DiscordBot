@@ -1,5 +1,21 @@
 
+var startedInvisible = false
+var startedByUser = false
+process.argv.forEach(function (val, index, array) {
+    if (val == 'invisible') {
+        startedInvisible = true
+    } else if (val == 'user') {
+        startedByUser = true
+    }
+})
+
 var autoStartBot = true
+
+const { SystemLog, SystemStart, SystemStop } = require('./functions/systemLog')
+
+SystemStart(startedInvisible, startedByUser)
+
+const startDateTime = new Date(Date.now())
 
 const { LogManager } = require('./functions/log.js')
 var logManager = new LogManager(false, null, null)
@@ -29,9 +45,12 @@ process.stdin.on('data', function (b) {
 
     if (s === '\u0003') {
         if (botStopped == true) {
+            SystemLog('Exit by user (terminal)')
+            SystemStop()
             process.stdin.pause()
-            process.exit()
+            setTimeout(() => { process.exit() }, 500)
         } else {
+            SystemLog('Destroy bot by user (terminal)')
             StopBot()
         }
         //} else if (s === ' ') {
@@ -180,11 +199,14 @@ if (process.stdin.setRawMode) {
 process.stdout.write('\x1b[?1005h')
 process.stdout.write('\x1b[?1003h')
 
-process.on('exit', function () {
+process.on('exit', function (code) {
     // Turn off mouse reporting
     process.stdout.write('\x1b[?1005l')
     process.stdout.write('\x1b[?1003l')
-    console.log("The application is closed")
+    console.log('Exited with code ' + code)
+
+    SystemLog('Exited with code ' + code)
+    SystemStop()
 })
 
 // Loading npm packages
@@ -292,7 +314,8 @@ const {
     ChannelId,
     CliColor
 } = require('./functions/enums.js')
-const { exit } = require('process')
+const { exit, hang } = require('process')
+const { CommandHangman, HangmanManager } = require('./commands/hangman.js')
 
 logManager.BlankScreen()
 
@@ -331,7 +354,9 @@ if (!databaseIsSuccesfullyLoaded) {
                 StartBot()
             }, 1000)
         } else {
-            process.exit()
+            SystemLog('Error: Database is not found')
+            SystemStop()
+            setTimeout(() => { process.exit() }, 500)
         }
     })
 }
@@ -340,6 +365,8 @@ const ws = new WS('1234', '192.168.1.100', 5665, bot, logManager, database, Star
 logManager.BlankScreen()
 
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
+
+const hangmanManager = new HangmanManager()
 
 /**@type {string[]} */
 let musicArray = []
@@ -447,21 +474,25 @@ function addXp(user, channel, ammount) {
 bot.on('reconnecting', () => {
     log(INFO + ': Újracsatlakozás...')
     statesManager.botLoadingState = 'Reconnecting'
+    SystemLog('Reconnecting')
 })
 
 bot.on('disconnect', () => {
     log(ERROR + ': Megszakadt a kapcsolat!')
     statesManager.botLoadingState = 'Disconnect'
+    SystemLog('Disconnect')
 })
 
 bot.on('resume', () => {
     log(INFO + ': Folytatás')
     statesManager.botLoadingState = 'Resume'
+    SystemLog('Resume')
 })
 
 bot.on('error', error => {
     log(ERROR + ': ' + error)
     statesManager.botLoadingState = 'Error'
+    SystemLog('Error: ' + error.message)
 })
 
 bot.on('debug', debug => {
@@ -472,6 +503,7 @@ bot.on('debug', debug => {
 
     if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
         logManager.AddTimeline(2)
+        SystemLog('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
     }
 
     if (translatedDebug.secret == true) return
@@ -522,11 +554,13 @@ bot.on('raw', async event => {
 bot.on('close', () => {
     log(SHARD & ': close')
     statesManager.botLoadingState = 'Close'
+    SystemLog('Close')
 })
 
 bot.on('destroyed', () => {
     log(SHARD & ': destroyed')
     statesManager.botLoadingState = 'Destroyed'
+    SystemLog('Destroyed')
 })
 
 bot.on('invalidSession', () => {
@@ -1623,6 +1657,49 @@ bot.on('interactionCreate', async interaction => {
                 editingMail.message.channel.send('\\❌ **A levelet nem sikerült elküldeni**')
             }
         }
+
+        
+        if (interaction.customId == 'hangmanStart') {
+            if (hangmanManager.GetUserSettingsIndex(interaction.user.id) == null) {
+                interaction.reply('> **\\❌ Hiba: A beállításaid nem találhatók!**')
+                return
+            }
+
+            const settings = hangmanManager.userSettings[hangmanManager.GetUserSettingsIndex(interaction.user.id)]
+            
+            var rawWordList = ''
+            if (settings.language == 'EN') {
+                rawWordList = fs.readFileSync('./word-list/english.txt', 'utf-8')
+            } else if (settings.language == 'HU') {
+                rawWordList = fs.readFileSync('./word-list/hungarian.txt', 'utf-8')
+            } else {
+                interaction.reply('> **\\❌ Hiba: Ismeretlen nyelv "' + settings.language + '"!**')
+                return
+            }
+            var wordList = ['']
+            if (settings.language == 'EN') {
+                wordList = rawWordList.split('\n')
+            } else if (settings.language == 'HU') {
+                const wordListHU = rawWordList.split('\n')
+                for (let i = 0; i < wordListHU.length; i++) {
+                    const item = wordListHU[i];
+                    wordList.push(item.split(' ')[0])
+                }
+            }
+
+            const randomIndex = Math.floor(Math.random() * wordList.length)
+            const randomWord = wordList[randomIndex]
+
+            if (hangmanManager.GetPlayerIndex(interaction.user.id) == null) {
+                hangmanManager.players.push({ userId: interaction.user.id, word: randomWord, guessedLetters: [] })
+            } else {
+                hangmanManager.players[hangmanManager.GetPlayerIndex(interaction.user.id)] = { userId: interaction.user.id, word: randomWord, guessedLetters: [] }
+            }
+
+            CommandHangman(interaction, hangmanManager, false)
+
+            return
+        }
     } else if (interaction.isSelectMenu()) {
         if (interaction.customId.startsWith('shopMenu')) {
             interaction.update(CommandShop(interaction.channel, interaction.user, interaction.member, database, interaction.values[0], '', privateCommand))
@@ -1916,6 +1993,34 @@ bot.on('interactionCreate', async interaction => {
 
             return
         }
+
+        if (interaction.customId == 'hangmanLang') {
+            const languageSelected = interaction.values[0]
+            
+            if (hangmanManager.GetUserSettingsIndex(interaction.user.id) == null) {
+                hangmanManager.userSettings.push({ userId: interaction.user.id, difficulty: 'HARD', language: languageSelected })
+            } else {
+                hangmanManager.userSettings[hangmanManager.GetUserSettingsIndex(interaction.user.id)].language = languageSelected
+            }
+
+            CommandHangman(interaction, hangmanManager, false)
+
+            return
+        }
+        if (interaction.customId == 'hangmanDifficulty') {
+            const difficultySelected = interaction.values[0]
+            
+            if (hangmanManager.GetUserSettingsIndex(interaction.user.id) == null) {
+                hangmanManager.userSettings.push({ userId: interaction.user.id, difficulty: difficultySelected, language: 'HU' })
+            } else {
+                hangmanManager.userSettings[hangmanManager.GetUserSettingsIndex(interaction.user.id)].difficulty = difficultySelected
+            }
+            
+            CommandHangman(interaction, hangmanManager, false)
+
+            return
+        }
+
     } else if (interaction.isUserContextMenu()) {
         if (interaction.commandName == 'Megajándékozás') {
             try {
@@ -2077,6 +2182,8 @@ async function GetOldDailyWeatherReport(channelId) {
 }
 
 bot.once('ready', async () => {
+    SystemLog('Bot is ready')
+
     statesManager.botLoadingState = 'Ready'
     try {
         //DeleteCommands(bot)
@@ -2628,6 +2735,10 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 async function processApplicationCommand(command, privateCommand) {
 
 
+    if (command.commandName === `hangman`) {
+        CommandHangman(command, hangmanManager, true)
+    }
+
     if (command.commandName === `wordle`) {
         command.deferReply({ ephemeral: privateCommand }).then(() => {
             CrossoutTest(command, command.options.getString('search'), privateCommand)
@@ -2824,6 +2935,7 @@ async function processApplicationCommand(command, privateCommand) {
 }
 
 function StartBot() {
+    SystemLog('Start bot...')
     bot.login(token).catch((err) => {
         if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
             log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
@@ -2837,6 +2949,10 @@ function StopBot() {
     bot.destroy()
     botStopped = true
 }
+
+const endDateTime = new Date(Date.now())
+const ellapsedMilliseconds = endDateTime - startDateTime
+SystemLog('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
 
 if (autoStartBot) {
     StartBot()

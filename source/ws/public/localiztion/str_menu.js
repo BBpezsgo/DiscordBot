@@ -12,4 +12,6 @@ var str_menu =
     database:                  "Database",
     moderating:                  "Moderating",
     log:                  "Log",
+    logErrors:                  "Errors",
+    logSystem:                  "System",
 }

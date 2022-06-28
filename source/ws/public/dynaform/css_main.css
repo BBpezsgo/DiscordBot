@@ -244,7 +244,6 @@ table.datas>tbody>tr>td {
 
 	/* Position the tooltip text - see examples below! */
 	position: absolute;
-	z-index: 1;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
@@ -277,7 +276,7 @@ table.datas>tbody>tr>td {
 	cursor: pointer;
 }
 
-.dropbtn > i {
+.dropbtn>i {
 	pointer-events: none;
 }
 
@@ -296,7 +295,7 @@ table.datas>tbody>tr>td {
 	transform: translate(-100%, 0%);
 }
 
-.dropdown-content > form {
+.dropdown-content>form {
 	padding: 5px 8px;
 	margin: 0;
 	padding: 0;
@@ -310,7 +309,7 @@ table.datas>tbody>tr>td {
 	min-width: 100px;
 }
 
-.dropdown-content  input[type='text'] {
+.dropdown-content input[type='text'] {
 	display: none;
 }
 
@@ -319,10 +318,15 @@ table.datas>tbody>tr>td {
 	background: var(--main-primary-color);
 }
 
-.show {
-	display: block;
+.show-,
+.show-false {
+	display: none;
 }
 
-.show-, .show-false {
+.show-invert-true {
 	display: none;
+}
+
+.miniicon {
+	transform: translateY(4px);
 }

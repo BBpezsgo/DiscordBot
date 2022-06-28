@@ -6,6 +6,9 @@ const fs = require('fs')
 const request = require("request");
 const { openweatherToken } = require('../config.json')
 
+const urlWeather = 'http://api.openweathermap.org/data/2.5/weather?lat=46.678889&lon=21.090833&units=metric&appid=' + openweatherToken
+const urlPollution = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + openweatherToken
+
 let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
 if (fs.existsSync('./Helper/output.txt') == true) {
     dataToAvoidErrors_SunDatasRaw = fs.readFileSync('./Helper/output.txt').toString().split("|")
@@ -228,6 +231,61 @@ function addDays(date, days) {
     return date
 }
 
+/** @param 
+ * {(
+ * msnWeather: any,
+ * openweathermapWeather: any,
+ * openweathermapPollution: any,
+ * errorMessage: string
+ * ) => void}
+ * callback */
+function GetEarthWeather(callback) {
+    try {
+        weather1.find({ search: 'Békéscsaba, HU', degreeType: 'C' }, function (msnWeatherError, msnWeather) {
+            if (msnWeatherError) {
+                callback(null, null, null, '**MSN Error:** ' + msnWeatherError.toString())
+                return
+            }
+            try {
+                request(urlWeather, function (err1, res1, openweathermapWeatherBody) {
+                    if (res1.statusCode === 200) {
+                        if (err1) {
+                            callback(null, null, null, '**OpenWeatherMap Error:** ' + err1.toString())
+                        } else {
+                            /** @type {{ coord: { lon: number; lat: number; }; weather: { id: number; main: string; description: string; icon: string; }[]; base: string; main: { temp: number; feels_like: number; temp_min: number; temp_max: number; pressure: number; humidity: number; }; visibility: number; wind: { speed: number; deg: number; gust: number; }; clouds: { all: number; }; dt: number; sys: { type: number; id: number; country: string; sunrise: number; sunset: number; }; timezone: number; id: number; name: string; cod: number; }} */
+                            const openweathermapWeather = JSON.parse(openweathermapWeatherBody)
+                            try {
+                                request(urlPollution, function (err2, res2, openweathermapPollutionBody) {
+                                    if (res2.statusCode === 200) {
+                                        if (err2) {
+                                            callback(null, null, null, '**OpenWeatherMap Error:** ' + err2.toString())
+                                        } else {
+                                            /** @type {{coord: { lon: number; lat: number; }; list: { main: { aqi: number; }; components: { co: number; no: number; no2: number; o3: number; so2: number; pm2_5: number; pm10: number; nh3: number; }; dt: number; }[];}} */
+                                            const openweathermapPollution = JSON.parse(openweathermapPollutionBody)
+
+                                            callback(msnWeather, openweathermapWeather, openweathermapPollution.list[0], null)
+                                        }
+                                    } else {
+                                        callback(null, null, null, '**HTTP Response Error:** ' + res2.statusCode)
+                                    }
+                                })
+                            } catch (err) {
+                                callback(null, null, null, '**HTTP Requiest Error:** ' + err.toString())
+                            }
+                        }
+                    } else {
+                        callback(null, null, null, '**HTTP Response Error:** ' + res1.statusCode)
+                    }
+                })
+            } catch (err) {
+                callback(null, null, null, '**HTTP Requiest Error:** ' + err.toString())
+            }
+        })
+    } catch (error) {
+        callback(null, null, null, '**MSN Error:** ' + error.toString())
+    }
+}
+
 /**
  * @param {Discord.CommandInteraction<Discord.CacheType>} command
  * @param {boolean} privateCommand
@@ -247,52 +305,12 @@ module.exports = async (command, privateCommand) => {
 
     await command.deferReply({ ephemeral: privateCommand })
 
-    const urlWeather = 'http://api.openweathermap.org/data/2.5/weather?lat=46.678889&lon=21.090833&units=metric&appid=' + openweatherToken
-    const urlPollution = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + openweatherToken
-
-    try {
-        weather1.find({ search: 'Békéscsaba, HU', degreeType: 'C' }, function (msnWeatherError, msnWeather) {
-            if (msnWeatherError) {
-                command.editReply({ content: '> \\❌ **MSN Error:** ' + msnWeatherError.toString() })
-                return
-            }
-            try {
-                request(urlWeather, function (err1, res1, openweathermapWeatherBody) {
-                    if (res1.statusCode === 200) {
-                        if (err1) {
-                            command.editReply({ content: '> \\❌ **OpenWeatherMap Error:** ' + err1.toString() })
-                        } else {
-                            /** @type {{ coord: { lon: number; lat: number; }; weather: { id: number; main: string; description: string; icon: string; }[]; base: string; main: { temp: number; feels_like: number; temp_min: number; temp_max: number; pressure: number; humidity: number; }; visibility: number; wind: { speed: number; deg: number; gust: number; }; clouds: { all: number; }; dt: number; sys: { type: number; id: number; country: string; sunrise: number; sunset: number; }; timezone: number; id: number; name: string; cod: number; }} */
-                            const openweathermapWeather = JSON.parse(openweathermapWeatherBody)
-                            try {
-                                request(urlPollution, function (err2, res2, openweathermapPollutionBody) {
-                                    if (res1.statusCode === 200) {
-                                        if (err2) {
-                                            command.editReply({ content: '> \\❌ **OpenWeatherMap Error:** ' + err2.toString() })
-                                        } else {
-                                            /** @type {{coord: { lon: number; lat: number; }; list: { main: { aqi: number; }; components: { co: number; no: number; no2: number; o3: number; so2: number; pm2_5: number; pm10: number; nh3: number; }; dt: number; }[];}} */
-                                            const openweathermapPollution = JSON.parse(openweathermapPollutionBody)
-
-                                            const embed = getEmbedEarth(msnWeather, openweathermapWeather, m, openweathermapPollution.list[0])
-                                            command.editReply({ embeds: [embed] })
-                                        }
-                                    } else {
-                                        command.editReply({ content: '> \\❌ **HTTP Response Error:** ' + res1.statusCode })
-                                    }
-                                })
-                            } catch (err) {
-                                command.editReply({ content: '> \\❌ **HTTP Requiest Error:** ' + err.toString() })
-                            }
-                        }
-                    } else {
-                        command.editReply({ content: '> \\❌ **HTTP Response Error:** ' + res1.statusCode })
-                    }
-                })
-            } catch (err) {
-                command.editReply({ content: '> \\❌ **HTTP Requiest Error:** ' + err.toString() })
-            }
-        })
-    } catch (error) {
-        command.editReply({ content: '> \\❌ **MSN Error:** ' + error.toString() })
-    }
+    GetEarthWeather((msnWeather, openweathermapWeather, openweathermapPollution, errorMessage) => {
+        if (errorMessage != null) {
+            command.editReply({ content: '> \\❌ ' + errorMessage })
+        } else {
+            const embed = getEmbedEarth(msnWeather, openweathermapWeather, m, openweathermapPollution)
+            command.editReply({ embeds: [embed] })
+        }
+    })
 }

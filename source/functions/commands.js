@@ -163,6 +163,10 @@ function CreateCommands(bot, statesManager) {
         .setName('wordle')
         .setDescription('Wordle játék (angol)')
 
+    const commandHangman = new SlashCommandBuilder()
+        .setName('hangman')
+        .setDescription('Hangman játék')
+
     const fonts = GetFonts()
     for (let i = 0; i < fonts.length; i++) {
         if (i == 1) { continue }
@@ -172,7 +176,7 @@ function CreateCommands(bot, statesManager) {
     commandFont.addStringOption(commandFontSub0)
 
     try {
-        statesManager.commandAllCommandCount = 19
+        statesManager.commandAllCommandCount = 20
         statesManager.commandCreatedCount = 0
 
         const guildCommands = bot.guilds.cache.get('737954264386764812').commands
@@ -195,6 +199,7 @@ function CreateCommands(bot, statesManager) {
         guildCommands?.create(testContextMenu.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
         guildCommands?.create(commandWordle.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
         guildCommands?.create(commandSettings.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        guildCommands?.create(commandHangman.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
     } catch (error) {
         console.error(error)
     }
