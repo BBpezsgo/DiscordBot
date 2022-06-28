@@ -20,6 +20,8 @@ const {
 } = require('../functions/enums')
 const { GetTime, GetDataSize, Capitalize, GetDate } = require('../functions/functions')
 const { SystemLog, GetLogs } = require('../functions/systemLog')
+const { HbLog, HbGetLogs, HbStart } = require('./log')
+const child_process = require('child_process')
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
@@ -44,6 +46,8 @@ class WebSocket {
 
         this.statesManager = statesManager
 
+        HbStart()
+
         this.app = express()
         this.app.engine('hbs', engine({
             extname: '.hbs',
@@ -66,21 +70,19 @@ class WebSocket {
                 return next()
             }
 
+            HbLog({ IP: req.ip, type: 'NORMAL', message: 'Failed to log in with username "' + login + '" and password "' + password + '"' })
+
             res.set('WWW-Authenticate', 'Basic realm="401"')
             res.status(401).render('userRpm/401')
         })
 
         this.registerRoots()
 
-        this.app.get('/data/status', function (req, res) {
-            var dataToSendToClient = { 'message': 'error message from server' }
-            res.send(JSON.stringify(dataToSendToClient))
-        })
-
         this.server = this.app.listen(port, ip, () => {
             this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
             this.statesManager.handlebarsDone = true
             this.statesManager.handlebarsURL = 'http://' + this.server.address().address + ":" + this.server.address().port
+            HbLog({ type: 'NORMAL', message: 'Listening on ' + ip + ':' + port })
         })
         this.server.on('error', (err) => {
             if (err.message.startsWith('listen EADDRNOTAVAIL: address not available')) {
@@ -88,33 +90,38 @@ class WebSocket {
             } else {
                 this.statesManager.handlebarsErrorMessage = err.message
             }
-        })
-        this.server.on('checkContinue', () => {
-            this.logManager.Log(DEBUG + ': ' + "Check continue", true)
-        })
-        this.server.on('checkExpectation', () => {
-            this.logManager.Log(DEBUG + ': ' + "Check expectation", true)
+            HbLog({ type: 'ERROR', message: err.message, helperMessage: 'Server error: ' + err.message })
         })
         this.server.on('clientError', (err, socket) => {
             this.logManager.Log(ERROR + ': ' + err, true)
+            HbLog({ type: 'CLIENT_ERROR', message: err.message, helperMessage: 'Client error: ' + err.message })
+
+            if (err.code === 'ECONNRESET' || !socket.writable) {
+                return
+            }
+            socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
         })
         this.server.on('close', () => {
             this.statesManager.handlebarsDone = false
             this.statesManager.handlebarsURL = ''
             this.logManager.Log(SERVER + ': ' + "Closed", true)
+            HbLog({ type: 'NORMAL', message: 'Server closed' })
         })
         this.server.on('connect', (req, socket, head) => {
             this.logManager.Log(DEBUG + ': ' + "connect", true)
+            HbLog({ IP: req.socket.remoteAddress, type: 'CONNECT', url: req.url, method: req.method, helperMessage: 'Someone wanted to connect' })
         })
         this.server.on('connection', (socket) => {
             this.statesManager.handlebarsClients.push(socket)
             this.statesManager.handlebarsClientsTime.push(10)
         })
-        this.server.on('request', () => {
+        this.server.on('request', (req, res) => {
             this.statesManager.handlebarsRequiests.push(10)
+            HbLog({ IP: req.socket.remoteAddress, type: 'REQUIEST', url: req.url, method: req.method, helperMessage: 'Someone requiested' })
         })
         this.server.on('upgrade', (req, socket, head) => {
             this.logManager.Log(DEBUG + ': ' + "upgrade", true)
+            HbLog({ IP: req.socket.remoteAddress, type: 'NORMAL', message: 'Upgrade', helperMessage: 'Someone upgraded' })
         })
 
 
@@ -812,6 +819,17 @@ class WebSocket {
             setTimeout(() => { process.exit() }, 500)
         })
 
+        this.app.post('/userRpm/Process/Restart', (req, res) => {
+            if (this.logManager.isPhone == false) {
+                SystemLog('Restart by user (handlebars)')
+                setTimeout(() => {
+                    child_process.spawn('node ' + process.argv[1] + ' invisible user').once('spawn', () => {
+                        process.exit()
+                    })
+                }, 500)
+            }
+        })
+
         this.app.post('/userRpm/Process/Abort', (req, res) => {
             process.abort()
         })
@@ -1072,6 +1090,10 @@ class WebSocket {
 
         this.app.get('/userRpm/LogSystem', (req, res) => {
             res.render('userRpm/SystemLogs', { logs: GetLogs() })
+        })
+
+        this.app.get('/userRpm/LogHandlebars', (req, res) => {
+            res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
         })
 
         this.app.post('/userRpm/Log/Clear', (req, res) => {

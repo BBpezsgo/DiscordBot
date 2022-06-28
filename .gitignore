@@ -19,3 +19,4 @@ source/StartMobile.bat
 source/StartInvisible.bat
 source/node.error.log
 source/log/
+source/ws/log/

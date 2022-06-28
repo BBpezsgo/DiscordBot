@@ -17,6 +17,7 @@ var menuList = new Array(
     "LogError", 0, 1, str_menu.log,
     "LogError", 0, 2, str_menu.logErrors,
     "LogSystem", 0, 2, str_menu.logSystem,
+    "LogHandlebars", 0, 2, str_menu.logHandlebars,
 
 
     "Testing", 0, 0, str_menu.testing,

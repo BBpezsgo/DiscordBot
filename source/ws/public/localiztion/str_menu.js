@@ -14,4 +14,5 @@ var str_menu =
     log:                  "Log",
     logErrors:                  "Errors",
     logSystem:                  "System",
+    logHandlebars:                  "Handlebars",
 }

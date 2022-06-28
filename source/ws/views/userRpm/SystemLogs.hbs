@@ -18,7 +18,7 @@
             height: 10px;
             font-size: 0;
             display: inline-flex;
-            overflow-y: hidden;
+            overflow: hidden;
             transform: translate(22px, 4px);
         }
 
@@ -27,43 +27,44 @@
             max-height: 10px;
             min-height: 2px;
             height: 3px;
-            width: 5px;
             flex: 1 100%;
-            transition-duration: 200ms;
             background-color: #fff;
             border-bottom: 10px solid #a5a5a5;
-        }
-
-        .ping-element:hover {
-            border-bottom: 10px solid #535353;
+            color: #000;
+            user-select: none;
+            transition-duration: 100ms;
         }
 
         .ping-element.good {
             border-bottom: 10px solid #49d12e;
         }
 
-        .ping-element.good:hover {
-            border-bottom: 10px solid #2d9419;
-        }
-
         .ping-element.fair {
             border-bottom: 10px solid #fff12e;
-        }
-
-        .ping-element.fair:hover {
-            border-bottom: 10px solid #918920;
         }
 
         .ping-element.bad {
             border-bottom: 10px solid #ff951b;
         }
 
+        .ping-element.verybad {
+            border-bottom: 10px solid #f52222;
+        }
+
+        .ping-element:hover {
+            background-color: #eee;
+        }
+
+        .ping-element.fair:hover {
+            border-bottom: 10px solid #c4b81a;
+        }
+
         .ping-element.bad:hover {
             border-bottom: 10px solid #8d4e05;
         }
 
-        .ping-element.verybad {
-            border-bottom: 10px solid #f52222;
+        .ping-element.good:hover {
+            border-bottom: 10px solid #2d9419;
         }
 
         .ping-element.verybad:hover {
@@ -107,6 +108,7 @@
                                     </span>
                                     <ul class="nested">
                                         <li>
+                                            <img class="miniicon" src="/images/net.png">
                                             <b>Ping:</b>
                                             <div class="ping-panel">
                                                 {{#each pings}}
@@ -116,9 +118,13 @@
                                             </div>
                                             </div>
                                         </li>
+                                        <li>
+                                            <img class="miniicon" src="/images/log.png">
+                                            <b>Logs:</b>
+                                        </li>
                                         {{#each logs}}
                                         <li>
-                                            <b>{{time}}:</b> {{this.log}}
+                                            <b style="margin-left: 36px;">{{time}}:</b> {{this.log}}
                                         </li>
                                         {{/each}}
                                     </ul>
