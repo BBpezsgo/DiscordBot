@@ -361,7 +361,7 @@ if (!databaseIsSuccesfullyLoaded) {
     })
 }
 
-const ws = new WS('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager)
+const ws = new WS('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager, false)
 logManager.BlankScreen()
 
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))

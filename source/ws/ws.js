@@ -34,19 +34,22 @@ class WebSocket {
      * @param {LogManager} logManager
      * @param {DatabaseManager} database
      * @param {StatesManager} statesManager
+     * @param {boolean} isMobile
      */
-    constructor(password, ip, port, client, logManager, database, StartBot, StopBot, statesManager) {
+    constructor(password, ip, port, client, logManager, database, StartBot, StopBot, statesManager, isMobile) {
         this.password = password
         this.client = client
         this.StartBot = StartBot
         this.StopBot = StopBot
+        /** @type {boolean} */
+        this.IsMobile = isMobile
 
         this.logManager = logManager
         this.database = database
 
         this.statesManager = statesManager
 
-        HbStart()
+        if (isMobile == false) { HbStart() }
 
         this.app = express()
         this.app.engine('hbs', engine({
@@ -70,7 +73,9 @@ class WebSocket {
                 return next()
             }
 
-            HbLog({ IP: req.ip, type: 'NORMAL', message: 'Failed to log in with username "' + login + '" and password "' + password + '"' })
+            if (this.IsMobile == false) {
+                HbLog({ IP: req.ip, type: 'NORMAL', message: 'Failed to log in with username "' + login + '" and password "' + password + '"' })
+            }
 
             res.set('WWW-Authenticate', 'Basic realm="401"')
             res.status(401).render('userRpm/401')
@@ -82,7 +87,9 @@ class WebSocket {
             this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
             this.statesManager.handlebarsDone = true
             this.statesManager.handlebarsURL = 'http://' + this.server.address().address + ":" + this.server.address().port
-            HbLog({ type: 'NORMAL', message: 'Listening on ' + ip + ':' + port })
+            if (this.IsMobile == false) {
+                HbLog({ type: 'NORMAL', message: 'Listening on ' + ip + ':' + port })
+            }
         })
         this.server.on('error', (err) => {
             if (err.message.startsWith('listen EADDRNOTAVAIL: address not available')) {
@@ -90,11 +97,15 @@ class WebSocket {
             } else {
                 this.statesManager.handlebarsErrorMessage = err.message
             }
-            HbLog({ type: 'ERROR', message: err.message, helperMessage: 'Server error: ' + err.message })
+            if (this.IsMobile == false) {
+                HbLog({ type: 'ERROR', message: err.message, helperMessage: 'Server error: ' + err.message })
+            }
         })
         this.server.on('clientError', (err, socket) => {
             this.logManager.Log(ERROR + ': ' + err, true)
-            HbLog({ type: 'CLIENT_ERROR', message: err.message, helperMessage: 'Client error: ' + err.message })
+            if (this.IsMobile == false) {
+                HbLog({ type: 'CLIENT_ERROR', message: err.message, helperMessage: 'Client error: ' + err.message })
+            }
 
             if (err.code === 'ECONNRESET' || !socket.writable) {
                 return
@@ -105,11 +116,15 @@ class WebSocket {
             this.statesManager.handlebarsDone = false
             this.statesManager.handlebarsURL = ''
             this.logManager.Log(SERVER + ': ' + "Closed", true)
-            HbLog({ type: 'NORMAL', message: 'Server closed' })
+            if (this.IsMobile == false) {
+                HbLog({ type: 'NORMAL', message: 'Server closed' })
+            }
         })
         this.server.on('connect', (req, socket, head) => {
             this.logManager.Log(DEBUG + ': ' + "connect", true)
-            HbLog({ IP: req.socket.remoteAddress, type: 'CONNECT', url: req.url, method: req.method, helperMessage: 'Someone wanted to connect' })
+            if (this.IsMobile == false) {
+                HbLog({ IP: req.socket.remoteAddress, type: 'CONNECT', url: req.url, method: req.method, helperMessage: 'Someone wanted to connect' })
+            }
         })
         this.server.on('connection', (socket) => {
             this.statesManager.handlebarsClients.push(socket)
@@ -117,11 +132,15 @@ class WebSocket {
         })
         this.server.on('request', (req, res) => {
             this.statesManager.handlebarsRequiests.push(10)
-            HbLog({ IP: req.socket.remoteAddress, type: 'REQUIEST', url: req.url, method: req.method, helperMessage: 'Someone requiested' })
+            if (this.IsMobile == false) {
+                HbLog({ IP: req.socket.remoteAddress, type: 'REQUIEST', url: req.url, method: req.method, helperMessage: 'Someone requiested' })
+            }
         })
         this.server.on('upgrade', (req, socket, head) => {
             this.logManager.Log(DEBUG + ': ' + "upgrade", true)
-            HbLog({ IP: req.socket.remoteAddress, type: 'NORMAL', message: 'Upgrade', helperMessage: 'Someone upgraded' })
+            if (this.IsMobile == false) {
+                HbLog({ IP: req.socket.remoteAddress, type: 'NORMAL', message: 'Upgrade', helperMessage: 'Someone upgraded' })
+            }
         })
 
 
@@ -820,7 +839,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Process/Restart', (req, res) => {
-            if (this.logManager.isPhone == false) {
+            if (this.IsMobile == false) {
                 SystemLog('Restart by user (handlebars)')
                 setTimeout(() => {
                     child_process.spawn('node ' + process.argv[1] + ' invisible user').once('spawn', () => {
@@ -1093,7 +1112,9 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/LogHandlebars', (req, res) => {
-            res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
+            if (this.IsMobile == false) {
+                res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
+            }
         })
 
         this.app.post('/userRpm/Log/Clear', (req, res) => {
