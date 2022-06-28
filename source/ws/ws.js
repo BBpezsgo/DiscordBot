@@ -834,13 +834,17 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Process/Exit', (req, res) => {
-            SystemLog('Exit by user (handlebars)')
+            if (this.IsMobile == false) {
+                SystemLog('Exit by user (handlebars)')
+            }
             setTimeout(() => { process.exit() }, 500)
         })
 
         this.app.post('/userRpm/Process/Restart', (req, res) => {
             if (this.IsMobile == false) {
-                SystemLog('Restart by user (handlebars)')
+                if (this.IsMobile == false) {
+                    SystemLog('Restart by user (handlebars)')
+                }
                 setTimeout(() => {
                     child_process.spawn('node ' + process.argv[1] + ' invisible user').once('spawn', () => {
                         process.exit()
@@ -946,7 +950,9 @@ class WebSocket {
         })
 
         this.app.post('/stopBot', (req, res) => {
-            SystemLog('Destroy bot by user (handlebars)')
+            if (this.IsMobile == false) {
+                SystemLog('Destroy bot by user (handlebars)')
+            }
 
             this.StopBot()
 
