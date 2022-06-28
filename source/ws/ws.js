@@ -1071,6 +1071,10 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/LogError', (req, res) => {
+            if (this.IsMobile == true) {
+                res.render('userRpm/ErrorLogsNotSupported', { })
+                return
+            }
             const data = fs.readFileSync('./node.error.log', 'utf8')
 
             const errors = []
@@ -1114,12 +1118,18 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/LogSystem', (req, res) => {
-            res.render('userRpm/SystemLogs', { logs: GetLogs() })
+            if (this.IsMobile == false) {
+                res.render('userRpm/SystemLogs', { logs: GetLogs() })
+            } else {
+                res.render('userRpm/SystemLogsNotSupported', { })
+            }
         })
 
         this.app.get('/userRpm/LogHandlebars', (req, res) => {
             if (this.IsMobile == false) {
                 res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
+            } else {
+                res.render('userRpm/HandlebarsLogsNotSupported', { })
             }
         })
 
