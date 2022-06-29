@@ -19,7 +19,7 @@ const {
     MFALevel
 } = require('../functions/enums')
 const { GetTime, GetDataSize, Capitalize, GetDate } = require('../functions/functions')
-const { SystemLog, GetLogs } = require('../functions/systemLog')
+const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const child_process = require('child_process')
 
@@ -684,7 +684,33 @@ class WebSocket {
             viewable: c.viewable,
         }
 
-        res.render('userRpm/Moderating', { server: guild, channel: channel })
+        const messages = []
+
+        if (c.isText()) {
+            /** @type {Discord.DMChannel | Discord.PartialDMChannel | Discord.NewsChannel | Discord.TextChannel | Discord.ThreadChannel | Discord.VoiceChannel} */
+            const cTxt = c
+            cTxt.messages.cache.forEach((message) => {
+                messages.push({
+                    id: message.id,
+                    applicationId: message.applicationId,
+                    cleanContent: message.cleanContent,
+                    content: message.content,
+                    createdAt: GetDate(message.createdAt),
+                    crosspostable: message.crosspostable,
+                    deletable: message.deletable,
+                    editable: message.editable,
+                    editedAt: GetDate(message.editedAt),
+                    nonce: message.nonce,
+                    pinnable: message.pinnable,
+                    pinned: message.pinned,
+                    system: message.system,
+                    type: message.type,
+                    url: message.url
+                })
+            })
+        }
+
+        res.render('userRpm/Moderating', { server: guild, channel: channel, messages: messages })
     }
 
     registerRoots() {
@@ -842,13 +868,9 @@ class WebSocket {
 
         this.app.post('/userRpm/Process/Restart', (req, res) => {
             if (this.IsMobile == false) {
-                if (this.IsMobile == false) {
-                    SystemLog('Restart by user (handlebars)')
-                }
-                setTimeout(() => {
-                    child_process.spawn('node ' + process.argv[1] + ' invisible user').once('spawn', () => {
-                        process.exit()
-                    })
+                fs.writeFileSync('./exitdata.txt', 'restart', { encoding: 'ascii' })
+                setTimeout(function () {
+                    process.exit()
                 }, 500)
             }
         })
@@ -1072,7 +1094,7 @@ class WebSocket {
 
         this.app.get('/userRpm/LogError', (req, res) => {
             if (this.IsMobile == true) {
-                res.render('userRpm/ErrorLogsNotSupported', { })
+                res.render('userRpm/ErrorLogsNotSupported', {})
                 return
             }
             const data = fs.readFileSync('./node.error.log', 'utf8')
@@ -1119,9 +1141,9 @@ class WebSocket {
 
         this.app.get('/userRpm/LogSystem', (req, res) => {
             if (this.IsMobile == false) {
-                res.render('userRpm/SystemLogs', { logs: GetLogs() })
+                res.render('userRpm/SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
             } else {
-                res.render('userRpm/SystemLogsNotSupported', { })
+                res.render('userRpm/SystemLogsNotSupported', {})
             }
         })
 
@@ -1129,7 +1151,7 @@ class WebSocket {
             if (this.IsMobile == false) {
                 res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
             } else {
-                res.render('userRpm/HandlebarsLogsNotSupported', { })
+                res.render('userRpm/HandlebarsLogsNotSupported', {})
             }
         })
 

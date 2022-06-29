@@ -70,6 +70,85 @@
         .ping-element.verybad:hover {
             border-bottom: 10px solid #831d1d;
         }
+
+        .uptimehistory-panel {
+            width: 600px;
+            border: 1px solid #0007;
+            height: 10px;
+            font-size: 0;
+            display: inline-flex;
+            transform: translate(22px, 4px);
+        }
+
+        .uptimehistory-element {
+            display: inline-block;
+            height: 10px;
+            flex: 1 100%;
+            border-bottom-color: #a5a5a5;
+            transition-duration: 100ms;
+            border-bottom-style: solid;
+            border-bottom-width: 0px;
+            border-bottom-color: #6bdd0d;
+        }
+
+        .uptimehistory-element:hover {
+            border-bottom-color: #4da505;
+        }
+
+        .uptimehistory-element.online-good {
+            height: 0px;
+            border-bottom-width: 10px;
+        }
+
+        .uptimehistory-element.online-fair {
+            height: 1px;
+            border-bottom-width: 9px;
+        }
+
+        .uptimehistory-element.online-bad {
+            height: 2px;
+            border-bottom-width: 8px;
+        }
+
+        .uptimehistory-element.online-verybad {
+            height: 3px;
+            border-bottom-width: 7px;
+        }
+
+        .hour-22,
+        .hour-23,
+        .hour-0,
+        .hour-1,
+        .hour-2,
+        .hour-3,
+        .hour-4 {
+            background-color: #aaa;
+        }
+        .hour-5,
+        .hour-21 {
+            background-color: #bbb;
+        }
+        .hour-6,
+        .hour-20 {
+            background-color: #ccc;
+        }
+        .hour-7,
+        .hour-19 {
+            background-color: #ddd;
+        }
+        .hour-8,
+        .hour-9,
+        .hour-10,
+        .hour-11,
+        .hour-12,
+        .hour-13,
+        .hour-14,
+        .hour-15,
+        .hour-16,
+        .hour-17,
+        .hour-18 {
+            background-color: #eee;
+        }
     </style>
 </head>
 
@@ -79,6 +158,25 @@
         <tbody>
             <tr>
                 <td class="h1" colspan="3" id="t_title">System Log</td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td class="h2" colspan="3" id="t_lan">Uptime history</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="uptimehistory-panel">
+                        {{#each uptimeHistory}}
+                        <div class="uptimehistory-element {{status}} tooltip hour-{{hours}}">
+                            <span class="tooltiptext" style="font-size: medium; transform: translateY(-30px);">
+                                {{date}}
+                            </span>
+                        </div>
+                        {{/each}}
+                    </div>
+                </td>
             </tr>
             <tr>
                 <td class="blue" colspan="3"></td>

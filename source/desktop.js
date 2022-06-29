@@ -203,7 +203,7 @@ process.on('exit', function (code) {
     // Turn off mouse reporting
     process.stdout.write('\x1b[?1005l')
     process.stdout.write('\x1b[?1003l')
-    console.log('Exited with code ' + code)
+    console.log('Exit with code ' + code)
 
     SystemLog('Exited with code ' + code)
     SystemStop()
