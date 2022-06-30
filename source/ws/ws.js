@@ -18,10 +18,9 @@ const {
     VerificationLevel,
     MFALevel
 } = require('../functions/enums')
-const { GetTime, GetDataSize, Capitalize, GetDate } = require('../functions/functions')
+const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
 const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
-const child_process = require('child_process')
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
@@ -517,9 +516,25 @@ class WebSocket {
                 avatarUrlLarge: cacheUser.avatarURL({ size: 128 }),
             }
 
+            fs.readdir(this.database.databaseFolderPath, (err, files) => {
+                files.forEach(file => {
+                    if (fs.existsSync(this.database.databaseFolderPath + file)) {
+                        const size = fs.statSync(this.database.databaseFolderPath + file).size
+                        currentFiles.push({ filename: file, size: GetDataSize(size) })
+                    }
+                })
+            })
+            fs.readdir(this.database.backupFolderPath, (err, files) => {
+                files.forEach(file => {
+                    if (fs.existsSync(this.database.backupFolderPath + file)) {
+                        const size = fs.statSync(this.database.backupFolderPath + file).size
+                        backupFiles.push({ filename: file, size: GetDataSize(size) })
+                    }
+                })
+            })
             const info = {
-                backupFolder: this.database.backupFolderPath,
-                folder: this.database.databaseFolderPath,
+                backupFolder: { path: this.database.backupFolderPath, files: backupFiles },
+                folder: { path: this.database.databaseFolderPath, files: currentFiles }
             }
 
             const bot = {
@@ -551,14 +566,34 @@ class WebSocket {
         const cacheUsers = this.client.users.cache;
         const users = []
 
+        const currentFiles = []
+        const backupFiles = []
+
+        fs.readdir(this.database.databaseFolderPath, (err, files) => {
+            files.forEach(file => {
+                if (fs.existsSync(this.database.databaseFolderPath + file)) {
+                    const size = fs.statSync(this.database.databaseFolderPath + file).size
+                    currentFiles.push({ filename: file, size: GetDataSize(size) })
+                }
+            })
+        })
+        fs.readdir(this.database.backupFolderPath, (err, files) => {
+            files.forEach(file => {
+                if (fs.existsSync(this.database.backupFolderPath + file)) {
+                    const size = fs.statSync(this.database.backupFolderPath + file).size
+                    backupFiles.push({ filename: file, size: GetDataSize(size) })
+                }
+            })
+        })
+        const info = {
+            backupFolder: { path: this.database.backupFolderPath, files: backupFiles },
+            folder: { path: this.database.databaseFolderPath, files: currentFiles }
+        }
+
         cacheUsers.forEach(cacheUser => {
             users.push({ id: cacheUser.id, name: cacheUser.username, avatarUrlSmall: cacheUser.avatarURL({ size: 16 }), avatarUrlLarge: cacheUser.avatarURL({ size: 128 }) })
         });
 
-        const info = {
-            backupFolder: this.database.backupFolderPath,
-            folder: this.database.databaseFolderPath,
-        }
 
         const bot = {
             day: this.database.dataBot.day,
@@ -1038,6 +1073,30 @@ class WebSocket {
                 this.RenderPage_Database(req, res, userId)
             } else {
                 this.RenderPage_DatabaseSearch(req, res, 'User not found')
+            }
+        })
+
+        this.app.post('/userRpm/Database/Backup/All', (req, res) => {
+            fs.readdir(this.database.backupFolderPath, (err, files) => {
+                files.forEach(file => {
+                    const backupFile = this.database.backupFolderPath + file
+                    if (fs.existsSync(backupFile)) {
+                        fs.copyFile(backupFile, this.database.databaseFolderPath + file, (err) => {
+                            if (err) { throw err }
+                        })
+                    }
+                })
+            })
+        })
+
+        this.app.post('/userRpm/Database/Backup/One', (req, res) => {
+            const file = req.body.filename
+
+            const backupFile = this.database.backupFolderPath + file
+            if (fs.existsSync(backupFile)) {
+                fs.copyFile(backupFile, this.database.databaseFolderPath + file, (err) => {
+                    if (err) { throw err }
+                })
             }
         })
 

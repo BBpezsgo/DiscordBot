@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
-	<link href="/dynaform/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/dynaform/css-vars.css" rel="stylesheet" type="text/css">
     <link href="/dynaform/css_main.css" rel="stylesheet" type="text/css">
     <link href="/dynaform/tree-default.css" rel="stylesheet" type="text/css">
     <script language="javascript" src="/dynaform/common.js" type="text/javascript"></script>
@@ -23,16 +23,51 @@
                 <td class="blue" colspan="3"></td>
             </tr>
             <tr>
-				<td class="Item" id="t_mac_addr" name="t_mac_addr">Backup folder path:</td>
-				<td colspan="2">
-					{{info.backupFolder}}
-				</td>
+                <td></td>
+                <td colspan="2">
+                    <ul id="myUL">
+                        <li>
+                            <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
+                            <ul class="nested">
+                                {{#each info.backupFolder.files}}
+                                <li class="data-file">
+                                    <span>{{filename}}</span>
+                                    <b>{{size}}</b>
+                                </li>
+                                {{/each}}
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
             </tr>
             <tr>
-				<td class="Item" id="t_mac_addr" name="t_mac_addr">Folder path:</td>
-				<td colspan="2">
-					{{info.folder}}
-				</td>
+                <td class="Item" id="t_mac_addr" name="t_mac_addr"></td>
+                <td colspan="2">
+                    <ul id="myUL">
+                        <li>
+                            <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
+                            <form action="/userRpm/Database/Backup/All" method="post"
+                                style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
+                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                <input type="submit" value="Backup All">
+                            </form>
+                            <ul class="nested">
+                                {{#each info.folder.files}}
+                                <li class="data-file">
+                                    <span>{{filename}}</span>
+                                    <b>{{size}}</b>
+                                    <form action="/userRpm/Database/Backup/All" method="post"
+                                        style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="filename" value="{{filename}}" style="display: none;">
+                                        <input type="submit" value="Backup">
+                                    </form>
+                                </li>
+                                {{/each}}
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
             </tr>
             <tr>
                 <td class="blue" colspan="3"></td>
@@ -107,7 +142,7 @@
                                     <b>ID</b>
                                 </td>
                                 <td class="ListM">
-                                    
+
                                 </td>
                             </tr>
                             {{#each users}}
@@ -127,8 +162,7 @@
                                     {{this.id}}
                                 </td>
                                 <td style="padding:0 2 0 2;word-break:break-all">
-                                    <form action="/userRpm/Database/Search" method="post"
-                                        style="margin: 0;"
+                                    <form action="/userRpm/Database/Search" method="post" style="margin: 0;"
                                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                                         <input type="text" name="id" value="{{this.id}}" style="display: none;">
                                         <input type="submit" value="View">

@@ -82,7 +82,7 @@ function CreateNews(message) {
         .setDescription(message.content)
         .setColor(Color.Highlight)
         .setFooter({ text: '• ' + DateToStringNews(newDate) })
-    if (message.author.id == '802864588877856789') {
+    if (message.author.id == '802864588877856789') { // Crossout
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
         if (message.embeds.length > 0) {
             if (message.content.includes('@Entertainment')) {
@@ -127,7 +127,7 @@ function CreateNews(message) {
             embed.setDescription(embed2.description)
             embed.setFooter({ text: message.content.replace('@', '• #') + '\n• ' + DateToStringNews(newDate) })
         }
-    } else if (message.author.id == '813398275305898014') {
+    } else if (message.author.id == '813398275305898014') { // Warzone 2100
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://wz2100.net/' })
         if (message.embeds.length > 0) {
             const embed2 = message.embeds[0]
@@ -148,7 +148,7 @@ function CreateNews(message) {
             }
         }
         role = '902878851938517043'
-    } else if (message.author.id == '802864713323118603') {
+    } else if (message.author.id == '802864713323118603') { // Free games
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
         if (message.embeds.length == 1) {
             let content = message.content.replace('@Free Games Ping', '')
@@ -189,7 +189,7 @@ function CreateNews(message) {
             }
         }
         role = '902878798956093510'
-    } else if (message.author.id == '875340034537062400') {
+    } else if (message.author.id == '875340034537062400') { // Minecraft
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/apple-icon-180x180.png', url: 'https://www.minecraft.net/en-us' })
 
         let content = message.content
@@ -198,15 +198,15 @@ function CreateNews(message) {
         while (content.startsWith(' ')) {
             content = content.substring(1)
         }
-        const aaaaaa = content.split('\n')
-        for (let i = 0; i < aaaaaa.length; i++) {
-            const bbbbbb = aaaaaa[i]
+        const contentLines = content.split('\n')
+        for (let i = 0; i < contentLines.length; i++) {
+            const line = contentLines[i]
             if (i == 0) {
-                title = bbbbbb
-                content = content.replace(bbbbbb, '')
+                title = line
+                content = content.replace(line, '')
             } else if (i == 1) {
-                url = bbbbbb
-                content = content.replace(bbbbbb, '')
+                url = line
+                content = content.replace(line, '')
             } else if (i == 2) {
                 content = content.substring(1)
             }
@@ -226,7 +226,7 @@ function CreateNews(message) {
             }
         }
         role = '902878964438143026'
-    } else {
+    } else { // Other
         if (message.author.bot == false && message.author.system == false) {
             const senderMember = message.guild.members.cache.get(message.author.id)
             if (senderMember != undefined) {

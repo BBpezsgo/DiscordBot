@@ -23,15 +23,39 @@
                 <td class="blue" colspan="3"></td>
             </tr>
             <tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Backup folder path:</td>
+                <td></td>
 				<td colspan="2">
-					{{info.backupFolder}}
+                    <ul id="myUL">
+                        <li>
+                            <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
+                            <ul class="nested">
+                                {{#each info.backupFolder.files}}
+                                <li class="data-file">
+                                    <span>{{filename}}</span>
+                                    <b>{{size}}</b>
+                                </li>
+                                {{/each}}
+                            </ul>
+                        </li>
+                    </ul>
 				</td>
             </tr>
             <tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Folder path:</td>
+				<td class="Item" id="t_mac_addr" name="t_mac_addr"></td>
 				<td colspan="2">
-					{{info.folder}}
+                    <ul id="myUL">
+                        <li>
+                            <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
+                            <ul class="nested">
+                                {{#each info.folder.files}}
+                                <li class="data-file">
+                                    <span>{{filename}}</span>
+                                    <b>{{size}}</b>
+                                </li>
+                                {{/each}}
+                            </ul>
+                        </li>
+                    </ul>
 				</td>
             </tr>
             <tr>
