@@ -1133,8 +1133,7 @@ async function processApplicationCommand(command) {
             .setColor(Color.Highlight)
             .addField('\\🤖 BOT:',
                 '> \\📱 **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
-                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
-                '> Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
+                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
             )
             .addField('\\📡 Web Socket:',
                 '> Ping: ' + bot.ws.ping + ' ms\n' +

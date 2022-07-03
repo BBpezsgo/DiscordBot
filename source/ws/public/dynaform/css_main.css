@@ -330,3 +330,27 @@ table.datas>tbody>tr>td {
 .miniicon {
 	transform: translateY(4px);
 }
+
+.show-hide-part-button {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    cursor: pointer;
+    border-top: solid 1px #fff;
+    border-left: solid 1px #fff;
+    border-right: solid 1px #777;
+    border-bottom: solid 1px #777;
+
+	display: block;
+}
+
+.show-hide-part-button:active {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    cursor: pointer;
+    border-top: solid 1px #777;
+    border-left: solid 1px #777;
+    border-right: solid 1px #fff;
+    border-bottom: solid 1px #fff;
+}

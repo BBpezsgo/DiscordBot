@@ -2821,8 +2821,7 @@ async function processApplicationCommand(command, privateCommand) {
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
             .setColor(Color.Highlight)
             .addField('\\🤖 BOT:',
-                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp)) + '\n' +
-                '> Üzemidő: ' + Math.floor(bot.uptime / 1000) + ' másodperc'
+                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
             )
             .addField('\\📡 WebSocket:',
                 '> Ping: ' + bot.ws.ping + ' ms\n' +

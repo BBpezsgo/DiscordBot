@@ -902,12 +902,12 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Process/Restart', (req, res) => {
-            if (this.IsMobile == false) {
-                fs.writeFileSync('./exitdata.txt', 'restart', { encoding: 'ascii' })
-                setTimeout(function () {
-                    process.exit()
-                }, 500)
-            }
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
+            fs.writeFileSync('./exitdata.txt', 'restart', { encoding: 'ascii' })
+            setTimeout(() => {
+                process.exit()
+            }, 500)
         })
 
         this.app.post('/userRpm/Process/Abort', (req, res) => {
@@ -918,92 +918,8 @@ class WebSocket {
             process.disconnect()
         })
 
-        this.app.post('/sendMessage', (req, res) => {
-            var text = req.body.text
-            var channelId = req.body.channel
-
-            var chan = this.client.channels.cache.get(channelId)
-
-            if (chan) {
-                chan.send(text)
-            }
-
-            res.render('serverView', {
-                title: chan.name,
-                chans
-            })
-        })
-
-        this.app.post('/sendMessageUser', (req, res) => {
-            var text = req.body.text
-            var userId = req.body.user
-
-            var chan = this.client.users.cache.get(userId).dmChannel
-
-            if (chan) {
-                chan.send(text)
-            }
-
-            res.render('serverView', {
-                title: 'Ügyintéző Dashboard'
-            })
-        })
-
-        this.app.post('/fetchChannelMessages', (req, res) => {
-            var channelId = req.body.id
-
-            var chan = this.client.channels.cache.get(channelId)
-
-            if (!chan) {
-                res.status(500).send("Internal Server Error")
-                return
-            }
-
-            chan.messages.fetch()
-
-            res.status(200).send("OK")
-        })
-
-        this.app.post('/deleteUserDM', (req, res) => {
-            var userId = req.body.id
-
-            var user = this.client.users.cache.get(userId)
-
-            if (!user) { return }
-
-            user.deleteDM()
-
-            res.send(200).send("OK")
-        })
-
-        this.app.post('/createUserDM', (req, res) => {
-            var userId = req.body.id
-
-            var user = this.client.users.cache.get(userId)
-
-            if (!user) { return }
-
-            user.createDM()
-
-            res.send(200).send("OK")
-        })
-
-        this.app.post('/fetchUser', (req, res) => {
-            var userId = req.body.id
-
-            var user = this.client.users.cache.get(userId)
-
-            if (!user) { return }
-
-            user.fetch()
-
-            res.send(200).send("OK")
-        })
-
         this.app.post('/startBot', (req, res) => {
             this.StartBot()
-
-            res.send(200).send("OK")
         })
 
         this.app.post('/stopBot', (req, res) => {
@@ -1012,8 +928,6 @@ class WebSocket {
             }
 
             this.StopBot()
-
-            res.send(200).send("OK")
         })
 
         this.app.get('/userRpm/Moderating', (req, res) => {
@@ -1065,6 +979,8 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Search', (req, res) => {
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
             const userId = req.body.id
 
             if (this.client.users.cache.has(userId)) {
@@ -1077,6 +993,8 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Backup/All', (req, res) => {
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
             fs.readdir(this.database.backupFolderPath, (err, files) => {
                 files.forEach(file => {
                     const backupFile = this.database.backupFolderPath + file
@@ -1090,6 +1008,8 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Backup/One', (req, res) => {
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
             const file = req.body.filename
 
             const backupFile = this.database.backupFolderPath + file
@@ -1101,12 +1021,16 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Back', (req, res) => {
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
             this.databaseSearchedUserId = ''
 
             this.RenderPage_DatabaseSearch(req, res, '')
         })
 
         this.app.post('/userRpm/Database/Modify/Stickers', (req, res) => {
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
             if (this.databaseSearchedUserId.length > 0 && this.database.dataStickers[this.databaseSearchedUserId] != undefined) {
                 const datas = req.body
 
@@ -1123,6 +1047,8 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Modify/Backpack', (req, res) => {
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
             if (this.databaseSearchedUserId.length > 0 && this.database.dataBackpacks[this.databaseSearchedUserId] != undefined) {
                 const datas = req.body
 
@@ -1140,6 +1066,8 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Modify/Basic', (req, res) => {
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
             if (this.databaseSearchedUserId.length > 0 && this.database.dataBasic[this.databaseSearchedUserId] != undefined) {
                 const datas = req.body
 
@@ -1168,6 +1096,8 @@ class WebSocket {
                 if (line.length < 2) { continue }
                 if (line.startsWith('Error: ')) {
                     errors.push({ type: 'Error', title: line.replace('Error: ', ''), id: i })
+                } else if (line.startsWith('Error [')) {
+                    errors.push({ type: 'Error', title: line.replace('Error ', ''), id: i })
                 } else if (line.startsWith('TypeError: ')) {
                     errors.push({ type: 'TypeError', title: line.replace('Error: ', ''), id: i })
                 } else if (line.startsWith('    at ')) {
@@ -1215,6 +1145,8 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Log/Clear', (req, res) => {
+            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+
             fs.writeFileSync('./node.error.log', '')
         })
 

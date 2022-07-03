@@ -152,8 +152,10 @@
     </style>
 </head>
 
-<body onload="setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+<body onload="LoadHelp(window); setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
     marginheight="0">
+   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)"><</button>
+
     <table id="autoWidth" style="width: 598px;">
         <tbody>
             <tr>

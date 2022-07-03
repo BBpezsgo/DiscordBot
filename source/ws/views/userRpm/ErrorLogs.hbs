@@ -13,9 +13,11 @@
 
 </head>
 
-<body onload="setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+<body onload="LoadHelp(window); setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
     marginheight="0">
-    <table id="autoWidth" style="width: 598px;">
+    <button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)"><</button>
+
+   <table id="autoWidth" style="width: 598px;">
         <tbody>
             <tr>
                 <td class="h1" colspan="3" id="t_title">Error Log</td>

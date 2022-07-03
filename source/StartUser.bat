@@ -8,6 +8,8 @@ title Running - Discord BOT
 node desktop.js visible user
 
 title Stopped - Discord BOT
+timeout 1 /nobreak >nul
+
 Rem Read exitdata.txt file
 FOR /F %%i IN (exitdata.txt) DO (
     echo Data readed: %%i
@@ -15,6 +17,7 @@ FOR /F %%i IN (exitdata.txt) DO (
         title Restarting - Discord BOT
         echo none >exitdata.txt
         cls
+        timeout 1 /nobreak >nul
         CALL StartUser.bat
         echo Batch file executed
     ) else (
