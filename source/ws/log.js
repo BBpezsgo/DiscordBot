@@ -135,11 +135,14 @@ function HbGetLogs(invisibleIp) {
 
         if (thereIsAnyLogGroup) {
             thereIsAnyLogGroup = false
-            newLogGroup.running = true
             newEvent.groups.unshift(newLogGroup)
         }
 
         events.unshift(newEvent)
+    }
+
+    if (events.length > 0) {
+        events[0].groups[0].running = true
     }
 
     return events
