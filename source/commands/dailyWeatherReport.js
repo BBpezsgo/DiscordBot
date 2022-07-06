@@ -23,7 +23,8 @@ const {
     weatherHumidityIcon,
     DirectionToArrow,
     unixToTime,
-    weatherSkytextIcon
+    weatherSkytextIcon,
+    bekescsabaId
 } = require('../commands/weatherFunctions')
 
 const { Color } = require('../functions/enums')
@@ -78,7 +79,7 @@ module.exports = async (channel, statesManager) => {
 
     const loadingEmbed = new Discord.MessageEmbed()
         .setColor(Color.Highlight)
-        .setAuthor({ name: 'Békéscsaba', iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
+        .setAuthor({ name: 'Békéscsaba', url: 'https://openweathermap.org/city/' + bekescsabaId, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
         .setTitle('Napi időjárás jelentés betöltése...')
 
     const loadingMessage = await channel.send({ embeds: [loadingEmbed] })

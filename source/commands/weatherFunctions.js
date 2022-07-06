@@ -566,6 +566,8 @@ function weatherSkytextImgName(skyTxt, sunset, sunrise, clouds) {
     return IsToString(time, cloud, rain, fog)
 }
 
+const bekescsabaId = '722437'
+
 module.exports = {
     ImgExists,
     weatherSkytxt,
@@ -585,5 +587,6 @@ module.exports = {
     GetPollutionText,
     dayName,
     weatherSkytextIcon,
-    weatherSkytextImgName
+    weatherSkytextImgName,
+    bekescsabaId
 }

@@ -53,7 +53,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
     var current = data0[0].current
     const embed = new Discord.MessageEmbed()
         .setColor('#00AE86')
-        .setAuthor({ name: current.observationpoint.replace(', Hungary', '') + ' ' + current.date.toString().replace('-', '.').replace('-', '.') + '. (' + dayName(new Date().getDay()) + ') ' + current.observationtime.replace(':00:00', ':00 -kor'), url: 'https://openweathermap.org/city/' + data1.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
+        .setAuthor({ name: current.observationpoint.replace(', Hungary', ''), url: 'https://openweathermap.org/city/' + data1.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
     { //Ma
         let skyTxt = current.skytext
@@ -217,7 +217,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
     embed
         .setTimestamp(current.date + 'T' + current.observationtime)
         .setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(current.skytext, true).replace('\\', '')))
-        .setFooter({ text: '• weather.service.msn.com : openweathermap.org\n• weather-js : nodejs-weather-app : moonphase-js', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        .setFooter({ text: '• weather.service.msn.com : openweathermap.org', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
     return embed
 }
 
