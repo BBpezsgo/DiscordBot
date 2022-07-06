@@ -12,20 +12,20 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
-<body onload="LoadHelp(window); setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0"
     marginheight="0">
    	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)"><</button>
 
     <table id="autoWidth" style="width: 598px;">
         <tbody>
             <tr>
-                <td class="h1" colspan="3" id="t_title">Moderating</td>
+                <td class="h1" colspan="3">Moderating</td>
             </tr>
             <tr>
                 <td class="blue" colspan="3"></td>
             </tr>
             <tr>
-                <td class="h2" colspan="3" id="t_lan">
+                <td class="h2" colspan="3">
                     Moderating for channel
                     {{channel.name}}
                     in guild
@@ -45,134 +45,134 @@
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">ID:</td>
+                <td width="25%" class="Item">ID:</td>
                 <td colspan="2">
                     {{channel.id}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Topic:</td>
+                <td width="25%" class="Item">Topic:</td>
                 <td colspan="2">
                     <p style="word-wrap: break-word; max-width: 300px; overflow: auto; line-break: anywhere;">
                         {{channel.topic}}</p>
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Created at:</td>
+                <td width="25%" class="Item">Created at:</td>
                 <td colspan="2">
                     {{channel.createdAt}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Member count:</td>
+                <td width="25%" class="Item">Member count:</td>
                 <td colspan="2">
                     {{channel.memberCount}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Archived:</td>
+                <td width="25%" class="Item">Archived:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.archived}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Archived at:</td>
+                <td width="25%" class="Item">Archived at:</td>
                 <td colspan="2">
                     {{channel.archivedAt}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Deletable:</td>
+                <td width="25%" class="Item">Deletable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.deletable}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Editable:</td>
+                <td width="25%" class="Item">Editable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.editable}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Full:</td>
+                <td width="25%" class="Item">Full:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.full}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Invitable:</td>
+                <td width="25%" class="Item">Invitable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.invitable}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Joinable:</td>
+                <td width="25%" class="Item">Joinable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.joinable}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Locked:</td>
+                <td width="25%" class="Item">Locked:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.locked}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Manageable:</td>
+                <td width="25%" class="Item">Manageable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.manageable}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Message count:</td>
+                <td width="25%" class="Item">Message count:</td>
                 <td colspan="2">
                     {{channel.messageCount}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Nsfw:</td>
+                <td width="25%" class="Item">Nsfw:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.nsfw}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Sendable:</td>
+                <td width="25%" class="Item">Sendable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.sendable}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Speakable:</td>
+                <td width="25%" class="Item">Speakable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.speakable}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Type:</td>
+                <td width="25%" class="Item">Type:</td>
                 <td colspan="2">
                     {{channel.type}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Unarchivable:</td>
+                <td width="25%" class="Item">Unarchivable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.unarchivable}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">User limit:</td>
+                <td width="25%" class="Item">User limit:</td>
                 <td colspan="2">
                     {{channel.userLimit}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Video quality mode:</td>
+                <td width="25%" class="Item">Video quality mode:</td>
                 <td colspan="2">
                     {{channel.videoQualityMode}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Viewable:</td>
+                <td width="25%" class="Item">Viewable:</td>
                 <td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.viewable}}.png">
                 </td>
@@ -181,7 +181,7 @@
                 <td class="blue" colspan="3"></td>
             </tr>
             <tr>
-                <td class="h2" colspan="3" id="t_lan">Messages</td>
+                <td class="h2" colspan="3">Messages</td>
             </tr>
             <tr>
                 <td width="698" align="center" colspan="2">

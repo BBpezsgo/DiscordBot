@@ -54,20 +54,20 @@
 	</script>
 </head>
 
-<body onload="LoadHelp(window); setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0"
 	marginheight="0">
 	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)"><</button>
 
 	<table id="autoWidth" style="width: 598px;">
 		<tbody>
 			<tr>
-				<td class="h1" colspan="3" id="t_title">Status</td>
+				<td class="h1" colspan="3">Status</td>
 			</tr>
 			<tr>
 				<td class="blue" colspan="3"></td>
 			</tr>
 			<tr>
-				<td class="h2" colspan="3" id="t_lan">Process</td>
+				<td class="h2" colspan="3">Process</td>
 			</tr>
 			<tr>
 				<td></td>
@@ -89,33 +89,33 @@
 				<td class="blue" colspan="3"></td>
 			</tr>
 			<tr>
-				<td class="h2" colspan="3" id="t_lan">BOT</td>
+				<td class="h2" colspan="3">BOT</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Ready time:</td>
+				<td width="25%" class="Item">Ready time:</td>
 				<td colspan="2">
 					{{bot.readyTime}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Uptime:</td>
+				<td width="25%" class="Item">Uptime:</td>
 				<td colspan="2">
 					{{bot.uptime}}
 				</td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_sub_mask" name="t_sub_mask">Status:</td>
+				<td class="Item">Status:</td>
 				<td colspan="2">
 					<img src="/images/state-{{bot.statesManager.botLoadingState}}.png" class="miniicon">
 					{{bot.statesManager.botLoadingState}}
 				</td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_sub_mask" name="t_sub_mask"></td>
+				<td class="Item"></td>
 				<td colspan="2">
 					<form action="/startBot" method="post" style="display: inline-block;"
 						onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
-						<input type="submit" class="show-{{bot.botStopped}}" value="StartBot">
+						<input type="submit" class="show-invert-{{bot.botStarted}}" value="StartBot">
 					</form>
 					<form action="/stopBot" method="post" style="display: inline-block;"
 						onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
@@ -127,53 +127,53 @@
 				<td class="blue" colspan="3"></td>
 			</tr>
 			<tr>
-				<td class="h2" colspan="3" id="t_wireless">Web Socket</td>
+				<td class="h2" colspan="3">Web Socket</td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_wl_radio">Ping:</td>
-				<td colspan="2"><span id="t_enable">{{bot.ws.ping}}ms</span></td>
+				<td class="Item">Ping:</td>
+				<td colspan="2"><span>{{bot.ws.ping}}ms</span></td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_wl_radio">Status:</td>
+				<td class="Item">Status:</td>
 				<td colspan="2">
 					<img src="/images/state-{{bot.ws.status}}.png" class="miniicon">
-					<span id="t_enable">{{bot.ws.status}}</span>
+					<span>{{bot.ws.status}}</span>
 				</td>
 			</tr>
 			<tr>
-				<td class="Item" id="t_sub_mask" name="t_sub_mask">Shard status:</td>
+				<td class="Item">Shard status:</td>
 				<td colspan="2">
 					<img src="/images/state-{{bot.shard.state}}.png" class="miniicon">
 					{{bot.shard.state}}
 				</td>
 			</tr>
-			<tr>
+			<tr class="show-{{showWeatherStatus}}">
 				<td class="blue" colspan="3"></td>
 			</tr>
-			<tr>
-				<td class="h2" colspan="3" id="t_wireless">Weather report</td>
+			<tr class="show-{{showWeatherStatus}}">
+				<td class="h2" colspan="3">Weather report</td>
 			</tr>
-			<tr>
-				<td class="Item" id="t_wl_radio">Status:</td>
-				<td colspan="2"><span id="t_enable">{{bot.statesManager.dailyWeatherReportLoadingText}}</span></td>
+			<tr class="show-{{showWeatherStatus}}">
+				<td class="Item">Status:</td>
+				<td colspan="2"><span>{{bot.statesManager.dailyWeatherReportLoadingText}}</span></td>
 			</tr>
-			<tr>
+			<tr class="show-{{showNewsStatus}}">
 				<td class="blue" colspan="3"></td>
 			</tr>
-			<tr>
-				<td class="h2" colspan="3" id="t_wireless">News</td>
+			<tr class="show-{{showNewsStatus}}">
+				<td class="h2" colspan="3">News</td>
 			</tr>
-			<tr>
-				<td class="Item" id="t_wl_radio">All processed:</td>
-				<td colspan="2"><span id="t_enable">{{bot.statesManager.allNewsProcessed}}</span></td>
+			<tr class="show-{{showNewsStatus}}">
+				<td class="Item">All processed:</td>
+				<td colspan="2"><span>{{bot.statesManager.allNewsProcessed}}</span></td>
 			</tr>
-			<tr>
-				<td class="Item" id="t_wl_radio">Loading text 1:</td>
-				<td colspan="2"><span id="t_enable">{{bot.statesManager.newsLoadingText}}</span></td>
+			<tr class="show-{{showNewsStatus}}">
+				<td class="Item">Loading text 1:</td>
+				<td colspan="2"><span>{{bot.statesManager.newsLoadingText}}</span></td>
 			</tr>
-			<tr>
-				<td class="Item" id="t_wl_radio">Loading text 2:</td>
-				<td colspan="2"><span id="t_enable">{{bot.statesManager.newsLoadingText2}}</span></td>
+			<tr class="show-{{showNewsStatus}}">
+				<td class="Item">Loading text 2:</td>
+				<td colspan="2"><span>{{bot.statesManager.newsLoadingText2}}</span></td>
 			</tr>
 		</tbody>
 	</table>

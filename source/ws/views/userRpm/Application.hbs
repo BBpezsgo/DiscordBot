@@ -10,80 +10,80 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
-<body onload="LoadHelp(window); setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0"
 	marginheight="0">
    	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)"><</button>
 
 	<table id="autoWidth" style="width: 598px;">
 		<tbody>
 			<tr>
-				<td class="h1" colspan="3" id="t_title">Application</td>
+				<td class="h1" colspan="3">Application</td>
 			</tr>
 			<tr>
 				<td class="blue" colspan="3"></td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr"></td>
+				<td width="25%" class="Item"></td>
 				<td colspan="2">
-					<a href="https://discord.com/developers/applications/{{app.id}}/information" target="_blank">Manage application</a>
+					<a href="https://discord.com/developers/applications/{{app.id}}/information" target="_blank"><img width="16" height="16" src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Discord_icon.svg" class="miniicon">Manage application</a>
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">ID:</td>
+				<td width="25%" class="Item">ID:</td>
 				<td colspan="2">
 					{{app.id}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Name:</td>
+				<td width="25%" class="Item">Name:</td>
 				<td colspan="2">
 					{{app.name}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Created at:</td>
+				<td width="25%" class="Item">Created at:</td>
 				<td colspan="2">
 					{{app.createdAt}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Cover:</td>
+				<td width="25%" class="Item">Cover:</td>
 				<td colspan="2">
 					<img src="{{app.coverUrl}}" width="32" height="32">
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Icon:</td>
+				<td width="25%" class="Item">Icon:</td>
 				<td colspan="2">
 					<img src="{{app.iconUrl}}" width="32" height="32">
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Custom install url:</td>
+				<td width="25%" class="Item">Custom install url:</td>
 				<td colspan="2">
 					{{app.customInstallURL}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Description:</td>
+				<td width="25%" class="Item">Description:</td>
 				<td colspan="2">
 					{{app.description}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Partial:</td>
+				<td width="25%" class="Item">Partial:</td>
 				<td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.partial}}.png">
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Rpc origins:</td>
+				<td width="25%" class="Item">Rpc origins:</td>
 				<td colspan="2">
 					{{app.rpcOrigins}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Tags:</td>
+				<td width="25%" class="Item">Tags:</td>
 				<td colspan="2">
 					{{app.tags}}
 				</td>
@@ -92,22 +92,22 @@
 				<td class="blue" colspan="3"></td>
 			</tr>
 			<tr>
-				<td class="h2" colspan="3" id="t_lan">BOT</td>
+				<td class="h2" colspan="3">BOT</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr"></td>
+				<td width="25%" class="Item"></td>
 				<td colspan="2">
-					<a href="https://discord.com/developers/applications/{{app.id}}/bot" target="_blank">Manage bot</a>
+					<a href="https://discord.com/developers/applications/{{app.id}}/bot" target="_blank"><img width="16" height="16" src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Discord_icon.svg" class="miniicon">Manage bot</a>
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Require code grant:</td>
+				<td width="25%" class="Item">Require code grant:</td>
 				<td colspan="2">
 					{{app.botRequireCodeGrant}}
 				</td>
 			</tr>
 			<tr>
-				<td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Is public:</td>
+				<td width="25%" class="Item">Is public:</td>
 				<td colspan="2">
                     <img width="16" height="16" src="/images/bool-{{channel.botPublic}}.png">
 				</td>

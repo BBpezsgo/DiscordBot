@@ -445,8 +445,7 @@ class WebSocket {
         const clientData = {
             readyTime: GetTime(this.client.readyAt),
             uptime: GetTime(uptime),
-            botStarted: this.client.isReady(),
-            botStopped: (!this.client.isReady()),
+            botStarted: (this.client.ws.shards.first().status == 0),
             ws: {
                 ping: this.client.ws.ping.toString().replace('NaN', '-'),
                 status: WsStatusText[this.client.ws.status],
@@ -456,6 +455,8 @@ class WebSocket {
             shard: {
                 state: shardState,
             },
+            showWeatherStatus: (this.statesManager.dailyWeatherReportLoadingText.length > 0),
+            showNewsStatus: (this.statesManager.allNewsProcessed == false)
         }
 
         res.render('userRpm/Status', { bot: clientData })
@@ -829,7 +830,7 @@ class WebSocket {
         this.app.get('/userRpm/Process', (req, res) => {
             const uptime = new Date()
             uptime.setSeconds(Math.floor(process.uptime()))
-
+            
             const proc = {
 
                 argv: process.argv,
@@ -837,24 +838,17 @@ class WebSocket {
                 debugPort: process.debugPort,
                 execArgv: process.execArgv,
                 noAsar: process.noAsar,
-                release: process.release,
                 version: process.version,
 
                 arch: process.arch,
-                config: {
-                    variables: process.config.variables,
-                    target_defaults: process.config.target_defaults,
-                },
                 execPath: process.execPath,
                 platform: process.platform,
                 chrome: process.chrome,
                 contextId: process.contextId,
                 contextIsolated: process.contextIsolated,
                 defaultApp: process.defaultApp,
-                exitCode: process.exitCode,
                 features: process.features,
                 isMainFrame: process.isMainFrame,
-                mas: process.mas,
                 noDeprecation: process.noDeprecation,
                 pid: process.pid,
                 ppid: process.ppid,
@@ -865,7 +859,6 @@ class WebSocket {
                 traceDeprecation: process.traceDeprecation,
                 traceProcessWarnings: process.traceProcessWarnings,
                 type: process.type,
-                windowsStore: process.windowsStore,
                 uptime: GetTime(uptime)
             }
 

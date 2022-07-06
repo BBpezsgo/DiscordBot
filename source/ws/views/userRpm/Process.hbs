@@ -47,155 +47,122 @@
 	</script>
 </head>
 
-<body onload="LoadHelp(window); setTagStr(document,'ntw_status'); resize(this);" onresize="resize(this);" marginwidth="0"
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0"
 	marginheight="0">
    	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)"><</button>
 
     <table id="autoWidth" style="width: 598px;">
         <tbody>
             <tr>
-                <td class="h1" colspan="3" id="t_title">Process</td>
+                <td class="h1" colspan="3">Process</td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Config.Variables:</td>
-                <td colspan="2">
-                    {{process.config.variables}}
-                </td>
+                <td class="blue" colspan="3"></td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Config.Target defaults:</td>
-                <td colspan="2">
-                    {{process.config.target_defaults}}
-                </td>
-            </tr>
-            <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Execute path:</td>
+                <td width="25%" class="Item">Execute path:</td>
                 <td colspan="2">
                     {{process.execPath}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Chrome Version:</td>
+                <td width="25%" class="Item">Chrome Version:</td>
                 <td colspan="2">
                     {{process.chrome}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Context ID:</td>
+                <td width="25%" class="Item">Context ID:</td>
                 <td colspan="2">
                     {{process.contextId}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Context isolated:</td>
+                <td width="25%" class="Item">Context isolated:</td>
                 <td colspan="2">
-                    <img width="16" height="16" src="/images/bool-{{channel.contextIsolated}}.png">
+                    <img width="16" height="16" src="/images/bool-{{process.contextIsolated}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Default app:</td>
+                <td width="25%" class="Item">Default app:</td>
                 <td colspan="2">
-                    <img width="16" height="16" src="/images/bool-{{channel.defaultApp}}.png">
+                    <img width="16" height="16" src="/images/bool-force-{{process.defaultApp}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Exit code:</td>
+                <td width="25%" class="Item">Is main frame:</td>
                 <td colspan="2">
-                    {{process.exitCode}}
+                    <img width="16" height="16" src="/images/bool-force-{{process.isMainFrame}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Features:</td>
+                <td width="25%" class="Item">No deprecation:</td>
                 <td colspan="2">
-                    {{process.features}}
+                    <img width="16" height="16" src="/images/bool-{{process.noDeprecation}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Is main frame:</td>
-                <td colspan="2">
-                    {{process.isMainFrame}}
-                </td>
-            </tr>
-            <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Mas:</td>
-                <td colspan="2">
-                    {{process.mas}}
-                </td>
-            </tr>
-            <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">No deprecation:</td>
-                <td colspan="2">
-                    <img width="16" height="16" src="/images/bool-{{channel.noDeprecation}}.png">
-                </td>
-            </tr>
-            <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Process ID:</td>
+                <td width="25%" class="Item">Process ID:</td>
                 <td colspan="2">
                     {{process.pid}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">pp ID:</td>
+                <td width="25%" class="Item">pp ID:</td>
                 <td colspan="2">
                     {{process.ppid}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Resources path:</td>
+                <td width="25%" class="Item">Resources path:</td>
                 <td colspan="2">
                     {{process.resourcesPath}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Sandboxed:</td>
+                <td width="25%" class="Item">Sandboxed:</td>
                 <td colspan="2">
-                    <img width="16" height="16" src="/images/bool-{{channel.sandboxed}}.png">
+                    <img width="16" height="16" src="/images/bool-force-{{process.sandboxed}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Throw deprecation:</td>
+                <td width="25%" class="Item">Throw deprecation:</td>
                 <td colspan="2">
-                    {{process.throwDeprecation}}
+                    <img width="16" height="16" src="/images/bool-{{process.throwDeprecation}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Title:</td>
+                <td width="25%" class="Item">Title:</td>
                 <td colspan="2">
                     {{process.title}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Trace deprecation:</td>
+                <td width="25%" class="Item">Trace deprecation:</td>
                 <td colspan="2">
-                    {{process.traceDeprecation}}
+                    <img width="16" height="16" src="/images/bool-{{process.traceDeprecation}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Trace process warnings:</td>
+                <td width="25%" class="Item">Trace process warnings:</td>
                 <td colspan="2">
-                    {{process.traceProcessWarnings}}
+                    <img width="16" height="16" src="/images/bool-{{process.traceProcessWarnings}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Type:</td>
+                <td width="25%" class="Item">Type:</td>
                 <td colspan="2">
                     {{process.type}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Windows store:</td>
-                <td colspan="2">
-                    <img width="16" height="16" src="/images/bool-{{channel.windowsStore}}.png">
-                </td>
-            </tr>
-            <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Start time:</td>
+                <td width="25%" class="Item">Start time:</td>
                 <td colspan="2">
                     {{process.uptime}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr"></td>
+                <td width="25%" class="Item"></td>
                 <td colspan="2">
                     <form action="/userRpm/Process/Exit" method="post"
                         style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
@@ -218,16 +185,16 @@
                 <td class="blue" colspan="3"></td>
             </tr>
             <tr>
-                <td class="h2" colspan="3" id="t_lan">System</td>
+                <td class="h2" colspan="3">System</td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Arch:</td>
+                <td width="25%" class="Item">Arch:</td>
                 <td colspan="2">
                     {{process.arch}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Platform:</td>
+                <td width="25%" class="Item">Platform:</td>
                 <td colspan="2">
                     {{process.platform}}
                 </td>
@@ -236,18 +203,18 @@
                 <td class="blue" colspan="3"></td>
             </tr>
             <tr>
-                <td class="h2" colspan="3" id="t_lan">Node.js</td>
+                <td class="h2" colspan="3">Node.js</td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Argv:</td>
+                <td width="25%" class="Item">Argv:</td>
                 <td colspan="2">
                     {{process.argv}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Connected:</td>
+                <td width="25%" class="Item">Connected:</td>
                 <td colspan="2">
-                    <img width="16" height="16" src="/images/bool-{{channel.connected}}.png">
+                    <img width="16" height="16" src="/images/bool-{{process.connected}}.png">
                     <form action="/userRpm/Process/Disconnect" method="post"
                         style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
                         <input type="submit" class="show-{{bot.connected}}" value="Disconnect">
@@ -255,33 +222,33 @@
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Debug port:</td>
+                <td width="25%" class="Item">Debug port:</td>
                 <td colspan="2">
                     {{process.debugPort}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Execute argv:</td>
+                <td width="25%" class="Item">Execute argv:</td>
                 <td colspan="2">
                     {{process.execArgv}}
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">No asar:</td>
+                <td width="25%" class="Item">No asar:</td>
                 <td colspan="2">
-                    {{process.noAsar}}
+                    <img width="16" height="16" src="/images/bool-{{process.noAsar}}.png">
                 </td>
             </tr>
             <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Release:</td>
-                <td colspan="2">
-                    {{process.release}}
-                </td>
-            </tr>
-            <tr>
-                <td width="25%" class="Item" id="t_mac_addr" name="t_mac_addr">Version:</td>
+                <td width="25%" class="Item">Version:</td>
                 <td colspan="2">
                     {{process.version}}
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" class="Item"></td>
+                <td colspan="2">
+                     <a href="https://nodejs.org/en/" target="_blank"><img src="https://nodejs.org/static/images/favicons/favicon-16x16.png" class="miniicon">nodejs.org</a>
                 </td>
             </tr>
         </tbody>
