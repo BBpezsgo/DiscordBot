@@ -2,7 +2,7 @@ const Discord = require('discord.js')
 const fs = require('fs')
 const { StatesManager } = require('../functions/statesManager')
 
-function IsNone(obj) {
+function IsAnything(obj) {
     if (obj == undefined) { return false }
     if (obj == null) { return false }
     if (obj === {}) { return false }
@@ -150,43 +150,43 @@ class DatabaseManager {
     }
 
     SaveDatabase() {
-        if (IsNone(this.dataBackpacks)) {
+        if (IsAnything(this.dataBackpacks)) {
             this.statesManager.databaseSaveText = 'backpacks'
             fs.writeFile(this.databaseFolderPath + 'backpacks.json', JSON.stringify(this.dataBackpacks), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataBasic)) {
+        if (IsAnything(this.dataBasic)) {
             this.statesManager.databaseSaveText = 'basic'
             fs.writeFile(this.databaseFolderPath + 'basic.json', JSON.stringify(this.dataBasic), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataStickers)) {
+        if (IsAnything(this.dataStickers)) {
             this.statesManager.databaseSaveText = 'stickers'
             fs.writeFile(this.databaseFolderPath + 'stickers.json', JSON.stringify(this.dataStickers), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataUsernames)) {
+        if (IsAnything(this.dataUsernames)) {
             this.statesManager.databaseSaveText = 'userNames'
             fs.writeFile(this.databaseFolderPath + 'userNames.json', JSON.stringify(this.dataUsernames), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataMail)) {
+        if (IsAnything(this.dataMail)) {
             this.statesManager.databaseSaveText = 'mails'
             fs.writeFile(this.databaseFolderPath + 'mails.json', JSON.stringify(this.dataMail), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataPolls)) {
+        if (IsAnything(this.dataPolls)) {
             this.statesManager.databaseSaveText = 'polls'
             fs.writeFile(this.databaseFolderPath + 'polls.json', JSON.stringify(this.dataPolls), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataUserstats)) {
+        if (IsAnything(this.dataUserstats)) {
             this.statesManager.databaseSaveText = 'userstats'
             fs.writeFile(this.databaseFolderPath + 'userstats.json', JSON.stringify(this.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataBusinesses)) {
+        if (IsAnything(this.dataBusinesses)) {
             this.statesManager.databaseSaveText = 'businesses'
             fs.writeFile(this.databaseFolderPath + 'businesses.json', JSON.stringify(this.dataBusinesses), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataBot)) {
+        if (IsAnything(this.dataBot)) {
             this.statesManager.databaseSaveText = 'bot'
             fs.writeFile(this.databaseFolderPath + 'bot.json', JSON.stringify(this.dataBot), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsNone(this.dataMarket)) {
+        if (IsAnything(this.dataMarket)) {
             this.statesManager.databaseSaveText = 'market'
             fs.writeFile(this.databaseFolderPath + 'market.json', JSON.stringify(this.dataMarket), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }

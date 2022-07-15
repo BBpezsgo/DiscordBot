@@ -9,6 +9,22 @@ process.argv.forEach(function (val, index, array) {
     }
 })
 
+/** @param {Error} err */
+function FormatError(err) {
+    var str = ""
+    str += err.name + ': ' + err.message
+    if (err.stack != undefined) {
+        str += '\n' + err.stack
+    }
+    return str
+}
+
+process.on('uncaughtException', function (err) {
+    fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
+    fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
+})
+
+
 var autoStartBot = true
 
 const { SystemLog, SystemStart, SystemStop } = require('./functions/systemLog')
@@ -53,8 +69,6 @@ process.stdin.on('data', function (b) {
             SystemLog('Destroy bot by user (terminal)')
             StopBot()
         }
-        //} else if (s === ' ') {
-        //    console.clear()
     } else if (/^\u001b\[M/.test(s)) {
         // mouse event
         console.error('s.length:', s.length)
@@ -209,6 +223,8 @@ process.on('exit', function (code) {
     SystemStop()
 })
 
+//#region NPM Packages and variables
+
 // Loading npm packages
 
 logManager.Loading("Loading commands", 'weather')
@@ -314,7 +330,7 @@ const {
     ChannelId,
     CliColor
 } = require('./functions/enums.js')
-const { exit, hang } = require('process')
+const { exit, hang, contextIsolated } = require('process')
 const { CommandHangman, HangmanManager } = require('./commands/hangman.js')
 
 logManager.BlankScreen()
@@ -343,6 +359,7 @@ logManager.Loading('Loading database', 'datas')
 const databaseIsSuccesfullyLoaded = database.LoadDatabase()
 
 if (!databaseIsSuccesfullyLoaded) {
+    SystemLog('Error: Database is not found')
     console.log(CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
     autoStartBot = false
 
@@ -354,7 +371,6 @@ if (!databaseIsSuccesfullyLoaded) {
                 StartBot()
             }, 1000)
         } else {
-            SystemLog('Error: Database is not found')
             SystemStop()
             setTimeout(() => { process.exit() }, 500)
         }
@@ -381,7 +397,7 @@ let currentlyWritingEmails = []
 
 //#endregion
 
-/** @type [NewsMessage] */
+/** @type {NewsMessage[]} */
 const listOfNews = []
 
 /**@param {number} count @param {Discord.TextChannel} channel @param {string} content */
@@ -1121,7 +1137,11 @@ async function quizDone(quizMessageId, correctIndex) {
 //#endregion
 
 bot.on('interactionCreate', async interaction => {
-    database.SaveUserToMemoryAll(interaction.user, interaction.member.displayName)
+    if (interaction.member == undefined) {
+        database.SaveUserToMemoryAll(interaction.user, interaction.user.username)        
+    } else {
+        database.SaveUserToMemoryAll(interaction.user, interaction.member.displayName)
+    }
     const privateCommand = database.dataBasic[interaction.user.id].privateCommands
     if (interaction.isCommand()) {
         processApplicationCommand(interaction, privateCommand)
@@ -1318,7 +1338,7 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId === 'sendGift') {
-            interaction.reply({ content: '> **\\❔ Használd a **`/gift <felhasználó>`** parancsot egy személy megajándékozásához**', ephemeral: true })
+            interaction.reply({ content: '> **\\❔ Használd a **`/gift <felhasználó>`** parancsot egy személy megajándékozásához, vagy jobb klikk a felhasználóra > Alkalmazások > Megajándékozás**', ephemeral: true })
             interaction.message.edit(commandStore(interaction.user, privateCommand))
 
             database.SaveDatabase()
@@ -2050,6 +2070,27 @@ bot.on('interactionCreate', async interaction => {
                 interaction.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
             }
         }
+    } else if (interaction.isMessageContextMenu()) {
+        if (interaction.commandName ==  'Xp érték') {
+            const messageXpValue = calculateAddXp(interaction.targetMessage)
+            if (messageXpValue.total == 0) {
+                interaction.reply({
+                    content: '> Ez az üzenet semmi \\🍺t se ér', ephemeral: true
+                })
+            } else {
+                interaction.reply({
+                    content:
+                        '> Ez az üzenet **' + messageXpValue.total + '**\\🍺t ér:' + '\n' +
+                        '>   alap érték: ' + messageXpValue.messageBasicReward + '\\🍺' + '\n' +
+                        '>   fájl bónusz: ' + messageXpValue.messageAttachmentBonus + '\\🍺' + '\n' +
+                        '>   hossz bónusz: ' + messageXpValue.messageLengthBonus + '\\🍺' + '\n' +
+                        '>   emoji bónusz: ' + messageXpValue.messageEmojiBonus + '\\🍺' + '\n' +
+                        '>   link bónusz: ' + messageXpValue.otherBonuses + '\\🍺' + '\n' +
+                        '>   egyedi emoji bónusz: ' + messageXpValue.messageCustomEmojiBonus + '\\🍺'
+                    ,ephemeral: true
+                })
+            }
+        }
     }
 })
 
@@ -2304,6 +2345,25 @@ bot.once('ready', async () => {
             log(DONE + ': Minden hír közzétéve')
         }
     }, 2000)
+
+    try {
+        console.log('Load channel settings...')
+        /** @type {string[]} */
+        const channelsWithSettings = JSON.parse(fs.readFileSync('./settings.json')).channelSettings.channelsWithSettings
+        channelsWithSettings.forEach(channelWithSettings => {
+            console.log('Process settings for channel \'' + channelWithSettings + '\'...')
+            const chn = bot.channels.cache.get(channelWithSettings)
+            console.log('Fetch messages in channel \'' + channelWithSettings + '\'... (limit: 10)')
+            chn.messages.fetch({ limit: 10 }).then(async (messages) => {
+                messages.forEach(message => {
+                    console.log('Process message...')
+                    ProcessMessage(message)
+                })
+            })
+        })
+    } catch (err) {
+        console.log('  Error: ' + err.message)
+    }
 })
 
 /** @param {Discord.Message} message */
@@ -2319,6 +2379,8 @@ bot.on('messageCreate', async message => { //Message
     let sender = message.author
 
     database.LoadDatabase()
+
+    ProcessMessage(message)
 
     //#region Log
 
@@ -2408,7 +2470,7 @@ bot.on('messageCreate', async message => { //Message
 
     if (message.content.length > 2) {
         if (thisIsPrivateMessage === false) {
-            addXp(sender, message.channel, calculateAddXp(message))
+            addXp(sender, message.channel, calculateAddXp(message).total)
         }
     }
 
@@ -2450,6 +2512,55 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
     }
     database.dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
 })
+
+/** Auto reactions
+ *  @param {Discord.Message} message */
+function ProcessMessage(message) {
+    try {
+        var isHaveMusic = false
+        if (message.content.includes('https://youtu.be/') == true) { isHaveMusic = true }
+        if (message.content.includes('https://www.youtube.com/watch') == true) { isHaveMusic = true }
+        if (message.content.includes('https://open.spotify.com/') == true) { isHaveMusic = true }
+
+        if (isHaveMusic == false) { return }
+
+        console.log('  Load settings...')
+        const settingsRaw = fs.readFileSync('./settings.json')
+        console.log('  Parse settings...')
+        const settings = JSON.parse(settingsRaw)
+        console.log('  Process settings...')
+        const channelSettings = settings.channelSettings
+        const messageChannelId = message.channel.id
+        if (channelSettings[messageChannelId] != undefined) {
+            /** @type {string[]} */
+            const autoReactions = channelSettings[messageChannelId].autoReactions
+            autoReactions.forEach(async (autoReaction) => {
+                console.log('  Get message reactions...')
+                const reaction = message.reactions.resolve(autoReaction)
+                if (reaction == null) {
+                    console.log('  React to message...')
+                    await message.react(autoReaction)
+                } else {
+                    const users = await reaction.users.fetch();
+                    users.forEach(async (user) => {
+                        var botIsReacted = false
+                        userList.forEach(user => {
+                            if (user.id == '738030244367433770') {
+                                botIsReacted = true
+                            }
+                        })
+                        if (botIsReacted == false) {
+                            console.log('  React to message...')
+                            await message.react(autoReaction)
+                        }
+                    })
+                }
+            })
+        }
+    } catch (err) {
+        console.log('  Error: ' + err.message)
+    }
+}
 
 /**
  * @param {Discord.Message} message
@@ -2733,16 +2844,18 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
 async function processApplicationCommand(command, privateCommand) {
-
+    const isDm = command.guild == null
 
     if (command.commandName === `hangman`) {
         CommandHangman(command, hangmanManager, true)
+        return
     }
 
     if (command.commandName === `wordle`) {
         command.deferReply({ ephemeral: privateCommand }).then(() => {
             CrossoutTest(command, command.options.getString('search'), privateCommand)
         })
+        return
     }
 
     if (command.commandName == `gift`) {
@@ -2781,15 +2894,16 @@ async function processApplicationCommand(command, privateCommand) {
         command.deferReply({ ephemeral: privateCommand }).then(() => {
             CrossoutTest(command, command.options.getString('search'), privateCommand)
         })
+        return
     }
 
-    if (command.commandName === `market`) {
+    if (command.commandName === `market` || command.commandName === `piac`) {
         command.reply(CommandMarket(database, database.dataMarket, command.user, privateCommand))
         userstatsSendCommand(command.user)
         return
     }
 
-    if (command.commandName === `xp`) {
+    if (command.commandName === `xp` || command.commandName === `score`) {
         CommandXp(command, database, privateCommand)
         userstatsSendCommand(command.user)
         return
@@ -2839,7 +2953,11 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `weather`) {
-        CommandWeather(command, privateCommand)
+        if (command.options.getSubcommand() == 'mars') {
+            CommandWeather(command, privateCommand, false)
+        } else {            
+            CommandWeather(command, privateCommand)
+        }
         userstatsSendCommand(command.user)
         return
     }
@@ -2862,7 +2980,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `help`) {
-        command.reply({ embeds: [CommandHelp(false)], ephemeral: privateCommand })
+        command.reply({ embeds: [CommandHelp(isDm)], ephemeral: privateCommand })
         userstatsSendCommand(command.user)
         return
     }
@@ -2879,19 +2997,19 @@ async function processApplicationCommand(command, privateCommand) {
         return
     }
 
-    if (command.commandName === `profil`) {
+    if (command.commandName === `profil` || command.commandName === `profile`) {
         CommandProfil(database, command, privateCommand)
         userstatsSendCommand(command.user)
         return
     }
 
-    if (command.commandName === `store`) {
+    if (command.commandName === `backpack`) {
         command.reply(commandStore(command.user, privateCommand))
         userstatsSendCommand(command.user)
         return
     }
 
-    if (command.commandName === `bolt`) {
+    if (command.commandName === `bolt` || command.commandName === `shop`) {
         command.reply(CommandShop(command.channel, command.user, command.member, database, 0, '', privateCommand))
         userstatsSendCommand(command.user)
         return
@@ -2915,22 +3033,28 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `music`) {
-        if (command.options.getSubcommand() == 'play') {
-            commandMusic(command, command.options.getString('url'))
-        } else if (command.options.getSubcommand() == `skip`) {
-            commandSkip(command)
-        } else if (command.options.getSubcommand() == `list`) {
-            commandMusicList(command)
+        if (isDm == false) {
+            if (command.options.getSubcommand() == 'play') {
+                commandMusic(command, command.options.getString('url'))
+            } else if (command.options.getSubcommand() == `skip`) {
+                commandSkip(command)
+            } else if (command.options.getSubcommand() == `list`) {
+                commandMusicList(command)
+            }
+        } else {
+            command.reply("> \\❌ **Ez a parancs csak szerveren használható!**")
         }
         userstatsSendCommand(command.user)
         return
     }
 
-    if (command.commandName === `settings`) {
+    if (command.commandName === `settings` || command.commandName === `preferences`) {
         command.reply(CommandSettings(database, command.member, privateCommand))
         userstatsSendCommand(command.user)
         return
     }
+
+    command.reply("> \\❌ **Ismeretlen parancs `" + command.commandName + "`! **`/help`** a parancsok listájához!**")
 }
 
 function StartBot() {

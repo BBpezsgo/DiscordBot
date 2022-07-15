@@ -10,57 +10,88 @@ function getEmbedMessage(isPrivate, isMobile) {
     if (isMobile === true) {
         const embed = new Discord.MessageEmbed()
             .setTitle('Parancsok')
+            .setColor(Color.Highlight)
             .addField('Alap',
                 '>  \\ℹ    `/help` Segítség kérése a parancsok iránt.\n' +
-                '>  \\⛅  `/weather` Békéscsaba időjárása.\n' +
+                '>  \\⛅  `/weather <earth|mars>` Időjárása.\n' +
                 '>  \\🚸  `/crossout <search>` Egy Crossout-os tárgy adatai.\n' +
                 '>  \\🏓  `/ping` A BOT ping-elése, avagy megnézni hogy most épp online e.'
             )
-            .addField('Zene \\❗ Alfa verzió \\❗',
+        if (isPrivate == false) {
+            embed.addField('Zene \\❗ Alfa verzió \\❗',
                 '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
                 '>     ├   `.music skip` Az aktuális zene átugrása.\n' +
                 '>     └   `.music list` A lejátszólista megtekintése.'
             )
-            .addField('Fejlesztői \\⛔ Csak moderátor használhatja \\⛔',
+        } else {
+            embed.addField('Zene \\❗ Alfa verzió \\❗ \\⛔ Csak szerveren elérhető \\⛔',
+                '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
+                '>     ├   `.music skip` Az aktuális zene átugrása.\n' +
+                '>     └   `.music list` A lejátszólista megtekintése.'
+            )
+        }
+        if (isPrivate == false) {
+            embed.addField('Fejlesztői \\⛔ Csak moderátor használhatja \\⛔',
                 '>  \\💻  `/dev`'
             )
-            .setColor(Color.Highlight)
+        }
         return embed
     } else {
         const embed = new Discord.MessageEmbed()
             .setTitle('Parancsok')
-            .addField('Alap',
+            .setColor(Color.Highlight)
+        if (isPrivate == true) {
+            embed.addField('Alap',
                 '>  \\\u2139    `/help` Segítség kérése a parancsok iránt.\n' +
-                '>  \\⛅  `/weather` Békéscsaba időjárása.\n' +
+                '>  \\⛅  `/weather <earth|mars>` Időjárása.\n' +
+                '>  \\🚸  `/crossout <search>` Egy Crossout-os tárgy adatai.\n' +
+                '>  \\🏓  `/ping` A BOT ping-elése, avagy megnézni hogy most épp online e.'
+            )
+        } else {
+            embed.addField('Alap',
+                '>  \\\u2139    `/help` Segítség kérése a parancsok iránt.\n' +
+                '>  \\⛅  `/weather <earth|mars>` Időjárása.\n' +
                 '>  \\🚸  `/crossout <search>` Egy Crossout-os tárgy adatai.\n' +
                 '>  \\🏓  `/ping` A BOT ping-elése, avagy megnézni hogy most épp online e.\n' +
                 '>  \\📯  `.mail` E-mailek megtekintése vagy írása.\n' +
                 '>  \\⚙️   `/settings` Beállítások.'
             )
-            .addField('Pénzek',
+        }
+        if (isPrivate == false) {
+            embed.addField('Pénzek',
                 '>  \\🍺   `/xp` Rangod.\n' +
-                '>  \\💼  `/store` A hátizsákod tartalmának megtekintése.\n' +
+                '>  \\💼  `/backpack` A hátizsákod tartalmának megtekintése.\n' +
                 '>  \\🧰  `/napi <darab>` A napi ládák kinyitása.\n' +
                 '>  \\🧱  `/crate <darab>` A ládák kinyitása.\n' +
-                '>  \\🏪  `/bolt`\n' +
+                '>  \\🏪  `/shop`\n' +
                 '>  \\⚖️  `/market`\n' +
                 '>  \\👤  `/profil` Statisztikák és matricák megtekintése.\n' +
                 '>  \\💰   `.pms` Biznisz, ami pénzt termel. \\❗ **Alfa verzió** \\❗\n' +
                 //'>     └    `.pms name [új név]` \\⛔ **Nem elérhető** \\⛔\n' +
                 '>  \\🎁   `/gift <felhasználó>` Egy felhasználó megajándékozása.'
             )
-            .addField('Zene \\❗ Alfa verzió \\❗',
+        }
+        if (isPrivate == false) {
+            embed.addField('Zene \\❗ Alfa verzió \\❗',
                 '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
                 '>     ├   `.music skip` Az aktuális zene átugrása.\n' +
                 '>     └   `.music list` A lejátszólista megtekintése.'
             )
-            .addField('Fejlesztői \\⛔ Csak moderátor használhatja \\⛔',
+        } else {
+            embed.addField('Zene \\❗ Alfa verzió \\❗ \\⛔ Csak szerveren elérhető \\⛔',
+                '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
+                '>     ├   `.music skip` Az aktuális zene átugrása.\n' +
+                '>     └   `.music list` A lejátszólista megtekintése.'
+            )
+        }
+        if (isPrivate == false) {
+            embed.addField('Fejlesztői \\⛔ Csak moderátor használhatja \\⛔',
                 '>  \\💻  `/dev`'
             )
             .addField('Játék \\❗ Alfa verzió \\❗',
                 '>  \\🎮  `.game`'
             )
-            .setColor(Color.Highlight)
+        }
         return embed
     }
 }

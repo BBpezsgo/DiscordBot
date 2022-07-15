@@ -318,6 +318,10 @@ table.datas>tbody>tr>td {
 	background: var(--main-primary-color);
 }
 
+.hide-null- {
+	display: none;
+}
+
 .show-,
 .show-false {
 	display: none;

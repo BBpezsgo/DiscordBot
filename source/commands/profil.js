@@ -5,6 +5,24 @@ const request = require("request")
 const GetUserColor = require('../functions/userColor')
 const { abbrev } = require('../functions/abbrev')
 
+const awardRoles = [
+    '929443006627586078',
+    '929443558040166461',
+    '929443627527180288',
+    '929443673077329961',
+    '929443957967048834',
+    '893187175087226910'
+]
+
+const awardRoleNames = {
+    '929443006627586078': '\\🔥 Quiz - **Answer Streak** 3',
+    '929443558040166461': '\\🔥 Quiz - **Answer Streak** 4',
+    '929443627527180288': '\\🔥 Quiz - **Answer Streak** 5',
+    '929443673077329961': '\\🔥 Quiz - **Answer Streak** 5+ ||Max||',
+    '929443957967048834': '\\🎭 **Meme Áradat**',
+    '893187175087226910': '\\💥 **Aktív Résztvevő**'
+}
+
 /**
  * @param {DatabaseManager} database
  * @param {Discord.CommandInteraction<Discord.CacheType>} command
@@ -30,23 +48,41 @@ module.exports = async (database, command, privateCommand) => {
             '> \\🖥️ Parancsok:' + abbrev(database.dataUserstats[command.member.id].commands) + '\n' +
             '> \\👁‍🗨 Összes karakter: ' + abbrev(database.dataUserstats[command.member.id].chars)
         )
-        /*.addField('meta',
-            '> \\🏆 medal-0a: 0\n' +
-            '> \\🥇 medal-1a: 0\n' +
-            '> \\🥈 medal-1b: 0\n' +
-            '> \\🥉 medal-1c: 0\n' +
-            '> \\🏅 medal-1d: 0\n' +
-            '> \\🎖️ medal-2a: 0\n' +
-            '> \\🀄 card-0a: 0\n' +
-            '> \\🃏 card-0b: 0\n' +
-            '> \\🎴 card-0c: 0\n' +
-            '> \\🧧 card-1a: 0'
-        )*/
+
+    var text = ''
+    awardRoles.forEach(award => {
+        if (command.member.roles.cache.some(role => role.id == award)) {
+            text += '\n> ' + awardRoleNames[award]
+        }
+    })
+
+    if (text == '') {
+        text = '> Nincsenek jelvényeid'
+    }
+
+    embed
+        .addField('Jelvények',
+            text
+        )
+
+    /*.addField('meta',
+        '> \\🏆 medal-0a: 0\n' +
+        '> \\🥇 medal-1a: 0\n' +
+        '> \\🥈 medal-1b: 0\n' +
+        '> \\🥉 medal-1c: 0\n' +
+        '> \\🏅 medal-1d: 0\n' +
+        '> \\🎖️ medal-2a: 0\n' +
+        '> \\🀄 card-0a: 0\n' +
+        '> \\🃏 card-0b: 0\n' +
+        '> \\🎴 card-0c: 0\n' +
+        '> \\🧧 card-1a: 0'
+    )*/
+
         .addField('Mást keresel?',
             'Beállítások: `/settings`\n' + 
-            'Profil testreszabása: `/bolt`',
+            'Profil testreszabása: `/shop`',
             false
         )
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/322/bust-in-silhouette_1f464.png')
-        command.reply({ embeds: [embed], ephemeral: privateCommand })
+    command.reply({ embeds: [embed], ephemeral: privateCommand })
 }

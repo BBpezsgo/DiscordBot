@@ -38,7 +38,11 @@
                     <ul id="myUL">
                         {{#each errors}}
                         <li style="margin-bottom: 10px;">
+                            {{#if isCrash}}
+                            <span class="caret crash" style="font-weight: bold;">{{type}}: </span>
+                            {{else}}
                             <span class="caret error" style="font-weight: bold;">{{type}}: </span>
+                            {{/if}}
                             {{title}}
                             <ul class="nested">
                                 {{#each info}}
@@ -46,7 +50,7 @@
                                 {{/each}}
                                 {{#each stack}}
                                 <li>
-                                    at {{this}}
+                                    <p style="display: inline;">at</p> <p style="display: inline;">{{this.raw}}</p>
                                 </li>
                                 {{/each}}
                             </ul>

@@ -9,94 +9,9 @@ let dataStickers = JSON.parse(fs.readFileSync('./database/stickers.json', 'utf-8
 let dataBot = JSON.parse(fs.readFileSync('./database/bot.json', 'utf-8'))
 
 function saveDatabase() {
-    fs.writeFile('./database/backpacks.json', JSON.stringify(dataBackpacks), (err) => { if (err) { log(ERROR & ': ' & err.message) }; })
-    fs.writeFile('./database/basic.json', JSON.stringify(dataBasic), (err) => { if (err) { log(ERROR & ': ' & err.message) }; })
-    fs.writeFile('./database/stickers.json', JSON.stringify(dataStickers), (err) => { if (err) { log(ERROR & ': ' & err.message) }; })
-}
-
-/**
- * Shorten text.
- * @param {string} text Text to shorten 
- * @param {number} len Max Length
- * @returns {string}
- */
-function shorten(text, len) {
-    if (typeof text !== "string") return ""
-    if (text.length <= len) return text
-    return text.substr(0, len).trim() + "..."
-}
-
-/**
-* @param {string} message
-*/
-function log(message) {
-    console.clear()
-
-    let text = ''
-    text = message
-    if (message === '') text = null
-    if (message === ' ') text = null
-    if (!message) text = null
-
-    if (text != null) {
-        //#region Timestamp
-        let hour = new Date().getHours()
-        let minute = new Date().getMinutes()
-        if (minute < 10) {
-            minute = '0' + new Date().getMinutes()
-        }
-        let seconds = new Date().getSeconds()
-        if (seconds < 10) {
-            seconds = '0' + new Date().getSeconds()
-        }
-        const timeStamp = hour + ':' + minute + ':' + seconds
-        //#endregion
-        allConsoleText += '' + timestampForeColor + '' + timeStamp + fontColor + '  ' + text + '\x1b[1m' + fontColor + '\n'
-    }
-
-    //#region ToolStrip
-    let playingAudioText = ''
-    if (ytdlCurrentlyPlaying === true) {
-        playingAudioText = ' | Most hallható: ' + shorten(ytdlCurrentlyPlayingText, 50)
-    }
-    let loadingAudioText = ''
-    if (ytdlCurrentlyLoading === true) {
-        loadingAudioText = ' | ' + ytdloadingText
-        if (ytdlCurrentlyPlaying === true) {
-            playingAudioText = ' | Most hallható: ' + shorten(ytdlCurrentlyPlayingText, 13)
-        }
-    }
-    let botInformationsText = ''
-    if (ping != 0) {
-        botInformationsText = `| ${ping.replace('.', '')}`
-    } else {
-        botInformationsText = `| ${loadingProgressText}`
-    }
-    botInformationsText += playingAudioText
-    botInformationsText += loadingAudioText
-
-    const consoleToolstripButton1Text = botInformationsText
-    let consoleToolstripPart1 = ' '
-    consoleToolstripPart1 += consoleToolstripButton1Text
-    for (let w = 0; w < consoleWidth - 1 - consoleToolstripButton1Text.length; w++) {
-        consoleToolstripPart1 += ' '
-    }
-    console.log('\x1b[0m\033[37m' + consoleToolstripPart1 + '\x1b[0m\x1b[1m' + fontColor + '\033[40m\n' + backgroundColor + '' + fontColor + '')
-    //#endregion
-
-    //#region Working area
-    let listOfAllConsoleText = allConsoleText.split('\n')
-    while (listOfAllConsoleText.length > consoleLines - 3) {
-        listOfAllConsoleText.shift()
-    }
-    for (let i = 0; i < listOfAllConsoleText.length; i++) {
-        if (i === listOfAllConsoleText.length) {
-            console.log(' ' + listOfAllConsoleText[i] + '\x1b[1m' + backgroundColor + '' + fontColor + '')
-        } else {
-            console.log(' ' + listOfAllConsoleText[i])
-        }
-    }
-    //#endregion
+    fs.writeFile('./database/backpacks.json', JSON.stringify(dataBackpacks), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+    fs.writeFile('./database/basic.json', JSON.stringify(dataBasic), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+    fs.writeFile('./database/stickers.json', JSON.stringify(dataStickers), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
 }
 
 /**
@@ -129,7 +44,7 @@ module.exports = (message, sender, isPrivate, database) => {
             , false)
         .addField('Sorsjegyek', '> \\💶 ' + smallLuckyCard + ' Black Jack\n> \\💷 ' + mediumLuckyCard + ' Buksza\n> \\💴 ' + largeLuckyCard + ' Fáraók Kincse', false)
     if (isPrivate === true) {
-        embed.setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, használd a .store parancsot egy szerveren!' })
+        embed.setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, használd a /backpack parancsot egy szerveren!' })
     } else {
         embed.setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!' })
     }
@@ -144,9 +59,9 @@ module.exports = (message, sender, isPrivate, database) => {
             }
         } else {
             if (getGifts = 1) {
-                embed.addField('Van egy ajándékod, ami kicsomagolásra vár!', 'Hogy kicsomagolhasd, használd a `.store` parancsot egy szerveren.')
+                embed.addField('Van egy ajándékod, ami kicsomagolásra vár!', 'Hogy kicsomagolhasd, használd a `/backpack` parancsot egy szerveren.')
             } else {
-                embed.addField('Van ' + getGifts + ' ajándékod, ami kicsomagolásra vár!', 'Hogy kicsomagolhasd, használd a `.store` parancsot egy szerveren.')
+                embed.addField('Van ' + getGifts + ' ajándékod, ami kicsomagolásra vár!', 'Hogy kicsomagolhasd, használd a `/backpack` parancsot egy szerveren.')
             }
         }
     }

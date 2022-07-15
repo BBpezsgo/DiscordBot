@@ -190,7 +190,7 @@ function CreateNews(message) {
         }
         role = '902878798956093510'
     } else if (message.author.id == '875340034537062400') { // Minecraft
-        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/apple-icon-180x180.png', url: 'https://www.minecraft.net/en-us' })
+        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/favicon-32x32.png', url: 'https://www.minecraft.net/en-us' })
 
         let content = message.content
         let title = ''

@@ -138,7 +138,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle('Bolt')
             .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
-            .addField('A bolt nem használható.', 'Hogy újra használhasd a boltot, használd a `.bolt` parancsot!')
+            .addField('A bolt nem használható.', 'Hogy újra használhasd a boltot, használd a `/shop` parancsot!')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed

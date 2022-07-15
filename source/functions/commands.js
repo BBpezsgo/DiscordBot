@@ -12,23 +12,75 @@ const { GetFonts, StringToFont } = require('../commands/fonts')
 const Discord = require('discord.js')
 const { StatesManager } = require('./statesManager')
 
-/**@param {Client} bot @param {StatesManager} statesManager */
-function CreateCommands(bot, statesManager) {
-    const commandPing = new SlashCommandBuilder()
-        .setName('ping')
-        .setDescription('A BOT ping-elése, avagy megnézni hogy most épp elérhető e')
-    const commandWeather = new SlashCommandBuilder()
-        .setName('weather')
-        .setDescription('Békéscsaba időjárása')
-    const commandXp = new SlashCommandBuilder()
-        .setName('xp')
-        .setDescription('Rangod')
-    const commandDev = new SlashCommandBuilder()
-        .setName('dev')
-        .setDescription('Fejlesztői segítség')
-    const commandHelp = new SlashCommandBuilder()
-        .setName('help')
-        .setDescription('A parancsok listája')
+/** @param {string[]} commandNames @param {string} commandDescription */
+function GenerateCommand(commandNames, commandDescription) {
+    /** @type {RESTPostAPIApplicationCommandsJSONBody[]} */
+    const generatedCommands = []
+
+    for (let i = 0; i < commandNames.length; i++) {
+        const commandName = commandNames[i]
+        const newCommand = new SlashCommandBuilder()
+            .setName(commandName)
+            .setDescription(commandDescription)
+        generatedCommands.push(newCommand.toJSON())
+    }
+
+    return generatedCommands
+}
+
+function GenerateGuildCommands() {
+    /** @type {RESTPostAPIApplicationCommandsJSONBody[]} */
+    const generatedCommands = []
+
+    GenerateCommand(
+        ['xp', 'score'],
+        'Rangod'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    GenerateCommand(
+        ['dev'],
+        'Fejlesztői segítség'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    GenerateCommand(
+        ['profil', 'profile'],
+        'Statisztikák és matricák megtekintése'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    GenerateCommand(
+        ['backpack'],
+        'A hátizsákod tartalmának megtekintése'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    GenerateCommand(
+        ['shop', 'bolt'],
+        'Itt elköltheted a pénzed'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    GenerateCommand(
+        ['market', 'piac'],
+        'Piac, naponta változó árakkal'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    GenerateCommand(
+        ['settings', 'preferences'],
+        'Értesítési, és parancs beállítások'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+    
     const commandCrateSub = new SlashCommandIntegerOption()
         .setName('darab')
         .setDescription('Ládák mennyisége')
@@ -37,6 +89,8 @@ function CreateCommands(bot, statesManager) {
         .setName('crate')
         .setDescription('Láda kinyitása')
         .addIntegerOption(commandCrateSub)
+    generatedCommands.push(commandCrate.toJSON())
+
     const commandNapiSub = new SlashCommandIntegerOption()
         .setName('darab')
         .setDescription('Napi ládák mennyisége')
@@ -45,15 +99,7 @@ function CreateCommands(bot, statesManager) {
         .setName('napi')
         .setDescription('Napi láda kinyitása')
         .addIntegerOption(commandNapiSub)
-    const commandProfil = new SlashCommandBuilder()
-        .setName('profil')
-        .setDescription('Statisztikák és matricák megtekintése')
-    const commandBackpack = new SlashCommandBuilder()
-        .setName('store')
-        .setDescription('A hátizsákod tartalmának megtekintése.')
-    const commandShop = new SlashCommandBuilder()
-        .setName('bolt')
-        .setDescription('Itt elköltheted a pénzed')
+    generatedCommands.push(commandNapi.toJSON())
 
     const commandQuizSub3 = new SlashCommandIntegerOption()
         .setName('add_xp')
@@ -93,6 +139,8 @@ function CreateCommands(bot, statesManager) {
         .addIntegerOption(commandQuizSub4)
         .addIntegerOption(commandQuizSub5)
         .addIntegerOption(commandQuizSub6)
+    generatedCommands.push(commandQuiz.toJSON())
+
     const commandGiftSub = new SlashCommandUserOption()
         .setName('user')
         .setDescription('Felhasználó')
@@ -101,11 +149,62 @@ function CreateCommands(bot, statesManager) {
         .setName('gift')
         .setDescription('Egy felhasználó megajándékozása')
         .addUserOption(commandGiftSub)
+    generatedCommands.push(commandGift.toJSON())
 
-    const commandMarket = new SlashCommandBuilder()
-        .setName('market')
-        .setDescription('Piac')
+    const testContextMenu = new ContextMenuCommandBuilder()
+        .setName('Megajándékozás')
+        .setType(2)
+    generatedCommands.push(testContextMenu.toJSON())
+        
+    const showMessageXpValueContextMenu = new ContextMenuCommandBuilder()
+        .setName('Xp érték')
+        .setType(3)
+    generatedCommands.push(showMessageXpValueContextMenu.toJSON())
 
+    const commandWordle = new SlashCommandBuilder()
+        .setName('wordle')
+        .setDescription('Wordle játék (angol)')
+    generatedCommands.push(commandWordle.toJSON())
+
+    const commandHangman = new SlashCommandBuilder()
+        .setName('hangman')
+        .setDescription('Hangman játék')
+    generatedCommands.push(commandHangman.toJSON())
+
+    return generatedCommands
+}
+
+function GenerateGlobalCommands() {
+    /** @type {RESTPostAPIApplicationCommandsJSONBody[]} */
+    const generatedCommands = []
+
+    GenerateCommand(
+        ['ping'],
+        'A BOT ping-elése, avagy megnézni hogy most épp elérhető-e'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    GenerateCommand(
+        ['help'],
+        'A parancsok listája'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    const commandWeatherSub1 = new SlashCommandSubcommandBuilder()
+        .setName('mars')
+        .setDescription('Mars időjárása')
+    const commandWeatherSub2 = new SlashCommandSubcommandBuilder()
+        .setName('earth')
+        .setDescription('Békéscsaba időjárása')
+    const commandWeather = new SlashCommandBuilder()
+        .setName('weather')
+        .setDescription('Időjárása')
+        .addSubcommand(commandWeatherSub1)
+        .addSubcommand(commandWeatherSub2)
+    generatedCommands.push(commandWeather.toJSON())
+    
     const commandCrossoutSub = new SlashCommandStringOption()
         .setName('search')
         .setDescription('A tárgy amit keresni szeretnél')
@@ -114,6 +213,7 @@ function CreateCommands(bot, statesManager) {
         .setName('crossout')
         .setDescription('Crossout')
         .addStringOption(commandCrossoutSub)
+    generatedCommands.push(commandCrossout.toJSON())
 
     const commandFont = new SlashCommandBuilder()
         .setName('font')
@@ -126,6 +226,14 @@ function CreateCommands(bot, statesManager) {
         .setName('text')
         .setDescription('Text')
         .setRequired(true)
+    const fonts = GetFonts()
+    for (let i = 0; i < fonts.length; i++) {
+        if (i == 1) { continue }
+        commandFontSub0.addChoices({ name: StringToFont("Lorem ipsum", i), value: i.toString() })
+    }
+    commandFont.addStringOption(commandFontSub1)
+    commandFont.addStringOption(commandFontSub0)
+    generatedCommands.push(commandFont.toJSON())
 
     const commandMusic = new SlashCommandBuilder()
         .setName('music')
@@ -151,55 +259,37 @@ function CreateCommands(bot, statesManager) {
     commandMusic.addSubcommand(commandMusicSub1)
     commandMusic.addSubcommand(commandMusicSub2)
 
-    const commandSettings = new SlashCommandBuilder()
-        .setName('settings')
-        .setDescription('Értesítési, és parancs beállítások')
+    generatedCommands.push(commandMusic.toJSON())
         
-    const testContextMenu = new ContextMenuCommandBuilder()
-        .setName('Megajándékozás')
-        .setType(2)
+    return generatedCommands
+}
 
-    const commandWordle = new SlashCommandBuilder()
-        .setName('wordle')
-        .setDescription('Wordle játék (angol)')
-
-    const commandHangman = new SlashCommandBuilder()
-        .setName('hangman')
-        .setDescription('Hangman játék')
-
-    const fonts = GetFonts()
-    for (let i = 0; i < fonts.length; i++) {
-        if (i == 1) { continue }
-        commandFontSub0.addChoices({ name: StringToFont("Lorem ipsum", i), value: i.toString() })
-    }
-    commandFont.addStringOption(commandFontSub1)
-    commandFont.addStringOption(commandFontSub0)
+/**@param {Client} bot @param {StatesManager} statesManager */
+function CreateCommands(bot, statesManager) {
+    const guildCommands = GenerateGuildCommands()
+    const globalCommands = GenerateGlobalCommands()
 
     try {
-        statesManager.commandAllCommandCount = 20
+        statesManager.commandAllCommandCount = guildCommands.length + globalCommands
         statesManager.commandCreatedCount = 0
 
-        const guildCommands = bot.guilds.cache.get('737954264386764812').commands
-        guildCommands?.create(commandPing.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandWeather.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandGift.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandXp.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandDev.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandHelp.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandCrate.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandNapi.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandProfil.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandBackpack.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandShop.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandQuiz.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandMarket.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandCrossout.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandFont.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandMusic.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(testContextMenu.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandWordle.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandSettings.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
-        guildCommands?.create(commandHangman.toJSON()).finally(() => { /*console.log('Create commands ' + Math.round((statesManager.commandCreatedCount / statesManager.commandAllCommandCount) * 100) + '%');*/ statesManager.commandCreatedCount += 1 })
+        bot.application.commands.create()
+        const commandsGuild = bot.guilds.cache.get('737954264386764812').commands
+        const commandsGlobal = bot.application.commands
+
+        for (let i = 0; i < guildCommands.length; i++) {
+            const command = guildCommands[i];
+            commandsGuild?.create(command).finally(() => {
+               statesManager.commandCreatedCount += 1
+            })
+        }
+
+        for (let i = 0; i < globalCommands.length; i++) {
+            const command = globalCommands[i];
+            commandsGlobal?.create(command).finally(() => {
+               statesManager.commandCreatedCount += 1
+            })
+        }
     } catch (error) {
         console.error(error)
     }
@@ -213,18 +303,109 @@ async function DeleteCommands(bot) {
         await guildCommands.fetch()
         guildCommands.cache.forEach(async (val, key) => {
             await guildCommands.delete(val)
-            console.log('Szerver parancsok törölése... (' + guildCommands.cache.size + ')')
+            //console.log('Szerver parancsok törölése... (' + guildCommands.cache.size + ')')
         })
     
         const appCommands = bot.application?.commands
         await appCommands.fetch()
         appCommands.cache.forEach(async (val, key) => {
             await appCommands.delete(val)
-            console.log('Bot parancsok törölése... (' + appCommands.cache.size + ')')
+            //console.log('Bot parancsok törölése... (' + appCommands.cache.size + ')')
         })
     } catch (error) {
         console.error(error)
     }
 }
 
-module.exports = { CreateCommands, DeleteCommands }
+/**
+ * @param {Client} bot
+ * @param {StatesManager} statesManager
+ * @param {(process: number) => any} StepCallback
+ * @param {() => any} FinishCallback
+*/
+function DeleteCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
+    try {
+        statesManager.commandAllCommandCount = generatedCommands.length
+        statesManager.commandDeletedCount = 0
+
+        const guild = bot.guilds.cache.get('737954264386764812')
+        const guildCommands = guild.commands
+        const appCommands = bot.application?.commands
+        guildCommands.fetch().then(() => {
+            appCommands.fetch().then(() => {    
+                statesManager.commandAllCommandCount = guildCommands.cache.size + appCommands.cache.size
+
+                guildCommands.cache.forEach(async (val, key) => {
+                    guildCommands.delete(val).finally(() => {
+                        statesManager.commandDeletedCount += 1
+                        StepCallback(statesManager.commandDeletedCount / statesManager.commandAllCommandCount)
+                        if (statesManager.commandDeletedCount == statesManager.commandAllCommandCount) {
+                             FinishCallback()
+                        }
+                    })
+                    //console.log('Szerver parancsok törölése... (' + guildCommands.cache.size + ')')
+                })
+
+                appCommands.cache.forEach(async (val, key) => {
+                    appCommands.delete(val).finally(() => {
+                        statesManager.commandDeletedCount += 1
+                        StepCallback(statesManager.commandDeletedCount / statesManager.commandAllCommandCount)
+                        if (statesManager.commandDeletedCount == statesManager.commandAllCommandCount) {
+                             FinishCallback()
+                        }
+                    })
+                    //console.log('Bot parancsok törölése... (' + appCommands.cache.size + ')')
+                })
+            })
+        })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+/**
+ * @param {Client} bot
+ * @param {StatesManager} statesManager
+ * @param {(process: number) => any} StepCallback
+ * @param {() => any} FinishCallback
+ */
+function CreateCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
+    const guildCommands = GenerateGuildCommands()
+    const globalCommands = GenerateGlobalCommands()
+
+    try {
+        statesManager.commandAllCommandCount = guildCommands.length + globalCommands.length
+        statesManager.commandCreatedCount = 0
+
+        const commandsGuild = bot.guilds.cache.get('737954264386764812').commands
+        const commandsGlobal = bot.application.commands
+
+        for (let i = 0; i < guildCommands.length; i++) {
+            const command = guildCommands[i];
+            commandsGuild?.create(command).finally(() => {
+                //console.log('create bot command ' + Math.round(statesManager.commandCreatedCount / statesManager.commandAllCommandCount * 100) + '%')
+                statesManager.commandCreatedCount += 1
+                StepCallback(statesManager.commandCreatedCount / statesManager.commandAllCommandCount)
+                if (statesManager.commandCreatedCount == statesManager.commandAllCommandCount) {
+                    FinishCallback()
+                }
+            })
+        }
+
+        for (let i = 0; i < globalCommands.length; i++) {
+            const command = globalCommands[i];
+            commandsGlobal?.create(command).finally(() => {
+                //console.log('create global command ' + Math.round(statesManager.commandCreatedCount / statesManager.commandAllCommandCount * 100) + '%')
+                statesManager.commandCreatedCount += 1
+                StepCallback(statesManager.commandCreatedCount / statesManager.commandAllCommandCount)
+                if (statesManager.commandCreatedCount == statesManager.commandAllCommandCount) {
+                    FinishCallback()
+                }
+            })
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+module.exports = { CreateCommands, DeleteCommands, CreateCommandsSync, DeleteCommandsSync }

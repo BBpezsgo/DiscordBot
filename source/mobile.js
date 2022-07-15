@@ -26,8 +26,6 @@ process.stdin.on('data', function (b) {
         process.stdin.pause()
         StopBot()
         log(DONE + ': A BOT leállítva!')
-    } else if (s === ' ') {
-        console.clear()
     } else if (/^\u001b\[M/.test(s)) {
         // mouse event
         console.error('s.length:', s.length)
@@ -80,7 +78,6 @@ process.on('exit', function () {
     // don't forget to turn off mouse reporting
     process.stdout.write('\x1b[?1005l')
     process.stdout.write('\x1b[?1003l')
-    console.clear()
     console.log("The application is closed")
 })
 
@@ -957,36 +954,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
         channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
         return
     }
-    
-    if (command === `test`) {
-        const button0 = new disbut.MessageButton()
-            .setLabel("This is a button!")
-            .setID("myid0")
-            .setStyle("grey")
-        const button1 = new disbut.MessageButton()
-            .setLabel("This is a button!")
-            .setID("myid1")
-            .setStyle("blurple")
-        const option = new disbut.MessageMenuOption()
-            .setLabel('Your Label')
-            .setEmoji('🍔')
-            .setValue('menuid')
-            .setDescription('Custom Description!')
-
-        const select = new disbut.MessageMenu()
-            .setID('customid')
-            .setPlaceholder('Click me! :D')
-            .setMaxValues(1)
-            .setMinValues(1)
-            .addOption(option)
-
-        const row0 = new disbut.MessageActionRow()
-            .addComponents(button0, button1)
-        const row1 = new disbut.MessageActionRow()
-            .addComponents(select)
-        channel.send("Message with a button!", { components: [row0, row1] })
-        return
-    }
 
     if (command === `mail`) {
         channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
@@ -996,10 +963,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
     //#endregion
 
     //#region Disabled in dm
-
-    if (command.startsWith(`gift `)) {
-        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-    }
 
     if (command.startsWith(`pms name `)) {
         message.channel.send('> \\⛔ **Ez a parancs átmenetileg nem elérhető!**')
@@ -1074,8 +1037,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
     }
 
     //#endregion
-
-    channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**")
 }
 
 
@@ -1096,12 +1057,12 @@ async function processApplicationCommand(command) {
         })
     }
 
-    if (command.commandName === `market`) {
+    if (command.commandName === `market` || command.commandName === `piac`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
-    if (command.commandName === `xp`) {
+    if (command.commandName === `xp` || command.commandName === `score`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
@@ -1149,8 +1110,13 @@ async function processApplicationCommand(command) {
         return
     }
 
+
     if (command.commandName === `weather`) {
-        CommandWeather(command)
+        if (command.options.getSubcommand() == 'mars') {
+            CommandWeather(command, privateCommand, false)
+        } else {            
+            CommandWeather(command, privateCommand)
+        }
         return
     }
 
@@ -1185,17 +1151,17 @@ async function processApplicationCommand(command) {
         return
     }
 
-    if (command.commandName === `profil`) {
+    if (command.commandName === `profil` || command.commandName === `profile`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
-    if (command.commandName === `store`) {
+    if (command.commandName === `backpack`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
-    if (command.commandName === `bolt`) {
+    if (command.commandName === `bolt` || command.commandName === `shop`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
@@ -1217,10 +1183,12 @@ async function processApplicationCommand(command) {
         return
     }
 
-    if (command.commandName === `settings`) {
+    if (command.commandName === `settings` || command.commandName === `preferences`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
+
+    command.reply({ content: "> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**" })
 }
 
 function StartBot() {

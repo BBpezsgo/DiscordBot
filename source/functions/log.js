@@ -468,6 +468,7 @@ class LogManager {
 
     BlankScreen() {
         if (enabled == false) { return }
+        
         this.loadingOverride = ''
 
         const window = { width: 80, height: 25 }
@@ -651,7 +652,6 @@ class LogManager {
 
         if (this.logs.length == 0) {
             console.log('\x1b[1m' + fontColor)
-            console.clear()
         }
 
         /*

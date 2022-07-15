@@ -21,6 +21,7 @@ const {
 const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
 const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
+const { CreateCommandsSync, DeleteCommandsSync } = require('../functions/commands')
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
@@ -147,6 +148,27 @@ class WebSocket {
         this.databaseSearchedUserId = ''
         this.moderatingSearchedServerId = ''
         this.moderatingSearchedChannelId = ''
+
+
+        this.commandsDeleting = false
+        this.commandsCreating = false
+        this.commandsCreatingPercent = 0.0
+    }
+
+    /** @param {Discord.User} user */
+    Get_UserJson(user) {
+        return {
+            defaultAvatarUrl: user.defaultAvatarURL,
+            avatarUrlSmall: user.avatarURL({ size: 16 }),
+            avatarUrlBig: user.avatarURL({ size: 128 }),
+            id: user.id,
+            hexAccentColor: user.hexAccentColor,
+            bot: user.bot,
+            createdAt: GetDate(user.createdAt),
+            discriminator: user.discriminator,
+            system: user.system,
+            username: user.username,
+        }
     }
 
     Get_UsersCache() {
@@ -154,20 +176,7 @@ class WebSocket {
         const users = []
 
         this.client.users.cache.forEach(user => {
-            const newUser = {
-                defaultAvatarUrl: user.defaultAvatarURL,
-                avatarUrlSmall: user.avatarURL({ size: 16 }),
-                avatarUrlBig: user.avatarURL({ size: 128 }),
-                id: user.id,
-                hexAccentColor: user.hexAccentColor,
-                bot: user.bot,
-                createdAt: GetDate(user.createdAt),
-                discriminator: user.discriminator,
-                system: user.system,
-                username: user.username,
-            }
-
-            users.push(newUser)
+            users.push(this.Get_UserJson(user))
         })
         return users
     }
@@ -445,7 +454,7 @@ class WebSocket {
         const clientData = {
             readyTime: GetTime(this.client.readyAt),
             uptime: GetTime(uptime),
-            botStarted: (this.client.ws.shards.first().status == 0),
+            botStarted: (this.client.ws.shards.size > 0) ? (this.client.ws.shards.first().status == 0) : false,
             ws: {
                 ping: this.client.ws.ping.toString().replace('NaN', '-'),
                 status: WsStatusText[this.client.ws.status],
@@ -489,9 +498,9 @@ class WebSocket {
                     large: this.database.dataBackpacks[userId].luckyCards.large,
                 },
 
-                businessIndex: this.database.dataBusinesses[userId].businessIndex,
-                businessName: this.database.dataBusinesses[userId].businessName,
-                businessLevel: this.database.dataBusinesses[userId].businessLevel,
+                businessIndex: 0,
+                businessName: '',
+                businessLevel: 0,
 
                 stickersMeme: this.database.dataStickers[userId].stickersMeme,
                 stickersMusic: this.database.dataStickers[userId].stickersMusic,
@@ -507,6 +516,15 @@ class WebSocket {
                 chars: this.database.dataUserstats[userId].chars,
                 commands: this.database.dataUserstats[userId].commands,
             }
+
+            try {
+                userDatabase.businessIndex = this.database.dataBusinesses[userId].businessIndex
+                userDatabase.businessName = this.database.dataBusinesses[userId].businessName
+                userDatabase.businessLevel = this.database.dataBusinesses[userId].businessLevel
+            } catch (err) {}
+
+            const currentFiles = []
+            const backupFiles = []
 
             const cacheUser = this.client.users.cache.get(userId)
 
@@ -554,7 +572,7 @@ class WebSocket {
             res.render('userRpm/Database', { userDatabase: userDatabase, user: user, bot: bot, market: market, info: info })
         } catch (error) {
             this.databaseSearchedUserId = ''
-            this.RenderPage_DatabaseSearch(req, res, "User's database not found")
+            this.RenderPage_DatabaseSearch(req, res, error.message)
         }
     }
 
@@ -592,8 +610,14 @@ class WebSocket {
         }
 
         cacheUsers.forEach(cacheUser => {
-            users.push({ id: cacheUser.id, name: cacheUser.username, avatarUrlSmall: cacheUser.avatarURL({ size: 16 }), avatarUrlLarge: cacheUser.avatarURL({ size: 128 }) })
-        });
+            users.push({
+                id: cacheUser.id,
+                name: cacheUser.username,
+                avatarUrlSmall: cacheUser.avatarURL({ size: 16 }),
+                avatarUrlLarge: cacheUser.avatarURL({ size: 128 }),
+                haveDatabase: (this.database.dataBasic[cacheUser.id] != undefined)
+            })
+        })
 
 
         const bot = {
@@ -603,10 +627,16 @@ class WebSocket {
         const market = {
             day: this.database.dataMarket.day,
             prices: {
-                token: this.database.dataMarket.prices.token,
-                coupon: this.database.dataMarket.prices.coupon,
-                jewel: this.database.dataMarket.prices.jewel,
+                token: '?',
+                coupon: '?',
+                jewel: '?',
             },
+        }
+
+        if (this.database.dataMarket.prices != undefined) {
+            market.prices.token = this.database.dataMarket.prices.token
+            market.prices.coupon = this.database.dataMarket.prices.coupon
+            market.prices.jewel = this.database.dataMarket.prices.jewel
         }
 
         res.render('userRpm/DatabaseSearch', { users: users, searchError: searchError, bot: bot, market: market, info: info })
@@ -725,6 +755,7 @@ class WebSocket {
         if (c.isText()) {
             /** @type {Discord.DMChannel | Discord.PartialDMChannel | Discord.NewsChannel | Discord.TextChannel | Discord.ThreadChannel | Discord.VoiceChannel} */
             const cTxt = c
+            
             cTxt.messages.cache.forEach((message) => {
                 messages.push({
                     id: message.id,
@@ -741,12 +772,63 @@ class WebSocket {
                     pinned: message.pinned,
                     system: message.system,
                     type: message.type,
-                    url: message.url
+                    url: message.url,
+                    author: this.Get_UserJson(message.author)
                 })
             })
         }
 
         res.render('userRpm/Moderating', { server: guild, channel: channel, messages: messages })
+    }
+
+    RenderPage_Commands(req, res) {
+        const guildCommands = this.client.guilds.cache.get('737954264386764812').commands
+        const globalCommands = this.client.application.commands
+        const commands = []
+        guildCommands.cache.forEach(command => {
+            const newCommand = {
+                id: command.id,
+                createdAt: GetDate(command.createdAt),
+                description: command.description,
+                name: command.name,
+                typeUrl: command.type,
+                version: command.version,
+                haveOptions: false,
+                options: []
+            }
+            command.options.forEach(option => {
+                newCommand.haveOptions = true
+                newCommand.options.push({
+                    typeUrl: option.type,
+                    name: option.name,
+                    description: option.description
+                })
+            })
+            commands.push(newCommand)
+        });
+        globalCommands.cache.forEach(command => {
+            const newCommand = {
+                id: command.id,
+                createdAt: GetDate(command.createdAt),
+                description: command.description,
+                name: command.name,
+                typeUrl: command.type,
+                version: command.version,
+                haveOptions: false,
+                options: []
+            }
+            command.options.forEach(option => {
+                newCommand.haveOptions = true
+                newCommand.options.push({
+                    typeUrl: option.type,
+                    name: option.name,
+                    description: option.description
+                })
+            })
+            commands.push(newCommand)
+        });
+        
+        res.render('userRpm/Commands', { commands: commands, deleting: this.commandsDeleting, creating: this.commandsCreating, deletingPercent : this.commandsDeletingPercent, creatingPercent : this.commandsCreatingPercent })
     }
 
     registerRoots() {
@@ -809,6 +891,11 @@ class WebSocket {
 
         this.app.get('/userRpm/Application', (req, res) => {
             const app = this.client.application
+
+            if (app == undefined || app == null) {
+                res.render('userRpm/ApplicationUnavaliable')
+                return
+            }
 
             const newApp = {
                 id: app.id,
@@ -873,16 +960,12 @@ class WebSocket {
             const channel = this.client.channels.cache.get(req.body.id)
             channel.fetch()
 
-            console.log('userRpm/CacheChannels/Fetch')
-
             this.RenderPage_CacheChannels(req, res)
         })
 
         this.app.post('/userRpm/CacheChannels/Join', (req, res) => {
             const voiceChannel = this.client.channels.cache.get(req.body.id)
             voiceChannel.join()
-
-            console.log('userRpm/CacheChannels/Join')
 
             this.RenderPage_CacheChannels(req, res)
         })
@@ -1033,6 +1116,7 @@ class WebSocket {
                 this.database.dataStickers[this.databaseSearchedUserId].stickersMessage = datas.stickersMessage
                 this.database.dataStickers[this.databaseSearchedUserId].stickersCommand = datas.stickersCommand
                 this.database.dataStickers[this.databaseSearchedUserId].stickersTip = datas.stickersTip
+                
                 this.database.SaveDatabase()
 
                 this.RenderPage_Database(req, res, this.databaseSearchedUserId)
@@ -1054,6 +1138,8 @@ class WebSocket {
                 this.database.dataBackpacks[this.databaseSearchedUserId].luckyCards.medium = datas.luckyCardsMedium
                 this.database.dataBackpacks[this.databaseSearchedUserId].luckyCards.large = datas.luckyCardsLarge
 
+                this.database.SaveDatabase()
+
                 this.RenderPage_Database(req, res, this.databaseSearchedUserId)
             }
         })
@@ -1067,6 +1153,8 @@ class WebSocket {
                 this.database.dataBasic[this.databaseSearchedUserId].score = datas.score
                 this.database.dataBasic[this.databaseSearchedUserId].money = datas.money
                 this.database.dataBasic[this.databaseSearchedUserId].day = datas.day
+
+                this.database.SaveDatabase()
 
                 this.RenderPage_Database(req, res, this.databaseSearchedUserId)
             }
@@ -1084,29 +1172,52 @@ class WebSocket {
 
             const lines = data.split('\n')
 
+            var isCrash = false
+
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i]
                 if (line.length < 2) { continue }
-                if (line.startsWith('Error: ')) {
-                    errors.push({ type: 'Error', title: line.replace('Error: ', ''), id: i })
+                if (line == 'CRASH') {
+                    isCrash = true
+                } else if (line.startsWith('Error: ')) {
+                    errors.push({ type: 'Error', title: line.replace('Error: ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
                 } else if (line.startsWith('Error [')) {
-                    errors.push({ type: 'Error', title: line.replace('Error ', ''), id: i })
+                    errors.push({ type: 'Error', title: line.replace('Error ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
                 } else if (line.startsWith('TypeError: ')) {
-                    errors.push({ type: 'TypeError', title: line.replace('Error: ', ''), id: i })
+                    errors.push({ type: 'TypeError', title: line.replace('TypeError: ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
+                } else if (line.startsWith('ReferenceError: ')) {
+                    errors.push({ type: 'ReferenceError', title: line.replace('ReferenceError: ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
                 } else if (line.startsWith('    at ')) {
                     if (errors[errors.length - 1].stack == undefined) {
-                        errors[errors.length - 1].stack = [line.replace('    at ', '')]
-                    } else {
-                        errors[errors.length - 1].stack.push(line.replace('    at ', ''))
+                        errors[errors.length - 1].stack = []
                     }
+                    const stactItem = line.replace('    at ', '')
+                    var filePath = ''
+                    const isFile = (stactItem.startsWith('C:\\'))
+                    if (isFile && stactItem.includes(':')) {
+                        filePath = stactItem.replace(':' + stactItem.split(':')[2], '')
+                        filePath = filePath.replace(':' + filePath.split(':')[2], '')
+                    }
+                    errors[errors.length - 1].stack.push({
+                        raw: stactItem,
+                        isFile: isFile,
+                        filePath: filePath
+                    })                    
+                    isCrash = false
                 } else if (line.includes(' DeprecationWarning:')) {
                     var xd = line.replace(line.replace(':'[0]), '')
                     xd = xd.replace(':', '')
                     xd = line.replace(line.replace(':'[0]), '')
                     xd = xd.replace(': ', '')
                     warnings.push({ type: 'DeprecationWarning', title: xd, id: i })
+                    isCrash = false
                 } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
                     warnings[warnings.length - 1].info = 'Use `node --trace-deprecation ...` to show where the warning was created'
+                    isCrash = false
                 } else {
                     if (errors.length > 0) {
                         if (errors[errors.length - 1].info == undefined) {
@@ -1115,6 +1226,7 @@ class WebSocket {
                             errors[errors.length - 1].info.push(line)
                         }
                     }
+                    isCrash = false
                 }
             }
 
@@ -1141,6 +1253,64 @@ class WebSocket {
             if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.writeFileSync('./node.error.log', '')
+        })
+
+        this.app.post('/userRpm/Moderating/SendMessage', (req, res) => {
+            /** @type {Discord.DMChannel | Discord.PartialDMChannel | Discord.NewsChannel | Discord.TextChannel | Discord.ThreadChannel | Discord.VoiceChannel} */
+            const channel = this.client.channels.cache.get(req.body.id)
+
+            if (channel != undefined) {
+                if (channel.isText()) {
+                    channel.send({ content: req.body.content, tts: req.body.tts }).then(() => {
+                        this.RenderPage_ModeratingSearch(req, res, '')
+                    }).catch((err) => {
+                        this.RenderPage_ModeratingSearch(req, res, '')
+                    })
+                    return
+                }
+            }
+            
+            this.RenderPage_ModeratingSearch(req, res, '')
+        })
+
+        this.app.post('/userRpm/ApplicationCommands/Fetch', (req, res) => {
+            const guildCommands = this.client.guilds.cache.get('737954264386764812').commands
+            guildCommands.fetch().finally(() => {
+                this.RenderPage_Commands(req, res)
+            })
+        })
+
+        this.app.post('/userRpm/ApplicationCommands/DeleteAll', (req, res) => {
+            this.commandsDeleting = true
+            DeleteCommandsSync(this.client, this.statesManager, (percent) => {
+                this.commandsDeletingPercent = percent
+            }, () => {
+                this.commandsDeleting = false
+            })
+            this.RenderPage_Commands(req, res)
+        })
+
+        this.app.post('/userRpm/ApplicationCommands/Createall', (req, res) => {
+            this.commandsCreating = true
+            CreateCommandsSync(this.client, this.statesManager, (percent) => {
+                this.commandsCreatingPercent = percent
+            }, () => {
+                this.commandsCreating = false
+            })
+            this.RenderPage_Commands(req, res)
+        })
+
+        this.app.get('/userRpm/ApplicationCommands/Status', (req, res) => {
+            res.status(200).send(JSON.stringify({ creatingPercent: this.commandsCreatingPercent }))
+        })
+
+        this.app.get('/userRpm/ApplicationCommands', (req, res) => {            
+            if (this.client.guilds.cache.get('737954264386764812') == null) {
+                res.render('userRpm/ApplicationUnavaliable')
+                return
+            }
+
+            this.RenderPage_Commands(req, res)
         })
 
         this.app.get('/userRpm/*', (req, res) => {

@@ -1,7 +1,7 @@
 @echo off
 
 Rem Set encoding to display unicode characters from batch
-chcp 65001
+chcp 65001 >nul
 
 Rem Start the script
 title Running [Invisible] - Discord BOT

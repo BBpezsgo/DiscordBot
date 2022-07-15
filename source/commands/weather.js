@@ -8,6 +8,8 @@ const { openweatherToken } = require('../config.json')
 
 const urlWeather = 'http://api.openweathermap.org/data/2.5/weather?lat=46.678889&lon=21.090833&units=metric&appid=' + openweatherToken
 const urlPollution = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + openweatherToken
+const urlMarsWeather = 'https://mars.nasa.gov/rss/api/?feed=weather&category=mars2020&feedtype=json&ver=1.0'
+const urlMarsWeeklyImage = 'https://mars.nasa.gov/rss/api/?feed=weekly_raws&category=mars2020&feedtype=json&num=1&page=0&tags=mars2020_featured_image&format=json'
 
 let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
 if (fs.existsSync('./Helper/output.txt') == true) {
@@ -221,6 +223,94 @@ function getEmbedEarth(data0, data1, data2, data3) {
     return embed
 }
 
+function GetMarsPressureIcon(pressure, averagePressure) {
+    if (averagePressure == 0) {
+        return ''
+    } else {
+        if (pressure-5 > averagePressure) {
+            return '\\🔺 '
+        } else if (pressure+5 < averagePressure) {
+            return '\\🔻 '
+        }
+        return '\\◼️ '
+    }
+}
+
+/**
+ * @param {any} data Mars weather data
+ * @param {any} data Mars image data
+ * @returns {Discord.MessageEmbed}
+ */
+function getEmbedMars(data, weeklyImage) {
+    const embed = new Discord.MessageEmbed()
+        .setColor('#fd875f')
+        .setAuthor({ name: 'Jezero Kráter', url: 'https://mars.nasa.gov/mars2020/weather/', iconURL: 'https://mars.nasa.gov/mars2020/favicon-16x16.png' })
+
+    const seasonNames = {
+        'late autumn': 'Késő ősz'
+    }
+
+    var averagePressure = 0
+    try {
+        var text = ""
+        if (fs.existsSync('./pressures.txt')) {
+            text = fs.readFileSync('./pressures.txt', 'utf-8')
+        }
+        var lines = text.split('\n')
+        var solsLogged = []
+        lines.forEach(line => {
+            if (line.length > 0) {
+                solsLogged.push(line.split(' ')[0])
+            }
+        });
+        data.sols.forEach(sol => {
+            if (solsLogged.includes(sol.sol)) {
+                
+            } else {
+                text += sol.sol + ' ' + sol.pressure + '\n'
+                solsLogged.push(sol.sol)
+            }
+        })
+        fs.writeFileSync('./pressures.txt', text, 'utf-8')
+        var lines = text.split('\n')
+        var n = 0
+        lines.forEach(line => {
+            if (line.length > 0) {
+                averagePressure += Number.parseFloat(line.split(' ')[1])
+                n += 1
+            }
+        })
+        averagePressure = averagePressure / n        
+    } catch (ex) { }
+
+    data.sols.forEach(_sol => {
+        /** @type {{terrestrial_date: string; sol: string; ls: string; season: string; min_temp: number; max_temp: number; pressure: number; sunrise: string; sunset: string;}} */
+        const sol = _sol
+        var seasonName = sol.season
+        if (seasonNames[seasonName] != undefined) {
+            seasonName = seasonNames[seasonName]
+        }
+        embed.addField('Sol ' + sol.sol,
+        GetMarsPressureIcon(sol.pressure, averagePressure) + sol.pressure + ' Pa\n' + 
+        '\\🌡️ ' + sol.min_temp + ' - ' + sol.max_temp + ' C°\n' + 
+        'Évszak: ' + seasonName + ''
+        , true)
+    })
+
+    embed
+        .setFooter({ text: '• Mars 2020', iconURL: 'https://images-ext-1.discordapp.net/external/yUBPtm8abWHU7zYH04hOrTOPwU6Q8WfqtGX1OPwXTYQ/https/emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        .setImage('https://i.cdn29.hu/apix_collect_c/primary/1311/mars131114_20131114_122345_original_1150x645_cover.jpg')
+    
+    if (weeklyImage != null) {
+        const imageList = weeklyImage.images[0]
+        if (imageList != undefined) {
+            embed.setImage(imageList.image_files.medium)
+        }
+    }
+    
+    return embed
+}
+
 /**
  * @param {Date} date 
  * @param {number} days 
@@ -229,6 +319,39 @@ function getEmbedEarth(data0, data1, data2, data3) {
 function addDays(date, days) {
     date.setDate(date.getDate() + days)
     return date
+}
+
+/** @param {(error: string, embeds: Discord.MessageEmbed[]) => void} callback */
+function GetMarsWeather(callback) {
+    try {
+        request(urlMarsWeeklyImage, function (err, res, body) {
+            var bodyImage = null
+            if (res.statusCode === 200) {
+                bodyImage = body
+            }
+
+            try {
+                //const body = fs.readFileSync('C:/Users/bazsi/Desktop/letöltés (1).json')
+                request(urlMarsWeather, function (err, res, body) {
+                    if (res.statusCode === 200) {
+                        if (err) {
+                            callback('**Mars Weather Error:** ' + err.toString(), [])
+                        } else {
+                            const data = JSON.parse(body)
+                            if (bodyImage != null) {
+                                bodyImage = JSON.parse(bodyImage)
+                            }
+                            callback(null, [ getEmbedMars(data, bodyImage) ])
+                        }
+                    } else {
+                        callback('**HTTP Response Error:** ' + res.statusCode, [])
+                    }
+                })
+            } catch (err) {
+                callback('**HTTP Requiest Error:** ' + err.toString(), [])
+            }
+        })
+    } catch (err) {}
 }
 
 /** @param 
@@ -290,27 +413,37 @@ function GetEarthWeather(callback) {
  * @param {Discord.CommandInteraction<Discord.CacheType>} command
  * @param {boolean} privateCommand
 */
-module.exports = async (command, privateCommand) => {
-
-    const year = new Date().getFullYear()
-    const month = new Date().getMonth() + 1
-    const day = new Date().getDate()
-    const m = [
-        new MoonPhase(addDays(new Date(year, month, day), -1)),
-        new MoonPhase(new Date(year, month, day)),
-        new MoonPhase(addDays(new Date(year, month, day), 1)),
-        new MoonPhase(addDays(new Date(year, month, day), 2)),
-        new MoonPhase(addDays(new Date(year, month, day), 3))
-    ]
-
-    await command.deferReply({ ephemeral: privateCommand })
-
-    GetEarthWeather((msnWeather, openweathermapWeather, openweathermapPollution, errorMessage) => {
-        if (errorMessage != null) {
-            command.editReply({ content: '> \\❌ ' + errorMessage })
-        } else {
-            const embed = getEmbedEarth(msnWeather, openweathermapWeather, m, openweathermapPollution)
-            command.editReply({ embeds: [embed] })
-        }
-    })
+module.exports = async (command, privateCommand, earth = true) => {
+    if (earth == true) {
+        const year = new Date().getFullYear()
+        const month = new Date().getMonth() + 1
+        const day = new Date().getDate()
+        const m = [
+            new MoonPhase(addDays(new Date(year, month, day), -1)),
+            new MoonPhase(new Date(year, month, day)),
+            new MoonPhase(addDays(new Date(year, month, day), 1)),
+            new MoonPhase(addDays(new Date(year, month, day), 2)),
+            new MoonPhase(addDays(new Date(year, month, day), 3))
+        ]
+    
+        await command.deferReply({ ephemeral: privateCommand })
+    
+        GetEarthWeather((msnWeather, openweathermapWeather, openweathermapPollution, errorMessage) => {
+            if (errorMessage != null) {
+                command.editReply({ content: '> \\❌ ' + errorMessage })
+            } else {
+                const embed = getEmbedEarth(msnWeather, openweathermapWeather, m, openweathermapPollution)
+                command.editReply({ embeds: [embed] })
+            }
+        })
+    } else {
+        await command.deferReply()
+        GetMarsWeather((errorMessage, embeds) => {
+            if (errorMessage != null) {
+                command.editReply({ content: '> \\❌ ' + errorMessage })
+            } else {
+                command.editReply({ embeds: embeds })
+            }
+        })
+    }
 }

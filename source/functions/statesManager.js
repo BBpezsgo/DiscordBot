@@ -61,6 +61,9 @@ class StatesManager {
         this.commandCreatedCount = 0
         this.commandAllCommandCount = 0
 
+        /**@type {number} */
+        this.commandDeletedCount = 0
+
         /**@type {boolean} */
         this.allNewsProcessed = false
         /**@type {string} */

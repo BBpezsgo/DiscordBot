@@ -1,24 +1,142 @@
+const { Message } = require('discord.js')
 const fs = require('fs')
 
-/** @returns {number} */
+/*
+((https{0,1})(:\/\/)([\w]+)(\.)([\w]+)(\.[\w]+)*((\/)[\w]+){0,}(\/){0,1}((\?)[\w\_\-]+(\=)([\w\-\+\_]+\+{0,1})+((\&)[\w\_\-]+(\=)([\w\-\+\_]+))*){0,1}((\#)[\w\-\+\_]*){0,1})
+*/
+
+const linkRegex = /((https{0,1})(:\/\/)([\w]+)(\.)([\w]+)(\.[\w]+)*((\/)[\w]+){0,}(\/){0,1}((\?)[\w\_\-]+(\=)([\w\-\+\_]+\+{0,1})+((\&)[\w\_\-]+(\=)([\w\-\+\_]+))*){0,1}((\#)[\w\-\+\_]*){0,1})/g
+const customEmojiRegex = /(<:[a-zA-Z]+:[0-9]{18}>)/
+const builtinEmojiRegex = /(:[a-z_]+:)/
+
+/**
+ * @param {Message} message
+ */
 function calculateAddXp(message) {
-    const settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
-
-    let addScoreValue = message.content.length
-    if (addScoreValue > 20) {
-        addScoreValue = 20
-    }
-
-    for (let i = 0; i < 5; i++) {
-        if (message.content.includes(settings['addXp'][i].link.toString())) {
-            addScoreValue = settings['addXp'][i].xp
+    var settings = {
+        "xpRewards": {
+            "messageContents": {
+                "attachment": { "xp": 100 },
+                "GIF": { "xp": 22 },
+                "attachmentLink": { "xp": 50 },
+                "emoji": { "xp": 10 },
+                "customEmoji": { "xp": 10 },
+                "link": { "xp": 25 },
+                "specialLinks": [
+                    {
+                        "link": "https://www.youtube.com/",
+                        "xp": 40
+                    },
+                    {
+                        "link": "https://www.reddit.com/",
+                        "xp": 34
+                    }
+                ]
+            },
+            "messageSizes": [
+                {
+                    "minChar": 100,
+                    "xp": 50
+                },
+                {
+                    "minChar": 300,
+                    "xp": 200
+                }
+            ]
         }
     }
-    if (message.attachments.size) {
-        addScoreValue = settings['addXp'][5].xp
+
+    settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
+
+    var msg = message.content
+
+    const _msg_lnk_rw = msg.match(linkRegex)
+    const _msg_wrd_rw = msg.match(/\b(\w+)\b/)
+    const _msg_ej_rw = msg.match(/[\p{Emoji}]+/)
+    const _msg_dcej_rw = msg.match(customEmojiRegex)
+    const _msg_dbej_rw = msg.match(builtinEmojiRegex)
+
+    var allLinkLength = 0
+    if (_msg_lnk_rw != null) {
+        _msg_lnk_rw.forEach(link => {
+            if (link != undefined) {
+                allLinkLength += link.length
+            }
+        })
+    }
+    const messageCharacters = Math.max(1, msg.length - allLinkLength)
+
+    var messageEmojis = 0
+    if (_msg_dbej_rw != null) {
+        messageEmojis += _msg_dbej_rw.length
+    }
+    if (_msg_ej_rw != null) {
+        messageEmojis += _msg_ej_rw.length
+    }
+    messageEmojis = 0
+    var messageCustomEmojis = 0
+    if (_msg_dcej_rw != null) {
+        messageCustomEmojis += _msg_dcej_rw.length
+    }
+    var messageLinkCount = 0
+    var messageLinks = []
+    if (_msg_lnk_rw != null) {
+        messageLinkCount = _msg_lnk_rw.length
+        for (let i = 0; i < messageLinkCount; i++) {
+            const link = _msg_lnk_rw.at(i)
+            messageLinks.push(link)
+        }
     }
 
-    return addScoreValue
+    var messageLengthBonus = 0
+    for (let i = 0; i < settings.xpRewards.messageSizes.length; i++) {
+        const item = settings.xpRewards.messageSizes[i];
+        if (item.minChar <= messageCharacters) {
+            if (messageLengthBonus < item.xp) {
+                messageLengthBonus = item.xp
+            }
+        }
+    }
+
+    const messageEmojiBonus = messageEmojis * settings.xpRewards.messageContents.emoji.xp
+    const messageCustomEmojiBonus = messageCustomEmojis * settings.xpRewards.messageContents.customEmoji.xp
+
+    const messageBasicReward = Math.min(msg.length, 20)
+
+    const messageAttachmentBonus = message.attachments.size * settings.xpRewards.messageContents.attachment.xp
+
+    var otherBonuses = 0
+    if (msg.toLowerCase().includes('https://cdn.discordapp.com/attachments/')) {
+        otherBonuses += settings.xpRewards.messageContents.attachmentLink.xp
+    } else if (msg.toLowerCase().includes('https://tenor.com/view/')) {
+        otherBonuses += settings.xpRewards.messageContents.GIF.xp
+    } else {
+        messageLinks.forEach(link => {
+            var bonus = settings.xpRewards.messageContents.link.xp
+
+            for (let i = 0; i < settings.xpRewards.messageContents.specialLinks.length; i++) {
+                const specialLink = settings.xpRewards.messageContents.specialLinks[i];
+                if (link.startsWith(specialLink.link)) {
+                    if (bonus < specialLink.xp) {
+                        bonus = specialLink.xp
+                        break
+                    }
+                }
+            }
+
+            otherBonuses += bonus
+        })
+    }
+
+    return {
+        total: (messageLengthBonus + messageBasicReward + messageAttachmentBonus + otherBonuses + messageEmojiBonus + messageCustomEmojiBonus),
+        messageLengthBonus: messageLengthBonus,
+        messageBasicReward: messageBasicReward,
+        messageAttachmentBonus: messageAttachmentBonus,
+        otherBonuses: otherBonuses,
+        messageEmojiBonus: messageEmojiBonus,
+        messageCustomEmojiBonus: messageCustomEmojiBonus
+    }
 }
 
 function xpRankIcon(score) {

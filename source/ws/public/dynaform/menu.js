@@ -4,22 +4,32 @@ var menuList = new Array(
     //		if it's not null, must be one and only; else if it's null, that means it has branches, and the actual url is the one of its first visitable branches.
     //	display: must be 0. 
     //	directory level: 0: directory has no branches;  1: directory level 1;  2:level 2;   and so on
+    
+    // Status
     "Status", 0, 0, str_menu.status,
+    // Cache
     "CacheEmojis", 0, 1, str_menu.cache,
     "CacheEmojis", 0, 2, str_menu.cacheEmojis,
     "CacheUsers", 0, 2, str_menu.cacheUsers,
     "CacheChannels", 0, 2, str_menu.cacheChannels,
     "CacheServers", 0, 2, str_menu.cacheServers,
-    "Application", 0, 0, str_menu.application,
+    // Application
+    "Application", 0, 1, str_menu.application,
+    "Application", 0, 2, str_menu.application,
+    "ApplicationCommands", 0, 2, str_menu.commands,
+    // Process
     "Process", 0, 0, str_menu.process,
+    // Database
     "Database", 0, 0, str_menu.database,
+    // Moderating
     "Moderating", 0, 0, str_menu.moderating,
+    // Logs
     "LogError", 0, 1, str_menu.log,
     "LogError", 0, 2, str_menu.logErrors,
     "LogSystem", 0, 2, str_menu.logSystem,
     "LogHandlebars", 0, 2, str_menu.logHandlebars,
 
-
+    // Testing
     "Testing", 0, 0, str_menu.testing,
 );
 

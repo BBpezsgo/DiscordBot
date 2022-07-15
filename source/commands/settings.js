@@ -56,7 +56,7 @@ module.exports = (database, member, privateCommand) => {
         )
         .addField('Mást keresel?',
             'Statisztika és jelvények: `/profil`\n' + 
-            'Profil testreszabása: `/bolt`',
+            'Profil testreszabása: `/shop`',
             false
         )
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/322/gear_2699-fe0f.png')

@@ -164,7 +164,8 @@
                                     {{this.id}}
                                 </td>
                                 <td style="padding:0 2 0 2;word-break:break-all">
-                                    <form action="/userRpm/Database/Search" method="post" style="margin: 0;"
+                                    <img class="show-invert-{{this.haveDatabase}} miniicon" src="/images/err2.png" width="16" height="16">
+                                    <form action="/userRpm/Database/Search" method="post" style="margin: 0; display: inline-block;"
                                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                                         <input type="text" name="id" value="{{this.id}}" style="display: none;">
                                         <input type="submit" value="View">

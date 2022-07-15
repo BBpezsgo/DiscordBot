@@ -1,4 +1,7 @@
-/** @param {string} url */
+/**
+ * @param {string} url
+ * @param {(data: string) => any} callback
+ */
 function GetData(url, callback)
 {
     var xmlHttp = new XMLHttpRequest()
