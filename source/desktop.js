@@ -302,7 +302,7 @@ const ytdl = require('ytdl-core')
 const { musicGetLengthText } = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
-const WS = require('./ws/ws')
+const { WebSocket, userIdToHash } = require('./ws/ws')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
@@ -377,7 +377,7 @@ if (!databaseIsSuccesfullyLoaded) {
     })
 }
 
-const ws = new WS('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager, false)
+const ws = new WebSocket('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager, false)
 logManager.BlankScreen()
 
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
@@ -2347,16 +2347,12 @@ bot.once('ready', async () => {
     }, 2000)
 
     try {
-        console.log('Load channel settings...')
         /** @type {string[]} */
         const channelsWithSettings = JSON.parse(fs.readFileSync('./settings.json')).channelSettings.channelsWithSettings
         channelsWithSettings.forEach(channelWithSettings => {
-            console.log('Process settings for channel \'' + channelWithSettings + '\'...')
             const chn = bot.channels.cache.get(channelWithSettings)
-            console.log('Fetch messages in channel \'' + channelWithSettings + '\'... (limit: 10)')
             chn.messages.fetch({ limit: 10 }).then(async (messages) => {
                 messages.forEach(message => {
-                    console.log('Process message...')
                     ProcessMessage(message)
                 })
             })
@@ -2524,36 +2520,28 @@ function ProcessMessage(message) {
 
         if (isHaveMusic == false) { return }
 
-        console.log('  Load settings...')
         const settingsRaw = fs.readFileSync('./settings.json')
-        console.log('  Parse settings...')
         const settings = JSON.parse(settingsRaw)
-        console.log('  Process settings...')
         const channelSettings = settings.channelSettings
         const messageChannelId = message.channel.id
         if (channelSettings[messageChannelId] != undefined) {
             /** @type {string[]} */
             const autoReactions = channelSettings[messageChannelId].autoReactions
             autoReactions.forEach(async (autoReaction) => {
-                console.log('  Get message reactions...')
                 const reaction = message.reactions.resolve(autoReaction)
                 if (reaction == null) {
-                    console.log('  React to message...')
                     await message.react(autoReaction)
                 } else {
                     const users = await reaction.users.fetch();
+                    var botIsReacted = false
                     users.forEach(async (user) => {
-                        var botIsReacted = false
-                        userList.forEach(user => {
-                            if (user.id == '738030244367433770') {
-                                botIsReacted = true
-                            }
-                        })
-                        if (botIsReacted == false) {
-                            console.log('  React to message...')
-                            await message.react(autoReaction)
+                        if (user.id == '738030244367433770') {
+                            botIsReacted = true
                         }
                     })
+                    if (botIsReacted == false) {
+                        await message.react(autoReaction)
+                    }
                 }
             })
         }
@@ -2845,6 +2833,23 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
 async function processApplicationCommand(command, privateCommand) {
     const isDm = command.guild == null
+
+    if (command.commandName === `handlebars` || command.commandName === `webpage`) {
+        await command.deferReply({ ephemeral: true })
+        var http = require('http')
+        http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
+            resp.on('data', function(ip) {
+                const row = new MessageActionRow()
+                const button = new MessageButton()
+                    .setLabel('Weboldal')
+                    .setStyle('LINK')
+                    .setURL('http://' + ip + ':5665/public?user=' + userIdToHash[command.user.id])
+                row.addComponents(button)
+                command.editReply({ components: [row], ephemeral: true })
+            })
+        })
+        return
+    }
 
     if (command.commandName === `hangman`) {
         CommandHangman(command, hangmanManager, true)

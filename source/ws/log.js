@@ -125,9 +125,9 @@ function HbGetLogs(invisibleIp) {
                     continue
                 }
                 newLogGroup.logs.push(jsonData)
-                newLogGroup.logs[newLogGroup.logs.length-1].time = time
-                newLogGroup.logs[newLogGroup.logs.length-1].sameTime = (time == lastTime)
-                newLogGroup.logs[newLogGroup.logs.length-1].haveDetails = (jsonData.method != undefined || jsonData.url != undefined || jsonData.IP != undefined)
+                newLogGroup.logs[newLogGroup.logs.length - 1].time = time
+                newLogGroup.logs[newLogGroup.logs.length - 1].sameTime = (time == lastTime)
+                newLogGroup.logs[newLogGroup.logs.length - 1].haveDetails = (jsonData.method != undefined || jsonData.url != undefined || jsonData.IP != undefined)
                 newLogGroup.endTime = time
                 lastTime = time
             }
@@ -140,6 +140,28 @@ function HbGetLogs(invisibleIp) {
 
         events.unshift(newEvent)
     }
+
+    /** @param {string} dateString 0000-00-00 */
+    const getDaysFromString = (dateString) => {
+        const parts = dateString.split('-')
+        var days = Number.parseInt(parts[0]) * 366
+        days += Number.parseInt(parts[1]) * 32
+        days += Number.parseInt(parts[2])
+        return days
+    }
+
+    const compare = (a, b) => {
+        if (getDaysFromString(a.dateText) < getDaysFromString(b.dateText)) {
+            return -1;
+        }
+        if (getDaysFromString(a.dateText) > getDaysFromString(b.dateText)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    events.sort(compare)
+    events.reverse()
 
     if (events.length > 0) {
         events[0].groups[0].running = true

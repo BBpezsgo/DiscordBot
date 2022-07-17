@@ -135,7 +135,7 @@
 
     <script>
         var refreshCreatingProgressBar = {{creating}}
-        const progressbar = document.getElementById('creatingProgress')
+        const creatingProgressbar = document.getElementById('creatingProgress')
 
         setInterval(() => {
             if (refreshCreatingProgressBar) {
@@ -145,14 +145,14 @@
                         refreshCreatingProgressBar = false
                         document.getElementById('creatingProgressPanel').style.display = 'none'
                     } else {
-                        progressbar.value = data.creatingPercent
+                        creatingProgressbar.value = data.creatingPercent
                     }
                 })
             }
         }, 2000)
 
         var refreshDeletingProgressBar = {{deleting}}
-        const progressbar = document.getElementById('deletingProgress')
+        const deletingProgressbar = document.getElementById('deletingProgress')
 
         setInterval(() => {
             if (refreshDeletingProgressBar) {
@@ -162,7 +162,7 @@
                         refreshDeletingProgressBar = false
                         document.getElementById('deletingProgressPanel').style.display = 'none'
                     } else {
-                        progressbar.value = data.deletingPercent
+                        deletingProgressbar.value = data.deletingPercent
                     }
                 })
             }

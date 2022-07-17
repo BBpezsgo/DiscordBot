@@ -1,0 +1,167 @@
+input[type='submit'], .button {
+    outline: 0;
+    border: 0;
+    color: #F6F6F6;
+    background: transparent;
+    transition-duration: 300ms;
+    border-radius: 10px;
+    font-size: 25px;
+    font-weight: 600;
+    margin: 5px;
+    text-transform: uppercase;
+}
+
+input[type='submit']:hover, .button:hover {
+    background: #4b4f55;
+    transform: translateY(-1px);
+    box-shadow: #0004 0px 2px 5px;
+}
+
+input[type='submit']:active, .button:active {
+    transition-duration: 10ms;
+    background: #4b4f55;
+    transform: translateY(1px);
+}
+
+input[type='submit'].button-success, .button.button-success {
+    color: #F6F6F6;
+    background: #177032;
+}
+
+input[type='submit']:hover.button-success, .button:hover.button-success {
+    background: #238f43;
+}
+
+input[type='submit']:active.button-success, .button:active.button-success {
+    background: #30b668;
+}
+
+body {
+    background: #2C2F33;
+    color: #F6F6F6;
+    font-family: "Whitney", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+.hide {
+    opacity: 0;
+}
+
+.img {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    user-select: none;
+}
+
+h1.title,
+h2.title,
+h3.title,
+h4.title,
+h5.title,
+h6.title {
+    display: inline-block;
+}
+
+h1.img-title,
+h2.img-title,
+h3.img-title,
+h4.img-title,
+h5.img-title,
+h6.img-title {
+    display: inline-block;
+    transform: translateY(10px);
+    margin-left: 10px;
+}
+
+.img-small {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    user-select: none;
+}
+
+.img-text {
+    display: inline-block;
+    transform: translateY(2px);
+    margin-left: 5px;
+}
+
+.toast-alert {
+    background: #23272A;
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: #0006 2px 2px 5px;
+    margin-top: 20px;
+    transition-duration: 500ms !important;
+}
+
+.toast-alert.submitted {
+    opacity: 0 !important;
+    transform: translateX(-100px);
+    pointer-events: none;
+}
+
+.modal {
+    transition-duration: 200ms;
+    opacity: 0 !important;
+    transform: scale(.75);
+}
+
+.modal.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.modal .modal-content {
+    background-color: #23272A;
+    box-shadow: #000 0px 0px 25px;
+}
+
+.modal .modal-content .modal-header {
+    border-color: #32393d;
+}
+
+.modal .modal-content .modal-header button {
+    outline: 0;
+    border: 0;
+    transition-duration: 300ms;
+    margin: 5px;
+    opacity: .8;
+    background-image: url('https://www.pinclipart.com/picdir/big/88-882904_mermaiden-crystal-dress-up-game-white-x-icon.png');
+}
+
+.modal .modal-content .modal-header button:hover {
+    opacity: 1;
+}
+
+.modal .modal-content .modal-header button:active {
+    transition-duration: 10ms;
+    opacity: 1;
+    transform: translateY(1px);
+}
+
+.modal .modal-content .modal-header button:focus {
+    box-shadow: none;
+}
+
+.inline {
+    display: inline-block;
+}
+
+.show-, .show-false {
+    display: none !important;
+}
+
+.loading-effect {
+    opacity: 0;
+    transition-duration: 400ms;
+}
+
+.loading-effect.loading-effect-loaded {
+    opacity: 1;
+}
+
+.loading-effect.loading-effect-loaded-instant {
+    transition-duration: 0ms;
+    opacity: 1;
+}

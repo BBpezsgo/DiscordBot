@@ -80,6 +80,13 @@ function GenerateGuildCommands() {
     ).forEach((item) => {
         generatedCommands.push(item)
     })
+
+    GenerateCommand(
+        ['handlebars', 'webpage'],
+        'Link a fiókod weblapjához'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
     
     const commandCrateSub = new SlashCommandIntegerOption()
         .setName('darab')
@@ -325,11 +332,9 @@ async function DeleteCommands(bot) {
 */
 function DeleteCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
     try {
-        statesManager.commandAllCommandCount = generatedCommands.length
         statesManager.commandDeletedCount = 0
 
-        const guild = bot.guilds.cache.get('737954264386764812')
-        const guildCommands = guild.commands
+        const guildCommands = bot.guilds.cache.get('737954264386764812').commands
         const appCommands = bot.application?.commands
         guildCommands.fetch().then(() => {
             appCommands.fetch().then(() => {    

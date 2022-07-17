@@ -25,6 +25,29 @@ const { CreateCommandsSync, DeleteCommandsSync } = require('../functions/command
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
+const hashToUserId = {
+    'ET6JGOQW73': '726127512521932880', // Me
+    'QhUsrpv6ln': '875044278441758741', // Alt account
+    'BDG6Hfft9f': '575727604708016128', // Dorcsi
+    'CBiy551mPP': '638644689507057683', // Hédi
+    'uAS38SZL4j': '591218715803254784', // Livi
+    'DAyEfjYhLO': '583709720834080768', // Milán
+    'nbDhnQjiAV': '415078291574226955', // Peti
+    'UImjrrKzdk': '750748417373896825', // Ádám (narancs)
+    'Z6i7G9RGdb': '494126778336411648', // Ádám
+}
+const userIdToHash = {
+    '726127512521932880': 'ET6JGOQW73', // Me
+    '875044278441758741': 'QhUsrpv6ln', // Alt account
+    '575727604708016128': 'BDG6Hfft9f', // Dorcsi
+    '638644689507057683': 'CBiy551mPP', // Hédi
+    '591218715803254784': 'uAS38SZL4j', // Livi
+    '583709720834080768': 'DAyEfjYhLO', // Milán
+    '415078291574226955': 'nbDhnQjiAV', // Peti
+    '750748417373896825': 'UImjrrKzdk', // Ádám (narancs)
+    '494126778336411648': 'Z6i7G9RGdb', // Ádám
+}
+
 class WebSocket {
     /**
      * @param {string} password
@@ -64,6 +87,10 @@ class WebSocket {
         this.app.use(bodyParser.json())
 
         this.app.use((req, res, next) => {
+            if (req.path.startsWith('/public')) {
+                return next()
+            }
+
             const auth = { login: 'bb', password: 'bb' }
 
             const b64auth = (req.headers.authorization || '').split(' ')[1] || ''
@@ -81,7 +108,8 @@ class WebSocket {
             res.status(401).render('userRpm/401')
         })
 
-        this.registerRoots()
+        this.RegisterHandlebarsRoots()
+        this.RegisterPublicRoots()
 
         this.server = this.app.listen(port, ip, () => {
             this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
@@ -521,7 +549,7 @@ class WebSocket {
                 userDatabase.businessIndex = this.database.dataBusinesses[userId].businessIndex
                 userDatabase.businessName = this.database.dataBusinesses[userId].businessName
                 userDatabase.businessLevel = this.database.dataBusinesses[userId].businessLevel
-            } catch (err) {}
+            } catch (err) { }
 
             const currentFiles = []
             const backupFiles = []
@@ -755,7 +783,7 @@ class WebSocket {
         if (c.isText()) {
             /** @type {Discord.DMChannel | Discord.PartialDMChannel | Discord.NewsChannel | Discord.TextChannel | Discord.ThreadChannel | Discord.VoiceChannel} */
             const cTxt = c
-            
+
             cTxt.messages.cache.forEach((message) => {
                 messages.push({
                     id: message.id,
@@ -827,12 +855,12 @@ class WebSocket {
             })
             commands.push(newCommand)
         });
-        
-        res.render('userRpm/Commands', { commands: commands, deleting: this.commandsDeleting, creating: this.commandsCreating, deletingPercent : this.commandsDeletingPercent, creatingPercent : this.commandsCreatingPercent })
+
+        res.render('userRpm/Commands', { commands: commands, deleting: this.commandsDeleting, creating: this.commandsCreating, deletingPercent: this.commandsDeletingPercent, creatingPercent: this.commandsCreatingPercent })
     }
 
-    registerRoots() {
-        this.app.get('/', (req, res) => {
+    RegisterHandlebarsRoots() {
+        this.app.get('/hb', (req, res) => {
             const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
             const view = req.query.view
@@ -917,7 +945,7 @@ class WebSocket {
         this.app.get('/userRpm/Process', (req, res) => {
             const uptime = new Date()
             uptime.setSeconds(Math.floor(process.uptime()))
-            
+
             const proc = {
 
                 argv: process.argv,
@@ -1116,7 +1144,7 @@ class WebSocket {
                 this.database.dataStickers[this.databaseSearchedUserId].stickersMessage = datas.stickersMessage
                 this.database.dataStickers[this.databaseSearchedUserId].stickersCommand = datas.stickersCommand
                 this.database.dataStickers[this.databaseSearchedUserId].stickersTip = datas.stickersTip
-                
+
                 this.database.SaveDatabase()
 
                 this.RenderPage_Database(req, res, this.databaseSearchedUserId)
@@ -1173,24 +1201,36 @@ class WebSocket {
             const lines = data.split('\n')
 
             var isCrash = false
+            var lastLine = ''
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i]
                 if (line.length < 2) { continue }
+                if (line == lastLine) { continue }
+                lastLine = ''
+
                 if (line == 'CRASH') {
                     isCrash = true
                 } else if (line.startsWith('Error: ')) {
                     errors.push({ type: 'Error', title: line.replace('Error: ', ''), id: i, isCrash: isCrash })
                     isCrash = false
+                    lastLine = line
                 } else if (line.startsWith('Error [')) {
                     errors.push({ type: 'Error', title: line.replace('Error ', ''), id: i, isCrash: isCrash })
                     isCrash = false
+                    lastLine = line
                 } else if (line.startsWith('TypeError: ')) {
                     errors.push({ type: 'TypeError', title: line.replace('TypeError: ', ''), id: i, isCrash: isCrash })
                     isCrash = false
+                    lastLine = line
                 } else if (line.startsWith('ReferenceError: ')) {
                     errors.push({ type: 'ReferenceError', title: line.replace('ReferenceError: ', ''), id: i, isCrash: isCrash })
                     isCrash = false
+                    lastLine = line
+                } else if (line.startsWith('DiscordAPIError: ')) {
+                    errors.push({ type: 'DiscordAPIError', title: line.replace('DiscordAPIError: ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
+                    lastLine = line
                 } else if (line.startsWith('    at ')) {
                     if (errors[errors.length - 1].stack == undefined) {
                         errors[errors.length - 1].stack = []
@@ -1206,7 +1246,7 @@ class WebSocket {
                         raw: stactItem,
                         isFile: isFile,
                         filePath: filePath
-                    })                    
+                    })
                     isCrash = false
                 } else if (line.includes(' DeprecationWarning:')) {
                     var xd = line.replace(line.replace(':'[0]), '')
@@ -1269,7 +1309,7 @@ class WebSocket {
                     return
                 }
             }
-            
+
             this.RenderPage_ModeratingSearch(req, res, '')
         })
 
@@ -1304,7 +1344,7 @@ class WebSocket {
             res.status(200).send(JSON.stringify({ creatingPercent: this.commandsCreatingPercent }))
         })
 
-        this.app.get('/userRpm/ApplicationCommands', (req, res) => {            
+        this.app.get('/userRpm/ApplicationCommands', (req, res) => {
             if (this.client.guilds.cache.get('737954264386764812') == null) {
                 res.render('userRpm/ApplicationUnavaliable')
                 return
@@ -1315,6 +1355,254 @@ class WebSocket {
 
         this.app.get('/userRpm/*', (req, res) => {
             res.render('userRpm/404', { message: req.path })
+        })
+    }
+
+    RegisterPublicRoots() {
+        const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
+
+        /**
+         * @param {Request<{}, any, any, qs.ParsedQs, Record<string, any>>} req
+         * @param {Response<any, Record<string, any>, number>} res
+         * @param {string} userId
+         * @param {string} hash
+         */
+        const RenderStartpage = async (req, res, userId, hash, dontReload, additionalInfo) => {
+            const user = this.client.users.cache.get(userId)
+            var member = undefined
+            var thereIsNetworkError = false
+            try {
+                member = this.client.guilds.cache.get('737954264386764812').members.cache.get(userId)
+                if (member == undefined) {
+                    member = await this.client.guilds.cache.get('737954264386764812').members.fetch(userId)
+                }
+            } catch (err) {
+                thereIsNetworkError = true
+            }
+
+            const { abbrev } = require('../functions/abbrev')
+
+            const score = this.database.dataBasic[userId].score
+            const next = require('../commands/database/xpFunctions').xpRankNext(score)
+            const scorePercent = score / next
+            const xpImageUrl = require('../commands/database/xpFunctions').xpRankIconModern(score)
+            const rankText = require('../commands/database/xpFunctions').xpRankText(score)
+
+            const dataBackpack = this.database.dataBackpacks[userId]
+            const dataBasic = this.database.dataBasic[userId]
+            const dataUserstats = this.database.dataUserstats[userId]
+
+            const dayCrates = this.database.dataBot.day - dataBasic.day
+
+            const bools = {
+                haveCrates: dataBackpack.crates > 0,
+                gotGifts: dataBackpack.getGift > 0,
+                haveDayCrates: dayCrates > 0,
+                haveLuckycardSmall: dataBackpack.luckyCards.small > 0,
+                haveLuckycardMedium: dataBackpack.luckyCards.medium > 0,
+                haveLuckycardLarge: dataBackpack.luckyCards.large > 0,
+            }
+
+            const statistics = {
+                messages: abbrev(dataUserstats.messages),
+                chars: abbrev(dataUserstats.chars),
+                commands: abbrev(dataUserstats.commands)
+            }
+
+            const awards = {
+                quiz: false,
+                meme: false,
+                online: false
+            }
+
+            if (member != undefined) {
+                if (member.roles.cache.some(role => role.id == '929443006627586078')) {
+                    awards.quiz = true
+                } else if (member.roles.cache.some(role => role.id == '929443558040166461')) {
+                    awards.quiz = true
+                } else if (member.roles.cache.some(role => role.id == '929443627527180288')) {
+                    awards.quiz = true
+                } else if (member.roles.cache.some(role => role.id == '929443673077329961')) {
+                    awards.quiz = true
+                }
+                if (member.roles.cache.some(role => role.id == '929443957967048834')) {
+                    awards.meme = true
+                }
+                if (member.roles.cache.some(role => role.id == '893187175087226910')) {
+                    awards.online = true
+                }
+            }
+
+            const moneyText = abbrev(this.database.dataBasic[userId].money)
+
+            const userInfo = {
+                name: '<valaki>',
+                progress: scorePercent,
+                xpImageUrl: xpImageUrl,
+                rankText: rankText
+            }
+
+            if (member != undefined) {
+                userInfo.name = member.displayName
+            } else if (user != undefined) {
+                userInfo.name = user.username
+            }
+
+            res.render('public/startPage', { additionalInfo: additionalInfo, dontReload: dontReload, hash: hash, thereIsNetworkError: thereIsNetworkError, awards: awards, statistics: statistics, dayCrates: dayCrates, bools: bools, userInfo: userInfo, backpack: dataBackpack, money: moneyText })
+        }
+
+        /**
+         * @param {string} id 
+         */
+        const openAllCrate = (id) => {
+            if (this.database.dataBackpacks[id].crates === 0) {
+                return {
+                    success: false
+                }
+            } else {
+                let Crates = this.database.dataBackpacks[id].crates
+
+                let getXpS = 0
+                let getGiftS = 0
+                let getMoney = 0
+                for (let i = 0; i < Crates; i++) {
+
+                    let replies = ['xp', 'money', 'gift']
+                    let random = Math.floor(Math.random() * 3)
+                    let out = replies[random]
+                    let val = 0
+
+                    if (out === 'xp') {
+                        val = Math.floor(Math.random() * 110) + 100
+                        getXpS += val
+                        this.database.dataBasic[id].score += val
+                    }
+                    if (out === 'money') {
+                        val = Math.floor(Math.random() * 2000) + 2000
+                        getMoney += val
+                        this.database.dataBasic[id].money += val
+                    }
+                    if (out === 'gift') {
+                        getGiftS += 1
+                        this.database.dataBackpacks[id].gifts += 1
+                    }
+                }
+
+                this.database.dataBackpacks[id].crates = this.database.dataBackpacks[id].crates - Crates
+                this.database.SaveDatabase()
+
+                return {
+                    success: true,
+                    xp: getXpS,
+                    money: getMoney,
+                    gift: getGiftS
+                }
+
+            }
+        }
+        /**
+         * @param {string} id
+         */
+        const openAllDayCrate = (id) => {
+            /**
+             * @param {number} userId
+             * @returns {String} The result string
+             */
+            const openDayCrate = (userId) => {
+                const RandomPercente = Math.floor(Math.random() * 100)
+                let val = 0
+                if (RandomPercente < 10) { // 10%
+                    val = 1
+                    this.database.dataBackpacks[userId].tickets += val
+
+                    return 0 + '|' + val
+                } else if (RandomPercente < 30) { // 20%
+                    val = 1
+                    this.database.dataBackpacks[userId].crates += val
+
+                    return 1 + '|' + val
+                } else if (RandomPercente < 60) { // 30%
+                    val = Math.floor(Math.random() * 50) + 30
+                    this.database.dataBasic[userId].score += val
+
+                    return 2 + '|' + val
+                } else { // 40%
+                    val = Math.floor(Math.random() * 300) + 100
+                    this.database.dataBasic[userId].money += val
+
+                    return 3 + '|' + val
+                }
+            }
+
+            if (dayOfYear === this.database.dataBasic[id].day) {
+                return { success: false }
+            } else {
+                let dayCrates = this.database.dataBot.day - this.database.dataBasic[id].day
+
+                let getXpS = 0
+                let getChestS = 0
+                let getMoney = 0
+                let getTicket = 0
+                for (let i = 0; i < dayCrates; i++) {
+                    const rewald = openDayCrate(id)
+                    const rewaldIndex = rewald.split('|')[0]
+                    const rewaldValue = parseInt(rewald.split('|')[1])
+
+                    if (rewaldIndex === '2') {
+                        getXpS += rewaldValue
+                    } else if (rewaldIndex === '3') {
+                        getMoney += rewaldValue
+                    } else if (rewaldIndex === '1') {
+                        getChestS += 1
+                    } else if (rewaldIndex === '0') {
+                        getTicket += 1
+                    }
+                }
+
+                this.database.dataBasic[id].day = this.database.dataBot.day
+                this.database.SaveDatabase()
+
+                return {
+                    success: true,
+                    money: getMoney,
+                    xp: getXpS,
+                    crate: getChestS,
+                    ticket: getTicket
+                }
+            }
+        }
+
+        /**
+         * @param {Request<{}, any, any, qs.ParsedQs, Record<string, any>>} req
+         * @param {Response<any, Record<string, any>, number>} res
+         * @param {string} errorTitle
+         * @param {string} errorText
+         */
+        const RenderError = (req, res, errorTitle, errorText) => {
+            res.render('public/error', { title: errorTitle, text: errorText })
+        }
+
+        this.app.get('/public', (req, res) => {
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+            const userHash = req.query.user
+            if (userHash == undefined) {
+                RenderError(req, res, 'Hozzáférés megtagadva', 'felhasználó-azonosító nincs megadva!')
+                return
+            }
+            const userId = hashToUserId[userHash]
+            if (userId == undefined) {
+                RenderError(req, res, 'Hozzáférés megtagadva', 'nincs ilyen felhasználó!')
+                return
+            }
+            const action = req.query.action
+            if (action == 'openAllDayCrates') {
+                RenderStartpage(req, res, userId, userHash, true, { dayCrateResult: openAllDayCrate(userId) })
+                return
+            } else if (action == 'openAllCrates') {
+                RenderStartpage(req, res, userId, userHash, true, { crateResult: openAllCrate(userId) })
+                return
+            }
+            RenderStartpage(req, res, userId, userHash, false, {})
         })
     }
 }
@@ -1497,4 +1785,4 @@ function xpRankNext(score) {
     return next
 }
 
-module.exports = WebSocket
+module.exports = { WebSocket, userIdToHash }

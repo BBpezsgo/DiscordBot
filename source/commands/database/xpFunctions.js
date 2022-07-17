@@ -139,6 +139,41 @@ function calculateAddXp(message) {
     }
 }
 
+function xpRankIconModern(score) {
+    if (score < 1000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/japanese-symbol-for-beginner_1f530.png'
+    } else if (score < 5000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/circled-m_24c2-fe0f.png'
+    } else if (score < 10000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/name-badge_1f4db.png'
+    } else if (score < 50000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/diamond-with-a-dot_1f4a0.png'
+    } else if (score < 80000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/fleur-de-lis_269c-fe0f.png'
+    } else if (score < 100000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/trident-emblem_1f531.png'
+    } else if (score < 140000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/japanese-congratulations-button_3297-fe0f.png'
+    } else if (score < 180000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/japanese-bargain-button_1f250.png'
+    } else if (score < 250000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/japanese-acceptable-button_1f251.png'
+    } else if (score < 350000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/dizzy_1f4ab.png'
+    } else if (score < 500000) {
+        return 'https://emojipedia-us.s3.amazonaws.com/source/skype/289/shooting-star_1f320.png'
+    } else if (score < 780000) {
+        return 'https://emojipedia-us.s3.amazonaws.com/source/skype/289/comet_2604-fe0f.png'
+    } else if (score < 1000000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/ringed-planet_1fa90.png'
+    } else if (score < 1500000) {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/joypixels/291/cyclone_1f300.png'
+    } else if (score < 1800000) {
+        return 'https://emojipedia-us.s3.amazonaws.com/source/skype/289/milky-way_1f30c.png'
+    } else {
+        return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/nazar-amulet_1f9ff.png'
+    }
+}
 function xpRankIcon(score) {
     if (score < 1000) {
         return '🔰' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/japanese-symbol-for-beginner_1f530.png'
@@ -276,4 +311,4 @@ function xpRankNext(score) {
     }
 }
 
-module.exports =  {xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText, calculateAddXp }
+module.exports =  {xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText, calculateAddXp, xpRankIconModern }
