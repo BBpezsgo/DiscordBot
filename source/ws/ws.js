@@ -86,7 +86,23 @@ class WebSocket {
         this.app.use(bodyParser.urlencoded({ extended: false }))
         this.app.use(bodyParser.json())
 
+        this.ipToRate = {}
+        this.blockedIpsFor = {}
+
         this.app.use((req, res, next) => {
+            if (this.ipToRate[req.ip] == undefined) {
+                this.ipToRate[req.ip] = 1
+            } else {
+                this.ipToRate[req.ip] += 1
+            }
+
+            if (this.blockedIpsFor[req.ip] != undefined) {
+                if (this.blockedIpsFor[req.ip] > 0) {
+                    res.status(429).send('Too many requiests! Try again in ' + this.blockedIpsFor[req.ip] + ' secs')
+                    return
+                }
+            }
+
             if (req.path.startsWith('/public')) {
                 return next()
             }
@@ -107,6 +123,27 @@ class WebSocket {
             res.set('WWW-Authenticate', 'Basic realm="401"')
             res.status(401).render('userRpm/401')
         })
+
+        setInterval(() => {
+            for (var ip in this.ipToRate) {
+                var rate = this.ipToRate[ip]
+                if (rate > 0) {
+                    if (rate > 10) {
+                        HbLog({ IP: ip, type: 'BLOCKED', message: 'Address blocked: too many requiests' })
+                        this.blockedIpsFor[ip] = 5
+                    }
+                }
+                this.ipToRate[ip] = 0
+            }
+            for (var ip in this.blockedIpsFor) {
+                var time = this.blockedIpsFor[ip]
+                if (time > 0) {
+                    this.blockedIpsFor[ip] -= 1
+                }
+            }
+            console.clear()
+            console.log(this.blockedIpsFor)
+        }, 1000);
 
         this.RegisterHandlebarsRoots()
         this.RegisterPublicRoots()

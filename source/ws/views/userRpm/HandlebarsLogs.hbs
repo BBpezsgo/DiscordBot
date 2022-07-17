@@ -29,7 +29,7 @@
                     <ul id="myUL">
                         {{#each logs}}
                         <li style="margin-bottom: 10px;">
-                            <span class="caret log-file" style="font-weight: bold;">{{dateText}}</span>
+                            <span class="caret log-file" style="font-weight: bold;">{{dateText}} <img class="miniicon show-{{seriousLogs}}" src="/images/serious.png"></span>
                             <ul class="nested">
                                 {{#each groups}}
                                 <li>
@@ -42,6 +42,7 @@
                                         <span class="show-invert-{{this.running}}">
                                             {{endTime}}
                                         </span>
+                                        <img class="miniicon show-{{this.seriousLogs}}" src="/images/serious.png">
                                     </span>
                                     <ul class="nested">
                                         <li>

@@ -31,7 +31,7 @@ function LogRaw(message) {
 
 /**
  * @param {{
- *  type: 'NORMAL' | 'ERROR' | 'CLIENT_ERROR' | 'CONNECT' | 'REQUIEST';
+ *  type: 'NORMAL' | 'ERROR' | 'CLIENT_ERROR' | 'CONNECT' | 'REQUIEST' | 'BLOCKED';
  *  IP: string;
  *  url: string;
  *  method: string;
@@ -80,7 +80,7 @@ function HbGetLogs(invisibleIp) {
         const dateText = filesRaw[i].dateText
         const rawData = filesRaw[i].content
 
-        const newEvent = { dateText: dateText, groups: [] }
+        const newEvent = { dateText: dateText, groups: [], seriousLogs: false }
         const lines = rawData.split('\n')
 
         var thereIsAnyLogGroup = false
@@ -98,6 +98,8 @@ function HbGetLogs(invisibleIp) {
                     newEvent.groups.unshift(newLogGroup)
                 }
 
+                newEvent.seriousLogs = false
+
                 newLogGroup = {}
                 thereIsAnyLogGroup = true
 
@@ -105,13 +107,14 @@ function HbGetLogs(invisibleIp) {
                 newLogGroup.endTime = time
                 newLogGroup.logs = []
                 newLogGroup.running = false
+                newLogGroup.seriousLogs = false
                 lastTime = '--:--:--'
             } else {
                 if (newLogGroup.logs == undefined) {
                     newLogGroup.logs = []
                 }
                 /**
-                 *  type: 'NORMAL' | 'ERROR' | 'CLIENT_ERROR' | 'CONNECT' | 'REQUIEST';
+                 *  type: 'NORMAL' | 'ERROR' | 'CLIENT_ERROR' | 'CONNECT' | 'REQUIEST' | 'BLOCKED';
                  *  IP: string;
                  *  url: string;
                  *  method: string;
@@ -119,10 +122,16 @@ function HbGetLogs(invisibleIp) {
                  *  helperMessage: string;
                  */
                 const jsonData = JSON.parse(logData)
-                if (jsonData.IP === invisibleIp) {
+                if (jsonData.IP === invisibleIp && jsonData.type != 'BLOCKED') {
                     newLogGroup.endTime = time
                     lastTime = time
                     continue
+                }
+                if (jsonData.message != undefined) {
+                    if (jsonData.message.startsWith('Listening on') == false) {
+                        newEvent.seriousLogs = true
+                        newLogGroup.seriousLogs = true
+                    }
                 }
                 newLogGroup.logs.push(jsonData)
                 newLogGroup.logs[newLogGroup.logs.length - 1].time = time
