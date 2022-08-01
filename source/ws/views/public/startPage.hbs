@@ -474,11 +474,9 @@
     <script>
         /** @param {Event} event */
         function handleSubmit(event) {
-            console.log('submitTimer set');
             event.preventDefault()
             setTimeout(() => {
                 event.target.submit()
-                console.log('Submitted after 5 seconds')
                 setTimeout(() => {
                     const url = location.href
                     if (url.includes('#noReload')) {

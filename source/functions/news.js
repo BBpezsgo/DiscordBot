@@ -235,6 +235,9 @@ function CreateNews(message) {
                 embed.setAuthor({ name: message.author.username, iconURL: message.author.displayAvatarURL() })
             }
         }
+        if (message.attachments.size > 0) {
+            embed.image.url = message.attachments.at(0).url
+        }
     }
 
     return new NewsMessage(embed, role, message)

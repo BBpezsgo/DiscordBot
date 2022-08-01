@@ -202,7 +202,7 @@ logManager.Loading('Loading packet', "ytdl-core")
 const ytdl = require('ytdl-core')
 
 logManager.Loading('Loading', "WS")
-const { WebSocket, userIdToHash } = require('./ws/ws')
+const { WebSocket } = require('./ws/ws')
 var ws = new WebSocket('1234', '192.168.1.102', 5665, bot, logManager, null, null, null, statesManager, true)
 logManager.BlankScreen()
 
@@ -949,6 +949,11 @@ bot.on('messageCreate', async message => { //Message
 function processCommand(message, thisIsPrivateMessage, sender, command, channel, interaction) {
 
     //#region Enabled in dm
+
+    if (command.commandName === `handlebars` || command.commandName === `webpage`) {
+        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
+        return
+    }
 
     if (command === `pms`) {
         channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')

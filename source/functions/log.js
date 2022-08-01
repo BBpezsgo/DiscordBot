@@ -287,6 +287,7 @@ class LogManager {
         this.promtPressedButton = ''
 
         if (bot != null && statesManager != null) {
+            if (enabled == false) { return }
             this.timer = setInterval(async () => {
                 if (this.enableLog == true) {
                     if (this.timer > 3) {
@@ -367,6 +368,7 @@ class LogManager {
                 this.RefreshScreen()
             }, 100)
         } else {
+            if (enabled == false) { return }
             this.timer = setInterval(async () => {
                 this.loadingIndex += (this.deltaTime * 12)
                 if (Math.round(this.loadingIndex) >= spinner.length) {
@@ -446,6 +448,7 @@ class LogManager {
     }
 
     Loading(loadingName, packetName) {
+        if (enabled == false) { return }
         this.loadingOverride = loadingName + ': ' + packetName
         this.RefreshScreen()
 

@@ -82,7 +82,7 @@
                                     <b>Created At</b>
                                 </td>
                                 <td class="ListM">
-                                    <b>Version</b>
+                                    
                                 </td>
                             </tr>
                             {{#each commands}}
@@ -106,7 +106,18 @@
                                     {{this.createdAt}}
                                 </td>
                                 <td style="padding:0 2 0 2;word-break:break-all">
-                                    {{this.version}}
+                                    <form action="/userRpm/Commands/Update" method="post"
+                                        style="margin: 0; display: inline-block;"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                        <input type="submit" value="Update">
+                                    </form>
+                                    <form action="/userRpm/Commands/Delete" method="post"
+                                        style="margin: 0; display: inline-block;"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                        <input type="submit" value="Delete">
+                                    </form>
                                 </td>
                             </tr>
                             {{#each options}}
@@ -123,6 +134,7 @@
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     {{this.description}}
                                 </td>
+                                <td colspan="3"></td>
                             </tr>
                             {{/each}}
                             {{/each}}

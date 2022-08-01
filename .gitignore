@@ -17,3 +17,6 @@ source/log/
 source/ws/log/
 source/exitdata.txt
 Download.bat
+source/FLR.json
+source/GST.json
+source/IPS.json

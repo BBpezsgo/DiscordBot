@@ -413,4 +413,79 @@ function CreateCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
     }
 }
 
-module.exports = { CreateCommands, DeleteCommands, CreateCommandsSync, DeleteCommandsSync }
+/** @param {Client} bot @param {string} commandID @param {() => any} FinishCallback */
+function DeleteCommand(bot, commandID, FinishCallback) {
+    try {
+        const guildCommands = bot.guilds.cache.get('737954264386764812').commands
+        const appCommands = bot.application?.commands
+        guildCommands.fetch().then(() => {
+            appCommands.fetch().then(() => {    
+                guildCommands.cache.forEach(async (val, key) => {
+                    if (val.id == commandID) {
+                        guildCommands.delete(val).finally(() => { FinishCallback() })
+                        return
+                    }
+                })
+
+                appCommands.cache.forEach(async (val, key) => {
+                    if (val.id == commandID) {
+                        appCommands.delete(val).finally(() => { FinishCallback() })
+                        return
+                    }
+                })
+            })
+        })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+/** @param {string} commandName @param {string} commandDescription */
+function GetCommandData(commandName, commandDescription) {
+    var x = GenerateGlobalCommands()
+    var y = GenerateGuildCommands()
+
+    for (let i = 0; i < x.length; i++) {
+        const item = x[i]
+        if (item.name == commandName && item.description == commandDescription) {
+            return item
+        }
+    }
+    for (let i = 0; i < y.length; i++) {
+        const item = y[i]
+        if (item.name == commandName && item.description == commandDescription) {
+            return item
+        }
+    }
+    return null
+}
+
+/** @param {Client} bot @param {string} commandID @param {() => any} FinishCallback */
+function Updatecommand(bot, commandID, FinishCallback) {
+    try {
+        const guildCommands = bot.guilds.cache.get('737954264386764812').commands
+        const appCommands = bot.application?.commands
+        guildCommands.fetch().then(() => {
+            appCommands.fetch().then(() => {
+                guildCommands.cache.forEach(async (val, key) => {
+                    if (val.id == commandID) {
+                        val.edit(GetCommandData(val.name, val.description))
+                        FinishCallback()
+                        return
+                    }
+                })
+
+                appCommands.cache.forEach(async (val, key) => {
+                    if (val.id == commandID) {
+                        val.edit(GetCommandData(val.name, val.description))
+                        FinishCallback()
+                        return
+                    }
+                })
+            })
+        })
+    } catch (error) {
+        console.error(error)
+    }
+}
+module.exports = { CreateCommands, DeleteCommands, CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand }

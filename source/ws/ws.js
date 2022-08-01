@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
 const { LogManager, MessageCodes } = require('../functions/log.js')
+const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../functions/userHashManager')
 const fs = require('fs')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
@@ -21,32 +22,9 @@ const {
 const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
 const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
-const { CreateCommandsSync, DeleteCommandsSync } = require('../functions/commands')
+const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
-
-const hashToUserId = {
-    'ET6JGOQW73': '726127512521932880', // Me
-    'QhUsrpv6ln': '875044278441758741', // Alt account
-    'BDG6Hfft9f': '575727604708016128', // Dorcsi
-    'CBiy551mPP': '638644689507057683', // Hédi
-    'uAS38SZL4j': '591218715803254784', // Livi
-    'DAyEfjYhLO': '583709720834080768', // Milán
-    'nbDhnQjiAV': '415078291574226955', // Peti
-    'UImjrrKzdk': '750748417373896825', // Ádám (narancs)
-    'Z6i7G9RGdb': '494126778336411648', // Ádám
-}
-const userIdToHash = {
-    '726127512521932880': 'ET6JGOQW73', // Me
-    '875044278441758741': 'QhUsrpv6ln', // Alt account
-    '575727604708016128': 'BDG6Hfft9f', // Dorcsi
-    '638644689507057683': 'CBiy551mPP', // Hédi
-    '591218715803254784': 'uAS38SZL4j', // Livi
-    '583709720834080768': 'DAyEfjYhLO', // Milán
-    '415078291574226955': 'nbDhnQjiAV', // Peti
-    '750748417373896825': 'UImjrrKzdk', // Ádám (narancs)
-    '494126778336411648': 'Z6i7G9RGdb', // Ádám
-}
 
 class WebSocket {
     /**
@@ -141,8 +119,6 @@ class WebSocket {
                     this.blockedIpsFor[ip] -= 1
                 }
             }
-            console.clear()
-            console.log(this.blockedIpsFor)
         }, 1000);
 
         this.RegisterHandlebarsRoots()
@@ -233,6 +209,8 @@ class WebSocket {
             discriminator: user.discriminator,
             system: user.system,
             username: user.username,
+            haveHash: (GetHash(user.id) != null && GetHash(user.id) != undefined),
+            hash: '' + GetHash(user.id)
         }
     }
 
@@ -1390,6 +1368,26 @@ class WebSocket {
             this.RenderPage_Commands(req, res)
         })
 
+        this.app.post('/userRpm/GenerateHash', (req, res) => {
+            const userID = req.body.id
+            RemoveAllUser(userID)
+            AddNewUser(userID)
+        })
+
+        this.app.post('/userRpm/Commands/Delete', (req, res) => {
+            const commandID = req.body.id
+            DeleteCommand(this.client, commandID, () => {
+                this.RenderPage_Commands(req, res)
+            })
+        })
+
+        this.app.post('/userRpm/Commands/Update', (req, res) => {
+            const commandID = req.body.id
+            Updatecommand(this.client, commandID, () => {
+                this.RenderPage_Commands(req, res)
+            })
+        })
+
         this.app.get('/userRpm/*', (req, res) => {
             res.render('userRpm/404', { message: req.path })
         })
@@ -1626,8 +1624,8 @@ class WebSocket {
                 RenderError(req, res, 'Hozzáférés megtagadva', 'felhasználó-azonosító nincs megadva!')
                 return
             }
-            const userId = hashToUserId[userHash]
-            if (userId == undefined) {
+            const userId = GetID(userHash)
+            if (userId == undefined || userId == null) {
                 RenderError(req, res, 'Hozzáférés megtagadva', 'nincs ilyen felhasználó!')
                 return
             }
@@ -1822,4 +1820,4 @@ function xpRankNext(score) {
     return next
 }
 
-module.exports = { WebSocket, userIdToHash }
+module.exports = { WebSocket }

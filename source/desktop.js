@@ -302,7 +302,10 @@ const ytdl = require('ytdl-core')
 const { musicGetLengthText } = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
-const { WebSocket, userIdToHash } = require('./ws/ws')
+const { WebSocket } = require('./ws/ws')
+
+logManager.Loading('Loading', "WS")
+const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
@@ -330,7 +333,6 @@ const {
     ChannelId,
     CliColor
 } = require('./functions/enums.js')
-const { exit, hang, contextIsolated } = require('process')
 const { CommandHangman, HangmanManager } = require('./commands/hangman.js')
 
 logManager.BlankScreen()
@@ -2843,7 +2845,7 @@ async function processApplicationCommand(command, privateCommand) {
                 const button = new MessageButton()
                     .setLabel('Weboldal')
                     .setStyle('LINK')
-                    .setURL('http://' + ip + ':5665/public?user=' + userIdToHash[command.user.id])
+                    .setURL('http://' + ip + ':5665/public?user=' + GetHash(command.user.id))
                 row.addComponents(button)
                 command.editReply({ components: [row], ephemeral: true })
             })
