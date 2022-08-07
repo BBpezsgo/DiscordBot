@@ -12,21 +12,21 @@
 }
 
 .caret::before {
-	content: url('../images/expand.png');
+	content: url('/images/expand.png');
 	color: black;
 	display: inline-block;
 }
 
 .caret-down::before {
-	content: url('../images/collapse.png') !important;
+	content: url('/images/collapse.png') !important;
 }
 
 .caret-up::before {
-	content: url('../images/expand.png') !important;
+	content: url('/images/expand.png') !important;
 }
 
 .caret-all::before {
-	content: url('../images/both.png');
+	content: url('/images/both.png');
 	color: black;
 	display: inline-block;
 }

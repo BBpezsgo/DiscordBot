@@ -23,6 +23,7 @@ const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
 const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
+const https = require('https');
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
@@ -124,14 +125,17 @@ class WebSocket {
         this.RegisterHandlebarsRoots()
         this.RegisterPublicRoots()
 
-        this.server = this.app.listen(port, ip, () => {
+        this.OnStartListen = () => {
             this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
             this.statesManager.handlebarsDone = true
             this.statesManager.handlebarsURL = 'http://' + this.server.address().address + ":" + this.server.address().port
             if (this.IsMobile == false) {
                 HbLog({ type: 'NORMAL', message: 'Listening on ' + ip + ':' + port })
             }
-        })
+        }
+
+        this.server = this.app.listen(port, ip, this.OnStartListen)
+
         this.server.on('error', (err) => {
             if (err.message.startsWith('listen EADDRNOTAVAIL: address not available')) {
                 this.statesManager.handlebarsErrorMessage = 'Address not available'

@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -6,51 +7,27 @@
     <meta http-equiv="Pragma" content="no-cache">
     <link rel="icon" href="https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/ws/public/favicon.ico"
         type="image/x-icon">
+    <link rel="apple-touch-icon"
+        href="https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/ws/public/favicon.ico">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        var origCols = "182,55%,*"
-
-        /** @param {Element} sender */
-        function ToggleHelpPanel(sender) {
-            if (origCols != null) { showFrame(sender) }
-            else { hideFrame(sender) }
-        }
-
-        /** @param {Element} sender */
-        function hideFrame(sender) {
-            sender.textContent = '<'
-            const frameset = document.getElementById("frameSet")
-            origCols = frameset.cols
-            frameset.cols = "182,55%"
-        }
-
-        /** @param {Element} sender */
-        function showFrame(sender) {
-            sender.textContent = '>'
-            const frameset = document.getElementById("frameSet")
-            frameset.cols = origCols
-            origCols = null
-        }
-    </script>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Stjórnandius#1487's managing website">
 </head>
 
 <frameset rows="90,*">
     <frame name="topFrame" marginwidth="0" marginheight="0" src="/frames/top" noresize="" scrolling="no"
-        framespacing="0" frameborder="0">
-        <frameset id="frameSet" cols="182,55%">
-            <frame name="bottomLeftFrame" marginwidth="0" marginheight="0" src="/userRpm/MenuRpm" noresize=""
-                frameborder="1" scrolling="auto" style="overflow-x:hidden" />
-            <frame id="mainFrame" name="mainFrame" marginwidth="0" marginheight="0" src="/userRpm/Status"
-                frameborder="1" />
-            <frame id="helpFrame" name="helpFrame" marginwidth="0" marginheight="0" src="/help/StatusHelpRpm.html"
-                frameborder="1" />
-        </frameset>
-        <noframes>
-            <body>
-                Please upgrade to a version 4 or higher browser so that you can use this webpage.
-            </body>
-        </noframes>
+        framespacing="0" frameborder="0" title="Header frame" />
+    <frameset id="frameSet" cols="182,55%">
+        <frame name="bottomLeftFrame" marginwidth="0" marginheight="0" src="/userRpm/MenuRpm" noresize=""
+            frameborder="1" scrolling="auto" style="overflow-x:hidden" title="Menu frame" />
+        <frame id="mainFrame" name="mainFrame" marginwidth="0" marginheight="0" src="/userRpm/Status" frameborder="1"
+            title="Main frame" />
+        <!--<frame id="helpFrame" name="helpFrame" marginwidth="0" marginheight="0" src="/help/StatusHelpRpm.html"
+            frameborder="1" title="Help frame" />-->
+    </frameset>
+    <noframes>
+        Please upgrade to a version 4 or higher browser so that you can use this webpage.
+    </noframes>
 </frameset>
 
 <script>
@@ -63,6 +40,30 @@
         }
     }
 </script>
-<script src="contextMenu.js"></script>
+<script>
+    var origCols = "182,55%,*"
+
+    /** @param {Element} sender */
+    function ToggleHelpPanel(sender) {
+        if (origCols != null) { showFrame(sender) }
+        else { hideFrame(sender) }
+    }
+
+    /** @param {Element} sender */
+    function hideFrame(sender) {
+        sender.textContent = '<'
+        const frameset = document.getElementById("frameSet")
+        origCols = frameset.cols
+        frameset.cols = "182,55%"
+    }
+
+    /** @param {Element} sender */
+    function showFrame(sender) {
+        sender.textContent = '>'
+        const frameset = document.getElementById("frameSet")
+        frameset.cols = origCols
+        origCols = null
+    }
+</script>
 
 </html>

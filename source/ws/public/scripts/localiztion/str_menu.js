@@ -1,4 +1,4 @@
-var str_menu =
+const str_menu =
 {
     status:                         "Status",
     cache:                          "Cache",

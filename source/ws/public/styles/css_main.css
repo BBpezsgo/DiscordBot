@@ -10,7 +10,7 @@ TABLE.guage {
 
 BODY {
 	FONT-SIZE: 12px;
-	MARGIN: 42 30 30 30;
+	MARGIN: 42px 30px 30px 30px;
 	FONT-FAMILY: "Arial", "Helvetica", "Geneva", "Swiss", "SunSans-Regular", "sans-serif";
 	color: black;
 	background-color: #fafafa;
@@ -18,7 +18,7 @@ BODY {
 
 TEXTAREA.same {
 	overflow: auto;
-	border: 1;
+	border: 1px;
 	border-style: dashed;
 	font-family: Arial, Helvetica;
 	FONT-SIZE: 12px;
@@ -38,14 +38,14 @@ TD.h1 {
 	COLOR: WHITE;
 	background-color: var(--main-primary-color);
 	FONT-WEIGHT: bold;
-	padding-left: 15;
+	padding-left: 15px;
 }
 
 TD.h2 {
 	FONT-SIZE: 16px;
 	height: 30px;
 	FONT-WEIGHT: bold;
-	padding-left: 15;
+	padding-left: 15px;
 	white-space: normal;
 }
 
@@ -56,15 +56,15 @@ TD.h3 {
 }
 
 TD.info {
-	padding-left: 25;
+	padding-left: 25px;
 }
 
 TD.info1 {
-	padding-left: 35;
+	padding-left: 35px;
 }
 
 TD.clk {
-	padding-left: 25;
+	padding-left: 25px;
 	Width: 5%
 }
 
@@ -81,7 +81,7 @@ TD.blue {
 TD.Item {
 	FONT-WEIGHT: bold;
 	text-align: right;
-	padding-right: 30;
+	padding-right: 30px;
 	width: 30%;
 }
 
@@ -93,7 +93,7 @@ TD.emp {
 
 TD.ListTC1 {
 	text-align: right;
-	padding-right: 20;
+	padding-right: 20px;
 	FONT-WEIGHT: bold;
 	font-size: 13px;
 }
@@ -101,19 +101,19 @@ TD.ListTC1 {
 TD.ListTC2 {
 	text-align: left;
 	FONT-WEIGHT: bold;
-	padding-left: 20;
+	padding-left: 20px;
 	font-size: 13px;
 }
 
 TD.ListC1 {
 	text-align: right;
-	padding-right: 20;
+	padding-right: 20px;
 }
 
 TD.ListC2 {
 	text-align: left;
 	FONT-WEIGHT: bold;
-	padding-left: 20;
+	padding-left: 20px;
 }
 
 TD.ListB {
@@ -128,7 +128,7 @@ TD.Listm {
 
 TD.Listr {
 	text-align: right;
-	padding-right: 5;
+	padding-right: 5px;
 }
 
 input {
@@ -217,10 +217,6 @@ input[type="buttonLL"]:disabled,
 input[type="buttonBig"]:disabled,
 input[type="buttonBigL"]:disabled {
 	color: gray;
-}
-
-table.datas>tbody>tr>td {
-	padding: 5;
 }
 
 /* Tooltip container */
