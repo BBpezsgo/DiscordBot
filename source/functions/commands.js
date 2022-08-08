@@ -199,17 +199,17 @@ function GenerateGlobalCommands() {
         generatedCommands.push(item)
     })
 
-    const commandWeatherSub1 = new SlashCommandSubcommandBuilder()
-        .setName('mars')
-        .setDescription('Mars időjárása')
-    const commandWeatherSub2 = new SlashCommandSubcommandBuilder()
-        .setName('earth')
-        .setDescription('Békéscsaba időjárása')
     const commandWeather = new SlashCommandBuilder()
         .setName('weather')
         .setDescription('Időjárása')
-        .addSubcommand(commandWeatherSub1)
-        .addSubcommand(commandWeatherSub2)
+        .addStringOption(option =>
+            option.setName('location')
+                .setDescription('Weather location')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'Earth - Békéscsaba', value: 'earth' },
+                    { name: 'Mars - Jezero Kráter', value: 'mars' }
+                ))
     generatedCommands.push(commandWeather.toJSON())
     
     const commandCrossoutSub = new SlashCommandStringOption()
@@ -440,7 +440,7 @@ function DeleteCommand(bot, commandID, FinishCallback) {
     }
 }
 
-/** @param {string} commandName @param {string} commandDescription */
+/** @param {string} commandName @param {string} commandDescription @returns {RESTPostAPIApplicationCommandsJSONBody | null} */
 function GetCommandData(commandName, commandDescription) {
     var x = GenerateGlobalCommands()
     var y = GenerateGuildCommands()

@@ -4,12 +4,13 @@ const weather1 = require('weather-js')
 const weather2 = require('nodejs-weather-app');
 const fs = require('fs')
 const request = require("request");
-const { openweatherToken } = require('../config.json')
+const { tokens } = require('../config.json')
 
-const urlWeather = 'http://api.openweathermap.org/data/2.5/weather?lat=46.678889&lon=21.090833&units=metric&appid=' + openweatherToken
-const urlPollution = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + openweatherToken
+const urlWeather = 'http://api.openweathermap.org/data/2.5/weather?lat=46.678889&lon=21.090833&units=metric&appid=' + tokens.openweathermap
+const urlPollution = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + tokens.openweathermap
 const urlMarsWeather = 'https://mars.nasa.gov/rss/api/?feed=weather&category=mars2020&feedtype=json&ver=1.0'
 const urlMarsWeeklyImage = 'https://mars.nasa.gov/rss/api/?feed=weekly_raws&category=mars2020&feedtype=json&num=1&page=0&tags=mars2020_featured_image&format=json'
+const urlSatellite = 'https://api.nasa.gov/planetary/earth/assets?lon=46.678889&lat=21.090833&date=2014-02-01&dim=0.15&api_key=' + tokens.nasa
 
 let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
 if (fs.existsSync('./Helper/output.txt') == true) {
@@ -22,6 +23,11 @@ if (fs.existsSync('./Helper/output.txt') == true) {
 }
 const Dawn = dataToAvoidErrors_Dawn
 const Dusk = dataToAvoidErrors_Dusk
+
+const seasons = {
+    'late autumn': { name: 'Késő ősz', icon: '🍂' },
+    'early winter': { name: 'Kora tél', icon: '❄️' },
+}
 
 const {
     ImgExists,
@@ -236,8 +242,35 @@ function GetMarsPressureIcon(pressure, averagePressure) {
     }
 }
 
+function GetSeason(season) {
+    var seasonName = season
+    if (seasons[seasonName] != undefined) {
+        seasonName = `\\${seasons[seasonName].icon} ${seasons[seasonName].name}`
+    }
+    return seasonName
+}
+
+/** @param {string} date YYYY-MM-DD */
+function DateToDate(date) {
+    var newDate = new Date()
+    newDate.setFullYear(date.split('-')[0], Number.parseInt(date.split('-')[1]) - 1, date.split('-')[2])
+    return newDate
+}
+
 /**
- * @param {any} data Mars weather data
+ * @param {{
+ *      sols: {
+ *          terrestrial_date: string;
+ *          sol: string;
+ *          ls: string;
+ *          season: string;
+ *          min_temp: number;
+ *          max_temp: number;
+ *          pressure: number;
+ *          sunrise: string;
+ *          sunset: string;
+ *      }[];
+ *  }} data Mars weather data
  * @param {any} data Mars image data
  * @returns {Discord.MessageEmbed}
  */
@@ -245,10 +278,6 @@ function getEmbedMars(data, weeklyImage) {
     const embed = new Discord.MessageEmbed()
         .setColor('#fd875f')
         .setAuthor({ name: 'Jezero Kráter', url: 'https://mars.nasa.gov/mars2020/weather/', iconURL: 'https://mars.nasa.gov/mars2020/favicon-16x16.png' })
-
-    const seasonNames = {
-        'late autumn': 'Késő ősz'
-    }
 
     var averagePressure = 0
     try {
@@ -283,21 +312,35 @@ function getEmbedMars(data, weeklyImage) {
         averagePressure = averagePressure / n        
     } catch (ex) { }
 
-    data.sols.forEach(_sol => {
-        /** @type {{terrestrial_date: string; sol: string; ls: string; season: string; min_temp: number; max_temp: number; pressure: number; sunrise: string; sunset: string;}} */
-        const sol = _sol
-        var seasonName = sol.season
-        if (seasonNames[seasonName] != undefined) {
-            seasonName = seasonNames[seasonName]
+    const latestSol = data.sols[data.sols.length - 1]
+    
+    embed
+        .setTitle(`sol ${latestSol.sol}`)
+        .setDescription(
+            `\\🌡️ ${latestSol.min_temp} - ${latestSol.max_temp} °C\n` +
+            `${GetMarsPressureIcon(latestSol.pressure, averagePressure)} ${latestSol.pressure} pHa légnyomás\n` +
+            `${GetSeason(latestSol.season)}\n` +
+            `Földi dátum: ${latestSol.terrestrial_date}` +
+
+            '\n\n**Egyéb:**\n\n' +
+
+            `\\🌇 Napkelte: ${latestSol.sunrise}\n` +
+            `\\🌆 Napnyugta: ${latestSol.sunset}\n\n` +
+
+            '**Előző sol-ok:**')
+
+    data.sols.forEach(sol => {
+        if (latestSol.sol != sol.sol) {
+            embed.addField('Sol ' + sol.sol,
+            GetMarsPressureIcon(sol.pressure, averagePressure) + sol.pressure + ' Pa\n' + 
+            '\\🌡️ ' + sol.min_temp + ' - ' + sol.max_temp + ' C°\n' + 
+            'Évszak: ' + (GetSeason(sol.season)) + ''
+            , true)
         }
-        embed.addField('Sol ' + sol.sol,
-        GetMarsPressureIcon(sol.pressure, averagePressure) + sol.pressure + ' Pa\n' + 
-        '\\🌡️ ' + sol.min_temp + ' - ' + sol.max_temp + ' C°\n' + 
-        'Évszak: ' + seasonName + ''
-        , true)
     })
 
     embed
+        .setTimestamp(DateToDate(latestSol.terrestrial_date))
         .setFooter({ text: '• Mars 2020', iconURL: 'https://images-ext-1.discordapp.net/external/yUBPtm8abWHU7zYH04hOrTOPwU6Q8WfqtGX1OPwXTYQ/https/emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
         .setImage('https://i.cdn29.hu/apix_collect_c/primary/1311/mars131114_20131114_122345_original_1150x645_cover.jpg')
     
@@ -351,17 +394,21 @@ function GetMarsWeather(callback) {
                 callback('**HTTP Requiest Error:** ' + err.toString(), [])
             }
         })
-    } catch (err) {}
+    } catch (err) {
+        callback('**HTTP Requiest Error:** ' + err.tostring(), [])
+    }
 }
 
-/** @param 
- * {(
- * msnWeather: any,
- * openweathermapWeather: any,
- * openweathermapPollution: any,
- * errorMessage: string
- * ) => void}
- * callback */
+/**
+ * @param {
+ *      (
+ *          msnWeather: any,
+ *          openweathermapWeather: any,
+ *          openweathermapPollution: any,
+ *          errorMessage: string
+ *      ) => void
+ *  } callback
+ */
 function GetEarthWeather(callback) {
     try {
         weather1.find({ search: 'Békéscsaba, HU', degreeType: 'C' }, function (msnWeatherError, msnWeather) {

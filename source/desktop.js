@@ -312,7 +312,7 @@ const Discord = require('discord.js')
 
 const { MessageActionRow, MessageButton } = require('discord.js')
 const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
-const { perfix, token } = require('./config.json')
+const { perfix, tokens } = require('./config.json')
 
 logManager.Loading('Loading packet', "other functions")
 const GetUserColor = require('./functions/userColor')
@@ -2373,7 +2373,6 @@ bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
     if (message.author.bot && thisIsPrivateMessage === false) { return }
     if (!message.type) return
-    let args = message.content.substring(perfix.length).split(' ')
     let sender = message.author
 
     database.LoadDatabase()
@@ -2960,10 +2959,14 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `weather`) {
-        if (command.options.getSubcommand() == 'mars') {
+        /** @type {"earth" | "mars" | null} */
+        const weatherLocation = command.options.getString('location', false)
+        if (weatherLocation == 'mars') {
             CommandWeather(command, privateCommand, false)
-        } else {            
+        } else if (weatherLocation == 'earth' || weatherLocation == null) {            
             CommandWeather(command, privateCommand)
+        } else {
+            command.reply({ content: '> \\❌ **Nem tudok ilyen helyről <:wojakNoBrain:985043138471149588>**' })
         }
         userstatsSendCommand(command.user)
         return
@@ -3066,7 +3069,7 @@ async function processApplicationCommand(command, privateCommand) {
 
 function StartBot() {
     SystemLog('Start bot...')
-    bot.login(token).catch((err) => {
+    bot.login(tokens.discord).catch((err) => {
         if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
             log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
         } else {

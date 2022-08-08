@@ -277,15 +277,15 @@ function GetReadableNumber(value) {
 
 function GetPollutionText(value) {
     if (value == 1) {
-        return 'Good'
+        return 'Nagyon Jó'
     } else if (value == 2) {
-        return 'Fair'
+        return 'Jó'
     } else if (value == 3) {
-        return 'Moderate'
+        return 'Mérsékelt'
     } else if (value == 4) {
-        return 'Poor'
+        return 'Silány'
     } else if (value == 5) {
-        return 'Very Poor'
+        return 'Nagyon Rossz'
     }
     return ''
 }

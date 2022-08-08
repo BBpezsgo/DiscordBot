@@ -409,7 +409,6 @@ class WebSocket {
                         id: child.id,
                         createdAt: GetDate(child.createdAt),
                         deletable: child.deletable,
-                        editable: child.editable,
                         invitable: child.invitable,
                         joinable: child.joinable,
                         locked: child.locked,
@@ -451,7 +450,6 @@ class WebSocket {
                     id: channel.id,
                     createdAt: GetDate(channel.createdAt),
                     deletable: channel.deletable,
-                    editable: channel.editable,
                     invitable: channel.invitable,
                     joinable: channel.joinable,
                     locked: channel.locked,
@@ -777,7 +775,6 @@ class WebSocket {
             archivedAt: GetDate(c.archivedAt),
             createdAt: GetDate(c.createdAt),
             deletable: c.deletable,
-            editable: c.editable,
             full: c.full,
             invitable: c.invitable,
             joinable: c.joinable,
@@ -841,6 +838,7 @@ class WebSocket {
                 typeUrl: command.type,
                 version: command.version,
                 haveOptions: false,
+                global: false,
                 options: []
             }
             command.options.forEach(option => {
@@ -862,6 +860,7 @@ class WebSocket {
                 typeUrl: command.type,
                 version: command.version,
                 haveOptions: false,
+                global: true,
                 options: []
             }
             command.options.forEach(option => {
@@ -1333,9 +1332,10 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/ApplicationCommands/Fetch', (req, res) => {
-            const guildCommands = this.client.guilds.cache.get('737954264386764812').commands
-            guildCommands.fetch().finally(() => {
-                this.RenderPage_Commands(req, res)
+            this.client.application.commands.fetch().finally(()=> {
+                this.client.guilds.cache.get('737954264386764812').commands.fetch().finally(() => {
+                    this.RenderPage_Commands(req, res)
+                })
             })
         })
 

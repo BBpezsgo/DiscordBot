@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const fs = require('fs')
 const request = require("request");
-const { openweatherToken } = require('../config.json')
+const { tokens } = require('../config.json')
 const { StatesManager } = require('../functions/statesManager')
 
 let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
@@ -84,7 +84,7 @@ module.exports = async (channel, statesManager) => {
 
     const loadingMessage = await channel.send({ embeds: [loadingEmbed] })
 
-    const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=46.678889&lon=21.090833&appid=' + openweatherToken + '&cnt=24&units=metric'
+    const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=46.678889&lon=21.090833&appid=' + tokens.openweathermap + '&cnt=24&units=metric'
 
     statesManager.dailyWeatherReportLoadingText = 'Get weather data...'
     request(url, async function (err, res, body) {

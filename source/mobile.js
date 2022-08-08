@@ -163,7 +163,7 @@ logManager.Loading('Loading packet', "discord.js")
 const Discord = require("discord.js");
 const { MessageActionRow, MessageButton } = require('discord.js');
 logManager.Loading('Loading', "bot")
-const { perfix, token } = require('./config.json')
+const { perfix, tokens } = require('./config.json')
 const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_VOICE_STATES"] })
 logManager.Destroy()
 logManager = new LogManager(true, bot, statesManager)
@@ -890,7 +890,6 @@ bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
     if (message.author.bot && thisIsPrivateMessage === false) { return }
     if (!message.type) return
-    let args = message.content.substring(perfix.length).split(' ')
     let sender = message.author
 
     //#region Log
@@ -1197,7 +1196,7 @@ async function processApplicationCommand(command) {
 }
 
 function StartBot() {
-    bot.login(token).catch((err) => {
+    bot.login(tokens.discord).catch((err) => {
         if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
             log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
         } else {

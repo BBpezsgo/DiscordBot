@@ -82,6 +82,9 @@
                                     <b>Created At</b>
                                 </td>
                                 <td class="ListM">
+                                    <b>Global</b>
+                                </td>
+                                <td class="ListM">
                                     
                                 </td>
                             </tr>
@@ -104,6 +107,9 @@
                                 </td>
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     {{this.createdAt}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all; text-align: center;">
+                                    <img src="../images/bool-{{this.global}}.png" class="miniicon">
                                 </td>
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     <form action="/userRpm/Commands/Update" method="post"
@@ -134,7 +140,7 @@
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     {{this.description}}
                                 </td>
-                                <td colspan="3"></td>
+                                <td colspan="4"></td>
                             </tr>
                             {{/each}}
                             {{/each}}

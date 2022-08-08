@@ -108,7 +108,7 @@ module.exports = (message, sender, isPrivate, database) => {
                     message.channel.send('> \\🧱 Kaptál:  ' + txt)
                 }
             } else if (collected.first().emoji.name == '🎁') {
-                message.channel.send('> **\\❔ Használd a **`' + perfix + 'gift @Felhasználó`** parancsot, egy személy megajándékozásához!**')
+                message.channel.send('> **\\❔ Használd a **`/gift @Felhasználó`** parancsot, egy személy megajándékozásához!**')
             } else if (collected.first().emoji.name == '🎀') {
                 dataBackpacks[sender.id].getGift -= 1
                 { //Ajándék kinyitása
