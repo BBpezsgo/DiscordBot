@@ -885,7 +885,17 @@ class WebSocket {
             const view = req.query.view
 
             if (view == 'default' || view == null || view == undefined) {
-                res.render('default')
+                var icon = ''
+
+                if (this.ClientType == 'DESKTOP') {
+                    icon = ' 🖥️'
+                } else if (this.ClientType == 'MOBILE') {
+                    icon = ' 📱'
+                } else if (this.ClientType == 'RASPBERRY') {
+                    icon = ' 🍓'
+                }
+
+                res.render('default', { title: 'Discord BOT' + icon })
             } else {
                 res.status(404).send("Not found")
             }
