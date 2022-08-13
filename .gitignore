@@ -3,7 +3,6 @@ source/database
 source/database-copy
 node_modules
 package-lock.json
-package.json
 Start.lnk
 source/corpus.json
 source/index.js

@@ -497,6 +497,38 @@ class WebSocket {
             shardState = WsStatusText[this.client.ws.shards.first().status]
         }
 
+        const os = require('os')
+
+        var systemInfo = {
+            CPUs: []
+        }
+
+        const cpus = os.cpus()
+
+        for (let i = 0; i < cpus.length; i++) {
+            const cpu = cpus[i]
+            systemInfo.CPUs.push({
+                model: cpu.model,
+                id: i,
+                times: {
+                    user: cpu.times.user/1000,
+                    sys: cpu.times.sys/1000,
+                    nice: cpu.times.nice/1000,
+                    idle: cpu.times.idle/1000,
+                    irq: cpu.times.irq/1000,
+                }
+            })
+            
+        }
+
+        systemInfo.TotalMemory = os.totalmem()
+        systemInfo.FreeMemory = os.freemem()
+        systemInfo.UsedMemory = systemInfo.TotalMemory - systemInfo.FreeMemory
+        systemInfo.Uptime = GetTime(new Date(os.uptime() * 1000))
+        systemInfo.UserInfo = os.userInfo()
+
+        console.log(systemInfo)
+
         const clientData = {
             readyTime: GetTime(this.client.readyAt),
             uptime: GetTime(uptime),
@@ -511,7 +543,8 @@ class WebSocket {
                 state: shardState,
             },
             showWeatherStatus: (this.statesManager.dailyWeatherReportLoadingText.length > 0),
-            showNewsStatus: (this.statesManager.allNewsProcessed == false)
+            showNewsStatus: (this.statesManager.allNewsProcessed == false),
+            system: systemInfo
         }
 
         res.render('userRpm/Status', { bot: clientData })

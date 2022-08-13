@@ -87,6 +87,156 @@
 				</td>
 			</tr>
 			<tr>
+				<td width="25%" class="Item">CPUs:</td>
+			</tr>
+            <tr>
+				<td></td>
+                <td>
+                    <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td class="ListM">
+                                    <b>Model</b>
+                                </td>
+                                <td class="ListM"  style="width: 100%;">
+                                    <b>Times</b>
+                                </td>
+								<!--
+                                <td class="ListM" style="width: 100px;">
+                                    <b>Nice Time</b>
+                                </td>
+                                <td class="ListM" style="width: 100px;">
+                                    <b>Sys Time</b>
+                                </td>
+                                <td class="ListM" style="width: 100px;">
+                                    <b>Idle Time</b>
+                                </td>
+                                <td class="ListM" style="width: 100px;">
+                                    <b>Irq Time</b>
+                                </td>
+								-->
+                            </tr>
+							<style>
+								.multi-progressbar-content {
+									height: 100%;
+									display: inline-block;
+									margin: 0;
+									color: #fff;
+									padding-top: 2px;
+									text-align: center;
+									border-left: 1px solid #fff;
+									background: #077ba8;
+									text-overflow: clip;
+								}
+
+								.multi-progressbar-content > div {
+									width: 100%;
+									overflow: hidden;
+									font-size: 11px;
+									display: inline-block;
+									user-select: none;
+								}
+
+								.tooltiptext {
+									font-size: 12px;
+									transform: translateY(-30px);
+									color: #000;
+									z-index: 2;
+								}
+							</style>
+                            {{#each bot.system.CPUs}}
+                            <tr>
+                                <td style="padding:0px 2px 0px 2px;word-break:break-all">
+									{{model}}
+                                </td>
+                                <td style="padding:0px 2px 0px 2px;word-break:break-all">
+									<div style="font-size: 0px; height: 16px; width: 100%; border: 1px solid #cbcbcb; background: #efefef;">
+										<div id="cpu{{id}}t0" class="multi-progressbar-content tooltip">
+											<span class="tooltiptext">
+												{{times.user}} sec
+											</span>
+											<div>User</div>
+										</div>
+										<div id="cpu{{id}}t1" class="multi-progressbar-content tooltip">
+											<span class="tooltiptext">
+												{{times.idle}} sec
+											</span>
+											<div>Idle</div>
+										</div>
+										<div id="cpu{{id}}t2" class="multi-progressbar-content tooltip">
+											<span class="tooltiptext">
+												{{times.sys}} sec
+											</span>
+											<div>Sys</div>
+										</div>
+										<div id="cpu{{id}}t3" class="multi-progressbar-content tooltip">
+											<span class="tooltiptext">
+												{{times.irq}} sec
+											</span>
+											<div>Irq</div>
+										</div>
+										<div id="cpu{{id}}t4" class="multi-progressbar-content tooltip">
+											<span class="tooltiptext">
+												{{times.nice}} sec
+											</span>
+											<div>Nice</div>
+										</div>
+									</div>
+                                </td>
+								<!--
+                                <td style="padding:0px 2px 0px 2px;word-break:break-all">
+									{{times.nice}} s
+                                </td>
+                                <td style="padding:0px 2px 0px 2px;word-break:break-all">
+									{{times.sys}} s
+                                </td>
+                                <td style="padding:0px 2px 0px 2px;word-break:break-all">
+									{{times.idle}} s
+                                </td>
+                                <td style="padding:0px 2px 0px 2px;word-break:break-all">
+									{{times.irq}} s
+                                </td>
+								-->
+                            </tr>
+							<script>
+								var syst{{id}}V0 = {{times.user}};
+								var syst{{id}}V1 = {{times.idle}};
+								var syst{{id}}V2 = {{times.sys}};
+								var syst{{id}}V3 = {{times.irq}};
+								var syst{{id}}V4 = {{times.nice}};
+
+								const total{{id}} = syst{{id}}V0 + syst{{id}}V1 + syst{{id}}V2 + syst{{id}}V3 + syst{{id}}V4;
+
+								document.getElementById('cpu{{id}}t0').style.width = 'calc(' + (syst{{id}}V0 / total{{id}} * 100) + '%' + ' - 2px)';
+								document.getElementById('cpu{{id}}t1').style.width = 'calc(' + (syst{{id}}V1 / total{{id}} * 100) + '%' + ' - 2px)';
+								document.getElementById('cpu{{id}}t2').style.width = 'calc(' + (syst{{id}}V2 / total{{id}} * 100) + '%' + ' - 2px)';
+								document.getElementById('cpu{{id}}t3').style.width = 'calc(' + (syst{{id}}V3 / total{{id}} * 100) + '%' + ' - 2px)';
+								document.getElementById('cpu{{id}}t4').style.width = 'calc(' + (syst{{id}}V4 / total{{id}} * 100) + '%' + ' - 2px)';
+							</script>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+			<tr>
+				<td width="25%" class="Item">System Uptime:</td>
+				<td colspan="2">
+					{{bot.system.Uptime}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Memory:</td>
+				<td colspan="2">
+					<meter min="0" max="{{bot.system.TotalMemory}}" value="{{bot.system.UsedMemory}}"></meter>
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Logged in as:</td>
+				<td colspan="2">
+					{{bot.system.UserInfo.username}}
+				</td>
+			</tr>
+			<tr>
 				<td class="blue" colspan="3"></td>
 			</tr>
 			<tr>

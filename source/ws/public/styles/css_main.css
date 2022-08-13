@@ -329,6 +329,7 @@ input[type="buttonBigL"]:disabled {
 
 .miniicon {
 	transform: translateY(4px);
+	user-select: none;
 }
 
 .show-hide-part-button {
