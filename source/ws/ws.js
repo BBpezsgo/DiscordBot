@@ -37,14 +37,16 @@ class WebSocket {
      * @param {DatabaseManager} database
      * @param {StatesManager} statesManager
      * @param {boolean} isMobile
+     * @param {'DESKTOP' | 'MOBILE' | 'RASPBERRY'} clientType
      */
-    constructor(password, ip, port, client, logManager, database, StartBot, StopBot, statesManager, isMobile) {
+    constructor(password, ip, port, client, logManager, database, StartBot, StopBot, statesManager, clientType) {
         this.password = password
         this.client = client
         this.StartBot = StartBot
         this.StopBot = StopBot
-        /** @type {boolean} */
-        this.IsMobile = isMobile
+
+        /** @type {'DESKTOP' | 'MOBILE' | 'RASPBERRY'} */
+        this.ClientType = clientType
 
         this.logManager = logManager
         this.database = database
@@ -95,7 +97,7 @@ class WebSocket {
                 return next()
             }
 
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 HbLog({ IP: req.ip, type: 'NORMAL', message: 'Failed to log in with username "' + login + '" and password "' + password + '"' })
             }
 
@@ -129,7 +131,7 @@ class WebSocket {
             this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
             this.statesManager.handlebarsDone = true
             this.statesManager.handlebarsURL = 'http://' + this.server.address().address + ":" + this.server.address().port
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'NORMAL', message: 'Listening on ' + ip + ':' + port })
             }
         }
@@ -142,13 +144,13 @@ class WebSocket {
             } else {
                 this.statesManager.handlebarsErrorMessage = err.message
             }
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'ERROR', message: err.message, helperMessage: 'Server error: ' + err.message })
             }
         })
         this.server.on('clientError', (err, socket) => {
             this.logManager.Log(ERROR + ': ' + err, true)
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'CLIENT_ERROR', message: err.message, helperMessage: 'Client error: ' + err.message })
             }
 
@@ -161,13 +163,13 @@ class WebSocket {
             this.statesManager.handlebarsDone = false
             this.statesManager.handlebarsURL = ''
             this.logManager.Log(SERVER + ': ' + "Closed", true)
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'NORMAL', message: 'Server closed' })
             }
         })
         this.server.on('connect', (req, socket, head) => {
             this.logManager.Log(DEBUG + ': ' + "connect", true)
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 HbLog({ IP: req.socket.remoteAddress, type: 'CONNECT', url: req.url, method: req.method, helperMessage: 'Someone wanted to connect' })
             }
         })
@@ -177,13 +179,13 @@ class WebSocket {
         })
         this.server.on('request', (req, res) => {
             this.statesManager.handlebarsRequiests.push(10)
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 HbLog({ IP: req.socket.remoteAddress, type: 'REQUIEST', url: req.url, method: req.method, helperMessage: 'Someone requiested' })
             }
         })
         this.server.on('upgrade', (req, socket, head) => {
             this.logManager.Log(DEBUG + ': ' + "upgrade", true)
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 HbLog({ IP: req.socket.remoteAddress, type: 'NORMAL', message: 'Upgrade', helperMessage: 'Someone upgraded' })
             }
         })
@@ -1017,14 +1019,14 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Process/Exit', (req, res) => {
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 SystemLog('Exit by user (handlebars)')
             }
             setTimeout(() => { process.exit() }, 500)
         })
 
         this.app.post('/userRpm/Process/Restart', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType == 'MOBILE') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.writeFileSync('./exitdata.txt', 'restart', { encoding: 'ascii' })
             setTimeout(() => {
@@ -1045,7 +1047,7 @@ class WebSocket {
         })
 
         this.app.post('/stopBot', (req, res) => {
-            if (this.IsMobile == false) {
+            if (this.ClientType != 'MOBILE') {
                 SystemLog('Destroy bot by user (handlebars)')
             }
 
@@ -1101,7 +1103,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Search', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             const userId = req.body.id
 
@@ -1115,7 +1117,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Backup/All', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.readdir(this.database.backupFolderPath, (err, files) => {
                 files.forEach(file => {
@@ -1130,7 +1132,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Backup/One', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             const file = req.body.filename
 
@@ -1143,7 +1145,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Back', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             this.databaseSearchedUserId = ''
 
@@ -1151,7 +1153,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Modify/Stickers', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataStickers[this.databaseSearchedUserId] != undefined) {
                 const datas = req.body
@@ -1170,7 +1172,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Modify/Backpack', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataBackpacks[this.databaseSearchedUserId] != undefined) {
                 const datas = req.body
@@ -1191,7 +1193,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Database/Modify/Basic', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataBasic[this.databaseSearchedUserId] != undefined) {
                 const datas = req.body
@@ -1207,7 +1209,7 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/LogError', (req, res) => {
-            if (this.IsMobile == true) {
+            if (this.ClientType == 'MOBILE') {
                 res.render('userRpm/ErrorLogsNotSupported', {})
                 return
             }
@@ -1292,7 +1294,7 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/LogSystem', (req, res) => {
-            if (this.IsMobile == false) {
+            if (this.ClientType == 'MOBILE') {
                 res.render('userRpm/SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
             } else {
                 res.render('userRpm/SystemLogsNotSupported', {})
@@ -1300,7 +1302,7 @@ class WebSocket {
         })
 
         this.app.get('/userRpm/LogHandlebars', (req, res) => {
-            if (this.IsMobile == false) {
+            if (this.ClientType == 'MOBILE') {
                 res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
             } else {
                 res.render('userRpm/HandlebarsLogsNotSupported', {})
@@ -1308,7 +1310,7 @@ class WebSocket {
         })
 
         this.app.post('/userRpm/Log/Clear', (req, res) => {
-            if (this.IsMobile == true) { res.status(501).send('This is not available: the server is running on the phone'); return }
+            if (this.ClientType == 'MOBILE') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.writeFileSync('./node.error.log', '')
         })

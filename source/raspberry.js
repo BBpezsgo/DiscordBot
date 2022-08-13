@@ -279,7 +279,7 @@ function log(message = '', translateResult = null) {
 
 
 
-const ws = new WebSocket('1234', '192.168.1.101', 5665, bot, logManager, null, StartBot, StopBot, statesManager, true)
+const ws = new WebSocket('1234', '192.168.1.101', 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'RASPBERRY')
 logManager.BlankScreen()
 
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
