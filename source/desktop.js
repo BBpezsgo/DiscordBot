@@ -41,13 +41,11 @@ const fs = require('fs')
 
 process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
 
-//proc.stderr.pipe(fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', { flags: 'a' }))
-
 var botStopped = false
 var cliCurrentlyTyping = ''
 
 process.stdin.on('mousepress', function (info) {
-    console.log('Got "mousepress" event at %d x %d', info.x, info.y)
+    // console.log('Got "mousepress" event at %d x %d', info.x, info.y)
 })
 
 process.stdin.resume()
@@ -71,7 +69,7 @@ process.stdin.on('data', function (b) {
         }
     } else if (/^\u001b\[M/.test(s)) {
         // mouse event
-        console.error('s.length:', s.length)
+        // console.error('s.length:', s.length)
         // reuse the key array albeit its name
         // otherwise recompute as the mouse event is structured differently
         var modifier = s.charCodeAt(3)
@@ -99,108 +97,12 @@ process.stdin.on('data', function (b) {
         }
         console.error(key)
     } else {
-        if (true) {
-        } else {
-            const validChars = [
-                'a',
-                'b',
-                'c',
-                'd',
-                'e',
-                'f',
-                'g',
-                'h',
-                'i',
-                'j',
-                'k',
-                'l',
-                'm',
-                'n',
-                'o',
-                'p',
-                'q',
-                'r',
-                's',
-                't',
-                'u',
-                'v',
-                'w',
-                'x',
-                'y',
-                'z',
-
-                'ö',
-                'ü',
-                'ó',
-                'ő',
-                'ú',
-                'é',
-                'á',
-                'ű',
-
-                ',',
-                '.',
-                '-',
-                '?',
-                ':',
-                '_',
-
-                ' ',
-
-                '0',
-                '1',
-                '2',
-                '3',
-                '4',
-                '5',
-                '6',
-                '7',
-                '8',
-                '9',
-            ]
-
-            //console.error(s, s, b) //([0x1b, 0x5b, 0x31, 0x7e]))
-
-            if (s.charCodeAt(0) == 13 && false) { //Enter
-                ProcessCliCommand(cliCurrentlyTyping)
-                cliCurrentlyTyping = ''
-                logManager.currentlyTyping = cliCurrentlyTyping
-            } else if (s.charCodeAt(0) == 8 && false) {
-                cliCurrentlyTyping = cliCurrentlyTyping.substring(0, cliCurrentlyTyping.length - 1)
-                logManager.currentlyTyping = cliCurrentlyTyping
-            } else if (true && false) {
-                cliCurrentlyTyping += s
-                logManager.currentlyTyping = cliCurrentlyTyping
-            } else {
-                console.error(0, s, b)
-            }
-        }
+        // console.error(0, s, b)
     }
 })
 /**@param {string} command */
 function ProcessCliCommand(command) {
-    if (command.startsWith('spam ')) {
-        var count = 5
-
-        var otherText = ''
-
-        const commandArgs = command.split(' ')
-
-        if (commandArgs.length >= 2) {
-            count = Number.parseInt(commandArgs[1])
-        } else {
-            return
-        }
-
-        if (commandArgs.length >= 3) {
-            otherText = command.replace('spam ' + count + ' ', '')
-        }
-
-        /**@type {Discord.TextChannel} */
-        const channel = bot.channels.cache.get('756929083387936818')
-
-        SpamMessage(count, channel, '<@750748417373896825> ' + otherText)
-    }
+    
 }
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
@@ -224,8 +126,6 @@ process.on('exit', function (code) {
 })
 
 //#region NPM Packages and variables
-
-// Loading npm packages
 
 logManager.Loading("Loading commands", 'weather')
 const CommandWeather = require('./commands/weather')
@@ -310,7 +210,7 @@ const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
 
-const { MessageActionRow, MessageButton } = require('discord.js')
+const { MessageActionRow, MessageButton, GatewayIntentBits } = require('discord.js')
 const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
 const { perfix, tokens } = require('./config.json')
 
@@ -402,20 +302,6 @@ let currentlyWritingEmails = []
 /** @type {NewsMessage[]} */
 const listOfNews = []
 
-/**@param {number} count @param {Discord.TextChannel} channel @param {string} content */
-function SpamMessage(count, channel, content) {
-    if (count <= 0) {
-        return
-    }
-
-    channel.send({ content: content }).then((msg) => {
-        setTimeout(() => {
-            msg.delete().then((a) => {
-                SpamMessage(count - 1, channel, content)
-            })
-        }, 100)
-    })
-}
 
 //#region Functions 
 
@@ -2096,6 +1982,9 @@ bot.on('interactionCreate', async interaction => {
     }
 })
 
+
+
+
 bot.on('clickMenu', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
@@ -2291,9 +2180,7 @@ bot.once('ready', async () => {
     statesManager.newsLoadingText = 'Fetch news...'
     const channel = bot.channels.cache.get(ChannelId.IncomingNews)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
-        /**
-         * @type {[Discord.Message]}
-         */
+        /** @type {[Discord.Message]} */
         const listOfMessage = []
 
         statesManager.newsLoadingText = 'Looping messages...'
@@ -2380,18 +2267,6 @@ bot.on('messageCreate', async message => { //Message
     ProcessMessage(message)
 
     //#region Log
-
-    /*
-    if (!message.member === null) {
-        logMessage(message, message.member.displayName, false, sender)
-    } else {
-        if (message.channel.guild) {
-            logMessage(message, sender.username, false, sender)
-        } else {
-            logMessage(message, sender.username, true, sender)
-        }
-    }
-    */
    
     userstatsAddUserToMemory(sender)
     if (message.channel.id === '744979145460547746') { //Memes channel
@@ -2455,8 +2330,6 @@ bot.on('messageCreate', async message => { //Message
         log(`Received a news message`)
     }
     //#endregion
-
-    log(thisIsPrivateMessage.toString())
 
     if (thisIsPrivateMessage) {
         database.SaveUserToMemoryAll(sender, sender.username)

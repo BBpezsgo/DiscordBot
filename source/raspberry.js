@@ -1,5 +1,37 @@
 
-//#region Imports, variables
+
+
+
+
+
+
+
+
+
+
+/** @param {Error} err */
+function FormatError(err) {
+    var str = ""
+    str += err.name + ': ' + err.message
+    if (err.stack != undefined) {
+        str += '\n' + err.stack
+    }
+    return str
+}
+
+process.on('uncaughtException', function (err) {
+    fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
+    fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
+})
+
+
+var autoStartBot = true
+
+const { SystemLog, SystemStart, SystemStop } = require('./functions/systemLog')
+
+SystemStart(false, true)
+
+const startDateTime = new Date(Date.now())
 
 const { LogManager } = require('./functions/log.js')
 var logManager = new LogManager(true, null, null)
@@ -7,25 +39,34 @@ var logManager = new LogManager(true, null, null)
 logManager.Loading('Loading packet', "fs")
 const fs = require('fs')
 
-//process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
+process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
 
-
-
-
-
+var botStopped = false
+var cliCurrentlyTyping = ''
 
 process.stdin.on('mousepress', function (info) {
-    // console.log('got "mousepress" event at %d x %d', info.x, info.y)
+    // console.log('Got "mousepress" event at %d x %d', info.x, info.y)
 })
 
 process.stdin.resume()
 
 process.stdin.on('data', function (b) {
     var s = b.toString('utf8')
+    
+    if (logManager.CurrentlyPromt()) {
+        logManager.OnKeyDown(s)
+    }
+
     if (s === '\u0003') {
-        process.stdin.pause()
-        StopBot()
-        log(DONE + ': A BOT leállítva!')
+        if (botStopped == true) {
+            SystemLog('Exit by user (terminal)')
+            SystemStop()
+            process.stdin.pause()
+            setTimeout(() => { process.exit() }, 500)
+        } else {
+            SystemLog('Destroy bot by user (terminal)')
+            StopBot()
+        }
     } else if (/^\u001b\[M/.test(s)) {
         // mouse event
         // console.error('s.length:', s.length)
@@ -56,13 +97,13 @@ process.stdin.on('data', function (b) {
         }
         console.error(key)
     } else {
-        // something else...
-        console.error(0, s, b)
+        // console.error(0, s, b)
     }
 })
-
-
-
+/**@param {string} command */
+function ProcessCliCommand(command) {
+    
+}
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
     process.stdin.setRawMode(true)
@@ -74,29 +115,48 @@ if (process.stdin.setRawMode) {
 process.stdout.write('\x1b[?1005h')
 process.stdout.write('\x1b[?1003h')
 
-process.on('exit', function () {
-    // don't forget to turn off mouse reporting
+process.on('exit', function (code) {
+    // Turn off mouse reporting
     process.stdout.write('\x1b[?1005l')
     process.stdout.write('\x1b[?1003l')
-    console.log("The application is closed")
+    console.log('Exit with code ' + code)
+
+    SystemLog('Exited with code ' + code)
+    SystemStop()
 })
 
-// Loading npm packages
+//#region NPM Packages and variables
 
-logManager.Loading("Loading extensions", 'weather')
+logManager.Loading("Loading commands", 'weather')
 const CommandWeather = require('./commands/weather')
 const CommandDailyWeatherReport = require('./commands/dailyWeatherReport')
-logManager.Loading("Loading extensions", 'help')
+
+
+logManager.Loading("Loading commands", 'help')
 const CommandHelp = require('./commands/help')
 
-logManager.Loading("Loading extensions", 'crossout')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+logManager.Loading("Loading commands", 'crossout')
 const { CrossoutTest } = require('./commands/crossout')
-logManager.Loading("Loading extensions", 'redditsave')
+logManager.Loading("Loading commands", 'redditsave')
 const CommandRedditsave = require('./commands/redditsave')
-logManager.Loading("Loading extensions", 'fonts')
+logManager.Loading("Loading commands", 'fonts')
 const { CommandFont } = require('./commands/fonts')
-
-
 
 
 
@@ -136,39 +196,59 @@ const { StatesManager } = require('./functions/statesManager.js')
 
 
 
-const statesManager = new StatesManager()
+logManager.Loading('Loading packet', "ytdl-core")
+const ytdl = require('ytdl-core')
+
+const { musicGetLengthText } = require('./commands/music/functions')
+
+logManager.Loading('Loading', "WS")
+const { WebSocket } = require('./ws/ws')
+
+logManager.Loading('Loading', "WS")
+const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
+
+logManager.Loading('Loading packet', "discord.js")
+const Discord = require('discord.js')
+
+const { MessageActionRow, MessageButton, GatewayIntentBits } = require('discord.js')
+
+const { perfix, tokens } = require('./config.json')
+
+logManager.Loading('Loading packet', "other functions")
+
+const { abbrev } = require('./functions/abbrev')
+const { DateToString } = require('./functions/dateToString')
+const { NewsMessage, CreateNews } = require('./functions/news')
+const {
+    INFO,
+    ERROR,
+    WARNING,
+    SHARD,
+    DEBUG,
+    DONE,
+    Color,
+    ColorRoles,
+    activitiesMobile,
+    usersWithTax,
+    ChannelId,
+    CliColor
+} = require('./functions/enums.js')
+
+
 logManager.BlankScreen()
 
-const ColorRoles = {
-    red: "850016210422464534",
-    yellow: "850016458544250891",
-    blue: "850016589155401758",
-    orange: "850016531848888340",
-    green: "850016722039078912",
-    purple: "850016668352643072",
-    invisible: "850016786186371122"
-}
+const selfId = '738030244367433770'
 
-const { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesMobile } = require('./functions/enums.js')
-
-
-
-
-
-logManager.BlankScreen()
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-logManager.Loading('Loading packet', "discord.js")
-const Discord = require("discord.js");
-const { MessageActionRow, MessageButton, GatewayIntentBits  } = require('discord.js');
-logManager.Loading('Loading', "bot")
-const { perfix, tokens } = require('./config.json')
 const bot = new Discord.Client({ properties: { browser: "Discord iOS" }, intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
 logManager.Destroy()
+
+const statesManager = new StatesManager()
 logManager = new LogManager(true, bot, statesManager)
+
 statesManager.botLoaded = true
-logManager.BlankScreen()
 
 /** @param {string} message */
 function log(message = '', translateResult = null) {
@@ -198,16 +278,13 @@ function log(message = '', translateResult = null) {
 
 
 
-logManager.Loading('Loading packet', "ytdl-core")
-const ytdl = require('ytdl-core')
 
-logManager.Loading('Loading', "WS")
-const { WebSocket } = require('./ws/ws')
-var ws = new WebSocket('1234', '192.168.1.102', 5665, bot, logManager, null, null, null, statesManager, true)
+const ws = new WebSocket('1234', '192.168.1.101', 5665, bot, logManager, null, StartBot, StopBot, statesManager, true)
 logManager.BlankScreen()
 
-
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
+
+
 
 /**@type {string[]} */
 let musicArray = []
@@ -216,26 +293,18 @@ let musicFinished = true
 let lastNoNews = false
 
 
-const { DateToString } = require('./functions/dateToString')
-const { NewsMessage, CreateNews } = require('./functions/news')
-
-
 
 
 
 
 //#endregion
 
-/** @type [NewsMessage] */
+/** @type {NewsMessage[]} */
 const listOfNews = []
 const incomingNewsChannel = '902894789874311198'
 const processedNewsChannel = '746266528508411935'
-
-
-
-
-
 //#region Functions
+
 /**@param {number} days @returns {number} */
 function DaysToMilliseconds(days) {
     return days * 24 * 60 * 60 * 1000
@@ -402,75 +471,9 @@ bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => { })
 
 //#endregion
 
-bot.on('interactionCreate', interaction => {
-    if (interaction.isCommand()) {
-        processApplicationCommand(interaction)
-    } else if (interaction.isButton()) {
-        if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
-            if (interaction.component.customId.includes(interaction.user.id)) {
-                interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
-                const button1 = interaction.message.components[0].components[0]
-                const button2 = interaction.message.components[0].components[1]
-                const row = new MessageActionRow()
-                    .addComponents(button1, button2)
-                interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
-                return
-            }
-        }
-        if (interaction.component.customId.startsWith('redditsaveDelete')) {
-            if (interaction.component.customId.includes(interaction.user.id)) {
-                interaction.message.delete()
-                return
-            }
-        }
-        
-        try {
-            if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
-                interaction.reply({content: '> \\❗ **Ez nem a tied!**', ephemeral: true})
-                return
-            }
-        } catch (error) { }
-    }
-})
-
 //#region Commands
 
 //#region Command Functions
-
-function musicGetLengthText(videoLengthSeconds) {
-    let videoLengthMinutes = 0
-    let videoLengthHours = 0
-    for (let l = 0; videoLengthSeconds > 60; l += 1) {
-        videoLengthMinutes += 1
-        videoLengthSeconds -= 60
-    }
-    for (let l = 0; videoLengthMinutes > 60; l += 1) {
-        videoLengthHours += 1
-        videoLengthMinutes -= 60
-    }
-
-    let lengthText = '--:--'
-    let hours = '' + videoLengthHours
-    if (videoLengthHours < 10) {
-        hours = '0' + hours
-    }
-    let minutes = '' + videoLengthMinutes
-    if (videoLengthMinutes < 10) {
-        minutes = '0' + minutes
-    }
-    let seconds = '' + videoLengthSeconds
-    if (videoLengthSeconds < 10) {
-        seconds = '0' + seconds
-    }
-
-    if (videoLengthHours === 0) {
-        lengthText = minutes + ':' + seconds
-    } else {
-        lengthText = hours + ':' + minutes + ':' + seconds
-    }
-
-    return lengthText
-}
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand @returns {boolean} */
 async function playAudio(command) {
@@ -739,6 +742,37 @@ async function quizDone(quizMessageId, correctIndex) {
 }
 //#endregion
 
+bot.on('interactionCreate', async interaction => {
+    if (interaction.isCommand()) {
+        processApplicationCommand(interaction)
+    } else if (interaction.isButton()) {
+        if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
+            if (interaction.component.customId.includes(interaction.user.id)) {
+                interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
+                const button1 = interaction.message.components[0].components[0]
+                const button2 = interaction.message.components[0].components[1]
+                const row = new MessageActionRow()
+                    .addComponents(button1, button2)
+                interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
+                return
+            }
+        }
+        if (interaction.component.customId.startsWith('redditsaveDelete')) {
+            if (interaction.component.customId.includes(interaction.user.id)) {
+                interaction.message.delete()
+                return
+            }
+        }
+        
+        try {
+            if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
+                interaction.reply({content: '> \\❗ **Ez nem a tied!**', ephemeral: true})
+                return
+            }
+        } catch (error) { }
+    }
+})
+
 bot.on('clickButton', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
@@ -787,6 +821,8 @@ async function GetOldDailyWeatherReport(channelId) {
 }
 
 bot.once('ready', async () => {
+    SystemLog('Bot is ready')
+
     statesManager.botLoadingState = 'Ready'
     try {
         //DeleteCommands(bot)
@@ -801,17 +837,17 @@ bot.once('ready', async () => {
     }, 10000)
 
     statesManager.dailyWeatherReportLoadingText = 'Fetch channels...'
-    await bot.channels.fetch(processedNewsChannel)
+    await bot.channels.fetch(ChannelId.ProcessedNews)
     setTimeout(async () => {
         statesManager.dailyWeatherReportLoadingText = 'Search old report message...'
-        const oldWeatherMessage = await GetOldDailyWeatherReport(processedNewsChannel)
+        const oldWeatherMessage = await GetOldDailyWeatherReport(ChannelId.ProcessedNews)
         if (oldWeatherMessage == null) {
-            CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
+            CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
         } else {
             if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate()) {
                 statesManager.dailyWeatherReportLoadingText = 'Delete old report message...'
                 await oldWeatherMessage.delete()
-                CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
+                CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
             } else {
                 statesManager.dailyWeatherReportLoadingText = ''
             }
@@ -820,10 +856,23 @@ bot.once('ready', async () => {
     
     logManager.AddTimeline(2)
 
+
+
+
+
+
+
+
+
     log(DONE + ': A BOT kész!')
 
+
+
+
+
+
     statesManager.newsLoadingText = 'Fetch news...'
-    const channel = bot.channels.cache.get(incomingNewsChannel)
+    const channel = bot.channels.cache.get(ChannelId.IncomingNews)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
         /** @type {[Discord.Message]} */
         const listOfMessage = []
@@ -849,7 +898,7 @@ bot.once('ready', async () => {
         if (listOfNews.length > 0) {
             const newsMessage = listOfNews.shift()
             /** @type {Discord.TextChannel} */
-            const newsChannel = bot.channels.cache.get(processedNewsChannel)
+            const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
             const embed = newsMessage.embed
             statesManager.newsLoadingText2 = 'Send new message...'
             if (newsMessage.NotifyRoleId.length == 0) {
@@ -879,6 +928,21 @@ bot.once('ready', async () => {
             log(DONE + ': Minden hír közzétéve')
         }
     }, 2000)
+
+    try {
+        /** @type {string[]} */
+        const channelsWithSettings = JSON.parse(fs.readFileSync('./settings.json')).channelSettings.channelsWithSettings
+        channelsWithSettings.forEach(channelWithSettings => {
+            const chn = bot.channels.cache.get(channelWithSettings)
+            chn.messages.fetch({ limit: 10 }).then(async (messages) => {
+                messages.forEach(message => {
+                    ProcessMessage(message)
+                })
+            })
+        })
+    } catch (err) {
+        console.log('  Error: ' + err.message)
+    }
 })
 
 /** @param {Discord.Message} message */
@@ -892,18 +956,11 @@ bot.on('messageCreate', async message => { //Message
     if (!message.type) return
     let sender = message.author
 
-    //#region Log
-    if (!message.member === null) {
-        logMessage(message, message.member.displayName, false, sender)
-    } else {
-        if (message.channel.guild) {
-            logMessage(message, sender.username, false, sender)
-        } else {
-            logMessage(message, sender.username, true, sender)
-        }
-    }
+    
 
-    //#endregion
+    ProcessMessage(message)
+
+
 
     if (message.content.startsWith('https://www.reddit.com/r/')) {
         CommandRedditsave(message)
@@ -912,8 +969,19 @@ bot.on('messageCreate', async message => { //Message
     //#region News
     if (message.channel.id == incomingNewsChannel) {
         processNewsMessage(message)
+
+        log(`Received a news message`)
     }
     //#endregion
+
+
+
+
+
+
+
+
+
 
     if (message.content.startsWith(`${perfix}`)) {
         processCommand(message, thisIsPrivateMessage, sender, message.content.replace('. ', '.').substring(1), message.channel, null)
@@ -939,6 +1007,47 @@ bot.on('messageCreate', async message => { //Message
 
 
 
+/** Auto reactions
+ *  @param {Discord.Message} message */
+function ProcessMessage(message) {
+    try {
+        var isHaveMusic = false
+        if (message.content.includes('https://youtu.be/') == true) { isHaveMusic = true }
+        if (message.content.includes('https://www.youtube.com/watch') == true) { isHaveMusic = true }
+        if (message.content.includes('https://open.spotify.com/') == true) { isHaveMusic = true }
+
+        if (isHaveMusic == false) { return }
+
+        const settingsRaw = fs.readFileSync('./settings.json')
+        const settings = JSON.parse(settingsRaw)
+        const channelSettings = settings.channelSettings
+        const messageChannelId = message.channel.id
+        if (channelSettings[messageChannelId] != undefined) {
+            /** @type {string[]} */
+            const autoReactions = channelSettings[messageChannelId].autoReactions
+            autoReactions.forEach(async (autoReaction) => {
+                const reaction = message.reactions.resolve(autoReaction)
+                if (reaction == null) {
+                    await message.react(autoReaction)
+                } else {
+                    const users = await reaction.users.fetch();
+                    var botIsReacted = false
+                    users.forEach(async (user) => {
+                        if (user.id == '738030244367433770') {
+                            botIsReacted = true
+                        }
+                    })
+                    if (botIsReacted == false) {
+                        await message.react(autoReaction)
+                    }
+                }
+            })
+        }
+    } catch (err) {
+        console.log('  Error: ' + err.message)
+    }
+}
+
 /**
  * @param {Discord.Message} message
  * @param {boolean} thisIsPrivateMessage
@@ -950,17 +1059,17 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
     //#region Enabled in dm
 
     if (command.commandName === `handlebars` || command.commandName === `webpage`) {
-        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
+        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.')
         return
     }
 
     if (command === `pms`) {
-        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
+        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.')
         return
     }
 
     if (command === `mail`) {
-        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
+        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.')
         return
     }
 
@@ -1043,15 +1152,11 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
     //#endregion
 }
 
-
-
-
-
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
 async function processApplicationCommand(command) {
 
     if (command.commandName == `gift`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
@@ -1062,12 +1167,12 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `market` || command.commandName === `piac`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
     if (command.commandName === `xp` || command.commandName === `score`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
@@ -1097,7 +1202,7 @@ async function processApplicationCommand(command) {
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
             .setColor(Color.Highlight)
             .addField('\\🤖 BOT:',
-                '> \\📱 **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
+                '> \\🍓 **Raspberry-ről vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
                 '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
             )
             .addField('\\📡 Web Socket:',
@@ -1146,27 +1251,27 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `crate`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
     if (command.commandName === `napi`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
     if (command.commandName === `profil` || command.commandName === `profile`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
     if (command.commandName === `backpack`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
     if (command.commandName === `bolt` || command.commandName === `shop`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
@@ -1188,7 +1293,7 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `settings` || command.commandName === `preferences`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return
     }
 
@@ -1196,6 +1301,7 @@ async function processApplicationCommand(command) {
 }
 
 function StartBot() {
+    SystemLog('Start bot...')
     bot.login(tokens.discord).catch((err) => {
         if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
             log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
@@ -1207,8 +1313,15 @@ function StartBot() {
 
 function StopBot() {
     bot.destroy()
+    botStopped = true
 }
 
+const endDateTime = new Date(Date.now())
+const ellapsedMilliseconds = endDateTime - startDateTime
+SystemLog('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
+
+
 StartBot()
+
 
 
