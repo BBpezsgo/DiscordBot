@@ -161,10 +161,10 @@ let listOfHelpRequiestUsers = []
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require("discord.js");
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { MessageActionRow, MessageButton, GatewayIntentBits  } = require('discord.js');
 logManager.Loading('Loading', "bot")
 const { perfix, tokens } = require('./config.json')
-const bot = new Discord.Client({ properties: { browser: "Discord iOS" }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_VOICE_STATES"]})
+const bot = new Discord.Client({ properties: { browser: "Discord iOS" }, intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
 logManager.Destroy()
 logManager = new LogManager(true, bot, statesManager)
 statesManager.botLoaded = true
