@@ -164,7 +164,7 @@ const Discord = require("discord.js");
 const { MessageActionRow, MessageButton } = require('discord.js');
 logManager.Loading('Loading', "bot")
 const { perfix, tokens } = require('./config.json')
-const bot = new Discord.Client({ ws: { properties: { $browser: "Discord iOS" } }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_VOICE_STATES"] })
+const bot = new Discord.Client({ properties: { browser: "Discord iOS" }, intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_VOICE_STATES"]})
 logManager.Destroy()
 logManager = new LogManager(true, bot, statesManager)
 statesManager.botLoaded = true
@@ -203,7 +203,7 @@ const ytdl = require('ytdl-core')
 
 logManager.Loading('Loading', "WS")
 const { WebSocket } = require('./ws/ws')
-var ws = new WebSocket('1234', '192.168.1.102', 5665, bot, logManager, null, null, null, statesManager, true)
+var ws = new WebSocket('1234', '192.168.1.101', 5665, bot, logManager, null, null, null, statesManager, true)
 logManager.BlankScreen()
 
 
