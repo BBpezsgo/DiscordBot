@@ -242,7 +242,7 @@ const selfId = '738030244367433770'
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-const bot = new Discord.Client({ properties: { browser: "Discord iOS" }, intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
+const bot = new Discord.Client({ properties: { $browser: "Discord iOS" }, intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
 logManager.Destroy()
 
 const statesManager = new StatesManager()

@@ -164,7 +164,7 @@ const Discord = require("discord.js");
 const { MessageActionRow, MessageButton, GatewayIntentBits  } = require('discord.js');
 logManager.Loading('Loading', "bot")
 const { perfix, tokens } = require('./config.json')
-const bot = new Discord.Client({ properties: { browser: "Discord iOS" }, intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
+const bot = new Discord.Client({ properties: { $browser: "Discord iOS" }, intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
 logManager.Destroy()
 logManager = new LogManager(true, bot, statesManager)
 statesManager.botLoaded = true
