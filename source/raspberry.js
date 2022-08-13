@@ -39,7 +39,7 @@ var logManager = new LogManager(true, null, null)
 logManager.Loading('Loading packet', "fs")
 const fs = require('fs')
 
-process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
+process.__defineGetter__('stderr', function() { return fs.createWriteStream('~/Desktop/DiscordBOT/DiscordBot-main/source/node.error.log', {flags:'a'}) })
 
 var botStopped = false
 var cliCurrentlyTyping = ''
