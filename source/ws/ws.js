@@ -36,7 +36,6 @@ class WebSocket {
      * @param {LogManager} logManager
      * @param {DatabaseManager} database
      * @param {StatesManager} statesManager
-     * @param {boolean} isMobile
      * @param {'DESKTOP' | 'MOBILE' | 'RASPBERRY'} clientType
      */
     constructor(password, ip, port, client, logManager, database, StartBot, StopBot, statesManager, clientType) {
@@ -53,7 +52,7 @@ class WebSocket {
 
         this.statesManager = statesManager
 
-        if (isMobile == false) { HbStart() }
+        if (clientType != 'MOBILE') { HbStart() }
 
         this.app = express()
         this.app.engine('hbs', engine({
