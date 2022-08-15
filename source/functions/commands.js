@@ -100,11 +100,11 @@ function GenerateGuildCommands() {
 
     const commandNapiSub = new SlashCommandIntegerOption()
         .setName('darab')
-        .setDescription('Napi ládák mennyisége')
+        .setDescription('Heti ládák mennyisége')
         .setRequired(true)
     const commandNapi = new SlashCommandBuilder()
-        .setName('napi')
-        .setDescription('Napi láda kinyitása')
+        .setName('heti')
+        .setDescription('Heti láda kinyitása')
         .addIntegerOption(commandNapiSub)
     generatedCommands.push(commandNapi.toJSON())
 

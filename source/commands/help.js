@@ -61,7 +61,7 @@ function getEmbedMessage(isPrivate, isMobile) {
             embed.addField('Pénzek',
                 '>  \\🍺   `/xp` Rangod.\n' +
                 '>  \\💼  `/backpack` A hátizsákod tartalmának megtekintése.\n' +
-                '>  \\🧰  `/napi <darab>` A napi ládák kinyitása.\n' +
+                '>  \\🧰  `/heti <darab>` A heti ládák kinyitása. \\❗ **Alfa verzió** \\❗\n' +
                 '>  \\🧱  `/crate <darab>` A ládák kinyitása.\n' +
                 '>  \\🏪  `/shop`\n' +
                 '>  \\⚖️  `/market`\n' +

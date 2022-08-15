@@ -4,9 +4,17 @@ const { GetTime, GetDate } = require('./functions')
 const startedMessage = '====== Started ======'
 const stoppedMessage = '====== Stopped ======'
 
+/** @param {string} number @returns {string} */
+function AddZeros(number) {
+    if (number.length == 1) {
+        return '0' + number
+    }
+    return number
+}
+
 function GetFilename() {
     const currentDate = new Date(Date.now())
-    return currentDate.getFullYear() + '-' + (currentDate.getMonth() + 1) + '-' + currentDate.getDate()
+    return currentDate.getFullYear() + '-' + AddZeros((currentDate.getMonth() + 1).toString()) + '-' + AddZeros(currentDate.getDate().toString())
 }
 
 function GetTimePrefix() {
@@ -127,11 +135,11 @@ function GetLogs() {
                 } else if (logData.startsWith('Ping: ')) {
                     const ping = logData.replace('Ping: ', '').replace('ms', '')
                     var pingBaddness = 'none'
-                    if (ping < 115) {
+                    if (ping < 120) {
                         pingBaddness = 'good'
-                    } else if (ping < 125) {
+                    } else if (ping < 130) {
                         pingBaddness = 'fair'
-                    } else if (ping < 135) {
+                    } else if (ping < 140) {
                         pingBaddness = 'bad'
                     } else {
                         pingBaddness = 'verybad'

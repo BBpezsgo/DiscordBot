@@ -6,6 +6,7 @@ const Discord = require('discord.js')
 const { LogManager, MessageCodes } = require('../functions/log.js')
 const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../functions/userHashManager')
 const fs = require('fs')
+const os = require('os')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
 const {
@@ -497,8 +498,6 @@ class WebSocket {
             shardState = WsStatusText[this.client.ws.shards.first().status]
         }
 
-        const os = require('os')
-
         var systemInfo = {
             CPUs: []
         }
@@ -526,8 +525,6 @@ class WebSocket {
         systemInfo.UsedMemory = systemInfo.TotalMemory - systemInfo.FreeMemory
         systemInfo.Uptime = GetTime(new Date(os.uptime() * 1000))
         systemInfo.UserInfo = os.userInfo()
-
-        console.log(systemInfo)
 
         const clientData = {
             readyTime: GetTime(this.client.readyAt),
@@ -934,6 +931,44 @@ class WebSocket {
             }
         })
 
+        this.app.get('/json/status', (req, res) => {
+            this.ipToRate[req.ip] -= 1
+
+            var uptime = new Date(0)
+            uptime.setSeconds(this.client.uptime / 1000)
+            uptime.setHours(uptime.getHours() - 1)
+
+            var shardState = 'none'
+            if (this.client.ws.shards.size > 0) {
+                shardState = WsStatusText[this.client.ws.shards.first().status]
+            }
+
+            res.status(200).send({
+                heartbeat: this.statesManager.heartbeat,
+                hello: this.statesManager.hello,
+                loadingProgressText: this.statesManager.loadingProgressText,
+                botLoadingState: this.statesManager.botLoadingState,
+                botLoaded: this.statesManager.botLoaded,
+                botReady: this.statesManager.botReady,
+                shardCurrentlyLoading: this.statesManager.shardCurrentlyLoading,
+                shardCurrentlyLoadingText: this.statesManager.shardCurrentlyLoadingText,
+                shardErrorText: this.statesManager.shardErrorText,
+                uptime: GetTime(uptime),
+                shardState: shardState,
+                ws: {
+                    ping: this.client.ws.ping.toString().replace('NaN', '-'),
+                    status: WsStatusText[this.client.ws.status],
+                },
+                systemUptime: GetTime(new Date(os.uptime() * 1000)),
+            })
+        })
+
+        this.app.get('/json/ping', (req, res) => {
+            this.ipToRate[req.ip] -= 1
+            
+            res.status(200).send()
+        })
+
         this.app.get('/frames/top', (req, res) => {
             res.render('frames/top')
         })
@@ -1337,17 +1372,17 @@ class WebSocket {
 
         this.app.get('/userRpm/LogSystem', (req, res) => {
             if (this.ClientType == 'MOBILE') {
-                res.render('userRpm/SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
-            } else {
                 res.render('userRpm/SystemLogsNotSupported', {})
+            } else {
+                res.render('userRpm/SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
             }
         })
 
         this.app.get('/userRpm/LogHandlebars', (req, res) => {
             if (this.ClientType == 'MOBILE') {
-                res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
-            } else {
                 res.render('userRpm/HandlebarsLogsNotSupported', {})
+            } else {
+                res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
             }
         })
 

@@ -1255,6 +1255,11 @@ async function processApplicationCommand(command) {
         return
     }
 
+    if (command.commandName === `heti`) {
+        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        return
+    }
+
     if (command.commandName === `napi`) {
         command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
         return

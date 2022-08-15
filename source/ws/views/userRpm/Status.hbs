@@ -10,48 +10,13 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 
 	<script>
+		var refreshing = true
 		var autoReload = true
 		setInterval(() => {
-			if (autoReload == true) { window.location.reload() }
-		}, 5000)
-	</script>
-
-	<script>		
-		var i = 0
-		/** @param {numner} ms */
-		function Restart(ms) {
-			const form = document.getElementById("restart-form")
-			form.style.pointerEvents='none'
-			form.style.opacity='20%'
-			
-			var xhr = new XMLHttpRequest();
-			xhr.open("POST", '/userRpm/Process/Restart', true);
-			xhr.setRequestHeader('Content-Type', 'application/json');
-			xhr.send()
-
-			if (i == 0) {
-				autoReload = false
-				const panel = document.getElementById('restartProgressPanel')
-				panel.style.display = 'block'
-
-				i = 1
-				const elem = document.getElementById('restartProgress')
-				var value = 0
-				var id = setInterval(Tick, ms / 100)
-
-				function Tick() {
-					if (value >= 100) {
-						panel.style.display = 'none'
-						clearInterval(id)
-						i = 0
-						window.location.reload()
-					} else {
-						value++
-						elem.value = value
-					}
-				}
+			if (autoReload == true) {
+				window.location.reload()
 			}
-		}
+		}, 10000)
 	</script>
 </head>
 
@@ -83,8 +48,89 @@
 					<div style="display: none;" id="restartProgressPanel">
 						<label for="restartProgress">Restarting...</label>
 						<progress id="restartProgress" value="0" max="100"></progress>
+						<div>
+						<img src="/images/state-.png" class="miniicon" id="server-ping-icon">
+						<span id="server-ping-label"></span>
+						</div>
 					</div>
 				</td>
+				<script>
+					var sendPing = true
+					var currentlyReloading = false
+					var enableReloadOnPingSuccess = false
+					const serverPingLabel = document.getElementById('server-ping-label')
+					const serverPingIcon = document.getElementById('server-ping-icon')
+					var pingInterval = setInterval(() => {
+						if (!sendPing) {
+							if (!currentlyReloading) {
+							 	return
+							}
+						}
+						
+						const xhr = new XMLHttpRequest()
+						xhr.open('GET', '/json/ping')
+						xhr.timeout = 50
+
+						xhr.onload = () => {
+							serverPingLabel.innerText = 'Server is up'
+							serverPingIcon.src = "/images/state-Ready.png"
+							sendPing = false
+							if (enableReloadOnPingSuccess) {
+								window.location.reload()
+							}
+						}
+
+						xhr.ontimeout = (e) => {
+							serverPingLabel.innerText = 'Server is down'
+							serverPingIcon.src = "/images/state-.png"
+						}
+
+						xhr.send(null)
+					}, 100)
+					
+					var i = 0
+					/** @param {numner} ms */
+					function Restart(ms) {
+						currentlyReloading = true
+						enableReloadOnPingSuccess = false
+
+						setTimeout(() => {
+							enableReloadOnPingSuccess = true
+						}, 2000)
+
+						const form = document.getElementById("restart-form")
+						form.style.pointerEvents='none'
+						form.style.opacity='20%'
+						
+						var xhr = new XMLHttpRequest();
+						xhr.open("POST", '/userRpm/Process/Restart', true);
+						xhr.setRequestHeader('Content-Type', 'application/json');
+						xhr.send()
+
+						if (i == 0) {
+							autoReload = false
+							refreshing = false
+							const panel = document.getElementById('restartProgressPanel')
+							panel.style.display = 'block'
+
+							i = 1
+							const elem = document.getElementById('restartProgress')
+							var value = 0
+							var id = setInterval(Tick, ms / 100)
+
+							function Tick() {
+								if (value >= 100) {
+									panel.style.display = 'none'
+									clearInterval(id)
+									i = 0
+								} else {
+									value++
+									elem.value = value
+								}
+							}
+						}
+					}
+				</script>
 			</tr>
 			<tr>
 				<td width="25%" class="Item">CPUs:</td>
@@ -193,7 +239,7 @@
 			<tr>
 				<td width="25%" class="Item">System Uptime:</td>
 				<td colspan="2">
-					{{bot.system.Uptime}}
+					<span id="system-uptime-label">{{bot.system.Uptime}}</span>
 				</td>
 			</tr>
 			<tr>
@@ -223,14 +269,14 @@
 			<tr>
 				<td width="25%" class="Item">Uptime:</td>
 				<td colspan="2">
-					{{bot.uptime}}
+					<span id="uptime-label">{{bot.uptime}}</span>
 				</td>
 			</tr>
 			<tr>
 				<td class="Item">Status:</td>
 				<td colspan="2">
-					<img src="/images/state-{{bot.statesManager.botLoadingState}}.png" class="miniicon">
-					{{bot.statesManager.botLoadingState}}
+					<img src="/images/state-{{bot.statesManager.botLoadingState}}.png" class="miniicon" id="bot-loading-state-icon">
+					<span id="bot-loading-state-label">{{bot.statesManager.botLoadingState}}</span>
 				</td>
 			</tr>
 			<tr>
@@ -254,20 +300,20 @@
 			</tr>
 			<tr>
 				<td class="Item">Ping:</td>
-				<td colspan="2"><span>{{bot.ws.ping}}ms</span></td>
+				<td colspan="2"><span id="ws-ping-label">{{bot.ws.ping}}</span>ms</td>
 			</tr>
 			<tr>
 				<td class="Item">Status:</td>
 				<td colspan="2">
-					<img src="/images/state-{{bot.ws.status}}.png" class="miniicon">
-					<span>{{bot.ws.status}}</span>
+					<img src="/images/state-{{bot.ws.status}}.png" class="miniicon" id="ws-state-icon">
+					<span id="ws-state-label">{{bot.ws.status}}</span>
 				</td>
 			</tr>
 			<tr>
 				<td class="Item">Shard status:</td>
 				<td colspan="2">
-					<img src="/images/state-{{bot.shard.state}}.png" class="miniicon">
-					{{bot.shard.state}}
+					<img src="/images/state-{{bot.shard.state}}.png" class="miniicon" id="shard-state-icon">
+					<span id="shard-state-label">{{bot.shard.state}}</span>
 				</td>
 			</tr>
 			<tr class="show-{{showWeatherStatus}}">
@@ -300,6 +346,33 @@
 			</tr>
 		</tbody>
 	</table>
+
+	<script>
+		setInterval(() => {
+			if (!refreshing) { return }
+			var xd =  new XMLHttpRequest()
+			xd.open('GET', '/json/status')
+			xd.send()
+			xd.onloadend = (a) => {
+				if (xd.status == 200) {
+					const res = JSON.parse(xd.responseText)
+					document.getElementById('bot-loading-state-label').innerText = res.botLoadingState
+					document.getElementById('bot-loading-state-icon').src = "/images/state-" + res.botLoadingState + ".png"
+					
+					document.getElementById('shard-state-label').innerText = res.shardState
+					document.getElementById('shard-state-icon').src = "/images/state-" + res.shardState + ".png"
+					
+					document.getElementById('ws-state-label').innerText = res.ws.status
+					document.getElementById('ws-ping-label').innerText = res.ws.ping
+					document.getElementById('ws-state-icon').src = "/images/state-" + res.ws.status + ".png"
+					
+					document.getElementById('uptime-label').innerText = res.uptime
+
+					document.getElementById('system-uptime-label').innerText = res.systemUptime
+				}
+			}
+		}, 500)
+	</script>
 </body>
 
 </html>

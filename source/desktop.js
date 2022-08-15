@@ -24,6 +24,21 @@ process.on('uncaughtException', function (err) {
     fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
 })
 
+process.on('warning', (warn) => {
+    console.log(warn)
+})
+
+process.on('worker', (worker) => {
+    console.log(worker.threadId)
+})
+
+process.on('message', (message, sendHandle) => {
+    console.log(message)
+})
+
+process.on('disconnect', () => {
+    console.log('disconnect')
+})
 
 var autoStartBot = true
 
@@ -100,10 +115,7 @@ process.stdin.on('data', function (b) {
         // console.error(0, s, b)
     }
 })
-/**@param {string} command */
-function ProcessCliCommand(command) {
-    
-}
+
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
     process.stdin.setRawMode(true)
@@ -633,7 +645,7 @@ function openDayCrate(userId) {
  * @param {boolean} privateCommand
  */
 function commandStore(sender, privateCommand) {
-    var dayCrates = database.dataBot.day - database.dataBasic[sender.id].day
+    var dayCrates = (database.dataBot.day - database.dataBasic[sender.id].day) / 7
     var crates = database.dataBackpacks[sender.id].crates
     var gifts = database.dataBackpacks[sender.id].gifts
     var tickets = database.dataBackpacks[sender.id].tickets
@@ -653,7 +665,7 @@ function commandStore(sender, privateCommand) {
             '> \\🎁 ' + gifts + ' ajándék\n' +
             '> \\🎟️ ' + tickets + ' kupon\n' +
             '> \\🎫 ' + quizTokens + ' Quiz Token\n' +
-            '> \\🧰 ' + dayCrates + ' napi láda'
+            '> \\🧰 ' + Math.floor(dayCrates) + ' heti láda'
             , false)
         .addField('Sorsjegyek', '> \\💶 ' + smallLuckyCard + ' Black Jack\n> \\💷 ' + mediumLuckyCard + ' Buksza\n> \\💴 ' + largeLuckyCard + ' Fáraók Kincse', false)
         .setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!' })
@@ -695,7 +707,7 @@ function commandStore(sender, privateCommand) {
         .setCustomId("sendGift")
         .setStyle("SECONDARY")
     if (!crates > 0) { buttonCrate.setDisabled(true) }
-    if (!dayCrates > 0) { buttonDayCrate.setDisabled(true) }
+    if (!(Math.floor(dayCrates)) > 0) { buttonDayCrate.setDisabled(true) }
     if (!smallLuckyCard > 0) { buttonLuckyCardSmall.setDisabled(true) }
     if (!mediumLuckyCard > 0) { buttonLuckyCardMedium.setDisabled(true) }
     if (!largeLuckyCard > 0) { buttonLuckyCardLarge.setDisabled(true) }
@@ -715,16 +727,17 @@ function commandStore(sender, privateCommand) {
  * @param {boolean} privateCommand
  */
 function commandAllNapi(sender, ammount, privateCommand) {
-    if (dayOfYear === database.dataBasic[sender.id].day) {
-        return { content: '> **\\❌ Nincs napi ládád! \\🧰**', ephemeral: privateCommand }
+    if (Math.floor((database.dataBot.day - database.dataBasic[sender.id].day) / 7) <= 0) {
+        return { content: '> **\\❌ Nincs heti ládád! \\🧰**', ephemeral: privateCommand }
     } else {
-        let dayCrates = Math.min(database.dataBot.day - database.dataBasic[sender.id].day, ammount)
+        var dayCrateCountRaw = (database.dataBot.day - database.dataBasic[sender.id].day) / 7
+        let dayCrates = Math.min(dayCrateCountRaw, ammount)
 
         let getXpS = 0
         let getChestS = 0
         let getMoney = 0
         let getTicket = 0
-        for (let i = 0; i < dayCrates; i++) {
+        for (let i = 0; i < Math.floor(dayCrates); i++) {
 
             const rewald = openDayCrate(sender.id)
             const rewaldIndex = rewald.split('|')[0]
@@ -743,11 +756,11 @@ function commandAllNapi(sender, ammount, privateCommand) {
         }
 
 
-        database.dataBasic[sender.id].day = database.dataBasic[sender.id].day + dayCrates
+        database.dataBasic[sender.id].day = database.dataBasic[sender.id].day + (Math.floor(dayCrates) * 7)
         database.SaveDatabase()
 
         return {
-            content: '> ' + dayCrates + 'x \\🧰 Kaptál:\n' +
+            content: '> ' + Math.floor(dayCrates) + 'x \\🧰 Kaptál:\n' +
                 '>     \\💵 **' + getMoney + '** pénzt\n' +
                 '>     \\🍺 **' + getXpS + '** xpt\n' +
                 '>     \\🧱 **' + getChestS + '** ládát\n' +
@@ -1064,8 +1077,8 @@ bot.on('interactionCreate', async interaction => {
         let playerIndex = 0
 
         if (interaction.component.customId === 'openDayCrate') {
-            if (dayOfYear === database.dataBasic[interaction.user.id].day) {
-                interaction.reply({ content: '> **\\❌ Már kinyitottad a napi ládádat!*', ephemeral: true })
+            if (Math.floor((database.dataBot.day - database.dataBasic[interaction.user.id].day) / 7) <= 0) {
+                interaction.reply({ content: '> **\\❌ Már kinyitottad a heti ládádat!*', ephemeral: true })
             } else {
                 const rewald = openDayCrate(interaction.user.id)
                 const rewaldIndex = rewald.split('|')[0]
@@ -1087,7 +1100,7 @@ bot.on('interactionCreate', async interaction => {
                 interaction.reply({ content: '> \\🧰 Kaptál:  ' + txt, ephemeral: true })
             }
 
-            database.dataBasic[interaction.user.id].day += 1
+            database.dataBasic[interaction.user.id].day += 7
             if (database.dataBasic[interaction.user.id].day > database.dataBot.day) {
                 database.dataBasic[interaction.user.id].day = database.dataBot.day
             }
@@ -2869,13 +2882,19 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `crate`) {
-        command.reply(await commandAllCrate(command.member, command.options.getInteger("darab"), privateCommand))
+        command.reply(commandAllCrate(command.member, command.options.getInteger("darab"), privateCommand))
+        userstatsSendCommand(command.user)
+        return
+    }
+
+    if (command.commandName === `heti`) {
+        command.reply(commandAllNapi(command.member, command.options.getInteger("darab"), privateCommand))
         userstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `napi`) {
-        command.reply(await commandAllNapi(command.member, command.options.getInteger("darab"), privateCommand))
+        command.reply(commandAllNapi(command.member, command.options.getInteger("darab"), privateCommand))
         userstatsSendCommand(command.user)
         return
     }

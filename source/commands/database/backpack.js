@@ -21,6 +21,7 @@ function saveDatabase() {
 * @param {DatabaseManager} database
 */
 module.exports = (message, sender, isPrivate, database) => {
+    return;
     var currentDay = new Date().getDay()
     var dayCrates = dataBot.day - dataBasic[sender.id].day
     var crates = dataBackpacks[sender.id].crates
@@ -40,7 +41,7 @@ module.exports = (message, sender, isPrivate, database) => {
             '> \\🧱 ' + crates + ' láda\n' +
             '> \\🎁 ' + gifts + ' ajándék\n' +
             '> \\🎟️ ' + tickets + ' kupon\n' +
-            '> \\🧰 ' + dayCrates + ' napi láda'
+            '> \\🧰 ' + dayCrates + ' heti láda'
             , false)
         .addField('Sorsjegyek', '> \\💶 ' + smallLuckyCard + ' Black Jack\n> \\💷 ' + mediumLuckyCard + ' Buksza\n> \\💴 ' + largeLuckyCard + ' Fáraók Kincse', false)
     if (isPrivate === true) {
