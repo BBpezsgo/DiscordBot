@@ -2713,8 +2713,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         return
         */
     }
-
-    message.channel.send("> \\❌ **Ismeretlen parancs! **`/help`** a parancsok listájához!**")
 }
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
