@@ -37,7 +37,7 @@ const fs = require('fs')
 
 
 
-process.stdin.on('mousepress', function (info) {})
+process.stdin.on('mousepress', function (info) { })
 
 process.stdin.resume()
 
@@ -75,11 +75,7 @@ process.stdin.on('data', function (b) {
                 default: return;
             }
         }
-        console.error(key)
-    } else {
-        // something else...
-        console.error(0, s, b)
-    }
+    } else { }
 })
 
 // Enable "raw mode"
