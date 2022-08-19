@@ -356,7 +356,13 @@ bot.on('shardDisconnect', (colseEvent, shardID) => {
 bot.on('shardReady', (shardID) => {
     const mainGuild = bot.guilds.cache.get('737954264386764812')
     const quizChannel = mainGuild.channels.cache.get('799340273431478303')
-    quizChannel.messages.fetch()
+    if (quizChannel != undefined) {
+        quizChannel.messages.fetch()
+    } else {
+        bot.channels.fetch('799340273431478303').then((channel) => {
+            channel.messages.fetch()
+        })
+    }
     statesManager.shardCurrentlyLoading = false
 })
 

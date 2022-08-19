@@ -2220,22 +2220,35 @@ bot.once('ready', async () => {
             const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
             const embed = newsMessage.embed
             statesManager.newsLoadingText2 = 'Send new message...'
-            if (newsMessage.NotifyRoleId.length == 0) {
-                newsChannel.send({ embeds: [embed] })
-                    .then(() => {
-                        statesManager.newsLoadingText2 = 'Delete raw message...'
-                        newsMessage.message.delete().then(() => {
-                            statesManager.newsLoadingText2 = ''
-                        })
-                    })
-            } else {
-                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
-                    .then(() => {
-                        statesManager.newsLoadingText2 = 'Delete raw message...'
-                        newsMessage.message.delete().then(() => {
-                            statesManager.newsLoadingText2 = ''
-                        })
-                    })
+
+            /** @type {Discord.TextChannel | undefined} */
+            const newsTestChannel = bot.channels.cache.get('1010110583800078397')
+            if (newsTestChannel != undefined) {
+                newsTestChannel.send({
+                    tts: newsMessage.message.tts,
+                    nonce: newsMessage.message.nonce,
+                    content: newsMessage.message.content,
+                    embeds: newsMessage.message.embeds,
+                    components: newsMessage.message.components
+                }).finally(() => {
+                    if (newsMessage.NotifyRoleId.length == 0) {
+                        newsChannel.send({ embeds: [embed] })
+                            .then(() => {
+                                statesManager.newsLoadingText2 = 'Delete raw message...'
+                                newsMessage.message.delete().then(() => {
+                                    statesManager.newsLoadingText2 = ''
+                                })
+                            })
+                    } else {
+                        newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
+                            .then(() => {
+                                statesManager.newsLoadingText2 = 'Delete raw message...'
+                                newsMessage.message.delete().then(() => {
+                                    statesManager.newsLoadingText2 = ''
+                                })
+                            })
+                    }
+                })
             }
             lastNoNews = false
             statesManager.allNewsProcessed = false
