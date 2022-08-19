@@ -24,22 +24,6 @@ process.on('uncaughtException', function (err) {
     fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
 })
 
-process.on('warning', (warn) => {
-    console.log(warn)
-})
-
-process.on('worker', (worker) => {
-    console.log(worker.threadId)
-})
-
-process.on('message', (message, sendHandle) => {
-    console.log(message)
-})
-
-process.on('disconnect', () => {
-    console.log('disconnect')
-})
-
 var autoStartBot = true
 
 const { SystemLog, SystemStart, SystemStop } = require('./functions/systemLog')
@@ -57,11 +41,8 @@ const fs = require('fs')
 process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
 
 var botStopped = false
-var cliCurrentlyTyping = ''
 
-process.stdin.on('mousepress', function (info) {
-    // console.log('Got "mousepress" event at %d x %d', info.x, info.y)
-})
+process.stdin.on('mousepress', function (info) {})
 
 process.stdin.resume()
 
@@ -215,13 +196,10 @@ const { musicGetLengthText } = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
 const { WebSocket } = require('./ws/ws')
-
-logManager.Loading('Loading', "WS")
 const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
-
 const { MessageActionRow, MessageButton, GatewayIntentBits } = require('discord.js')
 const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
 const { perfix, tokens } = require('./config.json')

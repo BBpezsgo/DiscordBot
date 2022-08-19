@@ -4,11 +4,6 @@
 
 
 
-
-
-
-
-
 /** @param {Error} err */
 function FormatError(err) {
     var str = ""
@@ -23,7 +18,6 @@ process.on('uncaughtException', function (err) {
     fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
     fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
 })
-
 
 var autoStartBot = true
 
@@ -42,11 +36,8 @@ const fs = require('fs')
 process.__defineGetter__('stderr', function() { return fs.createWriteStream('./node.error.log', {flags:'a'}) })
 
 var botStopped = false
-var cliCurrentlyTyping = ''
 
-process.stdin.on('mousepress', function (info) {
-    // console.log('Got "mousepress" event at %d x %d', info.x, info.y)
-})
+process.stdin.on('mousepress', function (info) {})
 
 process.stdin.resume()
 
@@ -100,10 +91,7 @@ process.stdin.on('data', function (b) {
         // console.error(0, s, b)
     }
 })
-/**@param {string} command */
-function ProcessCliCommand(command) {
-    
-}
+
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
     process.stdin.setRawMode(true)
@@ -161,32 +149,6 @@ const { CommandFont } = require('./commands/fonts')
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 logManager.Loading("Loading extensions", 'commands')
 const { CreateCommands, DeleteCommands } = require('./functions/commands')
 logManager.Loading("Loading extensions", 'translator')
@@ -203,20 +165,17 @@ const { musicGetLengthText } = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
 const { WebSocket } = require('./ws/ws')
-
-logManager.Loading('Loading', "WS")
 const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
-
 const { MessageActionRow, MessageButton, GatewayIntentBits } = require('discord.js')
 
 const { perfix, tokens } = require('./config.json')
 
 logManager.Loading('Loading packet', "other functions")
 
-const { abbrev } = require('./functions/abbrev')
+
 const { DateToString } = require('./functions/dateToString')
 const { NewsMessage, CreateNews } = require('./functions/news')
 const {
@@ -237,7 +196,7 @@ const {
 
 logManager.BlankScreen()
 
-const selfId = '738030244367433770'
+
 
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
@@ -282,7 +241,7 @@ function log(message = '', translateResult = null) {
 const ws = new WebSocket('1234', '192.168.1.101', 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'RASPBERRY')
 logManager.BlankScreen()
 
-const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
+
 
 
 
@@ -1327,6 +1286,5 @@ SystemLog('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
 
 
 StartBot()
-
 
 

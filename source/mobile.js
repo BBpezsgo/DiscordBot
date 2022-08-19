@@ -1,5 +1,31 @@
 
-//#region Imports, variables
+
+
+
+
+
+/** @param {Error} err */
+function FormatError(err) {
+    var str = ""
+    str += err.name + ': ' + err.message
+    if (err.stack != undefined) {
+        str += '\n' + err.stack
+    }
+    return str
+}
+
+process.on('uncaughtException', function (err) {
+    // fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
+    // fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
+})
+
+
+
+
+
+
+
+
 
 const { LogManager } = require('./functions/log.js')
 var logManager = new LogManager(true, null, null)
@@ -11,12 +37,7 @@ const fs = require('fs')
 
 
 
-
-
-
-process.stdin.on('mousepress', function (info) {
-    // console.log('got "mousepress" event at %d x %d', info.x, info.y)
-})
+process.stdin.on('mousepress', function (info) {})
 
 process.stdin.resume()
 
@@ -61,8 +82,6 @@ process.stdin.on('data', function (b) {
     }
 })
 
-
-
 // Enable "raw mode"
 if (process.stdin.setRawMode) {
     process.stdin.setRawMode(true)
@@ -74,55 +93,48 @@ if (process.stdin.setRawMode) {
 process.stdout.write('\x1b[?1005h')
 process.stdout.write('\x1b[?1003h')
 
-process.on('exit', function () {
-    // don't forget to turn off mouse reporting
+process.on('exit', function (code) {
+    // Turn off mouse reporting
     process.stdout.write('\x1b[?1005l')
     process.stdout.write('\x1b[?1003l')
-    console.log("The application is closed")
+    console.log('Exit with code ' + code)
+
+
+
 })
 
-// Loading npm packages
+//#region NPM Packages and variables
 
-logManager.Loading("Loading extensions", 'weather')
+logManager.Loading("Loading commands", 'weather')
 const CommandWeather = require('./commands/weather')
 const CommandDailyWeatherReport = require('./commands/dailyWeatherReport')
-logManager.Loading("Loading extensions", 'help')
+
+
+logManager.Loading("Loading commands", 'help')
 const CommandHelp = require('./commands/help')
 
-logManager.Loading("Loading extensions", 'crossout')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+logManager.Loading("Loading commands", 'crossout')
 const { CrossoutTest } = require('./commands/crossout')
-logManager.Loading("Loading extensions", 'redditsave')
+logManager.Loading("Loading commands", 'redditsave')
 const CommandRedditsave = require('./commands/redditsave')
-logManager.Loading("Loading extensions", 'fonts')
+logManager.Loading("Loading commands", 'fonts')
 const { CommandFont } = require('./commands/fonts')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -136,39 +148,52 @@ const { StatesManager } = require('./functions/statesManager.js')
 
 
 
-const statesManager = new StatesManager()
+logManager.Loading('Loading packet', "ytdl-core")
+const ytdl = require('ytdl-core')
+
+
+
+logManager.Loading('Loading', "WS")
+const { WebSocket } = require('./ws/ws')
+
+
+logManager.Loading('Loading packet', "discord.js")
+const Discord = require('discord.js')
+const { MessageActionRow, MessageButton, GatewayIntentBits } = require('discord.js')
+
+const { perfix, tokens } = require('./config.json')
+
+logManager.Loading('Loading packet', "other functions")
+
+
+const { DateToString } = require('./functions/dateToString')
+const { NewsMessage, CreateNews } = require('./functions/news')
+const {
+    INFO,
+    ERROR,
+    WARNING,
+    SHARD,
+    DEBUG,
+    DONE,
+    Color,
+    activitiesMobile
+} = require('./functions/enums.js')
+
+
 logManager.BlankScreen()
 
-const ColorRoles = {
-    red: "850016210422464534",
-    yellow: "850016458544250891",
-    blue: "850016589155401758",
-    orange: "850016531848888340",
-    green: "850016722039078912",
-    purple: "850016668352643072",
-    invisible: "850016786186371122"
-}
-
-const { INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, activitiesMobile } = require('./functions/enums.js')
 
 
-
-
-
-logManager.BlankScreen()
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-logManager.Loading('Loading packet', "discord.js")
-const Discord = require("discord.js");
-const { MessageActionRow, MessageButton, GatewayIntentBits  } = require('discord.js');
-logManager.Loading('Loading', "bot")
-const { perfix, tokens } = require('./config.json')
 const bot = new Discord.Client({ properties: { $browser: "Discord iOS" }, intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
 logManager.Destroy()
+
+const statesManager = new StatesManager()
 logManager = new LogManager(true, bot, statesManager)
+
 statesManager.botLoaded = true
-logManager.BlankScreen()
 
 /** @param {string} message */
 function log(message = '', translateResult = null) {
@@ -198,16 +223,13 @@ function log(message = '', translateResult = null) {
 
 
 
-logManager.Loading('Loading packet', "ytdl-core")
-const ytdl = require('ytdl-core')
 
-logManager.Loading('Loading', "WS")
-const { WebSocket } = require('./ws/ws')
-var ws = new WebSocket('1234', '192.168.1.102', 5665, bot, logManager, null, null, null, statesManager, 'MOBILE')
+const ws = new WebSocket('1234', '192.168.1.102', 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'MOBILE')
 logManager.BlankScreen()
 
 
-const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
+
+
 
 /**@type {string[]} */
 let musicArray = []
@@ -216,25 +238,16 @@ let musicFinished = true
 let lastNoNews = false
 
 
-const { DateToString } = require('./functions/dateToString')
-const { NewsMessage, CreateNews } = require('./functions/news')
-
-
 
 
 
 
 //#endregion
 
-/** @type [NewsMessage] */
+/** @type {NewsMessage[]} */
 const listOfNews = []
 const incomingNewsChannel = '902894789874311198'
 const processedNewsChannel = '746266528508411935'
-
-
-
-
-
 //#region Functions
 /**@param {number} days @returns {number} */
 function DaysToMilliseconds(days) {
@@ -407,37 +420,6 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
 bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => { })
 
 //#endregion
-
-bot.on('interactionCreate', interaction => {
-    if (interaction.isCommand()) {
-        processApplicationCommand(interaction)
-    } else if (interaction.isButton()) {
-        if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
-            if (interaction.component.customId.includes(interaction.user.id)) {
-                interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
-                const button1 = interaction.message.components[0].components[0]
-                const button2 = interaction.message.components[0].components[1]
-                const row = new MessageActionRow()
-                    .addComponents(button1, button2)
-                interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
-                return
-            }
-        }
-        if (interaction.component.customId.startsWith('redditsaveDelete')) {
-            if (interaction.component.customId.includes(interaction.user.id)) {
-                interaction.message.delete()
-                return
-            }
-        }
-        
-        try {
-            if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
-                interaction.reply({content: '> \\❗ **Ez nem a tied!**', ephemeral: true})
-                return
-            }
-        } catch (error) { }
-    }
-})
 
 //#region Commands
 
@@ -745,6 +727,37 @@ async function quizDone(quizMessageId, correctIndex) {
 }
 //#endregion
 
+bot.on('interactionCreate', interaction => {
+    if (interaction.isCommand()) {
+        processApplicationCommand(interaction)
+    } else if (interaction.isButton()) {
+        if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
+            if (interaction.component.customId.includes(interaction.user.id)) {
+                interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
+                const button1 = interaction.message.components[0].components[0]
+                const button2 = interaction.message.components[0].components[1]
+                const row = new MessageActionRow()
+                    .addComponents(button1, button2)
+                interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
+                return
+            }
+        }
+        if (interaction.component.customId.startsWith('redditsaveDelete')) {
+            if (interaction.component.customId.includes(interaction.user.id)) {
+                interaction.message.delete()
+                return
+            }
+        }
+        
+        try {
+            if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
+                interaction.reply({content: '> \\❗ **Ez nem a tied!**', ephemeral: true})
+                return
+            }
+        } catch (error) { }
+    }
+})
+
 bot.on('clickButton', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
@@ -945,6 +958,10 @@ bot.on('messageCreate', async message => { //Message
 
 
 
+
+
+
+
 /**
  * @param {Discord.Message} message
  * @param {boolean} thisIsPrivateMessage
@@ -1048,10 +1065,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     //#endregion
 }
-
-
-
-
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command */
 async function processApplicationCommand(command) {
@@ -1219,6 +1232,11 @@ function StartBot() {
 function StopBot() {
     bot.destroy()
 }
+
+
+
+
+
 
 StartBot()
 
