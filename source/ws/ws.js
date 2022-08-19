@@ -260,17 +260,17 @@ class WebSocket {
                 createdAt: GetDate(server.createdAt),
                 joinedAt: GetDate(server.joinedAt),
 
-                memberCount: (server.memberCount),
-                nsfwLevel: (server.nsfwLevel),
-                nameAcronym: (server.nameAcronym),
-                mfaLevel: (server.mfaLevel),
-                verificationLevel: (server.verificationLevel),
-                splash: (server.splash),
+                memberCount: server.memberCount,
+                nsfwLevel: server.nsfwLevel,
+                nameAcronym: '-',
+                mfaLevel: server.mfaLevel,
+                verificationLevel: server.verificationLevel,
+                splash: server.splash,
 
                 available: server.available,
-                large: (server.large),
-                partnered: (server.partnered),
-                verified: (server.verified),
+                large: server.large,
+                partnered: server.partnered,
+                verified: server.verified,
             }
 
             servers.push(newServer)
