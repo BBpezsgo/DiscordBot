@@ -57,7 +57,9 @@ function weatherSkytxt(skyTxt) {
     } else if (skyTxt === 'Clear') {
         return 'Derült'
     } else if (skyTxt === 'T-Storms') {
-        return 'Vihar'
+        return 'Zivatar'
+    } else if (skyTxt === 'Heavy T-Storms') {
+        return 'Erős Zivatar'
     } else if (skyTxt === 'Snow') {
         return 'Havazás'
     } else if (skyTxt === 'Light Snow') {
@@ -469,6 +471,8 @@ function weatherSkytextIcon(skyTxt, useMoon) {
         return '\\🌤️'
     } else if (skyTxt === 'Light Rain and Snow') {
         return '\\🌧️'
+    } else if (skyTxt === 'Heavy T-Storms') {
+        return '\\⛈️'
     } else if (skyTxt === 'Partly Cloudy') {
         return '\\⛅'
     }
@@ -549,6 +553,8 @@ function weatherSkytextImgName(skyTxt, sunset, sunrise, clouds) {
     } else if (skyTxt === 'Light Rain and Snow') {
         rain = 3
     } else if (skyTxt === 'T-Storms') {
+        rain = 2
+    } else if (skyTxt === 'Heavy T-Storms') {
         rain = 2
     } else if (skyTxt === 'Snow') {
         rain = 3

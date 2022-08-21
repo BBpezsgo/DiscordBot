@@ -94,36 +94,44 @@ function getEmbedEarth(data0, data1, data2, data3) {
 
         embed
             .setTitle(`**${skyTxt}** ||(${data1.weather[0].description})|||| (${data1.weather[0].id})||`)
-            .setDescription(
-                `\\☁️ ${data1.clouds.all} % felhősség\n` +
-                `\\☔ ${data0[0].forecast[1].precip} % csapadék\n` +
-                `${humidityIcon} ${humidityValue} % páratartalom\n` +
-                `${tempIcon} ${tempMinValue} - ${tempValue} - ${tempMaxValue} °C (Hőérzet: ${tempFeelslikeValue} °C)\n` +
-                `${windIcon} ${windDirection} (${data1.wind.deg}°) ${windValue} km/h szél\n` +
-                `\\🌬️ ${windGustValue} km/h széllökés\n` +
-                `${weatherPressureIcon(data1.main.pressure)} ${data1.main.pressure} pHa légnyomás\n` +
-                `\\👁️ ${visibilityValue} km látótávolság\n` +
+        
+        var description =
+            `\\☁️ ${data1.clouds.all} % felhősség\n` +
+            `\\☔ ${data0[0].forecast[1].precip} % csapadék\n` +
+            `${humidityIcon} ${humidityValue} % páratartalom\n` +
+            `${tempIcon} ${tempMinValue} - ${tempValue} - ${tempMaxValue} °C (Hőérzet: ${tempFeelslikeValue} °C)\n` +
+            `${windIcon} ${windDirection} (${data1.wind.deg}°) ${windValue} km/h szél\n` +
+            `\\🌬️ ${windGustValue} km/h széllökés\n` +
+            `${weatherPressureIcon(data1.main.pressure)} ${data1.main.pressure} pHa légnyomás\n` +
+            `\\👁️ ${visibilityValue} km látótávolság`
 
-                '\n\n**Levegőminőség:**\n\n' +
+        if (data3 != undefined && data3 != null) {
+            description +=
+            '\n\n**Levegőminőség:**\n\n' +
 
-                'Levőminőség index: \\' + GetPollutionIndex(8, data3.main.aqi) + ' ' + GetPollutionText(data3.main.aqi) +
+            'Levőminőség index: \\' + GetPollutionIndex(8, data3.main.aqi) + ' ' + GetPollutionText(data3.main.aqi) +
 
-                '\n\nCO: \\' + GetPollutionIndex(0, data3.components.co) + ' ' + data3.components.co + ' μg/m³' +
-                '\nNO: \\' + GetPollutionIndex(1, data3.components.no) + ' ' + data3.components.no + ' μg/m³' +
-                '\nNO₂: \\' + GetPollutionIndex(2, data3.components.no2) + ' ' + data3.components.no2 + ' μg/m³' +
-                '\nO₃: \\' + GetPollutionIndex(3, data3.components.o3) + ' ' + data3.components.o3 + ' μg/m³' +
-                '\nSO₂: \\' + GetPollutionIndex(4, data3.components.so2) + ' ' + data3.components.so2 + ' μg/m³' +
-                '\nPM₂.₅: \\' + GetPollutionIndex(5, data3.components.pm2_5) + ' ' + data3.components.pm2_5 + ' μg/m³' +
-                '\nPM₁₀: \\' + GetPollutionIndex(6, data3.components.pm10) + ' ' + data3.components.pm10 + ' μg/m³' +
-                '\nNH₃: \\' + GetPollutionIndex(7, data3.components.nh3) + ' ' + data3.components.nh3 + ' μg/m³' +
+            '\n\nCO: \\' + GetPollutionIndex(0, data3.components.co) + ' ' + data3.components.co + ' μg/m³' +
+            '\nNO: \\' + GetPollutionIndex(1, data3.components.no) + ' ' + data3.components.no + ' μg/m³' +
+            '\nNO₂: \\' + GetPollutionIndex(2, data3.components.no2) + ' ' + data3.components.no2 + ' μg/m³' +
+            '\nO₃: \\' + GetPollutionIndex(3, data3.components.o3) + ' ' + data3.components.o3 + ' μg/m³' +
+            '\nSO₂: \\' + GetPollutionIndex(4, data3.components.so2) + ' ' + data3.components.so2 + ' μg/m³' +
+            '\nPM₂.₅: \\' + GetPollutionIndex(5, data3.components.pm2_5) + ' ' + data3.components.pm2_5 + ' μg/m³' +
+            '\nPM₁₀: \\' + GetPollutionIndex(6, data3.components.pm10) + ' ' + data3.components.pm10 + ' μg/m³' +
+            '\nNH₃: \\' + GetPollutionIndex(7, data3.components.nh3) + ' ' + data3.components.nh3 + ' μg/m³'
+        }
 
-                '\n\n**Egyéb:**\n\n' +
+            description +=
+            '\n\n**Egyéb:**\n\n' +
 
-                `${moonIcon} ${moonText} (${Math.floor(data2[1].illum * 100)} %-a látható)\n` +
-                `\\🌇 Napkelte: ${unixToTime(data1.sys.sunrise)}\n` +
-                `\\🌆 Napnyugta: ${unixToTime(data1.sys.sunset)}\n\n` +
+            `${moonIcon} ${moonText} (${Math.floor(data2[1].illum * 100)} %-a látható)\n` +
+            `\\🌇 Napkelte: ${unixToTime(data1.sys.sunrise)}\n` +
+            `\\🌆 Napnyugta: ${unixToTime(data1.sys.sunset)}\n\n` +
 
-                '**Előrejelzés:**')
+            '**Előrejelzés:**'
+
+        embed.setDescription(description)
+        
         if (ImgExists(skyImgName) === true) {
             embed
                 .setImage('https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/commands/weatherImages/' + skyImgName + '.jpg')
