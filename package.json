@@ -7,24 +7,22 @@
     "start": "node source/desktop.js"
   },
   "repository": "https://github.com/BBpezsgo/DiscordBot",
-  "devDependencies": {
-    "@discordjs/voice": "^0.9.0",
-    "adm-zip": "^0.5.9",
-    "axios": "^0.21.4",
-    "discord.js": "^13.10.2",
-    "express": "^4.18.1",
-    "express-handlebars": "^6.0.6",
-    "ffmpeg": "^0.0.4",
-    "ffmpeg-static": "^5.0.0",
-    "fluent-ffmpeg": "^2.1.2",
-    "fs": "^0.0.1-security",
-    "jsdom": "^19.0.0",
-    "moonphase-js": "^0.2.0",
-    "nodejs-weather-app": "^1.9.0",
-    "weather-js": "^2.0.0",
-    "ytdl-core": "^4.11.0"
-  },
   "dependencies": {
-    "asciichart": "^1.5.25"
+    "@discordjs/voice": "latest",
+    "adm-zip": "latest",
+    "asciichart": "latest",
+    "axios": "latest",
+    "discord.js": "13.10.2",
+    "express": "latest",
+    "express-handlebars": "latest",
+    "ffmpeg": "latest",
+    "ffmpeg-static": "latest",
+    "fluent-ffmpeg": "latest",
+    "fs": "latest",
+    "jsdom": "latest",
+    "moonphase-js": "latest",
+    "nodejs-weather-app": "^1.1.0",
+    "weather-js": "latest",
+    "ytdl-core": "latest"
   }
 }

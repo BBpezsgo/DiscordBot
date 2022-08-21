@@ -269,8 +269,8 @@ class WebSocket {
 
                 available: server.available,
                 large: server.large,
-                partnered: server.partnered,
-                verified: server.verified,
+                // partnered: server.partnered,
+                // verified: server.verified,
             }
 
             servers.push(newServer)
@@ -1351,6 +1351,13 @@ class WebSocket {
                     xd = line.replace(line.replace(':'[0]), '')
                     xd = xd.replace(': ', '')
                     warnings.push({ type: 'DeprecationWarning', title: xd, id: i })
+                    isCrash = false
+                } else if (line.includes(' ExperimentalWarning:')) {
+                    var xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(':', '')
+                    xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(': ', '')
+                    warnings.push({ type: 'ExperimentalWarning', title: xd, id: i })
                     isCrash = false
                 } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
                     warnings[warnings.length - 1].info = 'Use `node --trace-deprecation ...` to show where the warning was created'

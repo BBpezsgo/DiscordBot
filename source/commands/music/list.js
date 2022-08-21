@@ -10,7 +10,11 @@ module.exports = (channel) => {
         const embed = new Discord.MessageEmbed()
         musicArray.forEach(_link => {
             ytdl.getBasicInfo(_link).then( info => {
-                embed.addField(info.videoDetails.title, ' ', false)
+                embed.addFields([{
+                    name: info.videoDetails.title,
+                    value: ' ',
+                    inline: false
+                }])
             })
         })
         channel.send('> **\\❔ Lejátszólista: \\🎧**', embed)

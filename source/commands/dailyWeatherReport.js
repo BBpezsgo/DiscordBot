@@ -64,7 +64,11 @@ function getEmbedEarth(weatherData) {
             stringBuilder += `\\⛄ ${currentWeatherItem.snow['3h']} mm hó\n`
         }
 
-        embed.addField(unixToTime(currentWeatherItem.dt) + ` ${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`, stringBuilder.trimEnd(), false)
+        embed.addFields([{
+            name: unixToTime(currentWeatherItem.dt) + ` ${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
+            value: stringBuilder.trimEnd(),
+            inline: false
+        }])
     }
 
     embed

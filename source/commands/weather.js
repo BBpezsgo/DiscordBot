@@ -48,7 +48,8 @@ const {
     dayName,
     weatherSkytextIcon,
     weatherSkytextImgName
-} = require('../commands/weatherFunctions')
+} = require('../commands/weatherFunctions');
+const { inflate } = require('zlib');
 
 /**
  * @param {any} data0 Msn weather data
@@ -137,7 +138,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
                 .setImage('https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/commands/weatherImages/' + skyImgName + '.jpg')
         } else {
             embed
-                .addField('ImgCode', skyImgName, false)
+                .addFields([{name: 'ImgCode', value: skyImgName, inline: false}])
         }
     }
     { //Tegnap
@@ -151,11 +152,14 @@ function getEmbedEarth(data0, data1, data2, data3) {
         const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
-            .addField(dayName(new Date().getDay() - 1),
-                `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
-                `${skyIcon} ${skyTxt}\n` +
-                `${weatherMoonIcon(data2[0].phaseName())} ${weatherMoonText(data2[0].phaseName())}`,
-                true)
+            .addFields([{
+                    name: dayName(new Date().getDay() - 1),
+                    value:
+                        `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
+                        `${skyIcon} ${skyTxt}\n` +
+                        `${weatherMoonIcon(data2[0].phaseName())} ${weatherMoonText(data2[0].phaseName())}`,
+                    inline: true
+                }])
     }
     { //Ma2
         let skyTxt = data0[0].forecast[1].skytextday
@@ -168,12 +172,14 @@ function getEmbedEarth(data0, data1, data2, data3) {
         const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
-            .addField(dayName(new Date().getDay()) + ' (ma)',
-                `\\☔ ${data0[0].forecast[1].precip} %\n` +
-                `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
-                `${skyIcon} ${skyTxt}\n` +
-                `${weatherMoonIcon(data2[1].phaseName())} ${weatherMoonText(data2[1].phaseName())}`,
-                true)
+            .addFields([{
+                name: dayName(new Date().getDay()) + ' (ma)',
+                value: `\\☔ ${data0[0].forecast[1].precip} %\n` +
+                    `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
+                    `${skyIcon} ${skyTxt}\n` +
+                    `${weatherMoonIcon(data2[1].phaseName())} ${weatherMoonText(data2[1].phaseName())}`,
+                inline: true
+            }])
     }
     { //Holnap
         let skyTxt = data0[0].forecast[2].skytextday
@@ -186,12 +192,14 @@ function getEmbedEarth(data0, data1, data2, data3) {
         const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
-            .addField(dayName(new Date().getDay() + 1),
-                `\\☔ ${data0[0].forecast[2].precip} %\n` +
-                `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
-                `${skyIcon} ${skyTxt}\n` +
-                `${weatherMoonIcon(data2[2].phaseName())} ${weatherMoonText(data2[2].phaseName())}`,
-                true)
+            .addFields([{
+                name: dayName(new Date().getDay() + 1),
+                value: `\\☔ ${data0[0].forecast[2].precip} %\n` +
+                    `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
+                    `${skyIcon} ${skyTxt}\n` +
+                    `${weatherMoonIcon(data2[2].phaseName())} ${weatherMoonText(data2[2].phaseName())}`,
+                inline: true
+            }])
     }
     { //Holnap után
         let skyTxt = data0[0].forecast[3].skytextday
@@ -204,12 +212,14 @@ function getEmbedEarth(data0, data1, data2, data3) {
         const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
-            .addField(dayName(new Date().getDay() + 2),
-                `\\☔ ${data0[0].forecast[3].precip} %\n` +
-                `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
-                `${skyIcon} ${skyTxt}\n` +
-                `${weatherMoonIcon(data2[3].phaseName())} ${weatherMoonText(data2[3].phaseName())}`,
-                true)
+            .addFields([{
+                name: dayName(new Date().getDay() + 2),
+                value: `\\☔ ${data0[0].forecast[3].precip} %\n` +
+                    `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
+                    `${skyIcon} ${skyTxt}\n` +
+                    `${weatherMoonIcon(data2[3].phaseName())} ${weatherMoonText(data2[3].phaseName())}`,
+                inline: true
+            }])
     }
     { //Holnap után-után
         let skyTxt = data0[0].forecast[4].skytextday
@@ -222,12 +232,14 @@ function getEmbedEarth(data0, data1, data2, data3) {
         const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         embed
-            .addField(dayName(new Date().getDay() + 3),
-                `\\☔ ${data0[0].forecast[4].precip} %\n` +
-                `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
-                `${skyIcon} ${skyTxt}\n` +
-                `${weatherMoonIcon(data2[4].phaseName())} ${weatherMoonText(data2[4].phaseName())}`,
-                true)
+            .addFields([{
+                name: dayName(new Date().getDay() + 3),
+                value: `\\☔ ${data0[0].forecast[4].precip} %\n` +
+                    `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
+                    `${skyIcon} ${skyTxt}\n` +
+                    `${weatherMoonIcon(data2[4].phaseName())} ${weatherMoonText(data2[4].phaseName())}`,
+                inline: true
+            }])
     }
 
     embed
@@ -339,11 +351,12 @@ function getEmbedMars(data, weeklyImage) {
 
     data.sols.forEach(sol => {
         if (latestSol.sol != sol.sol) {
-            embed.addField('Sol ' + sol.sol,
-            GetMarsPressureIcon(sol.pressure, averagePressure) + sol.pressure + ' Pa\n' + 
-            '\\🌡️ ' + sol.min_temp + ' - ' + sol.max_temp + ' C°\n' + 
-            'Évszak: ' + (GetSeason(sol.season)) + ''
-            , true)
+            embed.addFields([{
+                name: 'Sol ' + sol.sol,
+                value: '\\🌡️ ' + sol.min_temp + ' - ' + sol.max_temp + ' C°\n' + 
+                    'Évszak: ' + (GetSeason(sol.season)) + '',
+                inline: true
+            }])
         }
     })
 

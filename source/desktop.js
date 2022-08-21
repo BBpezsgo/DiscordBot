@@ -351,8 +351,18 @@ function addXp(user, channel, ammount) {
         const embed = new Discord.MessageEmbed()
             .setAuthor({ name: user.username, iconURL: user.avatarURL() })
             .setTitle('Szintet léptél!')
-            .addField('Rang', '\\' + rank.toString() + '  (' + rankName + ')', true)
-            .addField('Jutalmad', addMoney.toString() + '\\💵', true)
+            .addFields([
+                {
+                    name: 'Rang',
+                    value: '\\' + rank.toString() + '  (' + rankName + ')',
+                    inline: true
+                },
+                {
+                    name: 'Jutalmad',
+                    value: addMoney.toString() + '\\💵',
+                    inline: true
+                }
+            ])
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/clinking-beer-mugs_1f37b.png')
             .setColor(Color.Highlight)
         //channel.send({ embeds: [embed] })
@@ -878,7 +888,10 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
             `\\❌ **-${removeXpValue}\\🍺** és **-${removeToken}\\🎫**\n` +
             `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
         )
-        .addField(`${titleText}`, `${optionText}`)
+        .addFields([{
+            name: titleText,
+            value: optionText
+        }])
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
         .setFooter({ text: "Vége:" })
         .setTimestamp(dateNow)
@@ -925,7 +938,10 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
     const embed = new Discord.MessageEmbed()
         .setColor(Color.DarkPink)
         .setTitle('Szavazás!')
-        .addField(`${titleText}`, `${optionText}`)
+        .addFields([{
+            name: titleText,
+            value: optionText
+        }])
 
     bot.channels.cache.get('795935090026086410').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&795935996982198272>')
@@ -2565,16 +2581,17 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     if (command.startsWith(`quiz help`)) {
         userstatsSendCommand(sender)
         const embed = new Discord.MessageEmbed()
-            .addField('Quiz szintaxis',
-                '.quiz\n' +
-                'Cím\n' +
-                'Opció;Opció;Opció\n' +
-                '💥;💥;💥\n' +
-                '5000 (add XP)\n' +
-                '2500 (remove XP)\n' +
-                '10 (add Token)\n' +
-                '5 (remove Token)'
-            )
+            .addFields([{
+                name: 'Quiz szintaxis',
+                value: '.quiz\n' +
+                    'Cím\n' +
+                    'Opció;Opció;Opció\n' +
+                    '💥;💥;💥\n' +
+                    '5000 (add XP)\n' +
+                    '2500 (remove XP)\n' +
+                    '10 (add Token)\n' +
+                    '5 (remove Token)'
+            }])
             .setColor(Color.Highlight)
         message.channel.send({ embeds: [embed] })
         return
