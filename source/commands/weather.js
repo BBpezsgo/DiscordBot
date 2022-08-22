@@ -157,7 +157,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
                     value:
                         `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
                         `${skyIcon} ${skyTxt}\n` +
-                        `${weatherMoonIcon(data2[0].phaseName())} ${weatherMoonText(data2[0].phaseName())}`,
+                        `${weatherMoonIcon(data2[0].phaseName())}`,
                     inline: true
                 }])
     }
@@ -177,7 +177,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
                 value: `\\☔ ${data0[0].forecast[1].precip} %\n` +
                     `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
                     `${skyIcon} ${skyTxt}\n` +
-                    `${weatherMoonIcon(data2[1].phaseName())} ${weatherMoonText(data2[1].phaseName())}`,
+                    `${weatherMoonIcon(data2[1].phaseName())}`,
                 inline: true
             }])
     }
@@ -197,7 +197,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
                 value: `\\☔ ${data0[0].forecast[2].precip} %\n` +
                     `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
                     `${skyIcon} ${skyTxt}\n` +
-                    `${weatherMoonIcon(data2[2].phaseName())} ${weatherMoonText(data2[2].phaseName())}`,
+                    `${weatherMoonIcon(data2[2].phaseName())}`,
                 inline: true
             }])
     }
@@ -217,7 +217,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
                 value: `\\☔ ${data0[0].forecast[3].precip} %\n` +
                     `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
                     `${skyIcon} ${skyTxt}\n` +
-                    `${weatherMoonIcon(data2[3].phaseName())} ${weatherMoonText(data2[3].phaseName())}`,
+                    `${weatherMoonIcon(data2[3].phaseName())}`,
                 inline: true
             }])
     }
@@ -237,7 +237,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
                 value: `\\☔ ${data0[0].forecast[4].precip} %\n` +
                     `${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C\n` +
                     `${skyIcon} ${skyTxt}\n` +
-                    `${weatherMoonIcon(data2[4].phaseName())} ${weatherMoonText(data2[4].phaseName())}`,
+                    `${weatherMoonIcon(data2[4].phaseName())}`,
                 inline: true
             }])
     }
@@ -354,7 +354,7 @@ function getEmbedMars(data, weeklyImage) {
             embed.addFields([{
                 name: 'Sol ' + sol.sol,
                 value: '\\🌡️ ' + sol.min_temp + ' - ' + sol.max_temp + ' C°\n' + 
-                    'Évszak: ' + (GetSeason(sol.season)) + '',
+                    GetSeason(sol.season),
                 inline: true
             }])
         }
