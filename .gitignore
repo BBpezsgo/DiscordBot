@@ -21,3 +21,10 @@ source/FLR.json
 source/GST.json
 source/IPS.json
 Update.bat
+source/ws/public/styles-test
+.vs
+DiscordBot.njsproj
+bin
+obj
+DiscordBot.sln
+DiscordBot.njsproj.user
