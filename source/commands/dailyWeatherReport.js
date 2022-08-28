@@ -31,10 +31,10 @@ const { Color } = require('../functions/enums')
 
 /**
  * @param {any} weatherData
- * @returns {Discord.MessageEmbed}
+ * @returns {Discord.EmbedBuilder}
  */
 function getEmbedEarth(weatherData) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor(Color.Highlight)
         .setAuthor({ name: weatherData.city.name, url: 'https://openweathermap.org/city/' + weatherData.city.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
@@ -81,7 +81,7 @@ function getEmbedEarth(weatherData) {
 module.exports = async (channel, statesManager) => {
     statesManager.dailyWeatherReportLoadingText = 'Send loading message...'
 
-    const loadingEmbed = new Discord.MessageEmbed()
+    const loadingEmbed = new Discord.EmbedBuilder()
         .setColor(Color.Highlight)
         .setAuthor({ name: 'Békéscsaba', url: 'https://openweathermap.org/city/' + bekescsabaId, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
         .setTitle('Napi időjárás jelentés betöltése...')

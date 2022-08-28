@@ -200,7 +200,7 @@ const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
-const { MessageActionRow, MessageButton, GatewayIntentBits } = require('discord.js')
+const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits, ModalBuilder, MessageButtonStyle } = require('discord.js')
 const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
 const { perfix, tokens } = require('./config.json')
 
@@ -232,7 +232,7 @@ const selfId = '738030244367433770'
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-const bot = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_VOICE_STATES"] })
+const bot = new Discord.Client({ intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
 logManager.Destroy()
 
 const statesManager = new StatesManager()
@@ -348,7 +348,7 @@ function addXp(user, channel, ammount) {
         }
 
         database.dataBasic[user.id].money += addMoney
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: user.username, iconURL: user.avatarURL() })
             .setTitle('Szintet léptél!')
             .addFields([
@@ -397,6 +397,7 @@ bot.on('error', error => {
     log(ERROR + ': ' + error)
     statesManager.botLoadingState = 'Error'
     SystemLog('Error: ' + error.message)
+    fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
 })
 
 bot.on('debug', debug => {
@@ -437,7 +438,13 @@ bot.on('shardDisconnect', (colseEvent, shardID) => {
 bot.on('shardReady', (shardID) => {
     const mainGuild = bot.guilds.cache.get('737954264386764812')
     const quizChannel = mainGuild.channels.cache.get('799340273431478303')
-    quizChannel.messages.fetch()
+    if (quizChannel != undefined) {
+        quizChannel.messages.fetch()
+    } else {
+        bot.channels.fetch('799340273431478303').then((channel) => {
+            channel.messages.fetch()
+        })
+    }
     statesManager.shardCurrentlyLoading = false
 })
 
@@ -526,14 +533,16 @@ async function playAudio(command) {
         .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') })
     */
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor(Color.Purple)
         .setURL(info.videoDetails.video_url)
         .setAuthor({ name: command.member.displayName, iconURL: command.member.displayAvatarURL() })
         .setTitle(info.videoDetails.title)
         .setThumbnail(info.videoDetails.thumbnails[0].url)
-        .addField('Csatorna', info.videoDetails.author.name, true)
-        .addField('Hossz', musicGetLengthText(info.videoDetails.lengthSeconds), true)
+        .addFields([
+            { name: 'Csatorna', value: info.videoDetails.author.name, inline: true },
+            { name: 'Hossz', value: musicGetLengthText(info.videoDetails.lengthSeconds), inline: true }
+        ])
     if (command.replied == true) {
         command.editReply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
     } else {
@@ -644,56 +653,66 @@ function commandStore(sender, privateCommand) {
     var largeLuckyCard = database.dataBackpacks[sender.id].luckyCards.large
     var money = database.dataBasic[sender.id].money
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setAuthor({ name: sender.username, iconURL: sender.avatarURL() })
         .setTitle('Hátizsák')
-        .addField('Pénz', '\\💵 ' + abbrev(money), false)
-        .addField('Alap cuccok',
-            '> \\🧱 ' + crates + ' láda\n' +
-            '> \\🎁 ' + gifts + ' ajándék\n' +
-            '> \\🎟️ ' + tickets + ' kupon\n' +
-            '> \\🎫 ' + quizTokens + ' Quiz Token\n' +
-            '> \\🧰 ' + Math.floor(dayCrates) + ' heti láda'
-            , false)
-        .addField('Sorsjegyek', '> \\💶 ' + smallLuckyCard + ' Black Jack\n> \\💷 ' + mediumLuckyCard + ' Buksza\n> \\💴 ' + largeLuckyCard + ' Fáraók Kincse', false)
+        .addFields([
+            { name: 'Pénz', value: '\\💵 ' + abbrev(money), inline: false },
+            {
+                name: 'Alap cuccok', value: 
+                '> \\🧱 ' + crates + ' láda\n' +
+                '> \\🎁 ' + gifts + ' ajándék\n' +
+                '> \\🎟️ ' + tickets + ' kupon\n' +
+                '> \\🎫 ' + quizTokens + ' Quiz Token\n' +
+                '> \\🧰 ' + Math.floor(dayCrates) + ' heti láda',
+                inline: false
+            },
+            {
+                name: 'Sorsjegyek', value: 
+                '> \\💶 ' + smallLuckyCard + ' Black Jack\n' +
+                '> \\💷 ' + mediumLuckyCard + ' Buksza\n' +
+                '> \\💴 ' + largeLuckyCard + ' Fáraók Kincse',
+                inline: false
+            }
+        ])
         .setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!' })
         .setColor(GetUserColor(database.dataBasic[sender.id].color))
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/briefcase_1f4bc.png')
     if (getGifts > 0) {
         if (getGifts == 1) {
-            embed.addField('Van egy ajándékod, ami kicsomagolásra vár', 'Kattints a \\🎀-ra a kicsomagoláshoz!')
+            embed.addFields([{ name: 'Van egy ajándékod, ami kicsomagolásra vár', value: 'Kattints a \\🎀-ra a kicsomagoláshoz!' }])
         } else {
-            embed.addField('Van ' + getGifts + ' ajándékod, ami kicsomagolásra vár', 'Kattints a \\🎀-ra a kicsomagoláshoz!')
+            embed.addFields([{ name: 'Van ' + getGifts + ' ajándékod, ami kicsomagolásra vár', value: 'Kattints a \\🎀-ra a kicsomagoláshoz!' }])
         }
     }
-    const buttonCrate = new MessageButton()
+    const buttonCrate = new ButtonBuilder()
         .setLabel("🧱")
         .setCustomId("openCrate")
-        .setStyle("PRIMARY")
-    const buttonDayCrate = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Primary)
+    const buttonDayCrate = new ButtonBuilder()
         .setLabel("🧰")
         .setCustomId("openDayCrate")
-        .setStyle("PRIMARY")
-    const buttonLuckyCardSmall = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Primary)
+    const buttonLuckyCardSmall = new ButtonBuilder()
         .setLabel("💶")
         .setCustomId("useLuckyCardSmall")
-        .setStyle("SECONDARY")
-    const buttonLuckyCardMedium = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonLuckyCardMedium = new ButtonBuilder()
         .setLabel("💷")
         .setCustomId("useLuckyCardMedium")
-        .setStyle("SECONDARY")
-    const buttonLuckyCardLarge = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonLuckyCardLarge = new ButtonBuilder()
         .setLabel("💴")
         .setCustomId("useLuckyCardLarge")
-        .setStyle("SECONDARY")
-    const buttonOpenGift = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonOpenGift = new ButtonBuilder()
         .setLabel("🎀")
         .setCustomId("openGift")
-        .setStyle("PRIMARY")
-    const buttonSendGift = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Primary)
+    const buttonSendGift = new ButtonBuilder()
         .setLabel("🎁")
         .setCustomId("sendGift")
-        .setStyle("SECONDARY")
+        .setStyle(Discord.ButtonStyle.Secondary)
     if (!crates > 0) { buttonCrate.setDisabled(true) }
     if (!(Math.floor(dayCrates)) > 0) { buttonDayCrate.setDisabled(true) }
     if (!smallLuckyCard > 0) { buttonLuckyCardSmall.setDisabled(true) }
@@ -701,9 +720,9 @@ function commandStore(sender, privateCommand) {
     if (!largeLuckyCard > 0) { buttonLuckyCardLarge.setDisabled(true) }
     if (!getGifts > 0) { buttonOpenGift.setDisabled(true) }
     if (!gifts > 0) { buttonSendGift.setDisabled(true) }
-    const rowPrimary = new MessageActionRow()
+    const rowPrimary = new ActionRowBuilder()
         .addComponents(buttonCrate, buttonDayCrate, buttonLuckyCardSmall, buttonLuckyCardMedium, buttonLuckyCardLarge)
-    const rowSecondary = new MessageActionRow()
+    const rowSecondary = new ActionRowBuilder()
         .addComponents(buttonSendGift)
     if (getGifts > 0) { rowSecondary.addComponents(buttonOpenGift) }
     return { embeds: [embed], components: [rowPrimary, rowSecondary], ephemeral: privateCommand }
@@ -834,15 +853,15 @@ async function commandMusicList(command) {
     if (musicArray.length === 0 && statesManager.ytdlCurrentlyPlaying === false) {
         command.reply({ content: '> **\\➖ A lejátszólista üres \\🎧**' })
     } else {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: command.member.displayName, iconURL: command.member.avatarURL() })
         embed.setColor(Color.Purple)
         await ytdl.getBasicInfo(statesManager.ytdlCurrentlyPlayingUrl).then(info => {
-            embed.addField('\\🎧 Most hallható: ' + info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
+            embed.addFields([{ name: '\\🎧 Most hallható: ' + info.videoDetails.title, value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), inline: false}])
         })
         musicArray.forEach(async (_link) => {
             await ytdl.getBasicInfo(_link).then(info => {
-                embed.addField(info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
+                embed.addFields([{ name: info.videoDetails.title, value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), inline: false }])
             })
         })
         command.reply({ content: '> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', embeds: [embed] })
@@ -880,7 +899,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
 
     const dateNow = Date.now() + DaysToMilliseconds(2)
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor(Color.Pink)
         .setTitle('Quiz!')
         .setDescription(
@@ -935,7 +954,7 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
             optionText += `${optionEmojis[i]}  ${optionTexts[i]}\n`
         }
     }
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor(Color.DarkPink)
         .setTitle('Szavazás!')
         .addFields([{
@@ -1046,7 +1065,7 @@ bot.on('interactionCreate', async interaction => {
                 interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
                 const button1 = interaction.message.components[0].components[0]
                 const button2 = interaction.message.components[0].components[1]
-                const row = new MessageActionRow()
+                const row = new ActionRowBuilder()
                     .addComponents(button1, button2)
                 interaction.update({ embeds: [interaction.message.embeds[0]], components: [row] })
                 return
@@ -1396,7 +1415,13 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId == 'shopClose') {
-            interaction.message.delete()
+            bot.channels.fetch(interaction.channelId)
+                .then((channel) => {
+                    channel.messages.fetch(interaction.message.id)
+                        .then((message) => {
+                            message.delete()
+                        })
+                })
         }
 
         if (interaction.component.customId.startsWith('shopBuy')) {
@@ -1935,8 +1960,8 @@ bot.on('interactionCreate', async interaction => {
 
             return
         }
-
-    } else if (interaction.isUserContextMenu()) {
+        
+    } else if (interaction.isUserContextMenuCommand()) {
         if (interaction.commandName == 'Megajándékozás') {
             try {
                 const giftableMember = interaction.targetMember
@@ -1965,8 +1990,8 @@ bot.on('interactionCreate', async interaction => {
                 interaction.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
             }
         }
-    } else if (interaction.isMessageContextMenu()) {
-        if (interaction.commandName ==  'Xp érték') {
+    } else if (interaction.isMessageContextMenuCommand()) {
+        if (interaction.commandName == 'Xp érték') {
             const messageXpValue = calculateAddXp(interaction.targetMessage)
             if (messageXpValue.total == 0) {
                 interaction.reply({
@@ -1986,6 +2011,10 @@ bot.on('interactionCreate', async interaction => {
                 })
             }
         }
+    } else if (interaction.isModalSubmit()) {
+        /** @type {Discord.ModalSubmitInteraction<Discord.CacheType>} */
+        const modalInteraction = interaction
+        
     }
 })
 
@@ -2184,27 +2213,31 @@ bot.once('ready', async () => {
     savePollDefaults(database)
     database.SaveDatabase()
 
-    statesManager.newsLoadingText = 'Fetch news...'
-    const channel = bot.channels.cache.get(ChannelId.IncomingNews)
-    channel.messages.fetch({ limit: 10 }).then(async (messages) => {
-        /** @type {[Discord.Message]} */
-        const listOfMessage = []
-
-        statesManager.newsLoadingText = 'Looping messages...'
-        messages.forEach((message) => {
-            listOfMessage.push(message)
-        })
-
-        statesManager.newsLoadingText = 'Processing messages...'
-        listOfMessage.reverse()
-        listOfMessage.forEach(message => {
-            processNewsMessage(message)
-        })
-        if (listOfMessage.length > 0) {
-            log(`Received ${listOfMessage.length} news`)
-        } else {
-            log(`No news recived`)
-        }
+    statesManager.newsLoadingText = 'Fetch news channel...'
+    bot.channels.fetch(ChannelId.IncomingNews)
+    .then((channel) => {
+        statesManager.newsLoadingText = 'Fetch news messages...'
+        channel.messages.fetch()
+            .then((messages) => {
+                /** @type {[Discord.Message]} */
+                const listOfMessage = []
+    
+                statesManager.newsLoadingText = 'Looping messages...'
+                messages.forEach((message) => {
+                    listOfMessage.push(message)
+                })
+    
+                statesManager.newsLoadingText = 'Processing messages...'
+                listOfMessage.reverse()
+                listOfMessage.forEach(message => {
+                    processNewsMessage(message)
+                })
+                if (listOfMessage.length > 0) {
+                    log(`Received ${listOfMessage.length} news`)
+                } else {
+                    log(`No news recived`)
+                }
+            })
     })
 
     setInterval(() => {
@@ -2462,11 +2495,11 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     if (command === `test`) {
         /*
-        const button0 = new MessageButton()
+        const button0 = new ButtonBuilder()
             .setLabel("This is a button!")
             .setID("myid0")
             .setStyle("grey")
-        const button1 = new MessageButton()
+        const button1 = new ButtonBuilder()
             .setLabel("This is a button!")
             .setID("myid1")
             .setStyle("blurple")
@@ -2483,9 +2516,9 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             .setMinValues(1)
             .addOption(option)
 
-        const row0 = new MessageActionRow()
+        const row0 = new ActionRowBuilder()
             .addComponents(button0, button1)
-        const row1 = new MessageActionRow()
+        const row1 = new ActionRowBuilder()
             .addComponents(select)
         message.channel.send("Message with a button!", { components: [row0, row1] })
 
@@ -2580,7 +2613,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     if (command.startsWith(`quiz help`)) {
         userstatsSendCommand(sender)
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .addFields([{
                 name: 'Quiz szintaxis',
                 value: '.quiz\n' +
@@ -2599,10 +2632,8 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     if (command.startsWith(`quizdone help`)) {
         userstatsSendCommand(sender)
-        const embed = new Discord.MessageEmbed()
-            .addField('Quizdone szintaxis',
-                '.quizdone messageId correctIndex(0 - ...)'
-            )
+        const embed = new Discord.EmbedBuilder()
+            .addFields([{ name: 'Quizdone szintaxis', value: '.quizdone messageId correctIndex(0 - ...)' }])
             .setColor(Color.Highlight)
         message.channel.send({ embeds: [embed] })
         return
@@ -2688,26 +2719,26 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         */
 
         /**
-         * @type {MessageButton[]}
+         * @type {ButtonBuilder[]}
          */
         /*
         let buttons = []
         for (let i = 0; i < icons.length; i++) {
             const icon = icons[i]
-            const button0 = new MessageButton()
+            const button0 = new ButtonBuilder()
                 .setLabel(icon)
                 .setID("pollOption" + i)
                 .setStyle("gray")
             buttons.push(button0)
         }
-        const row0 = new MessageActionRow()
+        const row0 = new ActionRowBuilder()
             .addComponents(buttons)
 
-        const buttonFinish = new MessageButton()
+        const buttonFinish = new ButtonBuilder()
             .setLabel('Befejezés')
             .setID("pollFinish")
             .setStyle("green")
-        const row1 = new MessageActionRow()
+        const row1 = new ActionRowBuilder()
             .addComponent(buttonFinish)
 
         let optionText = ''
@@ -2727,15 +2758,50 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 async function processApplicationCommand(command, privateCommand) {
     const isDm = command.guild == null
 
+    if (command.commandName == `test`) {
+        /*
+        const modal = new ModalBuilder()
+			.setCustomId('myModal')
+			.setTitle('My Modal');
+
+		// Add components to modal
+
+		// Create the text input components
+		const favoriteColorInput = new TextInputBuilder()
+			.setCustomId('favoriteColorInput')
+		    // The label is the prompt the user sees for this input
+			.setLabel("What's your favorite color?")
+		    // Short means only a single line of text
+			.setStyle(TextInputStyle.Short);
+
+		const hobbiesInput = new TextInputBuilder()
+			.setCustomId('hobbiesInput')
+			.setLabel("What's some of your favorite hobbies?")
+		    // Paragraph means multiple lines of text.
+			.setStyle(TextInputStyle.Paragraph);
+
+		// An action row only holds one text input,
+		// so you need one action row per text input.
+		const firstActionRow = new ActionRowBuilder().addComponents(favoriteColorInput);
+		const secondActionRow = new ActionRowBuilder().addComponents(hobbiesInput);
+
+		// Add inputs to the modal
+		modal.addComponents(firstActionRow, secondActionRow);
+
+		await command.showModal(modal);
+        */
+        return;
+    }
+
     if (command.commandName === `handlebars` || command.commandName === `webpage`) {
         await command.deferReply({ ephemeral: true })
         var http = require('http')
         http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
             resp.on('data', function(ip) {
-                const row = new MessageActionRow()
-                const button = new MessageButton()
+                const row = new ActionRowBuilder()
+                const button = new ButtonBuilder()
                     .setLabel('Weboldal')
-                    .setStyle('LINK')
+                    .setStyle(Discord.ButtonStyle.Link)
                     .setURL('http://' + ip + ':5665/public?user=' + GetHash(command.user.id))
                 row.addComponents(button)
                 command.editReply({ components: [row], ephemeral: true })
@@ -2828,22 +2894,30 @@ async function processApplicationCommand(command, privateCommand) {
         } else if (bot.ws.status === 8) {
             WsStatus = "Folytatás"
         }
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle('Pong!')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
             .setColor(Color.Highlight)
-            .addField('\\🤖 BOT:',
-                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
-            )
-            .addField('\\📡 WebSocket:',
-                '> Ping: ' + bot.ws.ping + ' ms\n' +
+            .addFields([
+                {
+                    name: '\\🤖 BOT:',
+                    value:
+                    '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
+                },
+                {
+                    name: '\\📡 WebSocket:',
+                    value:
+                    '> Ping: ' + bot.ws.ping + ' ms\n' +
                 '> Státusz: ' + WsStatus
-            )
+                }
+            ])
         if (bot.shard != null) {
-            embed.addField('Shard:',
+            embed.addFields([{
+                name: 'Shard:',
+                value:
                 '> Fő port: ' + bot.shard.parentPort + '\n' +
                 '> Mód: ' + bot.shard.mode
-            )
+            }])
         }
         command.reply({ embeds: [embed], ephemeral: privateCommand })
         userstatsSendCommand(command.user)
@@ -2867,12 +2941,14 @@ async function processApplicationCommand(command, privateCommand) {
     if (command.commandName === `dev`) {
         if (command.user.id === '726127512521932880') {
             userstatsSendCommand(command.user)
-            const embed = new Discord.MessageEmbed()
-                .addField('Fejlesztői parancsok',
+            const embed = new Discord.EmbedBuilder()
+                .addFields([{
+                    name: 'Fejlesztői parancsok',
+                    value:
                     '> \\❔  `.quiz`\n' +
                     '>  \\📊  `.poll simple`\n' +
                     '>  \\📊  `.poll wyr`'
-                )
+                }])
                 .setColor(Color.Highlight)
             command.reply({ embeds: [embed], ephemeral: true })
         } else {
@@ -3020,26 +3096,26 @@ function commandMail(sender, channel) {
  * @param {number} selectedIndex 0: main | 1: inbox | 2: outbox | 3: writing
  */
 function getMailMessage(user, selectedIndex = 0) {
-    const button0 = new MessageButton()
+    const button0 = new ButtonBuilder()
         .setLabel("Kezdőlap")
         .setCustomId("mailFolderMain")
-        .setStyle("SECONDARY")
-    const button1 = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const button1 = new ButtonBuilder()
         .setLabel("Beérkező e-mailek")
         .setCustomId("mailFolderInbox")
-        .setStyle("SECONDARY")
-    const button2 = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const button2 = new ButtonBuilder()
         .setLabel("Elküldött e-mailek")
         .setCustomId("mailFolderOutbox")
-        .setStyle("SECONDARY")
-    const button3 = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const button3 = new ButtonBuilder()
         .setLabel("✍️ Levél írása")
         .setCustomId("mailWrite")
-        .setStyle("PRIMARY")
+        .setStyle(Discord.ButtonStyle.Primary)
 
-    const row0 = new MessageActionRow()
+    const row0 = new ActionRowBuilder()
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setAuthor({ name: user.username, iconURL: user.avatarURL() })
 
     if (selectedIndex === 0) {
@@ -3052,11 +3128,13 @@ function getMailMessage(user, selectedIndex = 0) {
                 unreaded += 1
             }
         })
-        embed.addField("📥 Beérkező levelek", 'Olvasatlan: ' + unreaded + '\nÖsszes: ' + allInboxMails.length)
-        embed.addField("📤 Elküldött levelek", 'Összes: ' + allOutboxMails.length)
+        embed.addFields([
+            { name: '📥 Beérkező levelek', value: 'Olvasatlan: ' + unreaded + '\nÖsszes: ' + allInboxMails.length },
+            { name: '📤 Elküldött levelek', value: 'Összes: ' + allOutboxMails.length }
+        ])
 
         button0.setLabel("↻")
-        button0.setStyle('PRIMARY')
+        button0.setStyle(Discord.ButtonStyle.Primary)
         row0.addComponents(button3, button0, button1, button2)
     } else if (selectedIndex === 1) {
         embed.setTitle("📥 Beérkező levelek")
@@ -3064,14 +3142,15 @@ function getMailMessage(user, selectedIndex = 0) {
         const allMails = getAllEMails(user.id, MailFolder.inbox)
         log(allMails)
         allMails.forEach(mail => {
-            embed.addField(
-                mail.icon + ' ' + mail.sender.name + ' - ' + mail.title,
-                mail.context + '\n[' + new Date(mail.date).toDateString() + ']\n',
-                false)
+            embed.addFields([{
+                name: mail.icon + ' ' + mail.sender.name + ' - ' + mail.title,
+                value: mail.context + '\n[' + new Date(mail.date).toDateString() + ']\n',
+                inline: false
+            }])
         })
 
         button1.setLabel("↻")
-        button1.setStyle('PRIMARY')
+        button1.setStyle(Discord.ButtonStyle.Primary)
         row0.addComponents(button3, button1, button0, button2)
 
         setReadAllMessages(user.id)
@@ -3081,14 +3160,15 @@ function getMailMessage(user, selectedIndex = 0) {
         const allMails = getAllEMails(user.id, MailFolder.outbox)
         log(allMails)
         allMails.forEach(mail => {
-            embed.addField(
-                mail.icon + ' ' + mail.reciver.name + ' - ' + mail.title,
-                mail.context + '\n[' + new Date(mail.date).toDateString() + ']\n',
-                false)
+            embed.addFields([{
+                name: mail.icon + ' ' + mail.reciver.name + ' - ' + mail.title,
+                value: mail.context + '\n[' + new Date(mail.date).toDateString() + ']\n',
+                inline: false
+            }])
         })
 
         button2.setLabel("↻")
-        button2.setStyle('PRIMARY')
+        button2.setStyle(Discord.ButtonStyle.Primary)
         row0.addComponents(button3, button2, button0, button1)
     } else if (selectedIndex === 3) {
         embed.setTitle("Levél írása")
@@ -3103,21 +3183,24 @@ function getMailMessage(user, selectedIndex = 0) {
             }
         })
 
-        embed.addField('Cím: "' + mail.title + '"', 'Üzenet: "' + mail.context + '"\n' + 'Fogadó: @' + mail.reciver.name)
+        embed.addFields([{
+            name: 'Cím: "' + mail.title + '"',
+            value: 'Üzenet: "' + mail.context + '"\n' + 'Fogadó: @' + mail.reciver.name
+        }])
             .setFooter({
                 text: '.mail wt [cím] Cím beállítása\n' +
                     '.mail wc [üzenet] Üzenet beállítása\n' +
                     '.mail wr [@Felhasználó | Azonosító] Címzet beállítása'
             })
 
-        const button4 = new MessageButton()
+        const button4 = new ButtonBuilder()
             .setLabel("Küldés")
             .setCustomId("mailWriteSend")
-            .setStyle("SUCCESS")
-        const button5 = new MessageButton()
+            .setStyle(Discord.ButtonStyle.Success)
+        const button5 = new ButtonBuilder()
             .setLabel("Elvetés")
             .setCustomId("mailWriteAbort")
-            .setStyle("DANGER")
+            .setStyle(Discord.ButtonStyle.Danger)
         row0.addComponents(button4, button5)
     }
     return new MailMessage(embed, [row0])
@@ -3296,8 +3379,8 @@ class MailUser {
 
 class MailMessage {
     /**
-     * @param {Discord.MessageEmbed} embed
-     * @param {MessageActionRow[]} actionRows
+     * @param {Discord.EmbedBuilder} embed
+     * @param {ActionRowBuilder[]} actionRows
      */
     constructor(embed, actionRows) {
         this.embed = embed

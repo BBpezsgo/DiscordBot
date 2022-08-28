@@ -35,34 +35,42 @@ function BoolToIcon(bool) {
 */
 module.exports = (database, member, privateCommand) => {
     const userRoles = member.roles.cache
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor(GetUserColor(database.dataBasic[member.id].color))
         .setTitle('Beállítások')
         .setAuthor({ name: member.displayName, iconURL: member.displayAvatarURL() })
-        .addField('\\🔔 Értesítés beállítások',
-            '> 📊 Szavazás: ' + BoolToIcon(userRoles.some(role => role.id === roles.szavazas)) + '\n' +
-            '> ❔ Quiz: ' + BoolToIcon(userRoles.some(role => role.id === roles.quiz)) + '\n' +
-            '> 🌦️ Napi időjárás: ' + BoolToIcon(userRoles.some(role => role.id === roles.napiIdojaras)) + '\n' +
-            '> 🧱 Minecraft: ' + BoolToIcon(userRoles.some(role => role.id === roles.minecraft)) + '\n' +
-            '> 🚸 Crossout: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentes)) + ' \\❌ **Kiszolgálóhiba** \n' +
-            '> 🚸 Crossout bejelentés [PC]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesPC)) + ' \\❌ **Kiszolgálóhiba**\n' +
-            '> 🚸 Crossout bejelentés [Konzol]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesKonzol)) + ' \\❌ **Kiszolgálóhiba**\n' +
-            '> 🚸 Crossout egyéb: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutEgyeb)) + ' \\❌ **Kiszolgálóhiba**\n' +
-            '> 🛢️ Warzone 2100: ' + BoolToIcon(userRoles.some(role => role.id === roles.warzone)) + '\n' +
-            '> 💸 Ingyenes játék: ' + BoolToIcon(userRoles.some(role => role.id === roles.ingyenesJatek))
-        )
-        .addField('\\🤖 BOT beállítások',
-            '> 👁‍🗨 Privált válasz: ' + BoolToIcon(database.dataBasic[member.id].privateCommands)
-        )
-        .addField('Mást keresel?',
-            'Statisztika és jelvények: `/profil`\n' + 
-            'Profil testreszabása: `/shop`',
-            false
-        )
+        .addFields([
+            {
+                name: '\\🔔 Értesítés beállítások',
+                value:
+                    '> 📊 Szavazás: ' + BoolToIcon(userRoles.some(role => role.id === roles.szavazas)) + '\n' +
+                    '> ❔ Quiz: ' + BoolToIcon(userRoles.some(role => role.id === roles.quiz)) + '\n' +
+                    '> 🌦️ Napi időjárás: ' + BoolToIcon(userRoles.some(role => role.id === roles.napiIdojaras)) + '\n' +
+                    '> 🧱 Minecraft: ' + BoolToIcon(userRoles.some(role => role.id === roles.minecraft)) + '\n' +
+                    '> 🚸 Crossout: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentes)) + ' \\❌ **Kiszolgálóhiba** \n' +
+                    '> 🚸 Crossout bejelentés [PC]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesPC)) + ' \\❌ **Kiszolgálóhiba**\n' +
+                    '> 🚸 Crossout bejelentés [Konzol]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesKonzol)) + ' \\❌ **Kiszolgálóhiba**\n' +
+                    '> 🚸 Crossout egyéb: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutEgyeb)) + ' \\❌ **Kiszolgálóhiba**\n' +
+                    '> 🛢️ Warzone 2100: ' + BoolToIcon(userRoles.some(role => role.id === roles.warzone)) + '\n' +
+                    '> 💸 Ingyenes játék: ' + BoolToIcon(userRoles.some(role => role.id === roles.ingyenesJatek))
+            },
+            {
+                name: '\\🤖 BOT beállítások',
+                value:
+                    '> 👁‍🗨 Privált válasz: ' + BoolToIcon(database.dataBasic[member.id].privateCommands)
+            },
+            {
+                name: 'Mást keresel?',
+                value:
+                    'Statisztika és jelvények: `/profil`\n' + 
+                    'Profil testreszabása: `/shop`',
+                inline: false
+            }
+        ])
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/322/gear_2699-fe0f.png')
         .setFooter({ text: 'Válaszd ki az egyik opciót, hogy megváltoztasd a beállítást (bekapcs => kikapcs, és vissza)'})
-    const row = new Discord.MessageActionRow()
-    const contextMenu = new Discord.MessageSelectMenu()
+    const row = new Discord.ActionRowBuilder()
+    const contextMenu = new Discord.SelectMenuBuilder()
         .setCustomId('userSettings')
         .setPlaceholder('Beállítások')
         .addOptions([

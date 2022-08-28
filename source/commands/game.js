@@ -19,7 +19,7 @@ class Game {
 }
 
 const Discord = require('discord.js')
-const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js')
+const { ActionRowBuilder, ButtonBuilder, SelectMenuBuilder } = require('discord.js')
 
 function distance(x1, y1, x2, y2) {
     return Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)))
@@ -257,7 +257,7 @@ function getMapPoint(x, y, map) {
  * @param {Game} game
  */
 function getGameEmbed(user, isOnPhone, isInDebugMode, game) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setAuthor({name: user.username, iconURL: user.avatarURL()})
         .setTitle('Game')
         .setDescription(getView(game.gameCameraX, game.gameCameraY, game.gameMap, isOnPhone) +
@@ -610,53 +610,53 @@ function getGameMessage(user, isOnPhone, isInDebugMode, game) {
     const playerIndex = getPlayerIndex(user.id, game)
     const playerDirection = game.gameMap.players[playerIndex].direction
 
-    const buttonW = new MessageButton()
+    const buttonW = new ButtonBuilder()
         .setLabel("  ↑  ")
         .setCustomId("gameW")
-        .setStyle("SECONDARY")
-    const buttonA = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonA = new ButtonBuilder()
         .setLabel(" ←")
         .setCustomId("gameA")
-        .setStyle("SECONDARY")
-    const buttonS = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonS = new ButtonBuilder()
         .setLabel("  ↓  ")
         .setCustomId("gameS")
-        .setStyle("SECONDARY")
-    const buttonD = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonD = new ButtonBuilder()
         .setLabel(" →")
         .setCustomId("gameD")
-        .setStyle("SECONDARY")
-    const buttonHit = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonHit = new ButtonBuilder()
         .setLabel("👊")
         .setCustomId("gameHit")
-        .setStyle("SECONDARY")
-    const buttonUse = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonUse = new ButtonBuilder()
         .setLabel("🤚")
         .setCustomId("gameUse")
-        .setStyle("SECONDARY")
-    const buttonSwitchPhone = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonSwitchPhone = new ButtonBuilder()
         .setLabel("📱 Telefonon vagyok")
         .setCustomId("gameSwitchPhone")
-        .setStyle("SECONDARY")
-    const buttonSwitchDebug = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonSwitchDebug = new ButtonBuilder()
         .setLabel("📟")
         .setCustomId("gameSwitchDebug")
-        .setStyle("SECONDARY")
-    const buttonRestart = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonRestart = new ButtonBuilder()
         .setLabel("↺")
         .setCustomId("gameRestart")
-        .setStyle("DANGER")
+        .setStyle(Discord.ButtonStyle.Danger)
 
 
 
     if (playerDirection === Direction.Up) {
-        buttonW.setStyle("PRIMARY")
+        buttonW.setStyle(Discord.ButtonStyle.Primary)
     } else if (playerDirection === Direction.Left) {
-        buttonA.setStyle("PRIMARY")
+        buttonA.setStyle(Discord.ButtonStyle.Primary)
     } else if (playerDirection === Direction.Down) {
-        buttonS.setStyle("PRIMARY")
+        buttonS.setStyle(Discord.ButtonStyle.Primary)
     } else if (playerDirection === Direction.Right) {
-        buttonD.setStyle("PRIMARY")
+        buttonD.setStyle(Discord.ButtonStyle.Primary)
     }
 
     if (isOnPhone === true) {
@@ -666,14 +666,14 @@ function getGameMessage(user, isOnPhone, isInDebugMode, game) {
     }
 
     if (getGameUserSettings(user.id, game).isInDebugMode === true) {
-        buttonSwitchDebug.setStyle("PRIMARY")
+        buttonSwitchDebug.setStyle(Discord.ButtonStyle.Primary)
     } else {
-        buttonSwitchDebug.setStyle("SECONDARY")
+        buttonSwitchDebug.setStyle(Discord.ButtonStyle.Secondary)
     }
 
-    const row0 = new MessageActionRow()
+    const row0 = new ActionRowBuilder()
         .addComponents(buttonUse, buttonW, buttonHit, buttonSwitchPhone)
-    const row1 = new MessageActionRow()
+    const row1 = new ActionRowBuilder()
         .addComponents(buttonA, buttonS, buttonD, buttonSwitchDebug, buttonRestart)
 
     return new GameMessage(getGameEmbed(user, isOnPhone, isInDebugMode, game), [row0, row1])
@@ -961,8 +961,8 @@ class GamePlayer {
 
 class GameMessage {
     /**
-     * @param {Discord.MessageEmbed} embed
-     * @param {MessageActionRow[]} actionRows
+     * @param {Discord.EmbedBuilder} embed
+     * @param {ActionRowBuilder[]} actionRows
      */
     constructor(embed, actionRows) {
         this.embed = embed

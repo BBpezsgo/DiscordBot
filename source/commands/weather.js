@@ -56,11 +56,11 @@ const { inflate } = require('zlib');
  * @param {any} data1 Openweather weather data
  * @param {any[]} data2 Moon data
  * @param {any} data3 Openweather pollution data
- * @returns {Discord.MessageEmbed}
+ * @returns {Discord.EmbedBuilder}
  */
 function getEmbedEarth(data0, data1, data2, data3) {
     var current = data0[0].current
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor('#00AE86')
         .setAuthor({ name: current.observationpoint.replace(', Hungary', ''), url: 'https://openweathermap.org/city/' + data1.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
@@ -243,9 +243,9 @@ function getEmbedEarth(data0, data1, data2, data3) {
     }
 
     embed
-        .setTimestamp(current.date + 'T' + current.observationtime)
+        .setTimestamp(Date.parse(current.date + 'T' + current.observationtime))
         .setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(current.skytext, true).replace('\\', '')))
-        .setFooter({ text: '• weather.service.msn.com : openweathermap.org', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        .setFooter({ text: '• weather.service.msn.com : openweathermap.org' })
     return embed
 }
 
@@ -292,10 +292,10 @@ function DateToDate(date) {
  *      }[];
  *  }} data Mars weather data
  * @param {any} data Mars image data
- * @returns {Discord.MessageEmbed}
+ * @returns {Discord.EmbedBuilder}
  */
 function getEmbedMars(data, weeklyImage) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor('#fd875f')
         .setAuthor({ name: 'Jezero Kráter', url: 'https://mars.nasa.gov/mars2020/weather/', iconURL: 'https://mars.nasa.gov/mars2020/favicon-16x16.png' })
 
@@ -362,7 +362,7 @@ function getEmbedMars(data, weeklyImage) {
 
     embed
         .setTimestamp(DateToDate(latestSol.terrestrial_date))
-        .setFooter({ text: '• Mars 2020', iconURL: 'https://images-ext-1.discordapp.net/external/yUBPtm8abWHU7zYH04hOrTOPwU6Q8WfqtGX1OPwXTYQ/https/emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        .setFooter({ text: '• Mars 2020' })
         .setImage('https://i.cdn29.hu/apix_collect_c/primary/1311/mars131114_20131114_122345_original_1150x645_cover.jpg')
     
     if (weeklyImage != null) {
@@ -385,7 +385,7 @@ function addDays(date, days) {
     return date
 }
 
-/** @param {(error: string, embeds: Discord.MessageEmbed[]) => void} callback */
+/** @param {(error: string, embeds: Discord.EmbedBuilder[]) => void} callback */
 function GetMarsWeather(callback) {
     try {
         request(urlMarsWeeklyImage, function (err, res, body) {

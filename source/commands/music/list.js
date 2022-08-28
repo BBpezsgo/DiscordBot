@@ -7,7 +7,7 @@ module.exports = (channel) => {
     if (musicArray.length === 0) {
         channel.send('> **\\❔ A lejátszólista üres \\🎧**')
     } else {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
         musicArray.forEach(_link => {
             ytdl.getBasicInfo(_link).then( info => {
                 embed.addFields([{

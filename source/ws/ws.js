@@ -827,7 +827,7 @@ class WebSocket {
 
         const messages = []
 
-        if (c.isText()) {
+        if (c.type === "GUILD_TEXT") {
             /** @type {Discord.DMChannel | Discord.PartialDMChannel | Discord.NewsChannel | Discord.TextChannel | Discord.ThreadChannel | Discord.VoiceChannel} */
             const cTxt = c
 
@@ -1404,7 +1404,7 @@ class WebSocket {
             const channel = this.client.channels.cache.get(req.body.id)
 
             if (channel != undefined) {
-                if (channel.isText()) {
+                if (channel.type === "GUILD_TEXT") {
                     channel.send({ content: req.body.content, tts: req.body.tts }).then(() => {
                         this.RenderPage_ModeratingSearch(req, res, '')
                     }).catch((err) => {

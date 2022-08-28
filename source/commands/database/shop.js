@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
 const fs = require('fs')
-const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, SelectMenuBuilder } = require('discord.js');
 const { DatabaseManager } = require('../../functions/databaseManager')
 const { abbrev } = require('../../functions/abbrev')
 
@@ -18,61 +18,99 @@ const ColorRoles = {
  * @param {Discord.User} sender
  * @param {number} menuIndex 0: Main menu | 1: Basic | 2: Lucky cards | 3: Backpack colors | -1: None
  * @param {DatabaseManager} databaseManager
- * @returns {Discord.MessageEmbed}
+ * @returns {Discord.EmbedBuilder}
  */
 function getEmbedMessage(sender, menuIndex, databaseManager) {
     if (menuIndex == 0) {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
-            .addField('Menük: ',
-                '> \\🛒 Alap dolgok\n' +
-                '> \\🍀 Sorsjegyek\n' +
-                '> \\🎨 Profil testreszabása')
+            .addFields([
+                {
+                    name: '\\💵 Egyenleged:',
+                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    inline: true
+                },
+                {
+                    name: 'Menük:',
+                    value:
+                        '> \\🛒 Alap dolgok\n' +
+                        '> \\🍀 Sorsjegyek\n' +
+                        '> \\🎨 Profil testreszabása'
+                }
+            ])
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
 
         return embed
     } else if (menuIndex == 1) {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
-            .addField('Alap dolgok:',
-                '> \\🧱 Láda   [\\💵 2099] [' + databaseManager.dataBackpacks[sender.id].crates + ' db]\n' +
-                '> \\🎁 Ajándék   [\\💵 3999] [' + databaseManager.dataBackpacks[sender.id].gifts + ' db]\n' +
-                '> \\🎟️ Kupon   [\\💵 8999] [' + databaseManager.dataBackpacks[sender.id].tickets + ' db]\n' +
-                '> \\🧻 WC papír   [\\💵 799]')
+            .addFields([
+                {
+                    name: '\\💵 Egyenleged:',
+                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    inline: true
+                },
+                {
+                    name: 'Alap dolgok:',
+                    value:
+                        '> \\🧱 Láda   [\\💵 2099] [' + databaseManager.dataBackpacks[sender.id].crates + ' db]\n' +
+                        '> \\🎁 Ajándék   [\\💵 3999] [' + databaseManager.dataBackpacks[sender.id].gifts + ' db]\n' +
+                        '> \\🎟️ Kupon   [\\💵 8999] [' + databaseManager.dataBackpacks[sender.id].tickets + ' db]\n' +
+                        '> \\🧻 WC papír   [\\💵 799]'
+                }
+            ])
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
     } else if (menuIndex == 2) {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
-            .addField('Sorsjegyek:',
-                '> \\💶 Black Jack   [\\💵 1999]  50% hogy nyersz, főnyeremény: 2500 [' + databaseManager.dataBackpacks[sender.id].luckyCards.small + ' db]\n' +
-                '> \\💷 Buksza   [\\💵 3599]  20% hogy nyersz, főnyeremény: 6000 [' + databaseManager.dataBackpacks[sender.id].luckyCards.medium + ' db]\n' +
-                '> \\💴 Fáraók Kincse   [\\💵 6999]  10% hogy nyersz, főnyeremény: 1150 [' + databaseManager.dataBackpacks[sender.id].luckyCards.large + ' db]')
+            .addFields([
+                {
+                    name: '\\💵 Egyenleged:',
+                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    inline: true
+                },
+                {
+                    name: 'Sorsjegyek:',
+                    value:
+                        '> \\💶 Black Jack   [\\💵 1999]  50% hogy nyersz, főnyeremény: 2500 [' + databaseManager.dataBackpacks[sender.id].luckyCards.small + ' db]\n' +
+                        '> \\💷 Buksza   [\\💵 3599]  20% hogy nyersz, főnyeremény: 6000 [' + databaseManager.dataBackpacks[sender.id].luckyCards.medium + ' db]\n' +
+                        '> \\💴 Fáraók Kincse   [\\💵 6999]  10% hogy nyersz, főnyeremény: 1150 [' + databaseManager.dataBackpacks[sender.id].luckyCards.large + ' db]'
+                }
+            ])
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
     } else if (menuIndex == 3) {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
-            .addField('Profil testreszabása: ',
-                '> \\🖍️ Neved színe\n' +
-                '> \\🛍️ Hátizsákod színe')
-            .addField('Mást keresel?',
-                'Statisztika és jelvények: `/profil`\n' + 
-                'Beállítások: `/settings`'
-            )
+            .addFields([
+                {
+                    name: '\\💵 Egyenleged:',
+                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    inline: true
+                },
+                {
+                    name: 'Profil testreszabása:',
+                    value:
+                        '> \\🖍️ Neved színe\n' +
+                        '> \\🛍️ Hátizsákod színe'
+                },
+                {
+                    name: 'Mást keresel?',
+                    value:
+                        'Statisztika és jelvények: `/profil`\n' + 
+                        'Beállítások: `/settings`'
+                }
+            ])
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
@@ -98,47 +136,79 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
             colorEmoji = '⬛'
         }
     
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true).addField('Hátizsák színek:  [\\' + colorEmoji + ']',
-                '> \\⬛ Nincs szín   [\\💵 99]\n> \\🟥\\🟨\\🟦 Alap színek   [\\💵 1499]\n' +
-                '> \\🟧\\🟪\\🟩 Alap kevert színek   [\\💵 2499]\n' +
-                '> \\🟫 Barna   [\\💵 2999]\n' +
-                '> \\⬜ Fehér   [\\💵 3299]')
-            .addField('Mást keresel?',
-                'Statisztika és jelvények: `/profil`\n' + 
-                'Beállítások: `/settings`'
-            )
+            .addFields([
+                {
+                    name: '\\💵 Egyenleged:',
+                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    inline: true
+                },
+                {
+                    name: 'Hátizsák színek:  [\\' + colorEmoji + ']',
+                    value:
+                        '> \\⬛ Nincs szín   [\\💵 99]\n> \\🟥\\🟨\\🟦 Alap színek   [\\💵 1499]\n' +
+                        '> \\🟧\\🟪\\🟩 Alap kevert színek   [\\💵 2499]\n' +
+                        '> \\🟫 Barna   [\\💵 2999]\n' +
+                        '> \\⬜ Fehér   [\\💵 3299]'
+                },
+                {
+                    name: 'Mást keresel?',
+                    value:
+                        'Statisztika és jelvények: `/profil`\n' + 
+                        'Beállítások: `/settings`'
+                }
+            ])
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
     } else if (menuIndex == 5) {
     
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
-            .addField('Név színek:',
-                '> \\⚫ Alap   [\\💵 9]\n' +
-                '> \\🔴\\🟡\\🔵 Alap színek   [\\💵 2999]\n' +
-                '> \\🟠\\🟣\\🟢 Alap kevert színek   [\\💵 3499]\n' +
-                '> \\🚫 Láthatatlan   [\\💵 3999]')
-            .addField('Mást keresel?',
-                'Statisztika és jelvények: `/profil`\n' + 
-                'Beállítások: `/settings`'
-            )
+            .addFields([
+                {
+                    name: '\\💵 Egyenleged:',
+                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    inline: true
+                },
+                {
+                    name: 'Név színek:',
+                    value:
+                        '> \\⚫ Alap   [\\💵 9]\n' +
+                        '> \\🔴\\🟡\\🔵 Alap színek   [\\💵 2999]\n' +
+                        '> \\🟠\\🟣\\🟢 Alap kevert színek   [\\💵 3499]\n' +
+                        '> \\🚫 Láthatatlan   [\\💵 3999]'
+                },
+                {
+                    name: 'Mást keresel?',
+                    value:
+                        'Statisztika és jelvények: `/profil`\n' + 
+                        'Beállítások: `/settings`'
+                }
+            ])
             .setFooter({ text: 'Bezárás: ❌' })
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
     } else if (menuIndex == -1) {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle('Bolt')
-            .addField('\\💵 Egyenleged:', '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**', true)
-            .addField('A bolt nem használható.', 'Hogy újra használhasd a boltot, használd a `/shop` parancsot!')
+            .addFields([
+                {
+                    name: '\\💵 Egyenleged:',
+                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    inline: true
+                },
+                {
+                    name: 'A bolt nem használható',
+                    value: 'Hogy újra használhasd a boltot, használd a `/shop` parancsot!'
+                }
+            ])
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
     
         return embed
@@ -234,7 +304,7 @@ async function removeAllColorRoles(member, exceptRoleId) {
 function CommandShop(channel, sender, senderMember, databaseManager, menuIndex = 0, newColorRole = '', privateCommand = false) {
     const money = databaseManager.dataBasic[sender.id].money
 
-    const selectMenu = new MessageSelectMenu()
+    const selectMenu = new SelectMenuBuilder()
         .setCustomId("shopMenu")
         .setPlaceholder('Menük')
         .addOptions([
@@ -254,7 +324,7 @@ function CommandShop(channel, sender, senderMember, databaseManager, menuIndex =
                 emoji: '🎨'
             }
         ])
-    const selectMenu2 = new MessageSelectMenu()
+    const selectMenu2 = new SelectMenuBuilder()
         .setCustomId("shopMenu2")
         .setPlaceholder('Menük')
         .addOptions([
@@ -269,7 +339,7 @@ function CommandShop(channel, sender, senderMember, databaseManager, menuIndex =
                 emoji: '🖍️'
             }
         ])
-    const selectMenuBackpackColors = new MessageSelectMenu()
+    const selectMenuBackpackColors = new SelectMenuBuilder()
         .setCustomId("shopBackpackColors")
         .setPlaceholder('Színek')
         .addOptions([
@@ -320,7 +390,7 @@ function CommandShop(channel, sender, senderMember, databaseManager, menuIndex =
             }
         ])
 
-    const selectMenuNameColors = new MessageSelectMenu()
+    const selectMenuNameColors = new SelectMenuBuilder()
         .setCustomId("shopNameColors")
         .setPlaceholder('Színek')
         .addOptions([
@@ -378,38 +448,38 @@ function CommandShop(channel, sender, senderMember, databaseManager, menuIndex =
     if (menuIndex > 3) {
         selectMenu2.options[menuIndex - 4].default = true
     }
-    const buttonExit = new MessageButton()
+    const buttonExit = new ButtonBuilder()
         .setLabel("❌")
         .setCustomId("shopClose")
-        .setStyle("SECONDARY")
-    const buttonBuyCrate = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonBuyCrate = new ButtonBuilder()
         .setLabel("🧱")
         .setCustomId("shopBuyCrate")
-        .setStyle("SECONDARY")
-    const buttonBuyGift = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonBuyGift = new ButtonBuilder()
         .setLabel("🎁")
         .setCustomId("shopBuyGift")
-        .setStyle("SECONDARY")
-    const buttonBuyTicket = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonBuyTicket = new ButtonBuilder()
         .setLabel("🎟️")
         .setCustomId("shopBuyTicket")
-        .setStyle("SECONDARY")
-    const buttonBuyWC = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonBuyWC = new ButtonBuilder()
         .setLabel("🧻")
         .setCustomId("shopBuyWC")
-        .setStyle("SECONDARY")
-    const buttonBuyLuckySmall = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonBuyLuckySmall = new ButtonBuilder()
         .setLabel("💶")
         .setCustomId("shopBuyLuckySmall")
-        .setStyle("SECONDARY")
-    const buttonBuyLuckyMedium = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonBuyLuckyMedium = new ButtonBuilder()
         .setLabel("💷")
         .setCustomId("shopBuyLuckyMedium")
-        .setStyle("SECONDARY")
-    const buttonBuyLuckyLarge = new MessageButton()
+        .setStyle(Discord.ButtonStyle.Secondary)
+    const buttonBuyLuckyLarge = new ButtonBuilder()
         .setLabel("💴")
         .setCustomId("shopBuyLuckyLarge")
-        .setStyle("SECONDARY")
+        .setStyle(Discord.ButtonStyle.Secondary)
 
     if (!money >= 2099) { buttonBuyCrate.setDisabled(true) }
     if (!money >= 3999) { buttonBuyGift.setDisabled(true) }
@@ -419,19 +489,19 @@ function CommandShop(channel, sender, senderMember, databaseManager, menuIndex =
     if (!money >= 3599) { buttonBuyLuckyMedium.setDisabled(true) }
     if (!money >= 6999) { buttonBuyLuckyLarge.setDisabled(true) }
 
-    const rowSecondary0 = new MessageActionRow()
+    const rowSecondary0 = new ActionRowBuilder()
         .addComponents(buttonBuyCrate, buttonBuyGift, buttonBuyTicket, buttonBuyWC)
-    const rowSecondary1 = new MessageActionRow()
+    const rowSecondary1 = new ActionRowBuilder()
         .addComponents(buttonBuyLuckySmall, buttonBuyLuckyMedium, buttonBuyLuckyLarge)
-    const rowSecondary2 = new MessageActionRow()
+    const rowSecondary2 = new ActionRowBuilder()
         .addComponents(selectMenuBackpackColors)
-    const rowSecondary3 = new MessageActionRow()
+    const rowSecondary3 = new ActionRowBuilder()
         .addComponents(selectMenuNameColors)
-    const rowSelectMenuPrimary = new MessageActionRow()
+    const rowSelectMenuPrimary = new ActionRowBuilder()
         .addComponents(selectMenu)
-    const rowSelectMenuSecondary = new MessageActionRow()
+    const rowSelectMenuSecondary = new ActionRowBuilder()
         .addComponents(selectMenu2)
-    const rowPrimary = new MessageActionRow()
+    const rowPrimary = new ActionRowBuilder()
     if (privateCommand == false) {
         rowPrimary.addComponents(buttonExit)
     }

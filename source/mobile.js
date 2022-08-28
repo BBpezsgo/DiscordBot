@@ -155,7 +155,7 @@ const { WebSocket } = require('./ws/ws')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
-const { MessageActionRow, MessageButton, GatewayIntentBits } = require('discord.js')
+const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits } = require('discord.js')
 
 const { perfix, tokens } = require('./config.json')
 
@@ -495,14 +495,16 @@ async function playAudio(command) {
         .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') })
     */
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor(Color.Purple)
         .setURL(info.videoDetails.video_url)
         .setAuthor({ name: command.member.displayName, iconURL: command.member.displayAvatarURL() })
         .setTitle(info.videoDetails.title)
         .setThumbnail(info.videoDetails.thumbnails[0].url)
-        .addField('Csatorna', info.videoDetails.author.name, true)
-        .addField('Hossz', musicGetLengthText(info.videoDetails.lengthSeconds), true)
+        .addFields([
+            { name: 'Csatorna', value: info.videoDetails.author.name, inline: true },
+            { name: 'Hossz', value: musicGetLengthText(info.videoDetails.lengthSeconds), inline: true }    
+        ])
     if (command.replied == true) {
         command.editReply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
     } else {
@@ -537,15 +539,23 @@ async function commandMusicList(command) {
     if (musicArray.length === 0 && statesManager.ytdlCurrentlyPlaying === false) {
         command.reply({ content: '> **\\➖ A lejátszólista üres \\🎧**' })
     } else {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: command.member.displayName, iconURL: command.member.avatarURL() })
         embed.setColor(Color.Purple)
         await ytdl.getBasicInfo(statesManager.ytdlCurrentlyPlayingUrl).then(info => {
-            embed.addField('\\🎧 Most hallható: ' + info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
+            embed.addFields([{
+                name: '\\🎧 Most hallható: ' + info.videoDetails.title,
+                value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds),
+                inline: false
+            }])
         })
         musicArray.forEach(async (_link) => {
             await ytdl.getBasicInfo(_link).then(info => {
-                embed.addField(info.videoDetails.title, '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), false)
+                embed.addFields([{
+                    name: info.videoDetails.title,
+                    value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds),
+                    inline: false
+                }])
             })
         })
         command.reply({ content: '> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', embeds: [embed] })
@@ -578,7 +588,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
 
     const dateNow = Date.now() + DaysToMilliseconds(2)
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor(Color.Pink)
         .setTitle('Quiz!')
         .setDescription(
@@ -586,7 +596,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
             `\\❌ **-${removeXpValue}\\🍺** és **-${removeToken}\\🎫**\n` +
             `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
             )
-        .addField(`${titleText}`, `${optionText}`)
+        .addFields([{ name: titleText, value: optionText }])
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
         .setFooter({ text: "Vége:" })
         .setTimestamp(dateNow)
@@ -630,10 +640,10 @@ function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
             optionText += `${optionEmojis[i]}  ${optionTexts[i]}\n`
         }
     }
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setColor(Color.DarkPink)
         .setTitle('Szavazás!')
-        .addField(`${titleText}`, `${optionText}`)
+        .addFields([{ name: titleText, value: optionText }])
 
     bot.channels.cache.get('795935090026086410').send(embed).then(message => {
         message.channel.send('> <@&795935996982198272>')
@@ -724,7 +734,7 @@ async function quizDone(quizMessageId, correctIndex) {
 //#endregion
 
 bot.on('interactionCreate', interaction => {
-    if (interaction.isCommand()) {
+    if (interaction.type === "APPLICATION_COMMAND") {
         processApplicationCommand(interaction)
     } else if (interaction.isButton()) {
         if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
@@ -732,7 +742,7 @@ bot.on('interactionCreate', interaction => {
                 interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
                 const button1 = interaction.message.components[0].components[0]
                 const button2 = interaction.message.components[0].components[1]
-                const row = new MessageActionRow()
+                const row = new ActionRowBuilder()
                     .addComponents(button1, button2)
                 interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
                 return
@@ -1001,8 +1011,10 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
         }
         return
     } else if (command.startsWith(`quiz help`)) {
-        const embed = new Discord.MessageEmbed()
-            .addField('Quiz szintaxis',
+        const embed = new Discord.EmbedBuilder()
+            .addFields([{
+                name: 'Quiz szintaxis',
+                value:
                 '.quiz\n' +
                 'Cím\n' +
                 'Opció;Opció;Opció\n' + 
@@ -1011,15 +1023,16 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
                 '2500 (remove XP)\n' +
                 '10 (add Token)\n' +
                 '5 (remove Token)'
-            )
+            }])
             .setColor(Color.Highlight)
         message.channel.send({embeds: [ embed ]})
         return
     } else if (command.startsWith(`quizdone help`)) {
-        const embed = new Discord.MessageEmbed()
-            .addField('Quizdone szintaxis',
-                '.quizdone messageId correctIndex(0 - ...)'
-            )
+        const embed = new Discord.EmbedBuilder()
+            .addFields([{
+                name: 'Quizdone szintaxis',
+                value: '.quizdone messageId correctIndex(0 - ...)'
+            }])
             .setColor(Color.Highlight)
         message.channel.send({embeds: [ embed ]})
         return
@@ -1107,23 +1120,31 @@ async function processApplicationCommand(command) {
         } else if (bot.ws.status === 8) {
             WsStatus = "Folytatás"
         }
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle('Pong!')
             .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
             .setColor(Color.Highlight)
-            .addField('\\🤖 BOT:',
-                '> \\📱 **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
-                '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
-            )
-            .addField('\\📡 Web Socket:',
-                '> Ping: ' + bot.ws.ping + ' ms\n' +
+            .addFields([
+                {
+                    name: '\\🤖 BOT:',
+                    value:
+                    '> \\📱 **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
+                    '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
+                },
+                {
+                    name: '\\📡 WebSocket:',
+                    value:
+                    '> Ping: ' + bot.ws.ping + ' ms\n' +
                 '> Státusz: ' + WsStatus
-            )
+                }
+            ])
         if (bot.shard != null) {
-            embed.addField('\\📼 Shard:',
+            embed.addFields([{
+                name: 'Shard:',
+                value:
                 '> Fő port: ' + bot.shard.parentPort + '\n' +
                 '> Mód: ' + bot.shard.mode
-            )
+            }])
         }
         command.reply({embeds: [ embed ]})
         return
@@ -1141,12 +1162,14 @@ async function processApplicationCommand(command) {
 
     if (command.commandName === `dev`) {
         if (command.user.id === '726127512521932880') {
-            const embed = new Discord.MessageEmbed()
-                .addField('Fejlesztői parancsok',
+            const embed = new Discord.EmbedBuilder()
+                .addFields([{
+                    name: 'Fejlesztői parancsok',
+                    value:
                     '> \\❔  `.quiz`\n' +
                     '>  \\📊  `.poll simple`\n' +
                     '>  \\📊  `.poll wyr`'
-            )
+                }])
                 .setColor(Color.Highlight)
             command.reply({ embeds: [embed], ephemeral: true })
         } else {

@@ -1,7 +1,7 @@
 const https = require('https')
 const fs = require('fs')
 const Discord = require('discord.js')
-const { MessageAttachment, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js')
+const { MessageAttachment, EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
 
 /**@param {string} str */
 function StringToArray(str) {

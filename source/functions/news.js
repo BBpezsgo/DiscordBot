@@ -62,7 +62,7 @@ function ConvertNewsIdToName(id) {
 
 class NewsMessage {
     /**
-     * @param {Discord.MessageEmbed} embed
+     * @param {Discord.EmbedBuilder} embed
      * @param {string} NotifyRoleId
      * @param {Discord.Message} message
     */
@@ -77,7 +77,7 @@ class NewsMessage {
 function CreateNews(message) {
     let role = ''
     const newDate = new Date(message.createdTimestamp)
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
         .setDescription(message.content)
         .setColor(Color.Highlight)

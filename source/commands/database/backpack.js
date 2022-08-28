@@ -21,7 +21,7 @@ function saveDatabase() {
 * @param {DatabaseManager} database
 */
 module.exports = (message, sender, isPrivate, database) => {
-    return;
+/*
     var currentDay = new Date().getDay()
     var dayCrates = dataBot.day - dataBasic[sender.id].day
     var crates = dataBackpacks[sender.id].crates
@@ -33,7 +33,7 @@ module.exports = (message, sender, isPrivate, database) => {
     var largeLuckyCard = dataBackpacks[sender.id].luckyCards.large
     var money = dataBasic[sender.id].money
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
         .setTitle('Hátizasák')
         .addField('Pénz', '\\💵 ' + abbrev(money), false)
@@ -187,4 +187,5 @@ module.exports = (message, sender, isPrivate, database) => {
             embedMessage.reactions.removeAll()
         })
     })
+*/
 }

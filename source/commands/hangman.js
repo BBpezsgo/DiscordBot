@@ -9,7 +9,7 @@ const { Color } = require('../functions/enums')
  * @param {Discord.User} user
  */
 function GetMessage(isMenu, manager, user) {
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setTitle('Hangman')
         .setAuthor({ iconURL: user.avatarURL(), name: user.username })
         .setColor(Color.Silver)
@@ -24,10 +24,13 @@ function GetMessage(isMenu, manager, user) {
     
         if (manager.GetUserSettingsIndex(user.id) != null) {
             const userSettings = manager.userSettings[manager.GetUserSettingsIndex(user.id)]
-            embed.addField('Beállítások',
-                'Nyelv: ' + userSettings.language + '\n' +
-                'Nehézség: ' + userSettings.difficulty
-            , false)
+            embed.addFields([{
+                name: 'Beállítások',
+                value:
+                    'Nyelv: ' + userSettings.language + '\n' +
+                    'Nehézség: ' + userSettings.difficulty,
+                inline: false
+            }])
     
             defaultValue_lang_en = (userSettings.language == 'EN')
             defaultValue_lang_hu = (userSettings.language == 'HU')
@@ -35,27 +38,27 @@ function GetMessage(isMenu, manager, user) {
             defaultValue_difficulty_hard = (userSettings.difficulty == 'HARD')
         }
     
-        const row1 = new Discord.MessageActionRow()
-        const row2 = new Discord.MessageActionRow()
-        const row3 = new Discord.MessageActionRow()
+        const row1 = new Discord.ActionRowBuilder()
+        const row2 = new Discord.ActionRowBuilder()
+        const row3 = new Discord.ActionRowBuilder()
     
-        const languageSelectMenu = new Discord.MessageSelectMenu()
+        const languageSelectMenu = new Discord.SelectMenuBuilder()
             .setCustomId('hangmanLang')
             .setPlaceholder('Nyelv')
             .addOptions([
                 { emoji: '🇺🇲', label: 'Angol', value: 'EN', default: defaultValue_lang_en },
                 { emoji: '🇭🇺', label: 'Magyar', value: 'HU', default: defaultValue_lang_hu }
             ])
-        const difficultySelectMenu = new Discord.MessageSelectMenu()
+        const difficultySelectMenu = new Discord.SelectMenuBuilder()
             .setCustomId('hangmanDifficulty')
             .setPlaceholder('Nehézség')
             .addOptions([
                 { emoji: '🧠', label: 'Nehéz', value: 'HARD', default: defaultValue_difficulty_hard }
             ])
-        const startButton = new Discord.MessageButton()
+        const startButton = new Discord.ButtonBuilder()
             .setCustomId('hangmanStart')
             .setLabel('Indítás')
-            .setStyle('SUCCESS')
+            .setStyle(Discord.ButtonStyle.Success)
         
         row1.addComponents([ languageSelectMenu ])
         row2.addComponents([ difficultySelectMenu ])
@@ -64,7 +67,7 @@ function GetMessage(isMenu, manager, user) {
         return { embeds: [embed], components: [row1, row2, row3] }
     } else {
         const player = manager.players[0] //manager.players[manager.GetPlayerIndex(user.id)]
-        embed.addField('Játék', player.word, false)
+        embed.addFields([{ name: 'Játék', value: player.word, inline: false }])
 
         const chars = player.word.split('')
         var finalStr = ''

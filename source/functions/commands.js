@@ -47,6 +47,13 @@ function GenerateGuildCommands() {
     })
 
     GenerateCommand(
+        ['test'],
+        'Teszt'
+    ).forEach((item) => {
+        generatedCommands.push(item)
+    })
+
+    GenerateCommand(
         ['profil', 'profile'],
         'Statisztikák és matricák megtekintése'
     ).forEach((item) => {

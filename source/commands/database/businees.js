@@ -191,40 +191,59 @@ module.exports = (channel, sender, isPrivate, database) => {
             }
         }
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
             .setTitle(moneyMakerName)
             .setDescription(moneyMakerImage + ' ' + moneyMakerLevelText + ' (lvl' + (moneyMakerLevel - 1) + ')')
-            //.addField('Átnevezés', '`.pms name [új név]`')
+            //('Átnevezés', '`.pms name [új név]`')
             
             if (isPrivate === true) {
-                embed.addField(
-                    'Megszüntetés: 💥', 'Ez nem visszafordítható folyamat! Ha megszünteted a bizniszedet, minden elveszik, és nem kapsz vissza semmit!\n' + 
-                    '\\⛔ Csak szerveren érhető el')
+                embed.addFields([{
+                    name: 'Megszüntetés: 💥',
+                    value:
+                        'Ez nem visszafordítható folyamat! Ha megszünteted a bizniszedet, minden elveszik, és nem kapsz vissza semmit!\n' + 
+                        '\\⛔ Csak szerveren érhető el'
+                }])
             } else {
-                embed.addField('Megszüntetés: 💥', 'Ez nem visszafordítható folyamat! Ha megszünteted a bizniszedet, minden elveszik, és nem kapsz vissza semmit!')
+                embed.addFields([{
+                    name: 'Megszüntetés: 💥',
+                    value:
+                        'Ez nem visszafordítható folyamat! Ha megszünteted a bizniszedet, minden elveszik, és nem kapsz vissza semmit!'
+                }])
             }
         if (uprageCost > 0 && money >= uprageCost) {
             if (isPrivate === true) {
-                embed.addField('Fejlesztés: ⬆️',
-                    '\\💵' + uprageCost + '\n' + 
-                    '\\⛔ Csak szerveren érhető el')
+                embed.addFields([{
+                    name: 'Fejlesztés: ⬆️',
+                    value:
+                        '\\💵' + uprageCost + '\n' + 
+                        '\\⛔ Csak szerveren érhető el'
+                }])
             } else {
-                embed.addField('Fejlesztés: ⬆️', '\\💵' + uprageCost)
+                embed.addFields([{
+                    name: 'Fejlesztés: ⬆️',
+                    value:'\\💵' + uprageCost
+                }])
             }
         }
         if (addMoney > 0) {
                 const aaaaaaaaaaaaaa = database.dataBusinesses[sender.id].businessUses.date.toString().split(':')
                 const lastDate = new Date(aaaaaaaaaaaaaa[0], aaaaaaaaaaaaaa[1], aaaaaaaaaaaaaa[2])
             if (isPrivate === true) {
-                embed.addField('Beszedés: 💰',
-                    'Utoljára ekkor szedted be: ' + lastDate.getFullYear() + '.' + (lastDate.getMonth() + 1) + '.' + lastDate.getDate() + '\n' +
-                    'Kb ennyit tudsz beszedni: \\💵' + addMoney + '\n' + 
-                    '\\⛔ Csak szerveren érhető el')
+                embed.addFields([{
+                    name: 'Beszedés: 💰',
+                    value:
+                        'Utoljára ekkor szedted be: ' + lastDate.getFullYear() + '.' + (lastDate.getMonth() + 1) + '.' + lastDate.getDate() + '\n' +
+                        'Kb ennyit tudsz beszedni: \\💵' + addMoney + '\n' + 
+                        '\\⛔ Csak szerveren érhető el'
+                }])
             } else {
-                embed.addField('Beszedés: 💰',
-                    'Utoljára ekkor szedted be: ' + lastDate.getFullYear() + '.' + (lastDate.getMonth() + 1) + '.' + lastDate.getDate() + '\n' +
-                    'Kb ennyit tudsz beszedni: \\💵' + addMoney)
+                embed.addFields([{
+                    name: 'Beszedés: 💰',
+                    value:
+                        'Utoljára ekkor szedted be: ' + lastDate.getFullYear() + '.' + (lastDate.getMonth() + 1) + '.' + lastDate.getDate() + '\n' +
+                        'Kb ennyit tudsz beszedni: \\💵' + addMoney
+                }])
             }
         }
         channel.send({ embeds: [embed] }).then(embedMessage => {
@@ -278,33 +297,47 @@ module.exports = (channel, sender, isPrivate, database) => {
         if (isPrivate === true) {
             message.channel.send('> \\⛔ **Nincs bizniszed. Hogy vegyél egyet, használd a `.pms` parancsot egy szerveren.**')
         } else {
-            const embed = new Discord.MessageEmbed()
+            const embed = new Discord.EmbedBuilder()
                 .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
                 .setTitle('Bizniszek')
-                .addField('Utasszállító szolgálat',
-                    '> **Ikon:** 🚗\n' +
-                    '> **Ár:** 21300 \\💵\n' +
-                    '> **Haszonszerzés:** Minden héten egyszer termel\n' +
-                    '> **Maximum szint:** 4\n' +
-                    '> **Egyéb:** ' +
-                    'Járműveket venni kell hozzá. Minnél több van belőle, annál többet termel. Maximum 5 jármű lehet!')
-                .addField('Kereskedelmi szaküzlet',
-                    '> **Ikon:** 📠\n' +
-                    '> **Ár:** 7100 \\💵\n' +
-                    '> **Haszonszerzés:** Minden nap, kivéve Vasárnap termel\n' +
-                    '> **Maximum szint:** 2')
-                .addField('Gyár',
-                    '> **Ikon:** ⚙️\n' +
-                    '> **Ár:** 11200 \\💵\n' +
-                    '> **Haszonszerzés:** Minden nap, kivéve hétvégén termel\n' +
-                    '> **Maximum szint:** 2\n' +
-                    '> **Egyéb:** ' +
-                    'Alkalmazottakat felvenni kell hozzá, minnél több van belőle, annál többet termel. Maximum 20 alkalmazott lehet!')
-                .addField('Pénzügyi szervezet [Nem elérhető]',
-                    '> **Ikon:** 💳\n' +
-                    '> **Ár:** 36800 \\💵\n' +
-                    '> **Haszonszerzés:** Ha megoldasz egy matematikai műveletet, azonnal termel hasznot. Naponta maximum 3-szor lehet használni!\n' +
-                    '> **Maximum szint:** 3')
+                .addFields([
+                    {
+                        name: 'Utasszállító szolgálat',
+                        value:
+                            '> **Ikon:** 🚗\n' +
+                            '> **Ár:** 21300 \\💵\n' +
+                            '> **Haszonszerzés:** Minden héten egyszer termel\n' +
+                            '> **Maximum szint:** 4\n' +
+                            '> **Egyéb:** ' +
+                            'Járműveket venni kell hozzá. Minnél több van belőle, annál többet termel. Maximum 5 jármű lehet!'
+                    },
+                    {
+                        name: 'Kereskedelmi szaküzlet',
+                        value:
+                            '> **Ikon:** 📠\n' +
+                            '> **Ár:** 7100 \\💵\n' +
+                            '> **Haszonszerzés:** Minden nap, kivéve Vasárnap termel\n' +
+                            '> **Maximum szint:** 2'
+                    },
+                    {
+                        name: 'Gyár',
+                        value:
+                            '> **Ikon:** ⚙️\n' +
+                            '> **Ár:** 11200 \\💵\n' +
+                            '> **Haszonszerzés:** Minden nap, kivéve hétvégén termel\n' +
+                            '> **Maximum szint:** 2\n' +
+                            '> **Egyéb:** ' +
+                            'Alkalmazottakat felvenni kell hozzá, minnél több van belőle, annál többet termel. Maximum 20 alkalmazott lehet!'
+                    },
+                    {
+                        name: 'Pénzügyi szervezet [Nem elérhető]',
+                        value:
+                            '> **Ikon:** 💳\n' +
+                            '> **Ár:** 36800 \\💵\n' +
+                            '> **Haszonszerzés:** Ha megoldasz egy matematikai műveletet, azonnal termel hasznot. Naponta maximum 3-szor lehet használni!\n' +
+                            '> **Maximum szint:** 3'
+                    }
+                ])
             channel.send({ embeds: [embed] }).then(embedMessage => {
                 if (money >= 21300) { embedMessage.react('🚗'); }
                 if (money >= 7100) { embedMessage.react('📠'); }
