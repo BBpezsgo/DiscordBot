@@ -83,6 +83,7 @@ function CreateNews(message) {
         .setColor(Color.Highlight)
         .setFooter({ text: '• ' + DateToStringNews(newDate) })
     if (message.author.id == '802864588877856789') { // Crossout
+        return
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
         if (message.embeds.length > 0) {
             if (message.content.includes('@Entertainment')) {
@@ -121,8 +122,8 @@ function CreateNews(message) {
             }
             embed.setTitle(title)
             embed.setURL(embed2.url)
-            if (embed2.image != null) {
-                embed.setImage(embed2.image.url)
+            if (message.attachments.size > 0) {
+                embed.setImage(message.attachments.first().url)
             }
             embed.setDescription(embed2.description)
             embed.setFooter({ text: message.content.replace('@', '• #') + '\n• ' + DateToStringNews(newDate) })

@@ -189,10 +189,8 @@ const { StatesManager } = require('./functions/statesManager.js')
 logManager.Loading("Loading extensions", 'DatabaseManager')
 const { DatabaseManager } = require('./functions/databaseManager.js')
 
-logManager.Loading('Loading packet', "ytdl-core")
-const ytdl = require('ytdl-core')
-
-const { musicGetLengthText } = require('./commands/music/functions')
+logManager.Loading("Loading extensions", "MusicPlayer")
+const MusicPlayer = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
 const { WebSocket } = require('./ws/ws')
@@ -200,7 +198,7 @@ const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
-const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits, ModalBuilder, MessageButtonStyle } = require('discord.js')
+const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits, ModalBuilder, MessageButtonStyle, TextInputBuilder, TextInputStyle } = require('discord.js')
 const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
 const { perfix, tokens } = require('./config.json')
 
@@ -232,10 +230,13 @@ const selfId = '738030244367433770'
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-const bot = new Discord.Client({ intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
+const bot = new Discord.Client({ intents: [ GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ]})
 logManager.Destroy()
 
 const statesManager = new StatesManager()
+
+const musicPlayer = new MusicPlayer(statesManager, bot)
+
 logManager = new LogManager(false, bot, statesManager)
 
 statesManager.botLoaded = true
@@ -493,65 +494,6 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
 //#region Commands
 
 //#region Command Functions
-
-/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand @returns {boolean} */
-async function playAudio(command) {
-    const link = musicArray[musicArray.length - 1]
-
-    musicFinished = false
-    musicArray.shift()
-
-    const stream = ytdl(link, { filter: 'audioonly' })
-    const player = createAudioPlayer()
-
-    /** @type {Discord.VoiceChannel} */
-    const voiceChannel = command.member.voice.channel
-    const connection = joinVoiceChannel({
-        channelId: voiceChannel.id,
-        guildId: voiceChannel.guild.id,
-        adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-    })
-
-    let resource = createAudioResource(stream)
-
-    connection.subscribe(player)
-    
-    player.play(resource)
-
-    const info = await ytdl.getInfo(link)
-
-    /*const dispatcher = connection.play(stream)
-        .on("finish", () => {
-            musicFinished = true
-            if (musicArray.length > 0) {
-                playAudio(command)
-            }
-        })
-        .on("error", (error) => { log(ERROR + ': ' + error, 24) })
-        .on("start", () => { statesManager.ytdlCurrentlyPlaying = true; log('') })
-        .on("debug", (message) => { log(DEBUG + ': ytdl: ' + message) })
-        .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') })
-    */
-
-    const embed = new Discord.EmbedBuilder()
-        .setColor(Color.Purple)
-        .setURL(info.videoDetails.video_url)
-        .setAuthor({ name: command.member.displayName, iconURL: command.member.displayAvatarURL() })
-        .setTitle(info.videoDetails.title)
-        .setThumbnail(info.videoDetails.thumbnails[0].url)
-        .addFields([
-            { name: 'Csatorna', value: info.videoDetails.author.name, inline: true },
-            { name: 'Hossz', value: musicGetLengthText(info.videoDetails.lengthSeconds), inline: true }
-        ])
-    if (command.replied == true) {
-        command.editReply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
-    } else {
-        command.reply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
-    }
-    statesManager.ytdlCurrentlyPlayingText = info.videoDetails.title
-    statesManager.ytdlCurrentlyPlayingUrl = link
-    return true
-}
 
 function userstatsSendMeme(user) {
     database.dataUserstats[user.id].memes += 1
@@ -828,58 +770,6 @@ function commandAllCrate(sender, ammount, privateCommand) {
             ephemeral: privateCommand
         }
 
-    }
-}
-
-/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand @param {string} link */
-async function commandMusic(command, link) {
-    if (command.member.voice.channel) {
-        if (link.startsWith('https://www.youtube.com/watch?v=')) {
-            musicArray.unshift(link)
-            await command.reply({ content: '> **\\➕ Hozzáadva a lejátszólistába! \\🎧**' })
-            if (musicFinished) {
-                playAudio(command)
-            }
-        } else {
-            command.reply({ content: '> **\\❌ Érvénytelen URL! \\🎧**' })
-        }
-    } else {
-        command.reply({ content: '> **\\❗  Előbb jépj be egy hangcsatornába! \\🎧**' })
-    }
-}
-
-/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
-async function commandMusicList(command) {
-    if (musicArray.length === 0 && statesManager.ytdlCurrentlyPlaying === false) {
-        command.reply({ content: '> **\\➖ A lejátszólista üres \\🎧**' })
-    } else {
-        const embed = new Discord.EmbedBuilder()
-            .setAuthor({ name: command.member.displayName, iconURL: command.member.avatarURL() })
-        embed.setColor(Color.Purple)
-        await ytdl.getBasicInfo(statesManager.ytdlCurrentlyPlayingUrl).then(info => {
-            embed.addFields([{ name: '\\🎧 Most hallható: ' + info.videoDetails.title, value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), inline: false}])
-        })
-        musicArray.forEach(async (_link) => {
-            await ytdl.getBasicInfo(_link).then(info => {
-                embed.addFields([{ name: info.videoDetails.title, value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), inline: false }])
-            })
-        })
-        command.reply({ content: '> **\\🔜 Lejátszólista: [' + musicArray.length + ']\\🎧**', embeds: [embed] })
-    }
-}
-
-/**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
-function commandSkip(command) {
-    if (command.member.voice.channel) {
-        musicFinished = true
-        if (musicArray.length === 0) {
-            command.reply({ content: '> **\\❌ Nincs következő zene! \\🎧**' })
-            return
-        }
-        playAudio(command)
-        command.reply({ content: '> **\\▶️ Zene átugorva! \\🎧**' })
-    } else {
-        command.reply({ content: '> **\\❗  Előbb jépj be egy hangcsatornába! \\🎧**' })
     }
 }
 
@@ -2212,69 +2102,109 @@ bot.once('ready', async () => {
     }
     savePollDefaults(database)
     database.SaveDatabase()
+    
+    SystemLog('[NEWS]: Fetch processed news channel...')
+    const fetchedProcessedNewsChannel = await bot.channels.fetch(ChannelId.ProcessedNews)
+    if (fetchedProcessedNewsChannel == null) {
+        SystemLog(`[NEWS]: Can't fetch processed news channel!`)
+    }
 
+    SystemLog('[NEWS]: Fetch test news channel...')
+    const fetchedCopyNewsChannel =   await bot.channels.fetch('1010110583800078397')
+    if (fetchedCopyNewsChannel == null) {
+        SystemLog(`[NEWS]: Can't fetch test news channel!`)
+    }
+
+    SystemLog('[NEWS]: Fetch news channel...')
     statesManager.newsLoadingText = 'Fetch news channel...'
     bot.channels.fetch(ChannelId.IncomingNews)
-    .then((channel) => {
-        statesManager.newsLoadingText = 'Fetch news messages...'
-        channel.messages.fetch()
-            .then((messages) => {
-                /** @type {[Discord.Message]} */
-                const listOfMessage = []
-    
-                statesManager.newsLoadingText = 'Looping messages...'
-                messages.forEach((message) => {
-                    listOfMessage.push(message)
+        .then((c) => {
+            /** @type {Discord.GuildTextBasedChannel | null} */
+            const channel = c
+            SystemLog('[NEWS]: Fetch news messages...')
+            statesManager.newsLoadingText = 'Fetch news messages...'
+            channel.messages.fetch()
+                .then((messages) => {
+                    /** @type {Discord.Message<true>[]} */
+                    const listOfMessage = []
+        
+                    SystemLog(`[NEWS]: Looping messages... (${messages.size})`)
+                    statesManager.newsLoadingText = 'Looping messages...'
+                    messages.forEach((message) => {
+                        listOfMessage.push(message)
+                    })
+        
+                    SystemLog(`[NEWS]: Processing messages... (${listOfMessage.length})`)
+                    statesManager.newsLoadingText = 'Processing messages...'
+                    listOfMessage.reverse()
+                    listOfMessage.forEach(message => {
+                        processNewsMessage(message)
+                    })
                 })
-    
-                statesManager.newsLoadingText = 'Processing messages...'
-                listOfMessage.reverse()
-                listOfMessage.forEach(message => {
-                    processNewsMessage(message)
+                .catch((error) => {
+                    SystemLog(`[NEWS]: Can't fetch news messages! Reason: ${error}`)
                 })
-                if (listOfMessage.length > 0) {
-                    log(`Received ${listOfMessage.length} news`)
-                } else {
-                    log(`No news recived`)
-                }
-            })
-    })
+        })
+        .catch((error) => {
+            SystemLog(`[NEWS]: Can't fetch news channel! Reason: ${error}`)
+        })
 
     setInterval(() => {
         if (listOfNews.length > 0) {
             const newsMessage = listOfNews.shift()
-            /** @type {Discord.TextChannel} */
+            /** @type {Discord.GuildTextBasedChannel | undefined} */
             const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
             const embed = newsMessage.embed
             statesManager.newsLoadingText2 = 'Send new message...'
 
-            /** @type {Discord.TextChannel | undefined} */
+            SystemLog(`[NEWS]: Send copy of news message...`)
+            /** @type {Discord.GuildTextBasedChannel | null} */
             const newsTestChannel = bot.channels.cache.get('1010110583800078397')
-            if (newsTestChannel != undefined) {
+            if (newsTestChannel != null) {
                 newsTestChannel.send({
                     tts: newsMessage.message.tts,
-                    nonce: newsMessage.message.nonce,
                     content: newsMessage.message.content,
                     embeds: newsMessage.message.embeds,
                     components: newsMessage.message.components
-                }).finally(() => {
+                })
+                .then(() => {
+                    SystemLog(`[NEWS]: Send processed news message...`)
                     if (newsMessage.NotifyRoleId.length == 0) {
                         newsChannel.send({ embeds: [embed] })
                             .then(() => {
+                                SystemLog(`[NEWS]: Delete raw message...`)
                                 statesManager.newsLoadingText2 = 'Delete raw message...'
-                                newsMessage.message.delete().then(() => {
-                                    statesManager.newsLoadingText2 = ''
-                                })
+                                newsMessage.message.delete()
+                                    .catch((error) => {
+                                        SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
+                                    })
+                                    .finally(() => {
+                                        statesManager.newsLoadingText2 = ''
+                                    })
+                            })
+                            .catch((error) => {                    
+                                SystemLog(`[NEWS]: Can't send processed news message! Reason: ${error}`)
                             })
                     } else {
                         newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
                             .then(() => {
+                                SystemLog(`[NEWS]: Delete raw message...`)
                                 statesManager.newsLoadingText2 = 'Delete raw message...'
-                                newsMessage.message.delete().then(() => {
-                                    statesManager.newsLoadingText2 = ''
-                                })
+                                newsMessage.message.delete()
+                                    .catch((error) => {
+                                        SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
+                                    })
+                                    .finally(() => {
+                                        statesManager.newsLoadingText2 = ''
+                                    })
+                            })
+                            .catch((error) => {                    
+                                SystemLog(`[NEWS]: Can't send processed news message! Reason: ${error}`)
                             })
                     }
+                })
+                .catch((error) => {                    
+                    SystemLog(`[NEWS]: Can't send copy of news message! Reason: ${error}`)
                 })
             }
             lastNoNews = false
@@ -2285,6 +2215,7 @@ bot.once('ready', async () => {
             lastNoNews = true
             statesManager.allNewsProcessed = true
             log(DONE + ': Minden hír közzétéve')
+            SystemLog(`[NEWS]: All news processed!`)
         }
     }, 2000)
 
@@ -2494,7 +2425,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     }
 
     if (command === `test`) {
-        /*
         const button0 = new ButtonBuilder()
             .setLabel("This is a button!")
             .setID("myid0")
@@ -2524,7 +2454,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
         userstatsSendCommand(sender)
         return
-        */
     }
 
     const currEditingMailI = getCurrentlyEditingMailIndex(sender.id)
@@ -2659,32 +2588,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         return
     }
 
-    if (command === `music skip`) { //Music
-        if (thisIsPrivateMessage === false) {
-            userstatsSendCommand(sender)
-            commandSkip(message)
-            return
-        } else {
-            message.channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-    } else if (command === `music list`) {
-        if (thisIsPrivateMessage === false) {
-            userstatsSendCommand(sender)
-            commandMusicList(message)
-            return
-        } else {
-            message.channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-    } else if (command.startsWith(`music `)) {
-        if (thisIsPrivateMessage === false) {
-            userstatsSendCommand(sender)
-            commandMusic(message, command.toString().replace(`music `, ''))
-            return
-        } else {
-            message.channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-    }
-
     //#endregion
 
     if (command === 'game') {
@@ -2759,7 +2662,6 @@ async function processApplicationCommand(command, privateCommand) {
     const isDm = command.guild == null
 
     if (command.commandName == `test`) {
-        /*
         const modal = new ModalBuilder()
 			.setCustomId('myModal')
 			.setTitle('My Modal');
@@ -2789,7 +2691,7 @@ async function processApplicationCommand(command, privateCommand) {
 		modal.addComponents(firstActionRow, secondActionRow);
 
 		await command.showModal(modal);
-        */
+
         return;
     }
 
@@ -3019,11 +2921,11 @@ async function processApplicationCommand(command, privateCommand) {
     if (command.commandName === `music`) {
         if (isDm == false) {
             if (command.options.getSubcommand() == 'play') {
-                commandMusic(command, command.options.getString('url'))
+                musicPlayer.CommandMusic(command, command.options.getString('url'))
             } else if (command.options.getSubcommand() == `skip`) {
-                commandSkip(command)
+                musicPlayer.CommandSkip(command)
             } else if (command.options.getSubcommand() == `list`) {
-                commandMusicList(command)
+                musicPlayer.CommandMusicList(command)
             }
         } else {
             command.reply("> \\❌ **Ez a parancs csak szerveren használható!**")

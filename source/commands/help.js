@@ -23,17 +23,17 @@ function getEmbedMessage(isPrivate, isMobile) {
             embed.addFields([{
                 name: 'Zene \\❗ Alfa verzió \\❗',
                 value:
-                    '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
-                    '>     ├   `.music skip` Az aktuális zene átugrása.\n' +
-                    '>     └   `.music list` A lejátszólista megtekintése.'
+                    '>  \\🎶  `/music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
+                    '>     ├   `/music skip` Az aktuális zene átugrása.\n' +
+                    '>     └   `/music list` A lejátszólista megtekintése.'
             }])
         } else {
             embed.addFields([{
                 name: 'Zene \\❗ Alfa verzió \\❗ \\⛔ Csak szerveren elérhető \\⛔',
                 value:
-                    '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
-                    '>     ├   `.music skip` Az aktuális zene átugrása.\n' +
-                    '>     └   `.music list` A lejátszólista megtekintése.'
+                    '>  \\🎶  `/music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
+                    '>     ├   `/music skip` Az aktuális zene átugrása.\n' +
+                    '>     └   `/music list` A lejátszólista megtekintése.'
             }])
         }
         if (isPrivate == false) {
@@ -89,17 +89,17 @@ function getEmbedMessage(isPrivate, isMobile) {
             embed.addFields([{
                 name: 'Zene \\❗ Alfa verzió \\❗',
                 value:
-                    '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
-                    '>     ├   `.music skip` Az aktuális zene átugrása.\n' +
-                    '>     └   `.music list` A lejátszólista megtekintése.'
+                    '>  \\🎶  `/music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
+                    '>     ├   `/music skip` Az aktuális zene átugrása.\n' +
+                    '>     └   `/music list` A lejátszólista megtekintése.'
             }])
         } else {
             embed.addFields([{
                 name: 'Zene \\❗ Alfa verzió \\❗ \\⛔ Csak szerveren elérhető \\⛔',
                 value:
-                    '>  \\🎶  `.music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
-                    '>     ├   `.music skip` Az aktuális zene átugrása.\n' +
-                    '>     └   `.music list` A lejátszólista megtekintése.'
+                    '>  \\🎶  `/music <youtube link>` Zene lejátszása *(Előbb lépj be egy hangcsatornába)*\n' +
+                    '>     ├   `/music skip` Az aktuális zene átugrása.\n' +
+                    '>     └   `/music list` A lejátszólista megtekintése.'
             }])
         }
         if (isPrivate == false) {
