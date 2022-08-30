@@ -29,3 +29,7 @@ obj
 DiscordBot.sln
 DiscordBot.njsproj.user
 OldDCVer
+source/ws/views/default-old.hbs
+source/ws/public/scripts-test
+source/ws/views/default-test.hbs
+source/ws/views/userRpm/MenuRpm-test.hbs
