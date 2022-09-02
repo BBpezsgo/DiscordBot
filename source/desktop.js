@@ -2055,16 +2055,16 @@ bot.once('ready', async () => {
         bot.user.setActivity(activitiesDesktop[index])
     }, 10000)
 
-    statesManager.dailyWeatherReportLoadingText = 'Fetch channels...'
+    statesManager.dailyWeatherReportLoadingText = 'Fetch news channel...'
     await bot.channels.fetch(ChannelId.ProcessedNews)
     setTimeout(async () => {
-        statesManager.dailyWeatherReportLoadingText = 'Search old report message...'
+        statesManager.dailyWeatherReportLoadingText = 'Search old weather report message...'
         const oldWeatherMessage = await GetOldDailyWeatherReport(ChannelId.ProcessedNews)
-        if (oldWeatherMessage == null) {
+        if (oldWeatherMessage == null && new Date(Date.now()).getHours() < 10) {
             CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
         } else {
-            if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate()) {
-                statesManager.dailyWeatherReportLoadingText = 'Delete old report message...'
+            if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate() && new Date(Date.now()).getHours() < 10) {
+                statesManager.dailyWeatherReportLoadingText = 'Delete old weather report message...'
                 await oldWeatherMessage.delete()
                 CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
             } else {
