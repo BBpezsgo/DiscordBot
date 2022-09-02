@@ -48,7 +48,7 @@
                     <ul id="myUL">
                         <li>
                             <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
-                            <form action="/userRpm/Database/Backup/All" method="post"
+                            <form action="/userViews/Database/Backup/All" method="post"
                                 style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
                                 onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                                 <input type="submit" value="Backup All">
@@ -58,7 +58,7 @@
                                 <li class="data-file">
                                     <span>{{filename}}</span>
                                     <b>{{size}}</b>
-                                    <form action="/userRpm/Database/Backup/All" method="post"
+                                    <form action="/userViews/Database/Backup/All" method="post"
                                         style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
                                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                                         <input type="text" name="filename" value="{{filename}}" style="display: none;">
@@ -165,7 +165,7 @@
                                 </td>
                                 <td style="padding:0 2 0 2;word-break:break-all">
                                     <img class="show-invert-{{this.haveDatabase}} miniicon" src="/images/err2.png" width="16" height="16">
-                                    <form action="/userRpm/Database/Search" method="post" style="margin: 0; display: inline-block;"
+                                    <form action="/userViews/Database/Search" method="post" style="margin: 0; display: inline-block;"
                                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                                         <input type="text" name="id" value="{{this.id}}" style="display: none;">
                                         <input type="submit" value="View">
@@ -182,7 +182,7 @@
             </tr>
             <tr>
                 <td width="698" align="center">
-                    <form action="/userRpm/Database/Search" method="post"
+                    <form action="/userViews/Database/Search" method="post"
                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                         <input type="text" name="id" value="{{../this.id}}" placeholder="User ID" required>
                         <input type="submit" value="Search">

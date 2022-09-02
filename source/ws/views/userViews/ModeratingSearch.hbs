@@ -68,7 +68,7 @@
                                     <img width="16" height="16" src="/images/bool-{{this.available}}.png">
                                 </td>
                                 <td style="padding:0 2 0 2;word-break:break-all">
-                                    <form action="/userRpm/Moderating/Search" method="post"
+                                    <form action="/userViews/Moderating/Search" method="post"
                                         style="margin: 0;"
                                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                                         <input type="text" name="id" value="{{this.id}}" style="display: none;">
@@ -86,7 +86,7 @@
             </tr>
             <tr>
                 <td width="698" align="center">
-                    <form action="/userRpm/Moderating/Search" method="post"
+                    <form action="/userViews/Moderating/Search" method="post"
                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                         <input type="text" name="id" value="{{serverId}}" placeholder="Server ID" required>
                         <input type="submit" value="Search">

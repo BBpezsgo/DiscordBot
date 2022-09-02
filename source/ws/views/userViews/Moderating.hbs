@@ -35,7 +35,7 @@
                         </span>
                     </div>
                     {{server.name}}
-                    <form action="/userRpm/Moderating/Server/Back" method="post"
+                    <form action="/userViews/Moderating/Server/Back" method="post"
                         style="display: inline-block; margin-left: 30px;"
                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                         <input type="submit" value="Back">
@@ -183,7 +183,7 @@
             </tr>
             <tr>
                 <td colspan="3">
-                    <form action="/userRpm/Moderating/SendMessage" method="post"
+                    <form action="/userViews/Moderating/SendMessage" method="post"
                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
                         <input type="text" name="id" value="{{channel.id}}" style="display: none;">
 

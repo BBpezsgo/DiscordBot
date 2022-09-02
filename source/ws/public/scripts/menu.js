@@ -88,7 +88,7 @@ function menuDisplay() {
             display = "none";
         }
         var power = (menuList[n + 2] > 0) ? (menuList[n + 2] - 1) : 0;
-        document.write('<ol id=ol' + i + ' class=' + className + ' style="user-select: none; display:' + display + '; background-position:2px;PADDING-LEFT:2px;"><A id=a' + i + ' href="/userRpm/' + menuList[n] + '" target=mainFrame class=L1 onClick="doClick(' + i + ');">' + menuList[n + 3] + '</a></ol>');
+        document.write('<ol id=ol' + i + ' class=' + className + ' style="user-select: none; display:' + display + '; background-position:2px;PADDING-LEFT:2px;"><A id=a' + i + ' href="/userViews/' + menuList[n] + '" target=mainFrame class=L1 onClick="doClick(' + i + ');">' + menuList[n + 3] + '</a></ol>');
         //added by zqq,07.11.1
         //map.push(menuList[n+2]);
         map[map.length] = menuList[n + 2];

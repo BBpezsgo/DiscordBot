@@ -102,7 +102,7 @@ class WebSocket {
             }
 
             res.set('WWW-Authenticate', 'Basic realm="401"')
-            res.status(401).render('userRpm/401')
+            res.status(401).render('userViews/401')
         })
 
         setInterval(() => {
@@ -488,6 +488,20 @@ class WebSocket {
         }
     }
 
+    /**
+     * @param {Request} req
+     * @param {Response} res
+     * @param {string} viewName
+     * @param {object | undefined} options
+     */
+    RenderPage(req, res, viewName, options = undefined) {
+        if (req.url.includes('?new')) {
+            res.render(`userViewsNew/${viewName}`, options)
+        } else {
+            res.render(`userViews/${viewName}`, options)
+        }
+    }
+
     RenderPage_Status(req, res) {
         var uptime = new Date(0)
         uptime.setSeconds(this.client.uptime / 1000)
@@ -544,13 +558,13 @@ class WebSocket {
             system: systemInfo
         }
 
-        res.render('userRpm/Status', { bot: clientData })
+        this.RenderPage(req, res, 'Status', { bot: clientData })
     }
 
     RenderPage_CacheChannels(req, res) {
         const xd = this.Get_ChannelsCache()
 
-        res.render('userRpm/CacheChannels', { groups: xd.groups, channels: xd.singleChannels })
+        this.RenderPage(req, res, 'CacheChannels', { groups: xd.groups, channels: xd.singleChannels })
     }
 
     RenderPage_Database(req, res, userId) {
@@ -645,7 +659,7 @@ class WebSocket {
                 },
             }
 
-            res.render('userRpm/Database', { userDatabase: userDatabase, user: user, bot: bot, market: market, info: info })
+            this.RenderPage(req, res, 'Database', { userDatabase: userDatabase, user: user, bot: bot, market: market, info: info })
         } catch (error) {
             this.databaseSearchedUserId = ''
             this.RenderPage_DatabaseSearch(req, res, error.message)
@@ -715,7 +729,7 @@ class WebSocket {
             market.prices.jewel = this.database.dataMarket.prices.jewel
         }
 
-        res.render('userRpm/DatabaseSearch', { users: users, searchError: searchError, bot: bot, market: market, info: info })
+        this.RenderPage(req, res, 'DatabaseSearch', { users: users, searchError: searchError, bot: bot, market: market, info: info })
     }
 
     RenderPage_ModeratingSearch(req, res, searchError) {
@@ -724,7 +738,7 @@ class WebSocket {
             return
         }
 
-        res.render('userRpm/ModeratingSearch', { servers: this.Get_ServersCache(), searchError: searchError })
+        this.RenderPage(req, res, 'ModeratingSearch', { servers: this.Get_ServersCache(), searchError: searchError })
     }
 
     RenderPage_ModeratingGuildSearch(req, res, searchError) {
@@ -761,7 +775,7 @@ class WebSocket {
             verified: (g.verified),
         }
 
-        res.render('userRpm/ModeratingGuildSearch', { server: guild, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError })
+        this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError })
     }
 
     RenderPage_Moderating(req, res) {
@@ -853,7 +867,7 @@ class WebSocket {
             })
         }
 
-        res.render('userRpm/Moderating', { server: guild, channel: channel, messages: messages })
+        this.RenderPage(req, res, 'Moderating', { server: guild, channel: channel, messages: messages })
     }
 
     RenderPage_Commands(req, res) {
@@ -905,7 +919,7 @@ class WebSocket {
             commands.push(newCommand)
         });
 
-        res.render('userRpm/Commands', { commands: commands, deleting: this.commandsDeleting, creating: this.commandsCreating, deletingPercent: this.commandsDeletingPercent, creatingPercent: this.commandsCreatingPercent })
+        this.RenderPage(req, res, 'Commands', { commands: commands, deleting: this.commandsDeleting, creating: this.commandsCreating, deletingPercent: this.commandsDeletingPercent, creatingPercent: this.commandsCreatingPercent })
     }
 
     RegisterHandlebarsRoots() {
@@ -926,6 +940,28 @@ class WebSocket {
                 }
 
                 res.render('default', { title: 'Discord BOT' + icon })
+            } else {
+                res.status(404).send("Not found")
+            }
+        })
+        
+        this.app.get('/hbnew', (req, res) => {
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+
+            const view = req.query.view
+
+            if (view == 'default' || view == null || view == undefined) {
+                var icon = ''
+
+                if (this.ClientType == 'DESKTOP') {
+                    icon = ' 🖥️'
+                } else if (this.ClientType == 'MOBILE') {
+                    icon = ' 📱'
+                } else if (this.ClientType == 'RASPBERRY') {
+                    icon = ' 🍓'
+                }
+
+                res.render('defaultNew', { title: 'Discord BOT' + icon })
             } else {
                 res.status(404).send("Not found")
             }
@@ -973,15 +1009,19 @@ class WebSocket {
             res.render('frames/top')
         })
 
-        this.app.get('/userRpm/MenuRpm', (req, res) => {
-            res.render('userRpm/MenuRpm')
+        this.app.get('/userViews/MenuRpm', (req, res) => {
+            res.render('userViews/MenuRpm')
         })
 
-        this.app.get('/userRpm/Status', (req, res) => {
+        this.app.get('/userViewsNew/MenuRpm', (req, res) => {
+            res.render('userViewsNew/MenuRpm')
+        })
+
+        this.app.get('/userViews/Status', (req, res) => {
             this.RenderPage_Status(req, res)
         })
 
-        this.app.get('/userRpm/CacheEmojis', (req, res) => {
+        this.app.get('/userViews/CacheEmojis', (req, res) => {
             var emojis = []
 
             this.client.emojis.cache.forEach(emoji => {
@@ -999,26 +1039,26 @@ class WebSocket {
                 emojis.push(newEmoji)
             });
 
-            res.render('userRpm/CacheEmojis', { emojis: emojis })
+            this.RenderPage(req, res, 'CacheEmojis', { emojis: emojis })
         })
 
-        this.app.get('/userRpm/CacheUsers', (req, res) => {
-            res.render('userRpm/CacheUsers', { users: this.Get_UsersCache() })
+        this.app.get('/userViews/CacheUsers', (req, res) => {
+            this.RenderPage(req, res, 'CacheUsers', { users: this.Get_UsersCache() })
         })
 
-        this.app.get('/userRpm/CacheChannels', (req, res) => {
+        this.app.get('/userViews/CacheChannels', (req, res) => {
             this.RenderPage_CacheChannels(req, res)
         })
 
-        this.app.get('/userRpm/CacheServers', (req, res) => {
-            res.render('userRpm/CacheServers', { servers: this.Get_ServersCache() })
+        this.app.get('/userViews/CacheServers', (req, res) => {
+            this.RenderPage(req, res, 'CacheServers', { servers: this.Get_ServersCache() })
         })
 
-        this.app.get('/userRpm/Application', (req, res) => {
+        this.app.get('/userViews/Application', (req, res) => {
             const app = this.client.application
 
             if (app == undefined || app == null) {
-                res.render('userRpm/ApplicationUnavaliable')
+                this.RenderPage(req, res, 'ApplicationUnavaliable')
                 return
             }
 
@@ -1036,10 +1076,10 @@ class WebSocket {
                 rpcOrigins: app.rpcOrigins,
                 tags: app.tags,
             }
-            res.render('userRpm/Application', { app: newApp })
+            this.RenderPage(req, res, 'Application', { app: newApp })
         })
 
-        this.app.get('/userRpm/Process', (req, res) => {
+        this.app.get('/userViews/Process', (req, res) => {
             const uptime = new Date()
             uptime.setSeconds(Math.floor(process.uptime()))
 
@@ -1074,35 +1114,35 @@ class WebSocket {
                 uptime: GetTime(uptime)
             }
 
-            res.render('userRpm/Process', { process: proc })
+            this.RenderPage(req, res, 'Process', { process: proc })
         })
 
-        this.app.get('/userRpm/Testing', (req, res) => {
-            res.render('userRpm/Testing')
+        this.app.get('/userViews/Testing', (req, res) => {
+            this.RenderPage(req, res, 'Testing')
         })
 
-        this.app.post('/userRpm/CacheChannels/Fetch', (req, res) => {
+        this.app.post('/userViews/CacheChannels/Fetch', (req, res) => {
             const channel = this.client.channels.cache.get(req.body.id)
             channel.fetch()
 
             this.RenderPage_CacheChannels(req, res)
         })
 
-        this.app.post('/userRpm/CacheChannels/Join', (req, res) => {
+        this.app.post('/userViews/CacheChannels/Join', (req, res) => {
             const voiceChannel = this.client.channels.cache.get(req.body.id)
             voiceChannel.join()
 
             this.RenderPage_CacheChannels(req, res)
         })
 
-        this.app.post('/userRpm/Process/Exit', (req, res) => {
+        this.app.post('/userViews/Process/Exit', (req, res) => {
             if (this.ClientType != 'MOBILE') {
                 SystemLog('Exit by user (handlebars)')
             }
             setTimeout(() => { process.exit() }, 500)
         })
 
-        this.app.post('/userRpm/Process/Restart', (req, res) => {
+        this.app.post('/userViews/Process/Restart', (req, res) => {
             if (this.ClientType == 'MOBILE') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.writeFileSync('./exitdata.txt', 'restart', { encoding: 'ascii' })
@@ -1111,11 +1151,11 @@ class WebSocket {
             }, 500)
         })
 
-        this.app.post('/userRpm/Process/Abort', (req, res) => {
+        this.app.post('/userViews/Process/Abort', (req, res) => {
             process.abort()
         })
 
-        this.app.post('/userRpm/Process/Disconnect', (req, res) => {
+        this.app.post('/userViews/Process/Disconnect', (req, res) => {
             process.disconnect()
         })
 
@@ -1131,11 +1171,11 @@ class WebSocket {
             this.StopBot()
         })
 
-        this.app.get('/userRpm/Moderating', (req, res) => {
+        this.app.get('/userViews/Moderating', (req, res) => {
             this.RenderPage_ModeratingSearch(req, res, '')
         })
 
-        this.app.post('/userRpm/Moderating/Search', (req, res) => {
+        this.app.post('/userViews/Moderating/Search', (req, res) => {
             const serverId = req.body.id
 
             if (this.client.guilds.cache.has(serverId)) {
@@ -1147,19 +1187,19 @@ class WebSocket {
             }
         })
 
-        this.app.post('/userRpm/Moderating/Back', (req, res) => {
+        this.app.post('/userViews/Moderating/Back', (req, res) => {
             this.moderatingSearchedServerId = ''
 
             this.RenderPage_ModeratingSearch(req, res, '')
         })
 
-        this.app.post('/userRpm/Moderating/Server/Back', (req, res) => {
+        this.app.post('/userViews/Moderating/Server/Back', (req, res) => {
             this.moderatingSearchedChannelId = ''
 
             this.RenderPage_ModeratingGuildSearch(req, res, '')
         })
 
-        this.app.post('/userRpm/Moderating/Server/Search', (req, res) => {
+        this.app.post('/userViews/Moderating/Server/Search', (req, res) => {
             const channelId = req.body.id
 
             if (this.client.channels.cache.has(channelId)) {
@@ -1171,15 +1211,15 @@ class WebSocket {
             }
         })
 
-        this.app.get('/userRpm/Database', (req, res) => {
+        this.app.get('/userViews/Database', (req, res) => {
             if (this.database == null || this.database == undefined) {
-                res.render('userRpm/DatabaseNotSupported')
+                this.RenderPage(req, res, 'DatabaseNotSupported')
             } else {
                 this.RenderPage_DatabaseSearch(req, res, '')
             }
         })
 
-        this.app.post('/userRpm/Database/Search', (req, res) => {
+        this.app.post('/userViews/Database/Search', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             const userId = req.body.id
@@ -1193,7 +1233,7 @@ class WebSocket {
             }
         })
 
-        this.app.post('/userRpm/Database/Backup/All', (req, res) => {
+        this.app.post('/userViews/Database/Backup/All', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.readdir(this.database.backupFolderPath, (err, files) => {
@@ -1208,7 +1248,7 @@ class WebSocket {
             })
         })
 
-        this.app.post('/userRpm/Database/Backup/One', (req, res) => {
+        this.app.post('/userViews/Database/Backup/One', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             const file = req.body.filename
@@ -1221,7 +1261,7 @@ class WebSocket {
             }
         })
 
-        this.app.post('/userRpm/Database/Back', (req, res) => {
+        this.app.post('/userViews/Database/Back', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             this.databaseSearchedUserId = ''
@@ -1229,7 +1269,7 @@ class WebSocket {
             this.RenderPage_DatabaseSearch(req, res, '')
         })
 
-        this.app.post('/userRpm/Database/Modify/Stickers', (req, res) => {
+        this.app.post('/userViews/Database/Modify/Stickers', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataStickers[this.databaseSearchedUserId] != undefined) {
@@ -1248,7 +1288,7 @@ class WebSocket {
             }
         })
 
-        this.app.post('/userRpm/Database/Modify/Backpack', (req, res) => {
+        this.app.post('/userViews/Database/Modify/Backpack', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataBackpacks[this.databaseSearchedUserId] != undefined) {
@@ -1269,7 +1309,7 @@ class WebSocket {
             }
         })
 
-        this.app.post('/userRpm/Database/Modify/Basic', (req, res) => {
+        this.app.post('/userViews/Database/Modify/Basic', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataBasic[this.databaseSearchedUserId] != undefined) {
@@ -1285,9 +1325,9 @@ class WebSocket {
             }
         })
 
-        this.app.get('/userRpm/LogError', (req, res) => {
+        this.app.get('/userViews/LogError', (req, res) => {
             if (this.ClientType == 'MOBILE') {
-                res.render('userRpm/ErrorLogsNotSupported', {})
+                this.RenderPage(req, res, 'ErrorLogsNotSupported', {})
                 return
             }
             const data = fs.readFileSync('./node.error.log', 'utf8')
@@ -1374,32 +1414,32 @@ class WebSocket {
                 }
             }
 
-            res.render('userRpm/ErrorLogs', { errors: errors, warnings: warnings })
+            this.RenderPage(req, res, 'ErrorLogs', { errors: errors, warnings: warnings })
         })
 
-        this.app.get('/userRpm/LogSystem', (req, res) => {
+        this.app.get('/userViews/LogSystem', (req, res) => {
             if (this.ClientType == 'MOBILE') {
-                res.render('userRpm/SystemLogsNotSupported', {})
+                this.RenderPage(req, res, 'SystemLogsNotSupported', {})
             } else {
-                res.render('userRpm/SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
+                this.RenderPage(req, res, 'SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
             }
         })
 
-        this.app.get('/userRpm/LogHandlebars', (req, res) => {
+        this.app.get('/userViews/LogHandlebars', (req, res) => {
             if (this.ClientType == 'MOBILE') {
-                res.render('userRpm/HandlebarsLogsNotSupported', {})
+                this.RenderPage(req, res, 'HandlebarsLogsNotSupported', {})
             } else {
-                res.render('userRpm/HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
+                this.RenderPage(req, res, 'HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
             }
         })
 
-        this.app.post('/userRpm/Log/Clear', (req, res) => {
+        this.app.post('/userViews/Log/Clear', (req, res) => {
             if (this.ClientType == 'MOBILE') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.writeFileSync('./node.error.log', '')
         })
 
-        this.app.post('/userRpm/Moderating/SendMessage', (req, res) => {
+        this.app.post('/userViews/Moderating/SendMessage', (req, res) => {
             /** @type {Discord.DMChannel | Discord.PartialDMChannel | Discord.NewsChannel | Discord.TextChannel | Discord.ThreadChannel | Discord.VoiceChannel} */
             const channel = this.client.channels.cache.get(req.body.id)
 
@@ -1417,7 +1457,7 @@ class WebSocket {
             this.RenderPage_ModeratingSearch(req, res, '')
         })
 
-        this.app.post('/userRpm/ApplicationCommands/Fetch', (req, res) => {
+        this.app.post('/userViews/ApplicationCommands/Fetch', (req, res) => {
             this.client.application.commands.fetch().finally(()=> {
                 this.client.guilds.cache.get('737954264386764812').commands.fetch().finally(() => {
                     this.RenderPage_Commands(req, res)
@@ -1425,7 +1465,7 @@ class WebSocket {
             })
         })
 
-        this.app.post('/userRpm/ApplicationCommands/DeleteAll', (req, res) => {
+        this.app.post('/userViews/ApplicationCommands/DeleteAll', (req, res) => {
             this.commandsDeleting = true
             DeleteCommandsSync(this.client, this.statesManager, (percent) => {
                 this.commandsDeletingPercent = percent
@@ -1435,7 +1475,7 @@ class WebSocket {
             this.RenderPage_Commands(req, res)
         })
 
-        this.app.post('/userRpm/ApplicationCommands/Createall', (req, res) => {
+        this.app.post('/userViews/ApplicationCommands/Createall', (req, res) => {
             this.commandsCreating = true
             CreateCommandsSync(this.client, this.statesManager, (percent) => {
                 this.commandsCreatingPercent = percent
@@ -1445,41 +1485,41 @@ class WebSocket {
             this.RenderPage_Commands(req, res)
         })
 
-        this.app.get('/userRpm/ApplicationCommands/Status', (req, res) => {
+        this.app.get('/userViews/ApplicationCommands/Status', (req, res) => {
             res.status(200).send(JSON.stringify({ creatingPercent: this.commandsCreatingPercent }))
         })
 
-        this.app.get('/userRpm/ApplicationCommands', (req, res) => {
+        this.app.get('/userViews/ApplicationCommands', (req, res) => {
             if (this.client.guilds.cache.get('737954264386764812') == null) {
-                res.render('userRpm/ApplicationUnavaliable')
+                this.RenderPage(req, res, 'ApplicationUnavaliable')
                 return
             }
 
             this.RenderPage_Commands(req, res)
         })
 
-        this.app.post('/userRpm/GenerateHash', (req, res) => {
+        this.app.post('/userViews/GenerateHash', (req, res) => {
             const userID = req.body.id
             RemoveAllUser(userID)
             AddNewUser(userID)
         })
 
-        this.app.post('/userRpm/Commands/Delete', (req, res) => {
+        this.app.post('/userViews/Commands/Delete', (req, res) => {
             const commandID = req.body.id
             DeleteCommand(this.client, commandID, () => {
                 this.RenderPage_Commands(req, res)
             })
         })
 
-        this.app.post('/userRpm/Commands/Update', (req, res) => {
+        this.app.post('/userViews/Commands/Update', (req, res) => {
             const commandID = req.body.id
             Updatecommand(this.client, commandID, () => {
                 this.RenderPage_Commands(req, res)
             })
         })
 
-        this.app.get('/userRpm/*', (req, res) => {
-            res.render('userRpm/404', { message: req.path })
+        this.app.get('/userViews/*', (req, res) => {
+            this.RenderPage(req, res, '404', { message: req.path })
         })
     }
 

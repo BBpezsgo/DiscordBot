@@ -31,12 +31,12 @@
             </tr>
             <tr>
                 <td>
-                    <form action="/userRpm/Applicationcommands/Fetch" method="post"
+                    <form action="/userViews/Applicationcommands/Fetch" method="post"
                         style="margin-left: 30px;"
                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
                         <input type="submit" value="Fetch">
                     </form>
-                    <form action="/userRpm/Applicationcommands/DeleteAll" method="post"
+                    <form action="/userViews/Applicationcommands/DeleteAll" method="post"
                         style="margin-left: 5px;"
                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; document.getElementById('deletingProgressPanel').style.display = 'inline-block'; refreshCreatingProgressBar = true;"
                         class="show-invert-{{deleting}}">
@@ -46,7 +46,7 @@
 						<label for="deletingProgress">Deleting...</label>
 						<progress id="deletingProgress" value="{{deletingPercent}}" max="1"></progress>
 					</div>
-                    <form action="/userRpm/Applicationcommands/Createall" method="post"
+                    <form action="/userViews/Applicationcommands/Createall" method="post"
                         style="margin-left: 5px;"
                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; document.getElementById('creatingProgressPanel').style.display = 'inline-block'; refreshCreatingProgressBar = true;"
                         class="show-invert-{{creating}}">
@@ -112,13 +112,13 @@
                                     <img src="../images/bool-{{this.global}}.png" class="miniicon">
                                 </td>
                                 <td style="padding:0 2 0 2;word-break:break-all">
-                                    <form action="/userRpm/Commands/Update" method="post"
+                                    <form action="/userViews/Commands/Update" method="post"
                                         style="margin: 0; display: inline-block;"
                                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                                         <input type="text" name="id" value="{{this.id}}" style="display: none;">
                                         <input type="submit" value="Update">
                                     </form>
-                                    <form action="/userRpm/Commands/Delete" method="post"
+                                    <form action="/userViews/Commands/Delete" method="post"
                                         style="margin: 0; display: inline-block;"
                                         onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                                         <input type="text" name="id" value="{{this.id}}" style="display: none;">
@@ -157,7 +157,7 @@
 
         setInterval(() => {
             if (refreshCreatingProgressBar) {
-                GetData('/userRpm/ApplicationCommands/Status', (body) => {
+                GetData('/userViews/ApplicationCommands/Status', (body) => {
                     const data = JSON.parse(body)
                     if (data.creatingPercent >= 1) {
                         refreshCreatingProgressBar = false
@@ -174,7 +174,7 @@
 
         setInterval(() => {
             if (refreshDeletingProgressBar) {
-                GetData('/userRpm/ApplicationCommands/Status', (body) => {
+                GetData('/userViews/ApplicationCommands/Status', (body) => {
                     const data = JSON.parse(body)
                     if (data.deletingPercent >= 1) {
                         refreshDeletingProgressBar = false

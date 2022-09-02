@@ -21,7 +21,8 @@ source/FLR.json
 source/GST.json
 source/IPS.json
 Update.bat
-source/ws/public/styles-test
+source/ws/public/stylesNew
+source/ws/public/imagesNew
 .vs
 DiscordBot.njsproj
 bin
@@ -32,4 +33,7 @@ OldDCVer
 source/ws/views/default-old.hbs
 source/ws/public/scripts-test
 source/ws/views/default-test.hbs
-source/ws/views/userRpm/MenuRpm-test.hbs
+source/ws/views/userViews/MenuRpm-test.hbs
+source/ws/views/defaultNew.hbs
+source/ws/views/userViewsNew
+source/ws/public/scripts/menuNew.js
