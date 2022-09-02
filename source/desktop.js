@@ -65,7 +65,6 @@ process.stdin.on('data', function (b) {
         }
     } else if (/^\u001b\[M/.test(s)) {
         // mouse event
-        // console.error('s.length:', s.length)
         // reuse the key array albeit its name
         // otherwise recompute as the mouse event is structured differently
         var modifier = s.charCodeAt(3)
@@ -778,13 +777,18 @@ function DaysToMilliseconds(days) {
     return days * 24 * 60 * 60 * 1000
 }
 
-/**@param {Discord.MessageAttachment} image */
-function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image = undefined) {
-    const optionEmojis = listOfOptionEmojis.toString().replace(' ', '').split(';')
-    const optionTexts = listOfOptionText.toString().replace(' ', '').split(';')
+/**
+ * @param {Discord.MessageAttachment} image
+ * @param {string} titleText
+ * @param {string} listOfOptionText
+ * @param {string} listOfOptionEmojis
+ */
+async function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image = undefined) {
+    const optionEmojis = listOfOptionEmojis.toString().split(';')
+    const optionTexts = listOfOptionText.toString().split(';')
     let optionText = ''
     for (let i = 0; i < optionTexts.length; i++) {
-        optionText += `> ${optionEmojis[i]}  ${optionTexts[i]}\n`
+        optionText += `> ${optionEmojis[i]}  ${optionTexts[i].trim()}\n`
     }
 
     const dateNow = Date.now() + DaysToMilliseconds(2)
@@ -808,18 +812,20 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
         embed.setImage(image.url)
     }
 
-    bot.channels.cache.get(ChannelId.Quiz).send({ embeds: [embed] }).then(message => {
-        message.channel.send('> <@&799342836931231775>')
-        message.react('🎯')
+    /** @type {Discord.GuildTextBasedChannel | undefined} */
+    const quizChannel = bot.channels.cache.get(ChannelId.Quiz)
+    const sentQuiz = await quizChannel.send({ embeds: [embed] })
+    if (sentQuiz) {
+        await sentQuiz.react('🎯')
         for (let i = 0; i < optionEmojis.length; i++) {
             if (optionEmojis[i].includes('<')) {
-                message.react(optionEmojis[i].split(':')[2].replace('>', ''))
+                await sentQuiz.react(optionEmojis[i].split(':')[2].replace('>', ''))
             } else {
-                message.react(optionEmojis[i])
+                await sentQuiz.react(optionEmojis[i])
             }
-        }
-    })
-
+        }  
+        await quizChannel.send('> <@&799342836931231775>')      
+    }
 }
 
 /**
@@ -2236,15 +2242,18 @@ bot.once('ready', async () => {
         /** @type {string[]} */
         const channelsWithSettings = JSON.parse(fs.readFileSync('./settings.json')).channelSettings.channelsWithSettings
         channelsWithSettings.forEach(channelWithSettings => {
-            const chn = bot.channels.cache.get(channelWithSettings)
-            chn.messages.fetch({ limit: 10 }).then(async (messages) => {
-                messages.forEach(message => {
-                    ProcessMessage(message)
+            bot.channels.fetch(channelWithSettings)
+                .then((chn) => {
+                    chn.messages.fetch({ limit: 10 })
+                        .then(async (messages) => {
+                            messages.forEach(message => {
+                                ProcessMessage(message)
+                            })
+                        })
                 })
-            })
         })
     } catch (err) {
-        console.log('  Error: ' + err.message)
+        fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
     }
 })
 
@@ -2253,11 +2262,11 @@ function processNewsMessage(message) {
     statesManager.allNewsProcessed = false
     listOfNews.push(CreateNews(message))
 }
-bot.on('messageCreate', async message => { //Message
-    const thisIsPrivateMessage = message.channel.type === 'dm'
-    if (message.author.bot && thisIsPrivateMessage === false) { return }
-    if (!message.type) return
-    let sender = message.author
+bot.on('messageCreate', async message => {
+    const thisIsPrivateMessage = (message.channel.type === Discord.ChannelType.DM)
+
+    if (message.author.bot == true && thisIsPrivateMessage == false) { return }
+    const sender = message.author
 
     database.LoadDatabase()
 
@@ -2341,9 +2350,8 @@ bot.on('messageCreate', async message => { //Message
         }
     }
 
-
-    if (message.content.startsWith(`${perfix}`)) {
-        processCommand(message, thisIsPrivateMessage, sender, message.content.substring(1))
+    if (message.content.startsWith(perfix)) {
+        processCommand(message, thisIsPrivateMessage, sender, message.content.substring(1).trim())
         return
     }
 
@@ -2915,12 +2923,24 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `quiz`) {
-        try {
-            quiz(command.options.getString("title"), command.options.getString("options"), command.options.getString("option_emojis"), command.options.getInteger("add_xp"), command.options.getInteger("remove_xp"), command.options.getInteger("add_token"), command.options.getInteger("remove_token"))
-            command.reply({ content: '> \\✔️ **Kész**', ephemeral: true })
-        } catch (error) {
-            command.reply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
-        }
+        await command.deferReply()
+        bot.channels.fetch(ChannelId.Quiz)
+            .then(async () => {
+                try {
+                    quiz(command.options.getString("title"), command.options.getString("options"), command.options.getString("option_emojis"), command.options.getInteger("add_xp"), command.options.getInteger("remove_xp"), command.options.getInteger("add_token"), command.options.getInteger("remove_token"))
+                        .then(() => {
+                            command.editReply({ content: '> \\✔️ **Kész**', ephemeral: true })
+                        })
+                        .catch((error) => {
+                            command.editReply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
+                        })
+                } catch (error) {
+                    command.editReply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
+                }
+            })
+            .catch((error) => {
+                command.editReply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
+            })
         userstatsSendCommand(command.user)
         return
     }
