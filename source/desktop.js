@@ -2060,8 +2060,10 @@ bot.once('ready', async () => {
     setTimeout(async () => {
         statesManager.dailyWeatherReportLoadingText = 'Search old weather report message...'
         const oldWeatherMessage = await GetOldDailyWeatherReport(ChannelId.ProcessedNews)
-        if (oldWeatherMessage == null && new Date(Date.now()).getHours() < 10) {
-            CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
+        if (oldWeatherMessage == null) {
+            if (new Date(Date.now()).getHours() < 10) {
+                CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
+            }
         } else {
             if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate() && new Date(Date.now()).getHours() < 10) {
                 statesManager.dailyWeatherReportLoadingText = 'Delete old weather report message...'
@@ -2149,11 +2151,14 @@ bot.once('ready', async () => {
             SystemLog(`[NEWS]: Can't fetch news channel! Reason: ${error}`)
         })
 
+    const DeleteRawNewsMessages = true
+
     setInterval(() => {
         if (listOfNews.length > 0) {
-            const newsMessage = listOfNews.shift()
             /** @type {Discord.GuildTextBasedChannel | undefined} */
             const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
+
+            const newsMessage = listOfNews.shift()
             const embed = newsMessage.embed
             statesManager.newsLoadingText2 = 'Send new message...'
 
@@ -2172,15 +2177,19 @@ bot.once('ready', async () => {
                     if (newsMessage.NotifyRoleId.length == 0) {
                         newsChannel.send({ embeds: [embed] })
                             .then(() => {
-                                SystemLog(`[NEWS]: Delete raw message...`)
-                                statesManager.newsLoadingText2 = 'Delete raw message...'
-                                newsMessage.message.delete()
-                                    .catch((error) => {
-                                        SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
-                                    })
-                                    .finally(() => {
-                                        statesManager.newsLoadingText2 = ''
-                                    })
+                                if (DeleteRawNewsMessages) {
+                                    SystemLog(`[NEWS]: Delete raw message...`)
+                                    statesManager.newsLoadingText2 = 'Delete raw message...'
+                                    newsMessage.message.delete()
+                                        .catch((error) => {
+                                            SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
+                                        })
+                                        .finally(() => {
+                                            statesManager.newsLoadingText2 = ''
+                                        })                                    
+                                } else {
+                                    statesManager.newsLoadingText2 = ''
+                                }
                             })
                             .catch((error) => {                    
                                 SystemLog(`[NEWS]: Can't send processed news message! Reason: ${error}`)
@@ -2188,15 +2197,19 @@ bot.once('ready', async () => {
                     } else {
                         newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
                             .then(() => {
-                                SystemLog(`[NEWS]: Delete raw message...`)
-                                statesManager.newsLoadingText2 = 'Delete raw message...'
-                                newsMessage.message.delete()
-                                    .catch((error) => {
-                                        SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
-                                    })
-                                    .finally(() => {
-                                        statesManager.newsLoadingText2 = ''
-                                    })
+                                if (DeleteRawNewsMessages) {
+                                    SystemLog(`[NEWS]: Delete raw message...`)
+                                    statesManager.newsLoadingText2 = 'Delete raw message...'
+                                    newsMessage.message.delete()
+                                        .catch((error) => {
+                                            SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
+                                        })
+                                        .finally(() => {
+                                            statesManager.newsLoadingText2 = ''
+                                        })
+                                } else {
+                                    statesManager.newsLoadingText2 = ''
+                                }
                             })
                             .catch((error) => {                    
                                 SystemLog(`[NEWS]: Can't send processed news message! Reason: ${error}`)

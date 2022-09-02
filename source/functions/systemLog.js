@@ -24,17 +24,13 @@ function GetTimePrefix() {
 
 function Log(message) {
     fs.appendFile('./log/' + GetFilename() + '.log', '\n' + GetTimePrefix() + ' ' + message, function (err) {
-        if (err) {
-            throw err
-        }
+        if (err) { throw err }
     })
 }
 
 function LogRaw(message) {
     fs.appendFile('./log/' + GetFilename() + '.log', message, function (err) {
-        if (err) {
-            throw err
-        }
+        if (err) { throw err }
     })
 }
 
@@ -43,7 +39,7 @@ function SystemLog(message) {
         Log(message)
     } else {
         fs.mkdir('./log', (err) => {
-            if (err) throw err
+            if (err) { throw err }
             Log(message)
         })
     }

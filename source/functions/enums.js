@@ -2,7 +2,7 @@
 const ChannelId = {
     Quiz: "799340273431478303",
     IncomingNews: "902894789874311198",
-    ProcessedNews: "746266528508411935"
+    ProcessedNews: "760804414205591585" // 746266528508411935
 }
 
 const fontColor = '\033[37m'

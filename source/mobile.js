@@ -830,8 +830,10 @@ bot.once('ready', async () => {
     setTimeout(async () => {
         statesManager.dailyWeatherReportLoadingText = 'Search old weather report message...'
         const oldWeatherMessage = await GetOldDailyWeatherReport(processedNewsChannel)
-        if (oldWeatherMessage == null && new Date(Date.now()).getHours() < 10) {
-            CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
+        if (oldWeatherMessage == null) {
+            if (new Date(Date.now()).getHours() < 10) {
+                CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
+            }
         } else {
             if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate() && new Date(Date.now()).getHours() < 10) {
                 statesManager.dailyWeatherReportLoadingText = 'Delete old weather report message...'
