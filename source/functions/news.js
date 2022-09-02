@@ -2,45 +2,6 @@ const Discord = require("discord.js")
 const { Color } = require('./enums.js')
 
 /**
- * @param {Date} date
- * @returns {string}
- */
- function DateToStringNews(date) {
-    let str = ''
-    str += date.getFullYear() + '.'
-    let monthStr = (date.getMonth() + 1) + '.'
-    if (monthStr == '1') {
-        monthStr = 'Jan.'
-    } else if (monthStr == '2') {
-        monthStr = 'Febr.'
-    } else if (monthStr == '3') {
-        monthStr = 'Márc.'
-    } else if (monthStr == '4') {
-        monthStr = 'Ápr.'
-    } else if (monthStr == '5') {
-        monthStr = 'Máj.'
-    } else if (monthStr == '6') {
-        monthStr = 'Jún.'
-    } else if (monthStr == '7') {
-        monthStr = 'Júl.'
-    } else if (monthStr == '8') {
-        monthStr = 'Aug.'
-    } else if (monthStr == '9') {
-        monthStr = 'Szept.'
-    } else if (monthStr == '10') {
-        monthStr = 'Okt.'
-    } else if (monthStr == '11') {
-        monthStr = 'Nov.'
-    } else if (monthStr == '12') {
-        monthStr = 'Dec.'
-    }
-    str += ' ' + monthStr
-    str += ' ' + date.getDate() + '.'
-    str += ' ' + date.getHours() + ':' + date.getMinutes()
-    return str
-}
-
-/**
  * @param {string} id
  * @returns {string}
  */
@@ -81,7 +42,7 @@ function CreateNews(message) {
         .setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
         .setDescription(message.content)
         .setColor(Color.Highlight)
-        .setFooter({ text: '• ' + DateToStringNews(newDate) })
+        .setTimestamp(newDate)
     
     if (message.author.id == '802864588877856789') { // Crossout
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
@@ -134,7 +95,6 @@ function CreateNews(message) {
         }
         embed.setDescription(description)
         embed.setFooter({ text: message.content.split('\n')[0].trim().replace('@', '• #') })
-        embed.setTimestamp(newDate)
     } else if (message.author.id == '813398275305898014') { // Warzone 2100
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://wz2100.net/' })
         if (message.embeds.length > 0) {
@@ -251,4 +211,4 @@ function CreateNews(message) {
     return new NewsMessage(embed, role, message)
 }
 
-module.exports = { DateToStringNews, ConvertNewsIdToName, NewsMessage, CreateNews }
+module.exports = { NewsMessage, CreateNews }
