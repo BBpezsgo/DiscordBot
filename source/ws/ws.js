@@ -238,9 +238,9 @@ class WebSocket {
          * createdAt: string;
          * joinedAt: string;
          * memberCount: number;
-         * nsfwLevel: "DEFAULT" | "EXPLICIT" | "SAFE" | "AGE_RESTRICTED";
+         * nsfwLevel: Discord.GuildMFALevel;
          * nameAcronym: string;
-         * verificationLevel: "NONE" | "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
+         * verificationLevel: Discord.GuildVerificationLevel;
          * splash: string | null;
          * available: boolean;
          * large: boolean;
@@ -254,7 +254,7 @@ class WebSocket {
                 iconUrlSmall: server.iconURL({ size: 16 }),
                 iconUrlLarge: server.iconURL({ size: 128 }),
 
-                name: (server.name),
+                name: server.name,
                 id: server.id,
 
                 createdAt: GetDate(server.createdAt),
@@ -280,20 +280,22 @@ class WebSocket {
     }
 
     Get_ChannelsCache() {
+        /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
         const GetTypeUrl = (type) => {
-            if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+            if (type == Discord.ChannelType.GuildNews|| type == Discord.ChannelType.GuildText) {
                 return 'text'
             }
-            if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+            if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
                 return 'voice'
             }
         }
 
+        /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
         const GetTypeText = (type) => {
-            if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+            if (type == Discord.ChannelType.GuildNews || type == Discord.ChannelType.GuildText) {
                 return 'Text channel'
             }
-            if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+            if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
                 return 'Voice channel'
             }
         }
@@ -302,7 +304,7 @@ class WebSocket {
         const singleChannels = []
 
         this.client.channels.cache.forEach(channel => {
-            if (channel.type == "GUILD_CATEGORY") {
+            if (channel.type == Discord.ChannelType.GuildCategory) {
                 const channels = []
 
                 channel.children.forEach(child => {
@@ -350,7 +352,6 @@ class WebSocket {
                 const newChannel = {
                     id: channel.id,
                     createdAt: GetDate(channel.createdAt),
-                    deletable: channel.deletable,
                     invitable: channel.invitable,
                     joinable: channel.joinable,
                     locked: channel.locked,
@@ -756,23 +757,23 @@ class WebSocket {
             iconUrlSmall: g.iconURL({ size: 32 }),
             iconUrlLarge: g.iconURL({ size: 128 }),
 
-            name: (g.name),
+            name: g.name,
             id: g.id,
 
             createdAt: GetDate(g.createdAt),
             joinedAt: GetDate(g.joinedAt),
 
-            memberCount: (g.memberCount),
-            nsfwLevel: (g.nsfwLevel),
-            nameAcronym: (g.nameAcronym),
-            mfaLevel: (g.mfaLevel),
-            verificationLevel: (g.verificationLevel),
-            splash: (g.splash),
+            memberCount: g.memberCount,
+            nsfwLevel: g.nsfwLevel,
+            nameAcronym: '-',
+            mfaLevel: g.mfaLevel,
+            verificationLevel: g.verificationLevel,
+            splash: g.splash,
 
             available: g.available,
-            large: (g.large),
-            partnered: (g.partnered),
-            verified: (g.verified),
+            large: g.large,
+            partnered: g.partnered,
+            verified: g.verified,
         }
 
         this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError })
