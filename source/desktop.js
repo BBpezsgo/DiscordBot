@@ -2118,14 +2118,14 @@ bot.once('ready', async () => {
     }
 
     SystemLog('[NEWS]: Fetch test news channel...')
-    const fetchedCopyNewsChannel =   await bot.channels.fetch('1010110583800078397')
+    const fetchedCopyNewsChannel = await bot.channels.fetch('1010110583800078397')
     if (fetchedCopyNewsChannel == null) {
         SystemLog(`[NEWS]: Can't fetch test news channel!`)
     }
 
     SystemLog('[NEWS]: Fetch news channel...')
     statesManager.newsLoadingText = 'Fetch news channel...'
-    bot.channels.fetch(ChannelId.IncomingNews)
+    bot.channels.fetch(ChannelId.IncomingNews, { force: true })
         .then((c) => {
             /** @type {Discord.GuildTextBasedChannel | null} */
             const channel = c
@@ -2151,10 +2151,12 @@ bot.once('ready', async () => {
                 })
                 .catch((error) => {
                     SystemLog(`[NEWS]: Can't fetch news messages! Reason: ${error}`)
+                    fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
                 })
         })
         .catch((error) => {
             SystemLog(`[NEWS]: Can't fetch news channel! Reason: ${error}`)
+            fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
         })
 
     const DeleteRawNewsMessages = true
@@ -2165,6 +2167,7 @@ bot.once('ready', async () => {
             const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
 
             const newsMessage = listOfNews.shift()
+            if (newsMessage == null || newsMessage == undefined) { return }
             const embed = newsMessage.embed
             statesManager.newsLoadingText2 = 'Send new message...'
 
@@ -2259,6 +2262,7 @@ bot.once('ready', async () => {
 
 /** @param {Discord.Message} message */
 function processNewsMessage(message) {
+    SystemLog(`[NEWS]: Process message... (id: ${message.id})`)
     statesManager.allNewsProcessed = false
     listOfNews.push(CreateNews(message))
 }

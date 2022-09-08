@@ -860,6 +860,8 @@ bot.once('ready', async () => {
     setInterval(() => {
         if (listOfNews.length > 0) {
             const newsMessage = listOfNews.shift()
+            if (newsMessage == null || newsMessage == undefined) { return }
+            
             /** @type {Discord.TextChannel} */
             const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
             const embed = newsMessage.embed

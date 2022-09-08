@@ -36,11 +36,14 @@ class NewsMessage {
 
 /** @param {Discord.Message} message */
 function CreateNews(message) {
+    if (message.content == '[Original Message Deleted]') {
+        return null
+    }
     let role = ''
     const newDate = new Date(message.createdTimestamp)
     const embed = new Discord.EmbedBuilder()
         .setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
-        .setDescription(message.content)
+        .setDescription(message.cleanContent)
         .setColor(Color.Highlight)
         .setTimestamp(newDate)
     
@@ -56,7 +59,8 @@ function CreateNews(message) {
             role = '902877945876598784'
         }
 
-        let title = message.content.split('\n')[1].trim()
+        const lines = message.content.split('\n')
+        let title = lines[1].trim()
         if (title.includes('PS4') || title.includes('Xbox') || title.includes('PlayStation')) {
             role = '902878741364105238'
         } else if (title.includes('PC')) {
@@ -84,7 +88,6 @@ function CreateNews(message) {
             embed.setImage(message.attachments.first().url)
         }
         var description = ''
-        const lines = message.content.split('\n')
         for (let i = 2; i < lines.length; i++) {
             const line = lines[i]
             description += line + '\n'
