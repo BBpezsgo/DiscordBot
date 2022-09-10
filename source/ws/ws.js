@@ -1581,22 +1581,26 @@ class WebSocket {
                 online: false
             }
 
-            if (member != undefined) {
-                if (member.roles.cache.some(role => role.id == '929443006627586078')) {
-                    awards.quiz = true
-                } else if (member.roles.cache.some(role => role.id == '929443558040166461')) {
-                    awards.quiz = true
-                } else if (member.roles.cache.some(role => role.id == '929443627527180288')) {
-                    awards.quiz = true
-                } else if (member.roles.cache.some(role => role.id == '929443673077329961')) {
-                    awards.quiz = true
-                }
-                if (member.roles.cache.some(role => role.id == '929443957967048834')) {
-                    awards.meme = true
-                }
-                if (member.roles.cache.some(role => role.id == '893187175087226910')) {
-                    awards.online = true
-                }
+            try {
+                if (member != undefined) {
+                    if (member.roles.cache.some(role => role.id == '929443006627586078')) {
+                        awards.quiz = true
+                    } else if (member.roles.cache.some(role => role.id == '929443558040166461')) {
+                        awards.quiz = true
+                    } else if (member.roles.cache.some(role => role.id == '929443627527180288')) {
+                        awards.quiz = true
+                    } else if (member.roles.cache.some(role => role.id == '929443673077329961')) {
+                        awards.quiz = true
+                    }
+                    if (member.roles.cache.some(role => role.id == '929443957967048834')) {
+                        awards.meme = true
+                    }
+                    if (member.roles.cache.some(role => role.id == '893187175087226910')) {
+                        awards.online = true
+                    }
+                }                
+            } catch (error) {
+                
             }
 
             const moneyText = abbrev(this.database.dataBasic[userId].money)
