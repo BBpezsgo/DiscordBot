@@ -239,13 +239,10 @@ class WebSocket {
          * joinedAt: string;
          * memberCount: number;
          * nsfwLevel: Discord.GuildMFALevel;
-         * nameAcronym: string;
          * verificationLevel: Discord.GuildVerificationLevel;
          * splash: string | null;
          * available: boolean;
          * large: boolean;
-         * partnered: boolean;
-         * verified: boolean;
          * }[]} */
         const servers = []
 
@@ -262,7 +259,7 @@ class WebSocket {
 
                 memberCount: server.memberCount,
                 nsfwLevel: server.nsfwLevel,
-                nameAcronym: '-',
+                // nameAcronym: '-',
                 mfaLevel: server.mfaLevel,
                 verificationLevel: server.verificationLevel,
                 splash: server.splash,
@@ -496,7 +493,7 @@ class WebSocket {
      * @param {object | undefined} options
      */
     RenderPage(req, res, viewName, options = undefined) {
-        if (req.url.includes('?new')) {
+        if (req.url.includes('?new') || true) {
             res.render(`userViewsNew/${viewName}`, options)
         } else {
             res.render(`userViews/${viewName}`, options)
@@ -765,15 +762,15 @@ class WebSocket {
 
             memberCount: g.memberCount,
             nsfwLevel: g.nsfwLevel,
-            nameAcronym: '-',
+            // nameAcronym: '-',
             mfaLevel: g.mfaLevel,
             verificationLevel: g.verificationLevel,
             splash: g.splash,
 
             available: g.available,
-            large: g.large,
-            partnered: g.partnered,
-            verified: g.verified,
+            large: g.large
+            // partnered: g.partnered,
+            // verified: g.verified,
         }
 
         this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError })
@@ -802,15 +799,15 @@ class WebSocket {
 
             memberCount: g.memberCount,
             nsfwLevel: g.nsfwLevel,
-            nameAcronym: g.nameAcronym,
+            // nameAcronym: g.nameAcronym,
             mfaLevel: g.mfaLevel,
             verificationLevel: g.verificationLevel,
             splash: g.splash,
 
             available: g.available,
             large: g.large,
-            partnered: g.partnered,
-            verified: g.verified,
+            // partnered: g.partnered,
+            // verified: g.verified,
         }
 
         /** @type {Discord.GuildBasedChannel} */
@@ -933,14 +930,14 @@ class WebSocket {
                 var icon = ''
 
                 if (this.ClientType == 'DESKTOP') {
-                    icon = ' 🖥️'
+                    icon = '🖥️'
                 } else if (this.ClientType == 'MOBILE') {
-                    icon = ' 📱'
+                    icon = '📱'
                 } else if (this.ClientType == 'RASPBERRY') {
-                    icon = ' 🍓'
+                    icon = '🍓'
                 }
 
-                res.render('default', { title: 'Discord BOT' + icon })
+                res.render('default', { title: 'Discord BOT - ' + icon })
             } else {
                 res.status(404).send("Not found")
             }
@@ -955,14 +952,14 @@ class WebSocket {
                 var icon = ''
 
                 if (this.ClientType == 'DESKTOP') {
-                    icon = ' 🖥️'
+                    icon = '🖥️'
                 } else if (this.ClientType == 'MOBILE') {
-                    icon = ' 📱'
+                    icon = '📱'
                 } else if (this.ClientType == 'RASPBERRY') {
-                    icon = ' 🍓'
+                    icon = '🍓'
                 }
 
-                res.render('defaultNew', { title: 'Discord BOT' + icon })
+                res.render('defaultNew', { title: 'Discord BOT - ' + icon })
             } else {
                 res.status(404).send("Not found")
             }
@@ -1120,6 +1117,16 @@ class WebSocket {
 
         this.app.get('/userViews/Testing', (req, res) => {
             this.RenderPage(req, res, 'Testing')
+        })
+
+        this.app.post('/userViews/Moderating/FetchGuild', (req, res) => {
+            this.client.guilds.fetch(req.body.id)
+                .then(() => {
+                    this.RenderPage_ModeratingSearch(req, res)
+                })
+                .catch((error) => {
+                    this.RenderPage_ModeratingSearch(req, res, JSON.stringify(error))
+                })
         })
 
         this.app.post('/userViews/CacheChannels/Fetch', (req, res) => {
