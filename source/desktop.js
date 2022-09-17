@@ -2972,7 +2972,11 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `settings` || command.commandName === `preferences`) {
-        command.reply(CommandSettings(database, command.member, privateCommand))
+        await command.deferReply()
+        /** @type {Discord.GuildMember} */
+        const member = await command.member.fetch()
+        await member.guild.fetch()
+        command.editReply(CommandSettings(database, command.member, privateCommand))
         userstatsSendCommand(command.user)
         return
     }

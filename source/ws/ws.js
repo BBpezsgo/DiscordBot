@@ -1339,11 +1339,102 @@ class WebSocket {
                 return
             }
             const data = fs.readFileSync('./node.error.log', 'utf8')
+            const lines = data.split('\n')
+
+            var linesProcessed = []
+
+            var isCrash = false
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i]
+                if (line.length < 2) { continue }
+                
+                /** @type {'none' | 'error' | 'crash' | 'warning'} */
+                var icon = 'none'
+                var type = 'none'
+                var title = 'none'
+                var isHeader = true
+
+                if (line == 'CRASH') {
+                    isCrash = true
+                    continue
+                }
+
+                if (isCrash === true) {
+                    icon = 'crash'
+                } else {
+                    icon = 'error'
+                }
+
+                if (line.startsWith('Error: ')) {
+                    type = 'Error'
+                    title = line.replace('Error: ', '')
+                } else if (line.startsWith('Error [')) {
+                    type = 'Error'
+                    title = line.replace('Error ', '')
+                } else if (line.startsWith('TypeError: ')) {
+                    type = 'TypeError'
+                    title = line.replace('TypeError: ', '')
+                } else if (line.startsWith('ReferenceError: ')) {
+                    type = 'ReferenceError'
+                    title = line.replace('ReferenceError: ', '')
+                } else if (line.startsWith('DiscordAPIError: ')) {
+                    type = 'DiscordAPIError'
+                    title = line.replace('DiscordAPIError: ', '')
+                } else if (line.startsWith('    at ')) {
+                    icon = 'none'
+                    type = 'none'
+                    isHeader = false
+
+                    const stactItem = line.replace('    at ', '')
+                    var filePath = ''
+                    const isFile = (stactItem.startsWith('C:\\'))
+                    if (isFile && stactItem.includes(':')) {
+                        filePath = stactItem.replace(':' + stactItem.split(':')[2], '')
+                        filePath = filePath.replace(':' + filePath.split(':')[2], '')
+                    }            
+
+                    title = 'at ' + stactItem
+                } else if (line.includes(' DeprecationWarning:')) {
+                    icon = 'warning'
+                    type = 'DeprecationWarning'
+
+                    var xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(':', '')
+                    xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(': ', '')
+
+                    title = xd
+                } else if (line.includes(' ExperimentalWarning:')) {
+                    icon = 'warning'
+                    type = 'ExperimentalWarning'
+
+                    var xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(':', '')
+                    xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(': ', '')
+
+                    title = xd
+                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
+                    icon = 'none'
+                    type = 'none'
+                    isHeader = false
+                    title = line
+                } else {
+                    icon = 'none'
+                    type = 'none'
+                    isHeader = false
+                    title = line
+                }
+                
+                linesProcessed.push({ icon: icon, type: type, title: title, id: i, isCrash: isCrash, isHeader: isHeader })
+
+                isCrash = false
+            }
+
+            /*
 
             const errors = []
             const warnings = []
-
-            const lines = data.split('\n')
 
             var isCrash = false
             var lastLine = ''
@@ -1423,6 +1514,10 @@ class WebSocket {
             }
 
             this.RenderPage(req, res, 'ErrorLogs', { errors: errors, warnings: warnings })
+            
+            */
+
+            this.RenderPage(req, res, 'ErrorLogs', { logs: linesProcessed })
         })
 
         this.app.get('/userViews/LogSystem', (req, res) => {

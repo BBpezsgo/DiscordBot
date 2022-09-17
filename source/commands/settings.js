@@ -47,10 +47,10 @@ module.exports = (database, member, privateCommand) => {
                     '> ❔ Quiz: ' + BoolToIcon(userRoles.some(role => role.id === roles.quiz)) + '\n' +
                     '> 🌦️ Napi időjárás: ' + BoolToIcon(userRoles.some(role => role.id === roles.napiIdojaras)) + '\n' +
                     '> 🧱 Minecraft: ' + BoolToIcon(userRoles.some(role => role.id === roles.minecraft)) + '\n' +
-                    '> 🚸 Crossout: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentes)) + ' \\❌ **Kiszolgálóhiba** \n' +
-                    '> 🚸 Crossout bejelentés [PC]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesPC)) + ' \\❌ **Kiszolgálóhiba**\n' +
-                    '> 🚸 Crossout bejelentés [Konzol]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesKonzol)) + ' \\❌ **Kiszolgálóhiba**\n' +
-                    '> 🚸 Crossout egyéb: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutEgyeb)) + ' \\❌ **Kiszolgálóhiba**\n' +
+                    '> 🚸 Crossout: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentes)) + '\n' +
+                    '> 🚸 Crossout bejelentés [PC]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesPC)) + '\n' +
+                    '> 🚸 Crossout bejelentés [Konzol]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesKonzol)) + '\n' +
+                    '> 🚸 Crossout szórakozás: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutEgyeb)) + '\n' +
                     '> 🛢️ Warzone 2100: ' + BoolToIcon(userRoles.some(role => role.id === roles.warzone)) + '\n' +
                     '> 💸 Ingyenes játék: ' + BoolToIcon(userRoles.some(role => role.id === roles.ingyenesJatek))
             },
@@ -110,7 +110,7 @@ module.exports = (database, member, privateCommand) => {
                 emoji: '🚸'
             },
             {
-                label: 'Crossout egyéb',
+                label: 'Crossout szórakozás',
                 value: 'crossoutEgyeb',
                 emoji: '🚸'
             },
