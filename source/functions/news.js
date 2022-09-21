@@ -60,13 +60,19 @@ function CreateNews(message) {
         }
 
         const lines = message.content.split('\n')
-        let title = lines[1].trim()
+        let title = '<null>'
+        if (message.content.startsWith('@')) {
+            title = lines[1].trim()
+        } else {
+            title = lines[0].trim()
+        }
+
+        /*
         if (title.includes('PS4') || title.includes('Xbox') || title.includes('PlayStation')) {
             role = '902878741364105238'
         } else if (title.includes('PC')) {
             role = '902878695742652437'
         }
-        /*
         title = title
             .replace('[Sale]', '')
             .replace('[Developer blog]', '')
@@ -81,7 +87,11 @@ function CreateNews(message) {
             .replace('[Stories]', '')
             .replace('[Calendar]', '')
         */
+
         title = title.trim()
+        if (title === undefined || title.length == 0) {
+            title = '<null>'
+        }
         embed.setTitle(title)
         embed.setURL('https://crossout.net/en/news/')
         if (message.attachments.size > 0) {
