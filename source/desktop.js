@@ -32,7 +32,7 @@ SystemStart(startedInvisible, startedByUser)
 
 const startDateTime = new Date(Date.now())
 
-const { LogManager } = require('./functions/log.js')
+const { LogManager, TimeLine } = require('./functions/log.js')
 var logManager = new LogManager(false, null, null)
 
 logManager.Loading('Loading packet', "fs")
@@ -121,7 +121,6 @@ process.on('exit', function (code) {
 
 logManager.Loading("Loading commands", 'weather')
 const CommandWeather = require('./commands/weather')
-const CommandDailyWeatherReport = require('./commands/dailyWeatherReport')
 logManager.Loading("Loading commands", 'profil')
 const CommandProfil = require('./commands/profil')
 logManager.Loading("Loading commands", 'help')
@@ -201,11 +200,14 @@ const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits, ModalBuilder, Messag
 const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
 const { perfix, tokens } = require('./config.json')
 
+const { AutoReact } = require('./functions/autoReact')
+
 logManager.Loading('Loading packet', "other functions")
 const GetUserColor = require('./functions/userColor')
 const { abbrev } = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
-const { NewsMessage, CreateNews } = require('./functions/news')
+const { NewsManager } = require('./functions/news')
+const { MailManager, Mail, MailUser, CurrentlyWritingMail } = require('./commands/mail')
 const {
     INFO,
     ERROR,
@@ -237,6 +239,7 @@ const statesManager = new StatesManager()
 const musicPlayer = new MusicPlayer(statesManager, bot)
 
 logManager = new LogManager(false, bot, statesManager)
+const newsManager = new NewsManager(statesManager, true)
 
 statesManager.botLoaded = true
 
@@ -276,11 +279,11 @@ const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
 const hangmanManager = new HangmanManager()
 
+const mailManager = new MailManager(database)
+
 /**@type {string[]} */
 let musicArray = []
 let musicFinished = true
-
-let lastNoNews = false
 
 const game = new Game()
 
@@ -288,10 +291,6 @@ const game = new Game()
 let currentlyWritingEmails = []
 
 //#endregion
-
-/** @type {NewsMessage[]} */
-const listOfNews = []
-
 
 //#region Functions 
 
@@ -407,7 +406,7 @@ bot.on('debug', debug => {
     if (translatedDebug == null) return
 
     if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
-        logManager.AddTimeline(2)
+        logManager.AddTimeline(TimeLine.Primary)
         SystemLog('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
     }
 
@@ -494,61 +493,9 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
 
 //#region Command Functions
 
-function userstatsSendMeme(user) {
-    database.dataUserstats[user.id].memes += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
-}
-function userstatsSendMusic(user) {
-    database.dataUserstats[user.id].musics += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
-}
-function userstatsSendYoutube(user) {
-    database.dataUserstats[user.id].youtubevideos += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
-}
-function userstatsSendMessage(user) {
-    database.dataUserstats[user.id].messages += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
-}
-function userstatsSendChars(user, text) {
-    database.dataUserstats[user.id].chars += text.length
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
-}
-function userstatsSendCommand(user) {
-    database.dataUserstats[user.id].commands += 1
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
-}
-function userstatsAddUserToMemory(user) {
-    if (!database.dataUserstats[user.id]) {
-        database.dataUserstats[user.id] = {}
-    }
-    if (!database.dataUserstats[user.id].name) {
-        database.dataUserstats[user.id].name = user.username
-    }
-    if (!database.dataUserstats[user.id].memes) {
-        database.dataUserstats[user.id].memes = 0
-    }
-    if (!database.dataUserstats[user.id].musics) {
-        database.dataUserstats[user.id].musics = 0
-    }
-    if (!database.dataUserstats[user.id].youtubevideos) {
-        database.dataUserstats[user.id].youtubevideos = 0
-    }
-    if (!database.dataUserstats[user.id].messages) {
-        database.dataUserstats[user.id].messages = 0
-    }
-    if (!database.dataUserstats[user.id].chars) {
-        database.dataUserstats[user.id].chars = 0
-    }
-    if (!database.dataUserstats[user.id].commands) {
-        database.dataUserstats[user.id].commands = 0
-    }
-    fs.writeFile('./database/userstats.json', JSON.stringify(database.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
-}
-
 /**
  * @param {number} userId
- * @returns {String} The result string
+ * @returns {string} The result string
  */
 function openDayCrate(userId) {
     const RandomPercente = Math.floor(Math.random() * 100)
@@ -1446,17 +1393,17 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId === 'mailFolderMain') {
-            const message = getMailMessage(interaction.user, 0)
+            const message = mailManager.GetMailMessage(interaction.user, 0)
             interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
         } else if (interaction.component.customId === 'mailFolderInbox') {
-            const message = getMailMessage(interaction.user, 1)
+            const message = mailManager.GetMailMessage(interaction.user, 1)
             interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
         } else if (interaction.component.customId === 'mailFolderOutbox') {
-            const message = getMailMessage(interaction.user, 2)
+            const message = mailManager.GetMailMessage(interaction.user, 2)
             interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
         } else if (interaction.component.customId === 'mailWrite') {
 
-            currentlyWritingEmails.push(
+            mailManager.currentlyWritingEmails.push(
                 new CurrentlyWritingMail(
                     interaction.user,
                     new Mail(
@@ -1469,26 +1416,26 @@ bot.on('interactionCreate', async interaction => {
                     interaction.message
                 ))
 
-            const message = getMailMessage(interaction.user, 3)
+            const message = mailManager.GetMailMessage(interaction.user, 3)
             interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
         } else if (interaction.component.customId === 'mailWriteAbort') {
-            const message = getMailMessage(interaction.user)
+            const message = mailManager.GetMailMessage(interaction.user)
             interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
-            currentlyWritingEmails.splice(getCurrentlyEditingMailIndex(interaction.user.id), 1)
+            mailManager.currentlyWritingEmails.splice(mailManager.GetCurrentlyEditingMailIndex(interaction.user.id), 1)
         } else if (interaction.component.customId === 'mailWriteSend') {
-            const editingMail = currentlyWritingEmails[getCurrentlyEditingMailIndex(interaction.user.id)]
+            const editingMail = mailManager.currentlyWritingEmails[mailManager.GetCurrentlyEditingMailIndex(interaction.user.id)]
             let newMail = editingMail.mail
             newMail.date = Date.now()
             newMail.sender = new MailUser(editingMail.user.username, editingMail.user.id)
-            newMail.id = generateMailId()
-            const sended = sendMailOM(newMail)
+            newMail.id = mailManager.GenerateMailID()
+            const sended = mailManager.sendMailOM(newMail)
 
             if (sended === true) {
                 editingMail.message.channel.send('\\✔️ **A levél elküldve neki: ' + editingMail.mail.reciver.name + '**')
 
-                const message = getMailMessage(interaction.user)
+                const message = mailManager.GetMailMessage(interaction.user)
                 interaction.update({ embeds: [message.embed], components: [message.actionRows[0]] })
-                currentlyWritingEmails.splice(getCurrentlyEditingMailIndex(interaction.user.id), 1)
+                mailManager.currentlyWritingEmails.splice(mailManager.GetCurrentlyEditingMailIndex(interaction.user.id), 1)
             } else {
                 editingMail.message.channel.send('\\❌ **A levelet nem sikerült elküldeni**')
             }
@@ -2024,31 +1971,16 @@ bot.on('clickMenu', async (button) => {
     button.reply.defer()
 })
 
-/** @returns {Promise<Discord.Message>} */
-async function GetOldDailyWeatherReport(channelId) {
-    /** @type {Discord.TextChannel} */
-    const channel = bot.channels.cache.get(channelId)
-    statesManager.dailyWeatherReportLoadingText = 'Fetch old messages...'
-    await channel.messages.fetch({ limit: 10 })
-    statesManager.dailyWeatherReportLoadingText = 'Loop messages...'
-    for (let i = 0; i < channel.messages.cache.size; i++) {
-        const element = channel.messages.cache.at(i)
-        if (element.embeds.length == 1) {
-            if (element.embeds[0].title == 'Napi időjárás jelentés') {
-                statesManager.dailyWeatherReportLoadingText = 'Old report message found'
-                return element
-            }
-        }
-    }
-
-    statesManager.dailyWeatherReportLoadingText = 'No messages found'
-    return null
-}
-
 bot.once('ready', async () => {
     SystemLog('Bot is ready')
-
     statesManager.botLoadingState = 'Ready'
+
+    const { Taxation } = require('./functions/tax')
+    const { MarketOnStart } = require('./functions/market')
+    const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
+    
+    const lastDay = database.dataBot.day
+
     try {
         //DeleteCommands(bot)
         //CreateCommands(bot, statesManager)
@@ -2061,184 +1993,23 @@ bot.once('ready', async () => {
         bot.user.setActivity(activitiesDesktop[index])
     }, 10000)
 
-    statesManager.dailyWeatherReportLoadingText = 'Fetch news channel...'
-    await bot.channels.fetch(ChannelId.ProcessedNews)
-    setTimeout(async () => {
-        statesManager.dailyWeatherReportLoadingText = 'Search old weather report message...'
-        const oldWeatherMessage = await GetOldDailyWeatherReport(ChannelId.ProcessedNews)
-        if (oldWeatherMessage == null) {
-            if (new Date(Date.now()).getHours() < 10) {
-                CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
-            }
-        } else {
-            if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate() && new Date(Date.now()).getHours() < 10) {
-                statesManager.dailyWeatherReportLoadingText = 'Delete old weather report message...'
-                await oldWeatherMessage.delete()
-                CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
-            } else {
-                statesManager.dailyWeatherReportLoadingText = ''
-            }
-        }
-    }, 100)
+    TrySendWeatherReport(statesManager, bot, ChannelId.ProcessedNews)
+    
+    logManager.AddTimeline(TimeLine.Primary)
 
-    logManager.AddTimeline(2)
-
-    const lastDay = database.dataBot.day
-    database.dataBot.day = dayOfYear
-
-    const marketLastDay = (database.dataMarket.day == undefined) ? dayOfYear : dayOfYear
-    database.dataMarket.day = dayOfYear
-
-    if (database.dataMarket.prices == undefined || dayOfYear - marketLastDay >= 3) { database.dataMarket.prices = { 'token': (Math.floor(Math.random() * 1000) + 5000), 'coupon': (Math.floor(Math.random() * 1000) + 4000), 'jewel': (Math.floor(Math.random() * 100) + 11000) } }
+    MarketOnStart(database)
 
     log(DONE + ': A BOT kész!')
 
-    for (let i = 0; i < dayOfYear - lastDay; i++) {
-        for (let i = 0; i < usersWithTax.length; i++) {
-            const element = usersWithTax[i]
-            try {
-                const userMoney = database.dataBasic[element].money
-                const finalTax = Math.floor(userMoney * 0.001) * 2
-                const userMoneyFinal = userMoney - finalTax
-                log("Adó:  " + userMoney + " ---1%-->" + finalTax + " ------->" + userMoneyFinal)
-                database.dataBasic[element].money = userMoneyFinal
-            } catch (error) {
-                log(ERROR + ': Adó hiba (id: ' + element + '): ' + error)
-            }
-        }
-        log("Mindenki megadózva")
-    }
+    Taxation(database, lastDay)
+
     savePollDefaults(database)
+
     database.SaveDatabase()
     
-    SystemLog('[NEWS]: Fetch processed news channel...')
-    const fetchedProcessedNewsChannel = await bot.channels.fetch(ChannelId.ProcessedNews)
-    if (fetchedProcessedNewsChannel == null) {
-        SystemLog(`[NEWS]: Can't fetch processed news channel!`)
-    }
-
-    SystemLog('[NEWS]: Fetch test news channel...')
-    const fetchedCopyNewsChannel = await bot.channels.fetch('1010110583800078397')
-    if (fetchedCopyNewsChannel == null) {
-        SystemLog(`[NEWS]: Can't fetch test news channel!`)
-    }
-
-    SystemLog('[NEWS]: Fetch news channel...')
-    statesManager.newsLoadingText = 'Fetch news channel...'
-    bot.channels.fetch(ChannelId.IncomingNews, { force: true })
-        .then((c) => {
-            /** @type {Discord.GuildTextBasedChannel | null} */
-            const channel = c
-            SystemLog('[NEWS]: Fetch news messages...')
-            statesManager.newsLoadingText = 'Fetch news messages...'
-            channel.messages.fetch()
-                .then((messages) => {
-                    /** @type {Discord.Message<true>[]} */
-                    const listOfMessage = []
-        
-                    SystemLog(`[NEWS]: Looping messages... (${messages.size})`)
-                    statesManager.newsLoadingText = 'Looping messages...'
-                    messages.forEach((message) => {
-                        listOfMessage.push(message)
-                    })
-        
-                    SystemLog(`[NEWS]: Processing messages... (${listOfMessage.length})`)
-                    statesManager.newsLoadingText = 'Processing messages...'
-                    listOfMessage.reverse()
-                    listOfMessage.forEach(message => {
-                        processNewsMessage(message)
-                    })
-                })
-                .catch((error) => {
-                    SystemLog(`[NEWS]: Can't fetch news messages! Reason: ${error}`)
-                    fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
-                })
-        })
-        .catch((error) => {
-            SystemLog(`[NEWS]: Can't fetch news channel! Reason: ${error}`)
-            fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
-        })
-
-    const DeleteRawNewsMessages = true
-
+    newsManager.OnStart(bot, true)
     setInterval(() => {
-        if (listOfNews.length > 0) {
-            /** @type {Discord.GuildTextBasedChannel | undefined} */
-            const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
-
-            const newsMessage = listOfNews.shift()
-            if (newsMessage == null || newsMessage == undefined) { return }
-            const embed = newsMessage.embed
-            statesManager.newsLoadingText2 = 'Send new message...'
-
-            SystemLog(`[NEWS]: Send copy of news message...`)
-            /** @type {Discord.GuildTextBasedChannel | null} */
-            const newsTestChannel = bot.channels.cache.get('1010110583800078397')
-            if (newsTestChannel != null) {
-                newsTestChannel.send({
-                    tts: newsMessage.message.tts,
-                    content: newsMessage.message.content,
-                    embeds: newsMessage.message.embeds,
-                    components: newsMessage.message.components
-                })
-                .then(() => {
-                    SystemLog(`[NEWS]: Send processed news message...`)
-                    if (newsMessage.NotifyRoleId.length == 0) {
-                        newsChannel.send({ embeds: [embed] })
-                            .then(() => {
-                                if (DeleteRawNewsMessages) {
-                                    SystemLog(`[NEWS]: Delete raw message...`)
-                                    statesManager.newsLoadingText2 = 'Delete raw message...'
-                                    newsMessage.message.delete()
-                                        .catch((error) => {
-                                            SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
-                                        })
-                                        .finally(() => {
-                                            statesManager.newsLoadingText2 = ''
-                                        })                                    
-                                } else {
-                                    statesManager.newsLoadingText2 = ''
-                                }
-                            })
-                            .catch((error) => {                    
-                                SystemLog(`[NEWS]: Can't send processed news message! Reason: ${error}`)
-                            })
-                    } else {
-                        newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
-                            .then(() => {
-                                if (DeleteRawNewsMessages) {
-                                    SystemLog(`[NEWS]: Delete raw message...`)
-                                    statesManager.newsLoadingText2 = 'Delete raw message...'
-                                    newsMessage.message.delete()
-                                        .catch((error) => {
-                                            SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
-                                        })
-                                        .finally(() => {
-                                            statesManager.newsLoadingText2 = ''
-                                        })
-                                } else {
-                                    statesManager.newsLoadingText2 = ''
-                                }
-                            })
-                            .catch((error) => {                    
-                                SystemLog(`[NEWS]: Can't send processed news message! Reason: ${error}`)
-                            })
-                    }
-                })
-                .catch((error) => {                    
-                    SystemLog(`[NEWS]: Can't send copy of news message! Reason: ${error}`)
-                })
-            }
-            lastNoNews = false
-            statesManager.allNewsProcessed = false
-        } else if (lastNoNews == false) {
-            statesManager.newsLoadingText = ''
-            statesManager.newsLoadingText2 = ''
-            lastNoNews = true
-            statesManager.allNewsProcessed = true
-            log(DONE + ': Minden hír közzétéve')
-            SystemLog(`[NEWS]: All news processed!`)
-        }
+        newsManager.TryProcessNext(bot)
     }, 2000)
 
     try {
@@ -2250,7 +2021,7 @@ bot.once('ready', async () => {
                     chn.messages.fetch({ limit: 10 })
                         .then(async (messages) => {
                             messages.forEach(message => {
-                                ProcessMessage(message)
+                                AutoReact(message)
                             })
                         })
                 })
@@ -2258,14 +2029,10 @@ bot.once('ready', async () => {
     } catch (err) {
         fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
     }
+
+    database.dataBot.day = dayOfYear
 })
 
-/** @param {Discord.Message} message */
-function processNewsMessage(message) {
-    SystemLog(`[NEWS]: Process message... (id: ${message.id})`)
-    statesManager.allNewsProcessed = false
-    listOfNews.push(CreateNews(message))
-}
 bot.on('messageCreate', async message => {
     const thisIsPrivateMessage = (message.channel.type === Discord.ChannelType.DM)
 
@@ -2274,79 +2041,66 @@ bot.on('messageCreate', async message => {
 
     database.LoadDatabase()
 
-    ProcessMessage(message)
+    AutoReact(message)
 
-    //#region Log
+    //#region User Stats
    
-    userstatsAddUserToMemory(sender)
+    database.UserstatsAddUserToMemory(sender)
     if (message.channel.id === '744979145460547746') { //Memes channel
         if (message.content.includes('https://cdn.discordapp.com/attachments')) {
-            userstatsSendMeme(sender)
+            database.UserstatsSendMeme(sender)
         }
         if (message.content.includes('https://www.youtube.com/watch?v=')) {
-            userstatsSendMeme(sender)
+            database.UserstatsSendMeme(sender)
         }
         if (message.content.includes('https://www.reddit.com/r/')) {
-            userstatsSendMeme(sender)
+            database.UserstatsSendMeme(sender)
         }
         if (message.content.includes('https://media.discordapp.net/attachments/')) {
-            userstatsSendMeme(sender)
+            database.UserstatsSendMeme(sender)
         }
         if (message.content.includes('https://tenor.com/view/')) {
-            userstatsSendMeme(sender)
+            database.UserstatsSendMeme(sender)
         }
         if (message.attachments.size) {
-            userstatsSendMeme(sender)
+            database.UserstatsSendMeme(sender)
         }
     }
-    if (message.channel.id === '775430473626812447') { //Youtube channel
-        if (message.content.includes('https://www.youtube.com/')) {
-            userstatsSendYoutube(sender)
-        }
-        if (message.content.includes('https://youtu.be/')) {
-            userstatsSendYoutube(sender)
-        }
-    }
+    
     if (message.channel.id === '738772392385577061') { //Music channel
         if (message.content.includes('https://cdn.discordapp.com/attachments')) {
-            userstatsSendMusic(sender)
+            database.UserstatsSendMusic(sender)
         }
         if (message.content.includes('https://www.youtube.com/watch?v=')) {
-            userstatsSendMusic(sender)
+            database.UserstatsSendMusic(sender)
         }
         if (message.content.includes('https://media.discordapp.net/attachments/')) {
-            userstatsSendMusic(sender)
+            database.UserstatsSendMusic(sender)
         }
         if (message.content.includes('https://youtu.be/')) {
-            userstatsSendMusic(sender)
+            database.UserstatsSendMusic(sender)
         }
         if (message.attachments.size) {
-            userstatsSendMusic(sender)
+            database.UserstatsSendMusic(sender)
         }
     }
 
-    userstatsSendMessage(sender)
-    userstatsSendChars(sender, message.content.toString())
+    database.UserstatsSendMessage(sender)
+    database.UserstatsSendChars(sender, message.cleanContent)
+    
     //#endregion
 
     if (message.content.startsWith('https://www.reddit.com/r/')) {
         CommandRedditsave(message)
     }
 
-    //#region News
-    if (message.channel.id == ChannelId.IncomingNews) {
-        processNewsMessage(message)
-
-        log(`Received a news message`)
-    }
-    //#endregion
+    newsManager.TryProcessMessage(message)
 
     if (thisIsPrivateMessage) {
         database.SaveUserToMemoryAll(sender, sender.username)
     } else {
         database.SaveUserToMemoryAll(sender, message.member.displayName.toString())
     }
-
 
     if (message.content.length > 2) {
         if (thisIsPrivateMessage === false) {
@@ -2363,7 +2117,7 @@ bot.on('messageCreate', async message => {
         if (message.content.toLowerCase().includes('igen')) {
             message.reply('Használd a `.help` parancsot!')
         } else if (message.content.toLowerCase().includes('nem')) {
-            message.reply('Ja ok')
+            message.reply('...')
         }
         delete listOfHelpRequiestUsers[listOfHelpRequiestUsers.indexOf(message.author.id)]
     } else {
@@ -2373,7 +2127,7 @@ bot.on('messageCreate', async message => {
         }
     }
 })
-bot.on('messageReactionRemove', (messageReaction, user) => {
+bot.on('messageReactionRemove', (reaction, user) => {
     if (user.bot) return
 
     if (!database.dataUsernames[user.id]) {
@@ -2382,7 +2136,7 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
     }
     database.dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
 })
-bot.on('messageReactionAdd', (messageReaction, user) => {
+bot.on('messageReactionAdd', (reaction, user) => {
     if (user.bot) return
 
     if (!database.dataUsernames[user.id]) {
@@ -2391,47 +2145,6 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
     }
     database.dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
 })
-
-/** Auto reactions
- *  @param {Discord.Message} message */
-function ProcessMessage(message) {
-    try {
-        var isHaveMusic = false
-        if (message.content.includes('https://youtu.be/') == true) { isHaveMusic = true }
-        if (message.content.includes('https://www.youtube.com/watch') == true) { isHaveMusic = true }
-        if (message.content.includes('https://open.spotify.com/') == true) { isHaveMusic = true }
-
-        if (isHaveMusic == false) { return }
-
-        const settingsRaw = fs.readFileSync('./settings.json')
-        const settings = JSON.parse(settingsRaw)
-        const channelSettings = settings.channelSettings
-        const messageChannelId = message.channel.id
-        if (channelSettings[messageChannelId] != undefined) {
-            /** @type {string[]} */
-            const autoReactions = channelSettings[messageChannelId].autoReactions
-            autoReactions.forEach(async (autoReaction) => {
-                const reaction = message.reactions.resolve(autoReaction)
-                if (reaction == null) {
-                    await message.react(autoReaction)
-                } else {
-                    const users = await reaction.users.fetch();
-                    var botIsReacted = false
-                    users.forEach(async (user) => {
-                        if (user.id == '738030244367433770') {
-                            botIsReacted = true
-                        }
-                    })
-                    if (botIsReacted == false) {
-                        await message.react(autoReaction)
-                    }
-                }
-            })
-        }
-    } catch (err) {
-        console.log('  Error: ' + err.message)
-    }
-}
 
 /**
  * @param {Discord.Message} message
@@ -2445,7 +2158,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     if (command === `pms`) {
         CommandBusiness(message.channel, sender, thisIsPrivateMessage, database)
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         return
     }
 
@@ -2477,51 +2190,50 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
             .addComponents(select)
         message.channel.send("Message with a button!", { components: [row0, row1] })
 
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         return
     }
 
-    const currEditingMailI = getCurrentlyEditingMailIndex(sender.id)
+    const currEditingMailI = mailManager.GetCurrentlyEditingMailIndex(sender.id)
     if (command === `mail`) {
-        commandMail(sender, message.channel)
-
-        userstatsSendCommand(sender)
+        mailManager.CommandMail(sender, message.channel)
+        database.UserstatsSendCommand(sender)
         return
     }
     if (currEditingMailI > -1) {
         if (command.startsWith(`mail wt `)) {
             const mailNewValue = command.replace(`mail wt `, '')
+            
+            mailManager.currentlyWritingEmails[currEditingMailI].mail.title = mailNewValue
 
-            currentlyWritingEmails[currEditingMailI].mail.title = mailNewValue
-
-            const _message = getMailMessage(sender, 3)
-            currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
+            const _message = mailManager.GetMailMessage(sender, 3)
+            mailManager.currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
             try { message.delete() } catch (error) { }
 
-            userstatsSendCommand(sender)
+            database.UserstatsSendCommand(sender)
             return
         } else if (command.startsWith(`mail wc `)) {
             const mailNewValue = command.replace(`mail wc `, '')
 
-            currentlyWritingEmails[currEditingMailI].mail.context = mailNewValue
+            mailManager.currentlyWritingEmails[currEditingMailI].mail.context = mailNewValue
 
-            const _message = getMailMessage(sender, 3)
-            currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
+            const _message = mailManager.GetMailMessage(sender, 3)
+            mailManager.currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
             try { message.delete() } catch (error) { }
 
-            userstatsSendCommand(sender)
+            database.UserstatsSendCommand(sender)
             return
         } else if (command.startsWith(`mail wr `) && message.mentions.users.first()) {
             const mailNewValue = message.mentions.users.first()
 
-            currentlyWritingEmails[currEditingMailI].mail.reciver.id = mailNewValue.id
-            currentlyWritingEmails[currEditingMailI].mail.reciver.name = mailNewValue.username
+            mailManager.currentlyWritingEmails[currEditingMailI].mail.reciver.id = mailNewValue.id
+            mailManager.currentlyWritingEmails[currEditingMailI].mail.reciver.name = mailNewValue.username
 
-            const _message = getMailMessage(sender, 3)
-            currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
+            const _message = mailManager.GetMailMessage(sender, 3)
+            mailManager.currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
             try { message.delete() } catch (error) { }
 
-            userstatsSendCommand(sender)
+            database.UserstatsSendCommand(sender)
             return
         } else if (command.startsWith(`mail wr `) && command.length == 26) {
             const mailNewValue = command.replace(`mail wr `, '')
@@ -2531,14 +2243,14 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
                 userName = bot.users.cache.get(mailNewValue).username
             } catch (error) { }
 
-            currentlyWritingEmails[currEditingMailI].mail.reciver.id = mailNewValue
-            currentlyWritingEmails[currEditingMailI].mail.reciver.name = userName
+            mailManager.currentlyWritingEmails[currEditingMailI].mail.reciver.id = mailNewValue
+            mailManager.currentlyWritingEmails[currEditingMailI].mail.reciver.name = userName
 
-            const _message = getMailMessage(sender, 3)
-            currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
+            const _message = mailManager.GetMailMessage(sender, 3)
+            mailManager.currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
             try { message.delete() } catch (error) { }
 
-            userstatsSendCommand(sender)
+            database.UserstatsSendCommand(sender)
             return
         }
     }
@@ -2550,7 +2262,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     if (command.startsWith(`pms name `)) {
         message.channel.send('> \\⛔ **Ez a parancs átmenetileg nem elérhető!**')
         //commandPmsName(message.channel, sender, command.replace(`pms name `, ''))
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         return
     }
 
@@ -2561,12 +2273,12 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
         } else {
             quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
         }
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         return
     }
 
     if (command.startsWith(`quiz help`)) {
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         const embed = new Discord.EmbedBuilder()
             .addFields([{
                 name: 'Quiz szintaxis',
@@ -2585,7 +2297,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     }
 
     if (command.startsWith(`quizdone help`)) {
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         const embed = new Discord.EmbedBuilder()
             .addFields([{ name: 'Quizdone szintaxis', value: '.quizdone messageId correctIndex(0 - ...)' }])
             .setColor(Color.Highlight)
@@ -2595,21 +2307,21 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
 
     if (command.startsWith(`quizdone `)) {
         quizDone(command.replace(`quizdone `, '').split(' ')[0], command.replace(`quizdone `, '').split(' ')[1])
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         return
     }
 
     if (command.startsWith(`poll simple\n`)) {
         const msgArgs = command.toString().replace(`poll simple\n`, '').split('\n')
         poll(msgArgs[0], msgArgs[1], msgArgs[2], false)
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         return
     }
 
     if (command.startsWith(`poll wyr\n`)) {
         const msgArgs = command.toString().replace(`poll wyr\n`, '').split('\n')
         poll(msgArgs[0], msgArgs[1], msgArgs[2], true)
-        userstatsSendCommand(sender)
+        database.UserstatsSendCommand(sender)
         return
     }
 
@@ -2750,7 +2462,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName == `gift`) {
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         try {
             var giftableMember = command.options.getUser('user')
             if (database.dataBackpacks[command.user.id].gifts > 0) {
@@ -2790,13 +2502,13 @@ async function processApplicationCommand(command, privateCommand) {
 
     if (command.commandName === `market` || command.commandName === `piac`) {
         command.reply(CommandMarket(database, database.dataMarket, command.user, privateCommand))
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `xp` || command.commandName === `score`) {
         CommandXp(command, database, privateCommand)
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
@@ -2847,7 +2559,7 @@ async function processApplicationCommand(command, privateCommand) {
             }])
         }
         command.reply({ embeds: [embed], ephemeral: privateCommand })
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
@@ -2861,13 +2573,13 @@ async function processApplicationCommand(command, privateCommand) {
         } else {
             command.reply({ content: '> \\❌ **Nem tudok ilyen helyről <:wojakNoBrain:985043138471149588>**' })
         }
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `dev`) {
         if (command.user.id === '726127512521932880') {
-            userstatsSendCommand(command.user)
+            database.UserstatsSendCommand(command.user)
             const embed = new Discord.EmbedBuilder()
                 .addFields([{
                     name: 'Fejlesztői parancsok',
@@ -2886,43 +2598,43 @@ async function processApplicationCommand(command, privateCommand) {
 
     if (command.commandName === `help`) {
         command.reply({ embeds: [CommandHelp(isDm)], ephemeral: privateCommand })
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `crate`) {
         command.reply(commandAllCrate(command.member, command.options.getInteger("darab"), privateCommand))
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `heti`) {
         command.reply(commandAllNapi(command.member, command.options.getInteger("darab"), privateCommand))
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `napi`) {
         command.reply(commandAllNapi(command.member, command.options.getInteger("darab"), privateCommand))
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `profil` || command.commandName === `profile`) {
         CommandProfil(database, command, privateCommand)
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `backpack`) {
         command.reply(commandStore(command.user, privateCommand))
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `bolt` || command.commandName === `shop`) {
         command.reply(CommandShop(command.channel, command.user, command.member, database, 0, '', privateCommand))
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
@@ -2945,13 +2657,13 @@ async function processApplicationCommand(command, privateCommand) {
             .catch((error) => {
                 command.editReply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
             })
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `font`) {
         CommandFont(command, privateCommand)
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
@@ -2967,7 +2679,7 @@ async function processApplicationCommand(command, privateCommand) {
         } else {
             command.reply("> \\❌ **Ez a parancs csak szerveren használható!**")
         }
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
@@ -2977,7 +2689,7 @@ async function processApplicationCommand(command, privateCommand) {
         const member = await command.member.fetch()
         await member.guild.fetch()
         command.editReply(CommandSettings(database, command.member, privateCommand))
-        userstatsSendCommand(command.user)
+        database.UserstatsSendCommand(command.user)
         return
     }
 
@@ -3007,346 +2719,3 @@ SystemLog('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
 if (autoStartBot) {
     StartBot()
 }
-
-//#region Mails
-
-/**
- * @param {number} userId
- * @returns {number}
- */
-function getCurrentlyEditingMailIndex(userId) {
-    for (let i = 0; i < currentlyWritingEmails.length; i++) {
-        const mail = currentlyWritingEmails[i]
-        if (mail.user.id === userId) {
-            return i
-        }
-    }
-
-    return -1
-}
-
-/**
- * @param {Discord.User} sender
- * @param {Discord.TextChannel} channel
- */
-function commandMail(sender, channel) {
-    const message = getMailMessage(sender)
-    channel.send({ embeds: [message.embed], components: [message.actionRows[0]] })
-}
-
-/**
- * @param {Discord.User} user
- * @param {number} selectedIndex 0: main | 1: inbox | 2: outbox | 3: writing
- */
-function getMailMessage(user, selectedIndex = 0) {
-    const button0 = new ButtonBuilder()
-        .setLabel("Kezdőlap")
-        .setCustomId("mailFolderMain")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const button1 = new ButtonBuilder()
-        .setLabel("Beérkező e-mailek")
-        .setCustomId("mailFolderInbox")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const button2 = new ButtonBuilder()
-        .setLabel("Elküldött e-mailek")
-        .setCustomId("mailFolderOutbox")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const button3 = new ButtonBuilder()
-        .setLabel("✍️ Levél írása")
-        .setCustomId("mailWrite")
-        .setStyle(Discord.ButtonStyle.Primary)
-
-    const row0 = new ActionRowBuilder()
-
-    const embed = new Discord.EmbedBuilder()
-        .setAuthor({ name: user.username, iconURL: user.avatarURL() })
-
-    if (selectedIndex === 0) {
-        embed.setTitle("Kezdőlap")
-        const allInboxMails = getAllEMails(user.id, MailFolder.inbox)
-        const allOutboxMails = getAllEMails(user.id, MailFolder.outbox)
-        let unreaded = 0
-        allInboxMails.forEach(mail => {
-            if (mail.readed === false) {
-                unreaded += 1
-            }
-        })
-        embed.addFields([
-            { name: '📥 Beérkező levelek', value: 'Olvasatlan: ' + unreaded + '\nÖsszes: ' + allInboxMails.length },
-            { name: '📤 Elküldött levelek', value: 'Összes: ' + allOutboxMails.length }
-        ])
-
-        button0.setLabel("↻")
-        button0.setStyle(Discord.ButtonStyle.Primary)
-        row0.addComponents(button3, button0, button1, button2)
-    } else if (selectedIndex === 1) {
-        embed.setTitle("📥 Beérkező levelek")
-
-        const allMails = getAllEMails(user.id, MailFolder.inbox)
-        log(allMails)
-        allMails.forEach(mail => {
-            embed.addFields([{
-                name: mail.icon + ' ' + mail.sender.name + ' - ' + mail.title,
-                value: mail.context + '\n[' + new Date(mail.date).toDateString() + ']\n',
-                inline: false
-            }])
-        })
-
-        button1.setLabel("↻")
-        button1.setStyle(Discord.ButtonStyle.Primary)
-        row0.addComponents(button3, button1, button0, button2)
-
-        setReadAllMessages(user.id)
-    } else if (selectedIndex === 2) {
-        embed.setTitle("📤 Elküldött levelek")
-
-        const allMails = getAllEMails(user.id, MailFolder.outbox)
-        log(allMails)
-        allMails.forEach(mail => {
-            embed.addFields([{
-                name: mail.icon + ' ' + mail.reciver.name + ' - ' + mail.title,
-                value: mail.context + '\n[' + new Date(mail.date).toDateString() + ']\n',
-                inline: false
-            }])
-        })
-
-        button2.setLabel("↻")
-        button2.setStyle(Discord.ButtonStyle.Primary)
-        row0.addComponents(button3, button2, button0, button1)
-    } else if (selectedIndex === 3) {
-        embed.setTitle("Levél írása")
-
-        /**
-         * @type {Mail}
-         */
-        let mail
-        currentlyWritingEmails.forEach(wMail => {
-            if (wMail.user.id === user.id) {
-                mail = wMail.mail
-            }
-        })
-
-        embed.addFields([{
-            name: 'Cím: "' + mail.title + '"',
-            value: 'Üzenet: "' + mail.context + '"\n' + 'Fogadó: @' + mail.reciver.name
-        }])
-            .setFooter({
-                text: '.mail wt [cím] Cím beállítása\n' +
-                    '.mail wc [üzenet] Üzenet beállítása\n' +
-                    '.mail wr [@Felhasználó | Azonosító] Címzet beállítása'
-            })
-
-        const button4 = new ButtonBuilder()
-            .setLabel("Küldés")
-            .setCustomId("mailWriteSend")
-            .setStyle(Discord.ButtonStyle.Success)
-        const button5 = new ButtonBuilder()
-            .setLabel("Elvetés")
-            .setCustomId("mailWriteAbort")
-            .setStyle(Discord.ButtonStyle.Danger)
-        row0.addComponents(button4, button5)
-    }
-    return new MailMessage(embed, [row0])
-}
-
-/**
- * @param {Discord.User} userSender
- * @param {Discord.User} userReciver
- * @param {Mail} mail
- */
-function sendMail(userSender, userReciver, mail) {
-    let newMail = mail
-    newMail.sender = new MailUser(userSender.username, userSender.id)
-    newMail.reciver = new MailUser(userReciver.username, userReciver.id)
-    return sendMailOM(newMail)
-}
-
-/**
- * @param {Mail} mail
- */
-function sendMailOM(mail) {
-    if (!database.dataMail[mail.reciver.id]) return false
-    if (!database.dataMail[mail.sender.id]) return false
-    if (!database.dataMail[mail.reciver.id].inbox) return false
-    if (!database.dataMail[mail.sender.id].outbox) return false
-
-    database.   dataMail[mail.reciver.id].inbox[mail.id] = {}
-    database.  dataMail[mail.reciver.id].inbox[mail.id].sender = {}
-    database.   dataMail[mail.reciver.id].inbox[mail.id].sender.name = database.dataMail[mail.sender.id].username
-    database.   dataMail[mail.reciver.id].inbox[mail.id].sender.id = mail.sender.id
-    database.   dataMail[mail.reciver.id].inbox[mail.id].reciver = {}
-    database. dataMail[mail.reciver.id].inbox[mail.id].reciver.name = database.dataMail[mail.reciver.id].username
-    database. dataMail[mail.reciver.id].inbox[mail.id].reciver.id = mail.reciver.id
-    database. dataMail[mail.reciver.id].inbox[mail.id].title = mail.title
-    database. dataMail[mail.reciver.id].inbox[mail.id].context = mail.context
-    database.  dataMail[mail.reciver.id].inbox[mail.id].date = mail.date
-    database.   dataMail[mail.reciver.id].inbox[mail.id].readed = false
-    database.  dataMail[mail.reciver.id].inbox[mail.id].icon = "✉️"
-    database.  dataMail.mailIds += '|' + mail.id
-
-    const newMailId = generateMailId()
-    database.  dataMail[mail.sender.id].outbox[mail.id] = {}
-    database.  dataMail[mail.sender.id].outbox[mail.id].sender = {}
-    database.  dataMail[mail.sender.id].outbox[mail.id].sender.name =database. dataMail[mail.sender.id].username
-    database.  dataMail[mail.sender.id].outbox[mail.id].sender.id = mail.sender.id
-    database.  dataMail[mail.sender.id].outbox[mail.id].reciver = {}
-    database.  dataMail[mail.sender.id].outbox[mail.id].reciver.name =database. dataMail[mail.reciver.id].username
-    database.  dataMail[mail.sender.id].outbox[mail.id].reciver.id = mail.reciver.id
-    database. dataMail[mail.sender.id].outbox[mail.id].title = mail.title
-    database.dataMail[mail.sender.id].outbox[mail.id].context = mail.context
-    database. dataMail[mail.sender.id].outbox[mail.id].date = mail.date
-    database. dataMail[mail.sender.id].outbox[mail.id].readed = true
-    database.  dataMail[mail.sender.id].outbox[mail.id].icon = "✉️"
-    database. dataMail.mailIds += '|' + newMailId
-
-    database.SaveDatabase()
-
-    log(getAllMailIds())
-
-    return true
-}
-
-function generateMailId() {
-    const allMailIds = getAllMailIds()
-    let generatedMailId = 0
-    while (allMailIds.includes(generatedMailId.toString()) === true) {
-        generatedMailId += 1
-    }
-    return generatedMailId.toString()
-}
-
-/**
- * @returns {string[]}
- */
-function getAllMailIds() {
-    return database.dataMail.mailIds.toString().split('|')
-}
-
-/**
- * @param {string} userId
- * @param {MailFolder} folder
- */
-function getAllEMails(userId, folder) {
-    if (!database.dataMail[userId]) return []
-    if (!database.dataMail[userId].inbox) return []
-
-    const allMailIds = getAllMailIds()
-    /**
-     * @type {Mail[]}
-     */
-    let allMails = []
-
-    for (let i = 0; i < allMailIds.length; i++) {
-        const mailId = allMailIds[i]
-        if (folder === MailFolder.inbox) {
-            if (database.dataMail[userId].inbox[mailId]) {
-                allMails.push(getMailFromRawJSON(database.dataMail[userId].inbox[mailId], mailId))
-            }
-        } else if (folder === MailFolder.outbox) {
-            if (database.dataMail[userId].outbox[mailId]) {
-                allMails.push(getMailFromRawJSON(database.dataMail[userId].outbox[mailId], mailId))
-            }
-        }
-    }
-    allMails = allMails.reverse()
-    return allMails
-}
-
-function getMailFromRawJSON(rawJSON, id) {
-    return new Mail(id,
-        new MailUser(rawJSON.sender.name, rawJSON.sender.id),
-        new MailUser(rawJSON.reciver.name, rawJSON.reciver.id),
-        rawJSON.title,
-        rawJSON.context,
-        rawJSON.date,
-        rawJSON.readed,
-        rawJSON.icon)
-}
-
-function setReadAllMessages(userId) {
-    if (!database.dataMail[userId]) return
-    if (!database.dataMail[userId].inbox) return
-
-    const allMailIds = getAllMailIds()
-    for (let i = 0; i < allMailIds.length; i++) {
-        const mailId = allMailIds[i]
-        if (database.dataMail[userId].inbox[mailId]) {
-            database.dataMail[userId].inbox[mailId].readed = true
-        }
-    }
-
-    database.SaveDatabase()
-}
-
-class Mail {
-    /**
- * @param {string} id
- * @param {MailUser} sender
- * @param {MailUser} reciver
- * @param {string} title
- * @param {string} context
- * @param {number} date
- * @param {boolean} readed
- * @param {string} icon
- */
-    constructor(id, sender, reciver, title, context, date = Date.now(), readed = false, icon = "✉️") {
-        this.id = id
-        this.sender = sender
-        this.reciver = reciver
-        this.title = title
-        this.context = context
-        this.date = date
-        this.readed = readed
-        this.icon = icon
-    }
-}
-
-const MailUserType = {
-    unknown: 0,
-    user: 1,
-    system: 2
-}
-
-class MailUser {
-    /**
-     * @param {string} name
-     * @param {string} id
-     * @param {MailUserType} type
-     */
-    constructor(name, id, type = MailUserType.user) {
-        this.name = name
-        this.id = id
-        this.type = type
-    }
-}
-
-class MailMessage {
-    /**
-     * @param {Discord.EmbedBuilder} embed
-     * @param {ActionRowBuilder[]} actionRows
-     */
-    constructor(embed, actionRows) {
-        this.embed = embed
-        this.actionRows = actionRows
-    }
-}
-
-const MailFolder = {
-    inbox: 0,
-    outbox: 1
-}
-
-class CurrentlyWritingMail {
-    /**
-     * @param {Discord.User} user
-     * @param {Mail} mail
-     * @param {Discord.Message} message
-     */
-    constructor(user, mail, message) {
-        this.user = user
-        this.mail = mail
-        this.message = message
-    }
-}
-
-//#endregion

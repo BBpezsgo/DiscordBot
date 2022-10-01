@@ -14,11 +14,11 @@ function FormatError(err) {
     return str
 }
 
-process.on('uncaughtException', function (err) {
-    // fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
-    // fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
-})
 
+
+    
+
+    
 
 
 
@@ -30,10 +30,10 @@ process.on('uncaughtException', function (err) {
 const { LogManager } = require('./functions/log.js')
 var logManager = new LogManager(true, null, null)
 
-logManager.Loading('Loading packet', "fs")
-const fs = require('fs')
 
-//process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
+
+
+
 
 
 
@@ -103,7 +103,6 @@ process.on('exit', function (code) {
 
 logManager.Loading("Loading commands", 'weather')
 const CommandWeather = require('./commands/weather')
-const CommandDailyWeatherReport = require('./commands/dailyWeatherReport')
 
 
 logManager.Loading("Loading commands", 'help')
@@ -163,7 +162,7 @@ logManager.Loading('Loading packet', "other functions")
 
 
 const { DateToString } = require('./functions/dateToString')
-const { NewsMessage, CreateNews } = require('./functions/news')
+const { NewsManager } = require('./functions/news')
 const {
     INFO,
     ERROR,
@@ -188,6 +187,7 @@ logManager.Destroy()
 
 const statesManager = new StatesManager()
 logManager = new LogManager(true, bot, statesManager)
+const newsManager = new NewsManager(statesManager, false)
 
 statesManager.botLoaded = true
 
@@ -231,8 +231,6 @@ logManager.BlankScreen()
 let musicArray = []
 let musicFinished = true
 
-let lastNoNews = false
-
 
 
 
@@ -240,68 +238,10 @@ let lastNoNews = false
 
 //#endregion
 
-/** @type {NewsMessage[]} */
-const listOfNews = []
-const incomingNewsChannel = '902894789874311198'
-const processedNewsChannel = '746266528508411935'
 //#region Functions
 /**@param {number} days @returns {number} */
 function DaysToMilliseconds(days) {
     return days * 24 * 60 * 60 * 1000
-}
-
-/**
-* @param {Discord.Message} message The message context
-* @param {string} username The message's author name
-* @param {boolean} private This is a private message?
-* @param {Discord.User} author This is a private message?
-*/
-async function logMessage(message, username, private = false.valueOf, author) {
-    if (private === false) {
-        if (message.content.startsWith('https://tenor.com/view/')) {
-
-        } else if (message.content.startsWith('https://www.youtube.com/') || message.content.startsWith('https://youtu.be/')) {
-
-            const link = message.content
-
-            let info = await ytdl.getInfo(link)
-
-            let videoLengthSeconds = info.videoDetails.lengthSeconds
-            let videoLengthMinutes = 0
-            let videoLengthHours = 0
-            for (let l = 0; videoLengthSeconds > 60; l += 1) {
-                videoLengthMinutes += 1
-                videoLengthSeconds -= 60
-            }
-            for (let l = 0; videoLengthMinutes > 60; l += 1) {
-                videoLengthHours += 1
-                videoLengthMinutes -= 60
-            }
-
-            let lengthText = '0:00'
-            let minutes = videoLengthMinutes
-            if (videoLengthMinutes < 10) { minutes = '0' + minutes }
-            let seconds = videoLengthSeconds
-            if (videoLengthSeconds < 10) { seconds = '0' + seconds }
-
-            if (videoLengthHours = 0) {
-                lengthText = videoLengthMinutes + ':' + seconds
-            } else {
-                lengthText = videoLengthHours + ':' + minutes + ':' + seconds
-            }
-
-        } else if (message.content.startsWith('https://www.reddit.com/')) {
-        } else if (message.content.startsWith('https://cdn.discordapp.com/attachments/')) {
-        } else if (message.content.startsWith('https://')) {
-        } else if (message.attachments.size) {
-        } else {
-        }
-    } else {
-        if (message.channel.guild) {
-        } else {
-        }
-    }
-
 }
 
 //#endregion
@@ -790,29 +730,11 @@ bot.on('clickMenu', async (menu) => {
     menu.reply.defer()
 })
 
-/** @returns {Promise<Discord.Message>} */
-async function GetOldDailyWeatherReport(channelId) {
-    /** @type {Discord.TextChannel} */
-    const channel = bot.channels.cache.get(channelId)
-    statesManager.dailyWeatherReportLoadingText = 'Fetch old messages...'
-    await channel.messages.fetch({ limit: 10 })
-    statesManager.dailyWeatherReportLoadingText = 'Loop messages...'
-    for (let i = 0; i < channel.messages.cache.size; i++) {
-        const element = channel.messages.cache.at(i)
-        if (element.embeds.length == 1) {
-            if (element.embeds[0].title == 'Napi időjárás jelentés') {
-                statesManager.dailyWeatherReportLoadingText = 'Old report message found'
-                return element
-            }
-        }
-    }
-
-    statesManager.dailyWeatherReportLoadingText = 'No messages found'
-    return null
-}
-
 bot.once('ready', async () => {
     statesManager.botLoadingState = 'Ready'
+
+    const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
+
     try {
         //DeleteCommands(bot)
         //CreateCommands(bot, statesManager)
@@ -825,124 +747,29 @@ bot.once('ready', async () => {
         bot.user.setActivity(activitiesMobile[index])
     }, 10000)
 
-    statesManager.dailyWeatherReportLoadingText = 'Fetch news channel...'
-    await bot.channels.fetch(processedNewsChannel)
-    setTimeout(async () => {
-        statesManager.dailyWeatherReportLoadingText = 'Search old weather report message...'
-        const oldWeatherMessage = await GetOldDailyWeatherReport(processedNewsChannel)
-        if (oldWeatherMessage == null) {
-            if (new Date(Date.now()).getHours() < 10) {
-                CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
-            }
-        } else {
-            if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate() && new Date(Date.now()).getHours() < 10) {
-                statesManager.dailyWeatherReportLoadingText = 'Delete old weather report message...'
-                await oldWeatherMessage.delete()
-                CommandDailyWeatherReport(bot.channels.cache.get(processedNewsChannel), statesManager)
-            } else {
-                statesManager.dailyWeatherReportLoadingText = ''
-            }
-        }
-    }, 100)
+    TrySendWeatherReport(statesManager, bot, '746266528508411935')
     
     logManager.AddTimeline(2)
 
     log(DONE + ': A BOT kész!')
-
-    statesManager.newsLoadingText = 'Fetch news...'
-    const channel = bot.channels.cache.get(incomingNewsChannel)
-    channel.messages.fetch({ limit: 10 }).then(async (messages) => {
-        /** @type {[Discord.Message]} */
-        const listOfMessage = []
-
-        statesManager.newsLoadingText = 'Looping messages...'
-        messages.forEach((message) => {
-            listOfMessage.push(message)
-        })
-
-        statesManager.newsLoadingText = 'Processing messages...'
-        listOfMessage.reverse()
-        listOfMessage.forEach(message => {
-            processNewsMessage(message)
-        })
-        if (listOfMessage.length > 0) {
-            log(`Received ${listOfMessage.length} news`)
-        } else {
-            log(`No news recived`)
-        }
-    })
-
+    
+    newsManager.OnStart(bot)
     setInterval(() => {
-        if (listOfNews.length > 0) {
-            const newsMessage = listOfNews.shift()
-            if (newsMessage == null || newsMessage == undefined) { return }
-            
-            /** @type {Discord.TextChannel} */
-            const newsChannel = bot.channels.cache.get(processedNewsChannel)
-            const embed = newsMessage.embed
-            statesManager.newsLoadingText2 = 'Send new message...'
-            if (newsMessage.NotifyRoleId.length == 0) {
-                newsChannel.send({ embeds: [embed] })
-                    .then(() => {
-                        statesManager.newsLoadingText2 = 'Delete raw message...'
-                        newsMessage.message.delete().then(() => {
-                            statesManager.newsLoadingText2 = ''
-                        })
-                    })
-            } else {
-                newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
-                    .then(() => {
-                        statesManager.newsLoadingText2 = 'Delete raw message...'
-                        newsMessage.message.delete().then(() => {
-                            statesManager.newsLoadingText2 = ''
-                        })
-                    })
-            }
-            lastNoNews = false
-            statesManager.allNewsProcessed = false
-        } else if (lastNoNews == false) {
-            statesManager.newsLoadingText = ''
-            statesManager.newsLoadingText2 = ''
-            lastNoNews = true
-            statesManager.allNewsProcessed = true
-            log(DONE + ': Minden hír közzétéve')
-        }
+        newsManager.TryProcessNext(bot)
     }, 2000)
 })
 
-/** @param {Discord.Message} message */
-function processNewsMessage(message) {
-    statesManager.allNewsProcessed = false
-    listOfNews.push(CreateNews(message))
-}
 bot.on('messageCreate', async message => { //Message
     const thisIsPrivateMessage = message.channel.type === 'dm'
     if (message.author.bot && thisIsPrivateMessage === false) { return }
     if (!message.type) return
     let sender = message.author
 
-    //#region Log
-    if (!message.member === null) {
-        logMessage(message, message.member.displayName, false, sender)
-    } else {
-        if (message.channel.guild) {
-            logMessage(message, sender.username, false, sender)
-        } else {
-            logMessage(message, sender.username, true, sender)
-        }
-    }
-
-    //#endregion
-
     if (message.content.startsWith('https://www.reddit.com/r/')) {
         CommandRedditsave(message)
     }
 
-    //#region News
-    if (message.channel.id == incomingNewsChannel) {
-        processNewsMessage(message)
-    }
-    //#endregion
+    newsManager.TryProcessMessage(message)
 
     if (message.content.startsWith(`${perfix}`)) {
         processCommand(message, thisIsPrivateMessage, sender, message.content.replace('. ', '.').substring(1), message.channel, null)

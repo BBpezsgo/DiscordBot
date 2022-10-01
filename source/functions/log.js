@@ -46,6 +46,12 @@ const MessageCodes = {
     HandlebarsFinishLoading: 1
 }
 
+const TimeLine = {
+    None: 0,
+    Secondary: 1,
+    Primary: 2
+}
+
 const spinner = ['─', '\\', '|', '/']
 const timeline = [' ', '▓', '█']
 const timeout = ['◌', '○', '●']
@@ -861,4 +867,4 @@ class LogMsg {
     }
 }
 
-module.exports = { LogManager, LogMsg, INFO, DEBUG, SERVER, WARNING, ERROR, SHARD, DONE, MessageCodes }
+module.exports = { LogManager, LogMsg, INFO, DEBUG, SERVER, WARNING, ERROR, SHARD, DONE, MessageCodes, TimeLine }

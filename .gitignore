@@ -36,3 +36,5 @@ source/ws/views/userViews/MenuRpm-test.hbs
 source/ws/views/defaultNew.hbs
 source/ws/views/userViewsNew
 source/ws/public/scripts/menuNew.js
+Properties
+source/form/

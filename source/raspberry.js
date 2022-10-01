@@ -269,60 +269,6 @@ function DaysToMilliseconds(days) {
     return days * 24 * 60 * 60 * 1000
 }
 
-/**
-* @param {Discord.Message} message The message context
-* @param {string} username The message's author name
-* @param {boolean} private This is a private message?
-* @param {Discord.User} author This is a private message?
-*/
-async function logMessage(message, username, private = false.valueOf, author) {
-    if (private === false) {
-        if (message.content.startsWith('https://tenor.com/view/')) {
-
-        } else if (message.content.startsWith('https://www.youtube.com/') || message.content.startsWith('https://youtu.be/')) {
-
-            const link = message.content
-
-            let info = await ytdl.getInfo(link)
-
-            let videoLengthSeconds = info.videoDetails.lengthSeconds
-            let videoLengthMinutes = 0
-            let videoLengthHours = 0
-            for (let l = 0; videoLengthSeconds > 60; l += 1) {
-                videoLengthMinutes += 1
-                videoLengthSeconds -= 60
-            }
-            for (let l = 0; videoLengthMinutes > 60; l += 1) {
-                videoLengthHours += 1
-                videoLengthMinutes -= 60
-            }
-
-            let lengthText = '0:00'
-            let minutes = videoLengthMinutes
-            if (videoLengthMinutes < 10) { minutes = '0' + minutes }
-            let seconds = videoLengthSeconds
-            if (videoLengthSeconds < 10) { seconds = '0' + seconds }
-
-            if (videoLengthHours = 0) {
-                lengthText = videoLengthMinutes + ':' + seconds
-            } else {
-                lengthText = videoLengthHours + ':' + minutes + ':' + seconds
-            }
-
-        } else if (message.content.startsWith('https://www.reddit.com/')) {
-        } else if (message.content.startsWith('https://cdn.discordapp.com/attachments/')) {
-        } else if (message.content.startsWith('https://')) {
-        } else if (message.attachments.size) {
-        } else {
-        }
-    } else {
-        if (message.channel.guild) {
-        } else {
-        }
-    }
-
-}
-
 //#endregion
 
 //#region Listener-ek

@@ -1,6 +1,7 @@
 const Discord = require('discord.js')
 const fs = require('fs')
 const { StatesManager } = require('../functions/statesManager')
+const { userstatsSendMeme, userstatsSendMusic, userstatsSendYoutube, userstatsSendMessage, userstatsSendChars, userstatsSendCommand, userstatsAddUserToMemory } = require('../functions/userstats.js')
 
 function IsAnything(obj) {
     if (obj == undefined) { return false }
@@ -33,10 +34,7 @@ class DatabaseManager {
         this.statesManager = statesManager
     }
 
-    /**
-     * @param {Discord.User} user
-     * @param {string} username
-     */
+    /** @param {Discord.User} user @param {string} username */
     SaveUserToMemoryAll(user, username) {
         if (!this.dataBackpacks[user.id]) {
             this.dataBackpacks[user.id] = {}
@@ -285,6 +283,21 @@ class DatabaseManager {
         fs.copyFileSync(this.backupFolderPath + 'businesses.json', this.databaseFolderPath + 'businesses.json', )
         this.statesManager.databaseBackupText = ''
     }
+
+    /** @param {Discord.User} user */
+    UserstatsSendMeme(user) { userstatsSendMeme(this, user) }
+    /** @param {Discord.User} user */
+    UserstatsSendMusic(user) { userstatsSendMusic(this, user) }
+    /** @param {Discord.User} user */
+    UserstatsSendYoutube(user) { userstatsSendYoutube(this, user) }
+    /** @param {Discord.User} user */
+    UserstatsSendMessage(user) { userstatsSendMessage(this, user) }
+    /** @param {Discord.User} user @param {string} text */
+    UserstatsSendChars(user, text) { userstatsSendChars(this, user, text) }
+    /** @param {Discord.User} user */
+    UserstatsSendCommand(user) { userstatsSendCommand(this, user) }
+    /** @param {Discord.User} user */
+    UserstatsAddUserToMemory(user) { userstatsAddUserToMemory(this, user) }
 }
 
 module.exports = { DatabaseManager }

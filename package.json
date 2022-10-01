@@ -4,7 +4,7 @@
   "description": "A discord.js application",
   "main": "./source/desktop.js",
   "scripts": {
-    "start": "node source/desktop.js"
+    "start": "node source/desktop.js visible user"
   },
   "repository": "https://github.com/BBpezsgo/DiscordBot",
   "dependencies": {
