@@ -3,11 +3,7 @@ source/database
 source/database-copy
 node_modules
 package-lock.json
-package.json
 Start.lnk
-source/corpus.json
-source/index.js
-source/user.js
 file.zip
 DiscordBot-main/
 source/ws/old/
@@ -15,11 +11,9 @@ source/node.error.log
 source/log/
 source/ws/log/
 source/exitdata.txt
-Download.bat
 source/FLR.json
 source/GST.json
 source/IPS.json
-Update.bat
 .vs
 DiscordBot.njsproj
 bin
@@ -27,9 +21,4 @@ obj
 DiscordBot.sln
 DiscordBot.njsproj.user
 OldDCVer
-source/ws/views/default-old.hbs
-source/ws/public/scripts-test
-source/ws/views/default-test.hbs
-source/ws/views/userViews/MenuRpm-test.hbs
 Properties
-source/form/
