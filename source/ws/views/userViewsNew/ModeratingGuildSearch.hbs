@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+	<link href="/stylesNew/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/stylesNew/css_main.css" rel="stylesheet" type="text/css">
+    <link href="/stylesNew/tree.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/scripts/common.js" type="text/javascript"></script>
+    <script language="javascript" src="/scripts/tree.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
+   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+
+    <table id="autoWidth" style="width: 598px;">
+        <tbody>
+            <tr>
+                <td class="h1" colspan="3">Moderating</td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td class="h2" colspan="3">
+                    Moderating guild
+                    <div class="tooltip" style="transform: translateY(10px);">
+                        <img class="server-icon" src="{{server.iconUrlSmall}}" width="32" height="32" title="{{server.nameAcronym}}">
+                        <span class="tooltiptext" style="font-weight: normal;">
+                            <img src="{{server.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
+                        </span>
+                    </div>
+                    {{server.name}}
+                    <form action="/userViews/Moderating/Back" method="post"
+                        style="display: inline-block; margin-left: 30px;"
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                        <input type="submit" value="Back">
+                    </form>
+                </td>
+            </tr>
+
+			<tr>
+				<td width="25%" class="Item">ID:</td>
+				<td colspan="2">
+					{{server.id}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Created at:</td>
+				<td colspan="2">
+					{{server.createdAt}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Member count:</td>
+				<td colspan="2">
+					{{server.memberCount}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Nsfw level:</td>
+				<td colspan="2">
+					{{server.nsfwLevel}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Mfa level:</td>
+				<td colspan="2">
+					{{server.mfaLevel}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Verification level:</td>
+				<td colspan="2">
+					{{server.verificationLevel}}
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Available:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{server.available}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Partnered:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{server.partnered}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Large:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{server.large}}.png">
+				</td>
+			</tr>
+			<tr>
+				<td width="25%" class="Item">Verified:</td>
+				<td colspan="2">
+                    <img width="16" height="16" src="/images/bool-{{server.verified}}.png">
+				</td>
+			</tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td class="h2" colspan="3">Channels</td>
+            </tr>
+            <tr>
+                <td width="698" align="center" colspan="2">
+                    <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td class="ListM">
+                                    <div class="caret-all"></div>
+                                </td>
+                                <td class="ListM" style="width: 100%;">
+                                    <b>Name</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>ID</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Delb.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Mange.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Viewb.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Edit.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Invt.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Join.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Lock.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Send.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Spek.</b>
+                                </td>
+                                <td class="ListM">
+                                    <b>Uarc.</b>
+                                </td>
+                                <td class="ListM">
+                                    
+                                </td>
+                            </tr>
+                            {{#each singleChannels}}
+                            <tr>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.deletable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.manageable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.editable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.invitable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.joinable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.locked}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.sendable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.speakable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.unarchivable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <form action="/userViews/Moderating/Server/Search" method="post"
+                                        style="margin: 0;"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                        <input type="submit" value="View">
+                                    </form>
+                                </td>
+                            </tr>
+                            {{/each}}
+                            {{#each groups}}
+                            <tr>
+                                <td style="padding:0 2 0 2;word-break:break-all; width: 16px;">
+                                    <div class="caret" id="{{this.id}}"></div>
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.deletable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.manageable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all" colspan="7">
+                                    
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <form action="/userViews/Moderating/Server/Search" method="post"
+                                        style="margin: 0;"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                        <input type="submit" value="View">
+                                    </form>
+                                </td>
+                            </tr>
+                            {{#each channels}}
+                            <tr class="nested {{this.parentId}}">
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.name}}
+                                    <span class="tag-{{this.nsfw}}">NSFW</span>
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    {{this.id}}
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.deletable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.manageable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.editable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.invitable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.joinable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.locked}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.sendable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.speakable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <img width="16" height="16" src="/images/bool-{{this.unarchivable}}.png">
+                                </td>
+                                <td style="padding:0 2 0 2;word-break:break-all">
+                                    <form action="/userViews/Moderating/Server/Search" method="post"
+                                        style="margin: 0;"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                        <input type="submit" value="View">
+                                    </form>
+                                </td>
+                            </tr>
+                            {{/each}}
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td width="698" align="center">
+                    <form action="/userViews/Moderating/Server/Search" method="post"
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                        <input type="text" name="id" value="{{channelId}}" placeholder="Channel ID" required>
+                        <input type="submit" value="Search">
+                        <span style="font-weight: bold; color: red;">{{searchError}}</span>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

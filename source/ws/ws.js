@@ -1364,10 +1364,13 @@ class WebSocket {
                 } else {
                     icon = 'error'
                 }
-
+                
                 if (line.startsWith('Error: ')) {
                     type = 'Error'
                     title = line.replace('Error: ', '')
+                } else if (line.startsWith('DiscordAPIError[')) {
+                    type = 'DiscordAPIError'
+                    title = line.replace('DiscordAPIError', '')
                 } else if (line.startsWith('Error [')) {
                     type = 'Error'
                     title = line.replace('Error ', '')

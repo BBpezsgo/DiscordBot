@@ -1,0 +1,58 @@
+ul,
+#myUL {
+    list-style-type: none;
+}
+
+#myUL {
+    margin: 0;
+    padding: 0;
+}
+
+.caret {
+    cursor: pointer;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+}
+
+.caret.error::before {
+    content: url('/imagesNew/err.png');
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+    position: relative;
+    top: 3px;
+    left: 3px;
+}
+
+.caret.warning::before {
+    content: url('/imagesNew/warn.png');
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+    position: relative;
+    top: 3px;
+    left: 3px;
+}
+
+.caret.crash::before {
+    content: url('/imagesNew/fire.png');
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+    position: relative;
+    top: 3px;
+    left: 3px;
+}
+
+.nested {
+    display: none;
+}
+
+.active {
+    display: block;
+}

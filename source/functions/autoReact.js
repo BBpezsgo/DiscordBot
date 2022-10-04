@@ -11,7 +11,7 @@ const fs = require('fs')
 
         if (isHaveMusic == false) { return }
 
-        const settingsRaw = fs.readFileSync('../settings.json')
+        const settingsRaw = fs.readFileSync('./settings.json')
         const settings = JSON.parse(settingsRaw)
         const channelSettings = settings.channelSettings
         const messageChannelId = message.channel.id

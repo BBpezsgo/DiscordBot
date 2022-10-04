@@ -223,6 +223,7 @@ const {
     CliColor
 } = require('./functions/enums.js')
 const { CommandHangman, HangmanManager } = require('./commands/hangman.js')
+const ytdl = require('ytdl-core')
 
 logManager.BlankScreen()
 
@@ -231,7 +232,7 @@ const selfId = '738030244367433770'
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-const bot = new Discord.Client({ intents: [ GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ]})
+const bot = new Discord.Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ], partials: [ Discord.Partials.Channel ]})
 logManager.Destroy()
 
 const statesManager = new StatesManager()
@@ -2007,7 +2008,8 @@ bot.once('ready', async () => {
 
     database.SaveDatabase()
     
-    newsManager.OnStart(bot, true)
+    await newsManager.OnStart(bot, true)
+
     setInterval(() => {
         newsManager.TryProcessNext(bot)
     }, 2000)
@@ -2038,6 +2040,9 @@ bot.on('messageCreate', async message => {
 
     if (message.author.bot == true && thisIsPrivateMessage == false) { return }
     const sender = message.author
+
+    console.log(sender.id)
+    console.log(message.content)
 
     database.LoadDatabase()
 
@@ -2094,7 +2099,9 @@ bot.on('messageCreate', async message => {
         CommandRedditsave(message)
     }
 
-    newsManager.TryProcessMessage(message)
+    message.fetch().then(async (msg) => {
+        await newsManager.TryProcessMessage(msg)
+    })
 
     if (thisIsPrivateMessage) {
         database.SaveUserToMemoryAll(sender, sender.username)

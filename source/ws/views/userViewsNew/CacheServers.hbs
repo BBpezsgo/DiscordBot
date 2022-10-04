@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+	<link href="/stylesNew/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/stylesNew/css_main.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/scripts/common.js" type="text/javascript"></script>
+    <script language="javascript" src="/scripts/tree.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
+   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+
+	<h1>Cache</h1>
+
+	<div class="container">
+		<h2>Guilds</h2>
+        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+            <tbody>
+                <tr>
+                    <td class="ListM">
+                        <b>Icon</b>
+                    </td>
+                    <td class="ListM" style="width: 100%;">
+                        <b>Name</b>
+                    </td>
+                    <td class="ListM">
+                        <b>ID</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Created At</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Joined At</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Members</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Nsfw Level</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Mfa Level</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Verification Level</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Avai.</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Large</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Parn.</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Veri.</b>
+                    </td>
+                </tr>
+                {{#each servers}}
+                <tr>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        <div class="tooltip">
+                            <img class="server-icon" src="{{this.iconUrlSmall}}" width="16" height="16" title="{{this.nameAcronym}}">
+                            <span class="tooltiptext">
+                                <img src="{{this.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
+                            </span>
+                        </div>
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        {{this.name}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        {{this.id}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        {{this.createdAt}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        {{this.joinedAt}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        {{this.memberCount}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        {{this.nsfwLevel}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        {{this.mfaLevel}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        {{this.verificationLevel}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.available}}.png">
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.large}}.png">
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.partnered}}.png">
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.verified}}.png">
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+	</div>
+</body>
+
+</html>

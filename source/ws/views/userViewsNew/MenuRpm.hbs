@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script language="javascript" type="text/javascript">
+        var visibleMenuList = new Array(
+            "NatStatusCfgRpm",
+            "PrintServerCfgRpm",
+            "MediaServerCfgRpm",
+            "NasUserCfgRpm",
+            "NasFtpCfgRpm",
+            "NasShareCfgRpm",
+            "NasCfgRpm",
+            "DiagnosticRpm",
+            "SysRebootRpm",
+            "DdnsAddRpm",
+            "SystemLogRpm",
+            "SystemStatisticRpm",
+            "RestoreDefaultCfgRpm",
+            "DateTimeCfgRpm",
+            "ChangeLoginPwdRpm",
+            "BakNRestoreRpm",
+            "SoftwareUpgradeRpm",
+            "SysRouteTableRpm",
+            "StaticRouteTableRpm",
+            "FixMapCfgRpm",
+            "AssignedIpAddrListRpm",
+            "LanDhcpServerRpm",
+            "ManageControlRpm",
+            "ParentCtrlRpm",
+            "AccessCtrlAccessRulesRpm",
+            "AccessCtrlTimeSchedRpm",
+            "AccessCtrlAccessTargetsRpm",
+            "AccessCtrlHostsListsRpm",
+            "WanCfgRpm",
+            "MacCloneCfgRpm",
+            "NetworkCfgRpm",
+            "WlanAdvRpm",
+            "WpsCfgRpm",
+            "WlanStationRpm",
+            "WlanMacFilterRpm",
+            "WlanSecurityRpm",
+            "WlanNetworkRpm",
+            "UpnpCfgRpm",
+            "SpecialAppRpm",
+            "DMZRpm",
+            "VirtualServerRpm",
+            "QoSRuleListRpm",
+            "QoSCfgRpm",
+            "LanArpBindingRpm",
+            "LanArpBindingListRpm",
+            "AdvScrRpm",
+            "LocalManageControlRpm",
+            "BasicSecurityRpm",
+            "StatusRpm",
+            "WzdStartRpm",
+            0, 0);
+    </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link href="/stylesNew/css-vars.css" rel="stylesheet" type="text/css">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+    <script language="javascript" type="text/javascript">
+        if (window.parent == window) { window.location.href = "http://192.168.1.100"; }
+        function Click() { return false; }
+        document.oncontextmenu = Click;
+    </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <script language="JavaScript" type="text/JavaScript">
+        try{document.execCommand('BackgroundImageCache', false, true);}catch(e){};
+    </script>
+    <script language="JavaScript" src="../scripts/localiztion/str_menu.js" type="text/JavaScript">
+    </script>
+    <script language="JavaScript" src="../scripts/menuNew.js" type="text/JavaScript">
+    </script>
+    <style type="text/css">
+        menu ol.minus {
+            background-color: #fff1;
+        }
+        menu ol.minus:hover {
+            background-color: #fff2;
+        }
+
+        ol {
+            display: block;
+            list-style-type: decimal;
+            margin-block-start: 0em;
+            margin-block-end: 0em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            padding-inline-start: 0px;
+        }
+
+        menu ol {
+            position: relative;
+            border-end-end-radius: 100px;
+            border-start-end-radius: 100px;
+            height: 30px;
+            overflow: hidden;
+            padding-left: 65px;
+            padding-top: 12px;
+            cursor: pointer;
+        }
+
+        menu ol>a {
+            text-decoration: none;
+            user-select: none;
+            color: #eee;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        menu ol:hover {
+            background-color: #3c4043;
+            color: #eee;
+        }
+
+        menu ol.dot2 {
+            padding-left: 85px;
+        }
+
+        menu ol span.ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 600ms linear;
+            background-color: #fff3;
+            pointer-events: none;
+        }
+
+        menu ol.selected span.ripple {
+            background-color: #0003;
+        }
+
+        menu ol.selected {
+            background-color: #8ab4f8;
+            color: #000;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+        .show {
+            display: block;
+        }
+        menu {
+            display: block;
+            list-style-type: disc;
+            margin-block-start: 0em;
+            margin-block-end: 0em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            padding-inline-start: 0px;
+        }
+
+        ol a {
+            
+        }
+    </style>
+    <script type="text/javascript">
+        function ResetStatus(strInfo) {
+            window.status = ""; return true;
+        }
+    </script>
+</head>
+
+<body style="margin: 0px;">
+    <menu>
+        <script type="text/javascript">
+            menuInit(visibleMenuList);
+            menuDisplay();
+        </script>
+    </menu>
+</body>
+
+    <script>
+        const buttons = document.getElementsByTagName("ol");
+        for (const button of buttons) {
+            button.addEventListener("mousedown", createRipple);
+        }
+
+        function createRipple(event) {
+            const ripples = document.getElementsByClassName("ripple")
+            for (let i = 0; i < ripples.length; i++) {
+                const ripple = ripples[i];
+                ripple.remove()
+            }
+
+            const offset = { x: 0, y: 0 }
+            const button = event.currentTarget;
+            const circle = document.createElement("span");
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - (button.offsetLeft + radius) + offset.x}px`;
+            circle.style.top = `${event.clientY - (button.offsetTop + radius) + offset.y}px`;
+            circle.classList.add("ripple");
+            button.appendChild(circle);
+        }
+    </script>
+
+</html>

@@ -4,6 +4,7 @@ const { Color } = require('./enums.js')
 const { StatesManager } = require('./statesManager')
 const { FormatError } = require('./formatError')
 const { SystemLog } = require('./systemLog')
+const ytdl = require("ytdl-core")
 
 /**
  * @param {string} id
@@ -39,10 +40,32 @@ class NewsMessage {
 }
 
 /** @param {Discord.Message} message */
-function CreateNews(message) {
+async function CreateNews(message) {
     if (message.content == '[Original Message Deleted]') {
         return null
     }
+
+    if (message.author.id == '726127512521932880' && message.content.startsWith('https://www.youtube.com/watch?v=')) {
+        const info = await ytdl.getInfo(message.content)
+        const vidInfo = info.videoDetails
+
+        var channelIconUrl = undefined
+        if (info.videoDetails.author.thumbnails.length > 0) {
+            channelIconUrl = info.videoDetails.author.thumbnails[0].url
+        }
+
+        const embedYt = new Discord.EmbedBuilder()
+        embedYt
+            .setAuthor({ name: info.videoDetails.author.name, url: info.videoDetails.author.channel_url, iconURL: channelIconUrl })
+            .setTitle(vidInfo.title)
+            .setURL(vidInfo.video_url)
+            .setImage(`https://i.ytimg.com/vi/${vidInfo.videoId}/maxresdefault.jpg`)
+            .setColor('#ff0000')
+            .setTimestamp(Date.parse(vidInfo.uploadDate))
+
+        return new NewsMessage(embedYt, '', message)
+    }
+
     let role = ''
     const newDate = new Date(message.createdTimestamp)
     const embed = new Discord.EmbedBuilder()
@@ -375,15 +398,15 @@ class NewsManager {
     }
 
     /** @param {Discord.Message} message */
-    ProcessMessage(message) {
+    async ProcessMessage(message) {
         this.statesManager.allNewsProcessed = false
-        this.listOfNews.push(CreateNews(message))
+        this.listOfNews.push(await CreateNews(message))
     }
     
     /** @param {Discord.Message} message */
-    TryProcessMessage(message) {
+    async TryProcessMessage(message) {
         if (message.channel.id == NewsIncomingChannel) {
-            this.ProcessMessage(message)
+            await this.ProcessMessage(message)
         }
     }
 }
@@ -391,4 +414,4 @@ class NewsManager {
 const NewsIncomingChannel = '902894789874311198'
 const NewsProcessedChannel = '746266528508411935'
 
-module.exports = { NewsMessage, NewsManager, CreateNews, NewsIncomingChannel, NewsProcessedChannel }
+module.exports = { NewsManager }

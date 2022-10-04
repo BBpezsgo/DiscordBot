@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+    <link href="/stylesNew/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/stylesNew/css_main.css" rel="stylesheet" type="text/css">
+    <link href="/stylesNew/tree-default.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/scripts/common.js" type="text/javascript"></script>
+    <script language="javascript" src="/scripts/tree-default.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
+   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+
+    <h1>Database</h1>
+
+	<div class="container">
+        <table border="0" width="100%">
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td colspan="2">
+                        <ul id="myUL">
+                            <li>
+                                <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
+                                <ul class="nested">
+                                    {{#each info.backupFolder.files}}
+                                    <li class="data-file">
+                                        <span>{{filename}}</span>
+                                        <b>{{size}}</b>
+                                    </li>
+                                    {{/each}}
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Item"></td>
+                    <td colspan="2">
+                        <ul id="myUL">
+                            <li>
+                                <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
+                                <form action="/userViews/Database/Backup/All" method="post"
+                                    style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
+                                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                    <input type="submit" value="Backup All">
+                                </form>
+                                <ul class="nested">
+                                    {{#each info.folder.files}}
+                                    <li class="data-file">
+                                        <span>{{filename}}</span>
+                                        <b>{{size}}</b>
+                                        <form action="/userViews/Database/Backup/All" method="post"
+                                            style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
+                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                            <input type="text" name="filename" value="{{filename}}" style="display: none;">
+                                            <input type="submit" value="Backup">
+                                        </form>
+                                    </li>
+                                    {{/each}}
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+	</div>
+
+	<div class="container">
+		<h2>BOT's database</h2>
+        <table border="0" width="100%">
+            <tbody>
+                <tr>
+                    <td width="698" align="center">
+                        <ul id="myUL">
+                            <li>
+                                <span class="data-number">Day: </span>
+                                <b>{{bot.day}}</b>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+	</div>
+
+	<div class="container">
+		<h2>Market</h2>
+        <table border="0" width="100%">
+            <tbody>
+                <tr>
+                    <td width="698" align="center">
+                        <ul id="myUL">
+                            <li>
+                                <span class="data-number">Day: </span>
+                                <b>{{market.day}}</b>
+                            </li>
+                            <li><span class="caret caret-down">Prices</span>
+                                <ul class="nested active">
+                                    <li>
+                                        <span class="data-number">Token: </span>
+                                        <b>{{market.prices.token}}</b>
+                                    </li>
+                                    <li>
+                                        <span class="data-number">Coupon: </span>
+                                        <b>{{market.prices.coupon}}</b>
+                                    </li>
+                                    <li>
+                                        <span class="data-number">Jewel: </span>
+                                        <b>{{market.prices.jewel}}</b>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+	</div>
+
+	<div class="container">
+		<h2>Users</h2>
+        <table border="0" width="100%">
+            <tbody>
+                <tr>
+                    <td width="698" align="center">
+                        <form action="/userViews/Database/Search" method="post"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                            <input type="text" name="id" value="{{../this.id}}" placeholder="User ID" required>
+                            <input type="submit" value="Search">
+                            <span style="font-weight: bold; color: red;">{{searchError}}</span>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="698" align="center" colspan="2">
+                        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td class="ListM">
+                                        <b>Avatar</b>
+                                    </td>
+                                    <td class="ListM" style="width: 100%;">
+                                        <b>Username</b>
+                                    </td>
+                                    <td class="ListM">
+                                        <b>ID</b>
+                                    </td>
+                                    <td class="ListM">
+
+                                    </td>
+                                </tr>
+                                {{#each users}}
+                                <tr>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        <div class="tooltip">
+                                            <img src="{{this.avatarUrlSmall}}" width="16" height="16" title="Avatar">
+                                            <span class="tooltiptext">
+                                                <img src="{{this.avatarUrlLarge}}">
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{this.name}}
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{this.id}}
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        <img class="show-invert-{{this.haveDatabase}} miniicon" src="/imagesNew/err2.png" width="16" height="16">
+                                        <form action="/userViews/Database/Search" method="post" style="margin: 0; display: inline-block;"
+                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                            <input type="submit" value="View">
+                                        </form>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+	</div>
+</body>
+
+</html>
