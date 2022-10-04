@@ -182,7 +182,7 @@ logManager.BlankScreen()
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-const bot = new Discord.Client({ properties: { $browser: "Discord iOS" }, intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates]})
+const bot = new Discord.Client({ properties: { $browser: "Discord iOS" }, intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ], partials: [ Discord.Partials.Channel ]})
 logManager.Destroy()
 
 const statesManager = new StatesManager()
@@ -765,11 +765,13 @@ bot.on('messageCreate', async message => { //Message
     if (!message.type) return
     let sender = message.author
 
-    if (message.content.startsWith('https://www.reddit.com/r/')) {
-        CommandRedditsave(message)
-    }
+    message.fetch().then(async (msg) => {
+        if (msg.content.startsWith('https://www.reddit.com/r/')) {
+            CommandRedditsave(msg)
+        }
 
-    newsManager.TryProcessMessage(message)
+        await newsManager.TryProcessMessage(msg)
+    })
 
     if (message.content.startsWith(`${perfix}`)) {
         processCommand(message, thisIsPrivateMessage, sender, message.content.replace('. ', '.').substring(1), message.channel, null)

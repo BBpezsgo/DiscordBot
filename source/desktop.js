@@ -2095,11 +2095,11 @@ bot.on('messageCreate', async message => {
     
     //#endregion
 
-    if (message.content.startsWith('https://www.reddit.com/r/')) {
-        CommandRedditsave(message)
-    }
-
     message.fetch().then(async (msg) => {
+        if (msg.content.startsWith('https://www.reddit.com/r/')) {
+            CommandRedditsave(msg)
+        }
+
         await newsManager.TryProcessMessage(msg)
     })
 
