@@ -1711,7 +1711,8 @@ class WebSocket {
                 name: '<valaki>',
                 progress: scorePercent,
                 xpImageUrl: xpImageUrl,
-                rankText: rankText
+                rankText: rankText,
+                avatarURL: user.avatarURL({ size: 32 })
             }
 
             if (member != undefined) {

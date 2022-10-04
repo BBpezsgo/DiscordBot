@@ -1,4 +1,4 @@
-input[type='submit'], .button {
+.button {
     outline: 0;
     border: 0;
     color: #F6F6F6;
@@ -11,28 +11,28 @@ input[type='submit'], .button {
     text-transform: uppercase;
 }
 
-input[type='submit']:hover, .button:hover {
+.button:hover {
     background: #4b4f55;
     transform: translateY(-1px);
     box-shadow: #0004 0px 2px 5px;
 }
 
-input[type='submit']:active, .button:active {
+.button:active {
     transition-duration: 10ms;
     background: #4b4f55;
     transform: translateY(1px);
 }
 
-input[type='submit'].button-success, .button.button-success {
+.button.button-success {
     color: #F6F6F6;
     background: #177032;
 }
 
-input[type='submit']:hover.button-success, .button:hover.button-success {
+.button:hover.button-success {
     background: #238f43;
 }
 
-input[type='submit']:active.button-success, .button:active.button-success {
+.button:active.button-success {
     background: #30b668;
 }
 
@@ -84,21 +84,6 @@ h6.img-title {
     display: inline-block;
     transform: translateY(2px);
     margin-left: 5px;
-}
-
-.toast-alert {
-    background: #23272A;
-    padding: 10px 15px;
-    border-radius: 5px;
-    box-shadow: #0006 2px 2px 5px;
-    margin-top: 20px;
-    transition-duration: 500ms !important;
-}
-
-.toast-alert.submitted {
-    opacity: 0 !important;
-    transform: translateX(-100px);
-    pointer-events: none;
 }
 
 .modal {
@@ -154,7 +139,7 @@ h6.img-title {
 
 .loading-effect {
     opacity: 0;
-    transition-duration: 400ms;
+    transition: opacity 400ms;
 }
 
 .loading-effect.loading-effect-loaded {
@@ -162,6 +147,6 @@ h6.img-title {
 }
 
 .loading-effect.loading-effect-loaded-instant {
-    transition-duration: 0ms;
+    transition: opacity 0ms;
     opacity: 1;
 }

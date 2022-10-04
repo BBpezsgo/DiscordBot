@@ -1,5 +1,8 @@
 const { usersWithTax } = require('./enums')
 const { DatabaseManager } = require('./databaseManager')
+const { FormatError } = require('./formatError')
+const { SystemLog } = require('./systemLog')
+const fs = require('fs')
 
 /** @param {DatabaseManager} database @param {number} lastDay */
 function Taxation(database, lastDay) {
@@ -15,7 +18,8 @@ function Taxation(database, lastDay) {
                 console.log("Adó:  " + userMoney + " ---1%-->" + finalTax + " ------->" + userMoneyFinal)
                 database.dataBasic[element].money = userMoneyFinal
             } catch (error) {
-                console.log(ERROR + ': Adó hiba (id: ' + element + '): ' + error)
+                SystemLog('Tax error: ' + error.message)
+                fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
             }
         }
         console.log("Mindenki megadózva")
