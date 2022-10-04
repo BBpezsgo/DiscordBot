@@ -4,21 +4,18 @@
 
 
 
-/** @param {Error} err */
-function FormatError(err) {
-    var str = ""
-    str += err.name + ': ' + err.message
-    if (err.stack != undefined) {
-        str += '\n' + err.stack
-    }
-    return str
-}
-
-
 
     
 
     
+
+const LogError = require('./functions/errorLog')
+
+process.on('uncaughtException', function (err) {
+    fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
+    LogError(err)
+})
+
 
 
 

@@ -9,19 +9,11 @@ process.argv.forEach(function (val, index, array) {
     }
 })
 
-/** @param {Error} err */
-function FormatError(err) {
-    var str = ""
-    str += err.name + ': ' + err.message
-    if (err.stack != undefined) {
-        str += '\n' + err.stack
-    }
-    return str
-}
+const LogError = require('./functions/errorLog')
 
 process.on('uncaughtException', function (err) {
     fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
-    fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
+    LogError(err)
 })
 
 var autoStartBot = true
@@ -397,7 +389,7 @@ bot.on('error', error => {
     log(ERROR + ': ' + error)
     statesManager.botLoadingState = 'Error'
     SystemLog('Error: ' + error.message)
-    fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
+    LogError(error)
 })
 
 bot.on('debug', debug => {
@@ -2029,7 +2021,7 @@ bot.once('ready', async () => {
                 })
         })
     } catch (err) {
-        fs.appendFileSync('./node.error.log', FormatError(err) + '\n', { encoding: 'utf-8' })
+        LogError(err)
     }
 
     database.dataBot.day = dayOfYear
