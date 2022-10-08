@@ -1,7 +1,41 @@
-var state = '  Loading'
-var error = ''
 const spinner = ['─', '\\', '|', '/']
 var spinnerIndex = 0
+/** @type {string[]} */
+var logs = []
+
+const useDefaultLogSystem = false
+
+/** @param {string} log */
+const ProcessLogMessage = (log, i = 0) => {
+    var logText = log
+
+    if (useDefaultLogSystem) {
+        logText = logText.replace('%SPINNER%', ' ')
+        logText = logText.replace('%TASK%', ' ')
+    } else {
+        logText = logText.replace('%SPINNER%', spinner[spinnerIndex])
+
+        if (i == logs.length - 1) {
+            logText = logText.replace('%TASK%', spinner[spinnerIndex])
+        } else {
+            logText = logText.replace('%TASK%', ' ')
+        }
+    }
+
+    return logText
+}
+
+const Log = (msg) => {
+    if (useDefaultLogSystem) {
+        if (typeof msg === 'string') {
+            console.log(ProcessLogMessage(msg))
+        } else {
+            console.log(msg)
+        }
+    } else {
+        logs.push(msg)
+    }
+}
 
 const CliColor = {
     FgBlack: "\x1b[30m",
@@ -24,6 +58,7 @@ const CliColor = {
 
     FgDefault: '\033[37m'
 }
+
 /**Reprints a line on the console */
 const reprint = (text, x = 0, y = 0) => {
     process.stdout.cursorTo(x, y)
@@ -37,63 +72,6 @@ function chars(char, len) {
     for (let i = 0; i < len; i++) {
         txt += char
     }
-    return txt
-}
-
-/**@param {string} str */
-function ThisContainsColorcode(str) {
-    return (
-        str.includes(CliColor.BgBlack) ||
-        str.includes(CliColor.BgBlue) ||
-        str.includes(CliColor.BgCyan) ||
-        str.includes(CliColor.BgGreen) ||
-        str.includes(CliColor.BgMagenta) ||
-        str.includes(CliColor.BgRed) ||
-        str.includes(CliColor.BgWhite) ||
-        str.includes(CliColor.BgYellow) ||
-        str.includes(CliColor.FgBlack) ||
-        str.includes(CliColor.FgBlue) ||
-        str.includes(CliColor.FgCyan) ||
-        str.includes(CliColor.FgDefault) ||
-        str.includes(CliColor.FgGreen) ||
-        str.includes(CliColor.FgMagenta) ||
-        str.includes(CliColor.FgRed) ||
-        str.includes(CliColor.FgWhite) ||
-        str.includes(CliColor.FgYellow)
-    )
-}
-
-function RemoveColorcodes(text) {
-    var txt = text + ''
-    while (ThisContainsColorcode(txt)) {
-        txt = txt.replace(CliColor.BgBlack, '')
-        txt = txt.replace(CliColor.BgBlue, '')
-        txt = txt.replace(CliColor.BgCyan, '')
-        txt = txt.replace(CliColor.BgGreen, '')
-        txt = txt.replace(CliColor.BgMagenta, '')
-        txt = txt.replace(CliColor.BgRed, '')
-        txt = txt.replace(CliColor.BgWhite, '')
-        txt = txt.replace(CliColor.BgYellow, '')
-        txt = txt.replace(CliColor.FgBlack, '')
-        txt = txt.replace(CliColor.FgBlue, '')
-        txt = txt.replace(CliColor.FgCyan, '')
-        txt = txt.replace(CliColor.FgDefault, '')
-        txt = txt.replace(CliColor.FgGreen, '')
-        txt = txt.replace(CliColor.FgMagenta, '')
-        txt = txt.replace(CliColor.FgRed, '')
-        txt = txt.replace(CliColor.FgWhite, '')
-        txt = txt.replace(CliColor.FgYellow, '')
-    }
-    return txt
-}
-
-/**@param {string} text @param {number} width */
-function genLine(text, width) {
-    var txt = text + ''
-    if (RemoveColorcodes(text).length > width) {
-        txt = txt.substring(0, width - 3) + '...'
-    }
-    txt += chars(' ', width - RemoveColorcodes(text).length)
     return txt
 }
 
@@ -118,33 +96,42 @@ function GetDataSize(bytes) {
 }
 
 function RefreshScreen() {
+    if (useDefaultLogSystem) { return }
+
     const window = { width: 40, height: 5 }
-    var txt = '┌' + chars('─', window.width - 2) + '┒\n'
 
-    if (error == '') {
-        txt += '│ ' + genLine(state, window.width - 4) + ' ┃\n'
-    } else {
-        txt += '│ ' + genLine(CliColor.FgRed + error + CliColor.FgDefault, window.width - 4) + ' ┃\n'
+    var txt = ''
+
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i]
+        var logText = ProcessLogMessage(log, i)
+
+        if (window.width - logText.length > 0) {
+            logText += chars(' ', window.width - logText.length)
+        }
+
+        txt += logText + '\n'
     }
 
-    const remaingHeight = window.height - txt.split('\n').length - 1 - 1
+    const remaingHeight = window.height - txt.split('\n').length
     for (let i = 0; i < remaingHeight; i++) {
-        txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+        txt += chars(' ', window.width) + '\n'
     }
-    txt += '┕' + chars('━', window.width - 2) + '┛\n'
-    txt += chars(' ', window.width) + '\n'
 
     reprint(txt)
 }
 
 const timer = setInterval(() => {
-    RefreshScreen()
-    spinnerIndex += 1
-    if (spinnerIndex >= spinner.length) {
-        spinnerIndex = 0
-    }
+    if (useDefaultLogSystem == false) {
+        RefreshScreen()
+        spinnerIndex += 1
+        if (spinnerIndex >= spinner.length) {
+            spinnerIndex = 0
+        }
+    }   
 }, 100)
 
+Log('  Loading npm packages')
 const https = require('https')
 const fs = require('fs')
 const AdmZip = require('adm-zip')
@@ -152,53 +139,112 @@ const AdmZip = require('adm-zip')
 const fileName = 'file.zip'
 const url = 'https://codeload.github.com/BBpezsgo/DiscordBot/zip/main'
 
+Log('%TASK% Create fs write stream')
 const file = fs.createWriteStream(fileName)
-const request = https.get(url, function (response) {
+
+Log(`%TASK% Request sent`)
+const requestedAt = Date.now()
+var showRequestEllapsed = true
+
+/** @type {string} num */
+const AddZeros = (num) => {
+
+}
+
+const requestEllapsedTimer = setInterval(() => {
+    var j = -1
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i]
+        if (log.includes(' Request sent')) {
+            j = i
+        }
+    }
+    if (j > -1) {            
+        logs[j] = `%TASK% Request sent (${new Date(Date.now() - requestedAt).getSeconds()} sec)`
+    }
+    if (showRequestEllapsed == false) {
+        clearInterval(requestEllapsedTimer)
+    }
+}, 100)
+
+const request = https.get(url, function (res) {
+    showRequestEllapsed = false
+    Log(`  Got a response: ${res.statusCode} ${res.statusMessage}`)
+
     var cur = 0
 
-    response.on('data', function (chunk) {
+    res.on('data', function (chunk) {
         cur += chunk.length
-        showProgress(cur)
+        
+        if (logs.length > 0) {
+            if (logs[logs.length - 1].includes(' Downloading ')) {
+                logs[logs.length - 1] = `%TASK% Downloading ${GetDataSize(cur)}`
+            } else {
+                Log(`%TASK% Downloading ${GetDataSize(cur)}`)
+            }
+        } else {
+            Log(`%TASK% Downloading ${GetDataSize(cur)}`)
+        }
+        RefreshScreen()
     })
 
-    response.on('end', function () {
-        state = spinner[spinnerIndex] + ' Install'
+    res.on('end', function () {
+        Log('%TASK% Waiting 1s before unzip')
 
         setTimeout(async () => {
-            state = spinner[spinnerIndex] + ' Install'
+            Log('%TASK% Unzip')
             Unzip()
 
-            state = spinner[spinnerIndex] + ' Finishing up'
+            Log('%TASK% Cleanup')
             fs.unlinkSync('./' + fileName)
 
             clearInterval(timer)
 
-            state = 'Finished'
+            Log('  Done')
             RefreshScreen()
         }, 1000)
     })
 
-    response.pipe(file)
+    res.on('error', (err) => {
+        Log(`  ${CliColor.FgRed}Response error:${CliColor.FgDefault} ${err.message}`)
+    })
+
+    res.on('pause', () => {
+        Log('  Response paused')
+    })
+
+    res.on('resume', () => {
+        Log('  Response resumed')
+    })
+
+    res.on('close', () => {
+        Log('  Response closed')
+    })
+
+    res.pipe(file)
 })
 
 request.on("error", (err) => {
+    showRequestEllapsed = false
     clearInterval(timer)
-    if (err.message == 'getaddrinfo ENOTFOUND codeload.github.com') {
-        error = 'Nem sikerült letölteni: codeload.github.com nem található'
-    } else {
-        error = err.message
-    }
+    Log(`  ${CliColor.FgRed}Requiest error:${CliColor.FgDefault}`)
+    Log(`    Name: ${err.name}`)
+    Log(`    Message: ${err.message}`)
+
     if (fs.existsSync('./' + fileName)) {
+        Log(`  Cleanup`)
         fs.unlinkSync('./' + fileName)
     }
 
     RefreshScreen()
 })
 
-function showProgress(cur) {
-    state = spinner[spinnerIndex] + ' Downloading (' + GetDataSize(cur) + ')'
-    RefreshScreen()
-}
+request.on('abort', () => { Log(`  Request aborted`) })
+request.on('close', () => { Log(`  Request closed`) })
+request.on('connect', (res, soc, head) => { Log(`  Request connected`) })
+request.on('timeout', () => { 
+    Log(`  Request timeout`)
+})
 
 function Unzip() {
     try {
@@ -208,11 +254,12 @@ function Unzip() {
     } catch (err) {
         clearInterval(timer)
         if (fs.readFileSync('./' + fileName) == '404: Not Found') {
-            error = 'Reposity not found.'
+            Log(`  ${CliColor.FgRed}Reposity not found${CliColor.FgDefault}`)
         } else {
-            error = err
+            Log(`  ${err}`)
         }
         if (fs.existsSync('./' + fileName)) {
+            Log(`  Cleanup`)
             fs.unlinkSync('./' + fileName)
         }
         RefreshScreen()
