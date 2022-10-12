@@ -798,6 +798,8 @@ bot.on('messageCreate', async message => { //Message
 
 
 
+const CommandNotAvailable = '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.'
+
 /**
  * @param {Discord.Message} message
  * @param {boolean} thisIsPrivateMessage
@@ -808,29 +810,19 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 
     //#region Enabled in dm
 
-    if (command.commandName === `handlebars` || command.commandName === `webpage`) {
-        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return
-    }
-
     if (command === `pms`) {
-        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
+        channel.send(CommandNotAvailable)
         return
     }
 
     if (command === `mail`) {
-        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.')
+        channel.send(CommandNotAvailable)
         return
     }
 
     //#endregion
 
     //#region Disabled in dm
-
-    if (command.startsWith(`pms name `)) {
-        message.channel.send('> \\⛔ **Ez a parancs átmenetileg nem elérhető!**')
-        return
-    }
 
     if (command.startsWith(`quiz\n`)) {
         const msgArgs = command.toString().replace(`quiz\n`, '').split('\n')
@@ -879,29 +871,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
         return
     }
 
-    if (command === `music skip`) { //Music
-        if (thisIsPrivateMessage === false) {
-            commandSkip(message)
-            return
-        } else {
-            channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-    } else if (command === `music list`) {
-        if (thisIsPrivateMessage === false) {
-            commandMusicList(message)
-            return
-        } else {
-            channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-    } else if (command.startsWith(`music `)) {
-        if (thisIsPrivateMessage === false) {
-            commandMusic(message, command.toString().replace(`music `, ''))
-            return
-        } else {
-            channel.send('> \\⛔ **Ez a parancs csak szerveren használható.**')
-        }
-    }
-
     //#endregion
 }
 
@@ -909,7 +878,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
 async function processApplicationCommand(command) {
 
     if (command.commandName == `gift`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
@@ -920,12 +889,12 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `market` || command.commandName === `piac`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
     if (command.commandName === `xp` || command.commandName === `score`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
@@ -1014,32 +983,32 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `crate`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
     if (command.commandName === `heti`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
     if (command.commandName === `napi`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
     if (command.commandName === `profil` || command.commandName === `profile`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
     if (command.commandName === `backpack`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
     if (command.commandName === `bolt` || command.commandName === `shop`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 
@@ -1061,7 +1030,7 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `settings` || command.commandName === `preferences`) {
-        command.reply({content: '> \\⛔ **Ez a parancs nem használható 😕.**\n> Telefonról vagyok bejelentkezve, az adatbázis nem elérhető.', ephemeral: true})
+        command.reply({content: CommandNotAvailable, ephemeral: true})
         return
     }
 

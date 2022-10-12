@@ -136,9 +136,7 @@ class HangmanManager {
             }
         }
         return null
-    }
-
-    
+    }    
 }
 
 /**

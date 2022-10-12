@@ -170,8 +170,6 @@ const {
     getMapPoint
 } = require('./commands/game')
 
-logManager.Loading("Loading extensions", 'commands')
-const { CreateCommands, DeleteCommands } = require('./functions/commands')
 logManager.Loading("Loading extensions", 'translator')
 const { TranslateMessage } = require('./functions/translator.js')
 logManager.Loading("Loading extensions", 'statesManager')
@@ -184,12 +182,11 @@ const MusicPlayer = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
 const { WebSocket } = require('./ws/ws')
-const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
+const { GetHash } = require('./functions/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
-const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits, ModalBuilder, MessageButtonStyle, TextInputBuilder, TextInputStyle } = require('discord.js')
-const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
+const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActivityType } = require('discord.js')
 const { perfix, tokens } = require('./config.json')
 
 const { AutoReact } = require('./functions/autoReact')
@@ -215,7 +212,6 @@ const {
     CliColor
 } = require('./functions/enums.js')
 const { CommandHangman, HangmanManager } = require('./commands/hangman.js')
-const ytdl = require('ytdl-core')
 
 logManager.BlankScreen()
 
@@ -224,7 +220,7 @@ const selfId = '738030244367433770'
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
-const bot = new Discord.Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ], partials: [ Discord.Partials.Channel ]})
+const bot = new Discord.Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ], partials: [ Discord.Partials.Channel ], presence: { activities: [{ name: 'Starting up...', type: ActivityType.Custom }] } })
 logManager.Destroy()
 
 const statesManager = new StatesManager()
@@ -274,14 +270,7 @@ const hangmanManager = new HangmanManager()
 
 const mailManager = new MailManager(database)
 
-/**@type {string[]} */
-let musicArray = []
-let musicFinished = true
-
 const game = new Game()
-
-/** @type {CurrentlyWritingMail[]} */
-let currentlyWritingEmails = []
 
 //#endregion
 
@@ -293,16 +282,11 @@ let currentlyWritingEmails = []
 * @param {number} ammount
  */
 function addXp(user, channel, ammount) {
-
-    oldScore = database.dataBasic[user.id].score
+    const oldScore = database.dataBasic[user.id].score
     database.dataBasic[user.id].score += ammount
     const newScore = database.dataBasic[user.id].score
 
-    log(DEBUG + ': Add XP: ' + ammount)
-
     if (oldScore < 1000 && newScore > 999 || oldScore < 5000 && newScore > 4999 || oldScore < 10000 && newScore > 9999 || oldScore < 50000 && newScore > 49999 || oldScore < 100000 && newScore > 99999) {
-
-        log(DEBUG + ': New level')
         let rank = xpRankIcon(newScore)
         let rankName = xpRankText(newScore)
         let addMoney = 0
@@ -893,7 +877,57 @@ bot.on('interactionCreate', async interaction => {
         database.SaveUserToMemoryAll(interaction.user, interaction.member.displayName)
     }
     const privateCommand = database.dataBasic[interaction.user.id].privateCommands
-    if (interaction.isCommand()) {
+    if (interaction.isMessageContextMenuCommand()) {
+        if (interaction.commandName == 'Xp érték') {
+            const messageXpValue = calculateAddXp(interaction.targetMessage)
+            if (messageXpValue.total == 0) {
+                interaction.reply({
+                    content: '> Ez az üzenet semmi \\🍺t se ér', ephemeral: true
+                })
+            } else {
+                interaction.reply({
+                    content:
+                        '> Ez az üzenet **' + messageXpValue.total + '**\\🍺t ér:' + '\n' +
+                        '>   alap érték: ' + messageXpValue.messageBasicReward + '\\🍺' + '\n' +
+                        '>   fájl bónusz: ' + messageXpValue.messageAttachmentBonus + '\\🍺' + '\n' +
+                        '>   hossz bónusz: ' + messageXpValue.messageLengthBonus + '\\🍺' + '\n' +
+                        '>   emoji bónusz: ' + messageXpValue.messageEmojiBonus + '\\🍺' + '\n' +
+                        '>   link bónusz: ' + messageXpValue.otherBonuses + '\\🍺' + '\n' +
+                        '>   egyedi emoji bónusz: ' + messageXpValue.messageCustomEmojiBonus + '\\🍺'
+                    ,ephemeral: true
+                })
+            }
+        }
+    } else if (interaction.isUserContextMenuCommand()) {
+        if (interaction.commandName == 'Megajándékozás') {
+            try {
+                const giftableMember = interaction.targetMember
+                if (database.dataBackpacks[interaction.user.id].gifts > 0) {
+                    if (giftableMember.id === interaction.user.id) {
+                        interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
+                    } else {
+                        if (database.dataBackpacks[giftableMember.id] != undefined && giftableMember.id != selfId) {
+                            database.dataBackpacks[giftableMember.id].getGift += 1
+                            database.dataBackpacks[interaction.user.id].gifts -= 1
+                            interaction.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
+                            giftableMember.send('> **\\✨ ' + interaction.user.username + ' megajándékozott! \\🎆**')
+                            database.SaveDatabase()
+                        } else {
+                            interaction.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
+                        }
+                    }
+                } else {
+                    if (giftableMember.id === interaction.user.id) {
+                        interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true })
+                    } else {
+                        interaction.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true })
+                    }
+                }
+            } catch (error) {
+                interaction.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
+            }
+        }
+    } else if (interaction.isCommand()) {
         processApplicationCommand(interaction, privateCommand)
     } else if (interaction.isButton()) {
         if (interaction.component.customId.startsWith('redditsaveDeleteMain')) {
@@ -1437,7 +1471,7 @@ bot.on('interactionCreate', async interaction => {
         
         if (interaction.customId == 'hangmanStart') {
             if (hangmanManager.GetUserSettingsIndex(interaction.user.id) == null) {
-                interaction.reply('> **\\❌ Hiba: A beállításaid nem találhatók!**')
+                interaction.reply({ content: '> **\\❌ Hiba: A beállításaid nem találhatók!**', ephemeral: true})
                 return
             }
 
@@ -1449,7 +1483,7 @@ bot.on('interactionCreate', async interaction => {
             } else if (settings.language == 'HU') {
                 rawWordList = fs.readFileSync('./word-list/hungarian.txt', 'utf-8')
             } else {
-                interaction.reply('> **\\❌ Hiba: Ismeretlen nyelv "' + settings.language + '"!**')
+                interaction.reply({ content: '> **\\❌ Hiba: Ismeretlen nyelv "' + settings.language + '"!**', ephemeral: true})
                 return
             }
             var wordList = ['']
@@ -1458,7 +1492,7 @@ bot.on('interactionCreate', async interaction => {
             } else if (settings.language == 'HU') {
                 const wordListHU = rawWordList.split('\n')
                 for (let i = 0; i < wordListHU.length; i++) {
-                    const item = wordListHU[i];
+                    const item = wordListHU[i]
                     wordList.push(item.split(' ')[0])
                 }
             }
@@ -1797,66 +1831,12 @@ bot.on('interactionCreate', async interaction => {
             return
         }
         
-    } else if (interaction.isUserContextMenuCommand()) {
-        if (interaction.commandName == 'Megajándékozás') {
-            try {
-                const giftableMember = interaction.targetMember
-                if (database.dataBackpacks[interaction.user.id].gifts > 0) {
-                    if (giftableMember.id === interaction.user.id) {
-                        interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
-                    } else {
-                        if (database.dataBackpacks[giftableMember.id] != undefined && giftableMember.id != selfId) {
-                            database.dataBackpacks[giftableMember.id].getGift += 1
-                            database.dataBackpacks[interaction.user.id].gifts -= 1
-                            interaction.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
-                            giftableMember.send('> **\\✨ ' + interaction.user.username + ' megajándékozott! \\🎆**')
-                            database.SaveDatabase()
-                        } else {
-                            interaction.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
-                        }
-                    }
-                } else {
-                    if (giftableMember.id === interaction.user.id) {
-                        interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true })
-                    } else {
-                        interaction.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true })
-                    }
-                }
-            } catch (error) {
-                interaction.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
-            }
-        }
-    } else if (interaction.isMessageContextMenuCommand()) {
-        if (interaction.commandName == 'Xp érték') {
-            const messageXpValue = calculateAddXp(interaction.targetMessage)
-            if (messageXpValue.total == 0) {
-                interaction.reply({
-                    content: '> Ez az üzenet semmi \\🍺t se ér', ephemeral: true
-                })
-            } else {
-                interaction.reply({
-                    content:
-                        '> Ez az üzenet **' + messageXpValue.total + '**\\🍺t ér:' + '\n' +
-                        '>   alap érték: ' + messageXpValue.messageBasicReward + '\\🍺' + '\n' +
-                        '>   fájl bónusz: ' + messageXpValue.messageAttachmentBonus + '\\🍺' + '\n' +
-                        '>   hossz bónusz: ' + messageXpValue.messageLengthBonus + '\\🍺' + '\n' +
-                        '>   emoji bónusz: ' + messageXpValue.messageEmojiBonus + '\\🍺' + '\n' +
-                        '>   link bónusz: ' + messageXpValue.otherBonuses + '\\🍺' + '\n' +
-                        '>   egyedi emoji bónusz: ' + messageXpValue.messageCustomEmojiBonus + '\\🍺'
-                    ,ephemeral: true
-                })
-            }
-        }
     } else if (interaction.isModalSubmit()) {
         /** @type {Discord.ModalSubmitInteraction<Discord.CacheType>} */
         const modalInteraction = interaction
         
     }
 })
-
-
-
-
 bot.on('clickMenu', async (button) => {
     try {
         if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
@@ -1975,8 +1955,9 @@ bot.once('ready', async () => {
     const lastDay = database.dataBot.day
 
     try {
-        //DeleteCommands(bot)
-        //CreateCommands(bot, statesManager)
+        const { CreateCommands, DeleteCommands } = require('./functions/commands')
+        // DeleteCommands(bot)
+        // CreateCommands(bot, statesManager)
     } catch (error) {
         console.error(error)
     }
@@ -2027,7 +2008,9 @@ bot.once('ready', async () => {
     database.dataBot.day = dayOfYear
 })
 
-bot.on('messageCreate', async message => {
+bot.on('messageCreate', async msg => {
+    const message = await msg.fetch()
+
     const thisIsPrivateMessage = (message.channel.type === Discord.ChannelType.DM)
 
     if (message.author.bot == true && thisIsPrivateMessage == false) { return }
@@ -2087,13 +2070,11 @@ bot.on('messageCreate', async message => {
     
     //#endregion
 
-    message.fetch().then(async (msg) => {
-        if (msg.content.startsWith('https://www.reddit.com/r/')) {
-            CommandRedditsave(msg)
-        }
+    if (message.content.startsWith('https://www.reddit.com/r/')) {
+        CommandRedditsave(message)
+    }
 
-        await newsManager.TryProcessMessage(msg)
-    })
+    await newsManager.TryProcessMessage(message)
 
     if (thisIsPrivateMessage) {
         database.SaveUserToMemoryAll(sender, sender.username)
@@ -2126,24 +2107,6 @@ bot.on('messageCreate', async message => {
         }
     }
 })
-bot.on('messageReactionRemove', (reaction, user) => {
-    if (user.bot) return
-
-    if (!database.dataUsernames[user.id]) {
-        database.dataUsernames[user.id] = {}
-        database.dataUsernames[user.id].username = user.username
-    }
-    database.dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
-})
-bot.on('messageReactionAdd', (reaction, user) => {
-    if (user.bot) return
-
-    if (!database.dataUsernames[user.id]) {
-        database.dataUsernames[user.id] = {}
-        database.dataUsernames[user.id].username = user.username
-    }
-    database.dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
-})
 
 /**
  * @param {Discord.Message} message
@@ -2151,8 +2114,8 @@ bot.on('messageReactionAdd', (reaction, user) => {
  * @param {Discord.User} sender
  * @param {string} command
  */
-function processCommand(message, thisIsPrivateMessage, sender, command) {
-
+async function processCommand(message, thisIsPrivateMessage, sender, command) {
+    
     //#region Enabled in dm
 
     if (command === `pms`) {
@@ -2257,13 +2220,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command) {
     //#endregion
 
     //#region Disabled in dm
-
-    if (command.startsWith(`pms name `)) {
-        message.channel.send('> \\⛔ **Ez a parancs átmenetileg nem elérhető!**')
-        //commandPmsName(message.channel, sender, command.replace(`pms name `, ''))
-        database.UserstatsSendCommand(sender)
-        return
-    }
 
     if (command.startsWith(`quiz\n`)) {
         const msgArgs = command.toString().replace(`quiz\n`, '').split('\n')

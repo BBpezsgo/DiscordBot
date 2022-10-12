@@ -1,3 +1,4 @@
+const { ActivityType, ActivityOptions } = require('discord.js')
 
 const ChannelId = {
     Quiz: "799340273431478303",
@@ -61,17 +62,19 @@ const ColorRoles = {
     invisible: "850016786186371122"
 }
 
+/** @type {ActivityOptions[]} */
 const activitiesDesktop = [
-    { name: 'Nothing 2', type: 'PLAYING' },
-    { name: 'Microsoft Visual Studio', type: 'PLAYING' },
-    { name: 'Unity', type: 'PLAYING' },
+    { name: 'Nothing 2', type: ActivityType.Playing },
+    { name: 'Visual Studio', type: ActivityType.Playing },
+    { name: 'Unity', type: ActivityType.Playing },
 ]
 
+/** @type {ActivityOptions[]} */
 const activitiesMobile = [
-    { name: 'Photon PUN documentation', type: 3, browser: "DISCORD IOS" },
-    { name: 'Discord Devolper Portal', type: 3, browser: "DISCORD IOS" },
-    { name: 'Node.js documentation', type: 3, browser: "DISCORD IOS" },
-    { name: 'Unity tutorials', type: 3, browser: "DISCORD IOS" },
+    { name: 'Photon PUN documentation', type: ActivityType.Watching, browser: "DISCORD IOS" },
+    { name: 'Discord Guide', type: ActivityType.Watching, browser: "DISCORD IOS" },
+    { name: 'Node.js documentation', type: ActivityType.Watching, browser: "DISCORD IOS" },
+    { name: 'Unity tutorials', type: ActivityType.Watching, browser: "DISCORD IOS" },
 ]
 
 const usersWithTax = [
