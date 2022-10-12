@@ -66,4 +66,13 @@
     }
 </script>
 
+<script>
+    setInterval(() => {
+        var xmlHttp = new XMLHttpRequest()
+        xmlHttp.open("GET", '/title', false)
+        xmlHttp.send(null)
+        document.title = xmlHttp.responseText
+    }, 1000)
+</script>
+
 </html>

@@ -949,20 +949,33 @@ class WebSocket {
             const view = req.query.view
 
             if (view == 'default' || view == null || view == undefined) {
-                var icon = ''
-
-                if (this.ClientType == 'DESKTOP') {
-                    icon = '🖥️'
-                } else if (this.ClientType == 'MOBILE') {
-                    icon = '📱'
-                } else if (this.ClientType == 'RASPBERRY') {
-                    icon = '🍓'
-                }
-
-                res.render('defaultNew', { title: 'Discord BOT - ' + icon })
+                res.render('defaultNew', { title: GetTitle() })
             } else {
                 res.status(404).send("Not found")
             }
+        })
+
+        const GetTitle = () => {
+            var icon = ''
+
+            if (this.ClientType == 'DESKTOP') {
+                icon = '🖥️'
+            } else if (this.ClientType == 'MOBILE') {
+                icon = '📱'
+            } else if (this.ClientType == 'RASPBERRY') {
+                icon = '🍓'
+            }
+
+            var statusIcon = ' - ❌'
+            if (this.client.ws.shards.first().status == 0) {
+                statusIcon = ''
+            }
+
+            return 'Discord BOT' + statusIcon + ' - ' + icon
+        }
+
+        this.app.get('/title', (req, res) => {
+            res.status(200).send(GetTitle())
         })
 
         this.app.get('/json/status', (req, res) => {
