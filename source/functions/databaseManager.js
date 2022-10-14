@@ -149,139 +149,139 @@ class DatabaseManager {
 
     SaveDatabase() {
         if (IsAnything(this.dataBackpacks)) {
-            this.statesManager.databaseSaveText = 'backpacks'
+            this.statesManager.Database.SaveText = 'backpacks'
             fs.writeFile(this.databaseFolderPath + 'backpacks.json', JSON.stringify(this.dataBackpacks), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataBasic)) {
-            this.statesManager.databaseSaveText = 'basic'
+            this.statesManager.Database.SaveText = 'basic'
             fs.writeFile(this.databaseFolderPath + 'basic.json', JSON.stringify(this.dataBasic), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataStickers)) {
-            this.statesManager.databaseSaveText = 'stickers'
+            this.statesManager.Database.SaveText = 'stickers'
             fs.writeFile(this.databaseFolderPath + 'stickers.json', JSON.stringify(this.dataStickers), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataUsernames)) {
-            this.statesManager.databaseSaveText = 'userNames'
+            this.statesManager.Database.SaveText = 'userNames'
             fs.writeFile(this.databaseFolderPath + 'userNames.json', JSON.stringify(this.dataUsernames), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataMail)) {
-            this.statesManager.databaseSaveText = 'mails'
+            this.statesManager.Database.SaveText = 'mails'
             fs.writeFile(this.databaseFolderPath + 'mails.json', JSON.stringify(this.dataMail), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataPolls)) {
-            this.statesManager.databaseSaveText = 'polls'
+            this.statesManager.Database.SaveText = 'polls'
             fs.writeFile(this.databaseFolderPath + 'polls.json', JSON.stringify(this.dataPolls), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataUserstats)) {
-            this.statesManager.databaseSaveText = 'userstats'
+            this.statesManager.Database.SaveText = 'userstats'
             fs.writeFile(this.databaseFolderPath + 'userstats.json', JSON.stringify(this.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataBusinesses)) {
-            this.statesManager.databaseSaveText = 'businesses'
+            this.statesManager.Database.SaveText = 'businesses'
             fs.writeFile(this.databaseFolderPath + 'businesses.json', JSON.stringify(this.dataBusinesses), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataBot)) {
-            this.statesManager.databaseSaveText = 'bot'
+            this.statesManager.Database.SaveText = 'bot'
             fs.writeFile(this.databaseFolderPath + 'bot.json', JSON.stringify(this.dataBot), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
         if (IsAnything(this.dataMarket)) {
-            this.statesManager.databaseSaveText = 'market'
+            this.statesManager.Database.SaveText = 'market'
             fs.writeFile(this.databaseFolderPath + 'market.json', JSON.stringify(this.dataMarket), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        this.statesManager.databaseSaveText = ''
+        this.statesManager.Database.SaveText = ''
     }
 
     LoadDatabase() {
         var success = true
 
-        this.statesManager.databaseLoadText = 'backpacks'
+        this.statesManager.Database.LoadText = 'backpacks'
         const rawJsonBackpacks = fs.readFileSync(this.databaseFolderPath + 'backpacks.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'basic'
+        this.statesManager.Database.LoadText = 'basic'
         const rawJsonBasic = fs.readFileSync(this.databaseFolderPath + 'basic.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'stickers'
+        this.statesManager.Database.LoadText = 'stickers'
         const rawJsonStickers = fs.readFileSync(this.databaseFolderPath + 'stickers.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'bot'
+        this.statesManager.Database.LoadText = 'bot'
         const rawJsonBot = fs.readFileSync(this.databaseFolderPath + 'bot.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'market'
+        this.statesManager.Database.LoadText = 'market'
         const rawJsonMarket = fs.readFileSync(this.databaseFolderPath + 'market.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'userNames'
+        this.statesManager.Database.LoadText = 'userNames'
         const rawJsonUsernames = fs.readFileSync(this.databaseFolderPath + 'userNames.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'mails'
+        this.statesManager.Database.LoadText = 'mails'
         const rawJsonMail = fs.readFileSync(this.databaseFolderPath + 'mails.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'polls'
+        this.statesManager.Database.LoadText = 'polls'
         const rawJsonPolls = fs.readFileSync(this.databaseFolderPath + 'polls.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'userstats'
+        this.statesManager.Database.LoadText = 'userstats'
         const rawJsonUserstats = fs.readFileSync(this.databaseFolderPath + 'userstats.json', 'utf-8')
-        this.statesManager.databaseLoadText = 'businesses'
+        this.statesManager.Database.LoadText = 'businesses'
         const rawJsonBusinesses = fs.readFileSync(this.databaseFolderPath + 'businesses.json', 'utf-8')
-        this.statesManager.databaseLoadText = ''
+        this.statesManager.Database.LoadText = ''
 
-        this.statesManager.databaseParsingText = 'backpacks'
+        this.statesManager.Database.ParsingText = 'backpacks'
         if (rawJsonBackpacks != undefined && rawJsonBackpacks != null && rawJsonBackpacks != '') {
             this.dataBackpacks = JSON.parse(rawJsonBackpacks)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'basic'
+        this.statesManager.Database.ParsingText = 'basic'
         if (rawJsonBasic != undefined && rawJsonBasic != null && rawJsonBasic != '') {
             this.dataBasic = JSON.parse(rawJsonBasic)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'stickers'
+        this.statesManager.Database.ParsingText = 'stickers'
         if (rawJsonStickers != undefined && rawJsonStickers != null && rawJsonStickers != '') {
             this.dataStickers = JSON.parse(rawJsonStickers)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'bot'
+        this.statesManager.Database.ParsingText = 'bot'
         if (rawJsonBot != undefined && rawJsonBot != null && rawJsonBot != '') {
             this.dataBot = JSON.parse(rawJsonBot)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'market'
+        this.statesManager.Database.ParsingText = 'market'
         if (rawJsonMarket != undefined && rawJsonMarket != null && rawJsonMarket != '') {
             this.dataMarket = JSON.parse(rawJsonMarket)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'userNames'
+        this.statesManager.Database.ParsingText = 'userNames'
         if (rawJsonUsernames != undefined && rawJsonUsernames != null && rawJsonUsernames != '') {
             this.dataUsernames = JSON.parse(rawJsonUsernames)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'mails'
+        this.statesManager.Database.ParsingText = 'mails'
         if (rawJsonMail != undefined && rawJsonMail != null && rawJsonMail != '') {
             this.dataMail = JSON.parse(rawJsonMail)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'polls'
+        this.statesManager.Database.ParsingText = 'polls'
         if (rawJsonPolls != undefined && rawJsonPolls != null && rawJsonPolls != '') {
             this.dataPolls = JSON.parse(rawJsonPolls)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'userstats'
+        this.statesManager.Database.ParsingText = 'userstats'
         if (rawJsonUserstats != undefined && rawJsonUserstats != null && rawJsonUserstats != '') {
             this.dataUserstats = JSON.parse(rawJsonUserstats)
         } else { success = false }
-        this.statesManager.databaseParsingText = 'businesses'
+        this.statesManager.Database.ParsingText = 'businesses'
         if (rawJsonBusinesses != undefined && rawJsonBusinesses != null && rawJsonBusinesses != '') {
             this.dataBusinesses = JSON.parse(rawJsonBusinesses)
         } else { success = false }
-        this.statesManager.databaseParsingText = ''
+        this.statesManager.Database.ParsingText = ''
         return success
     }
 
     BackupDatabase() {
-        this.statesManager.databaseBackupText = 'backpacks'
+        this.statesManager.Database.BackupText = 'backpacks'
         fs.copyFileSync(this.backupFolderPath + 'backpacks.json', this.databaseFolderPath + 'backpacks.json', )
-        this.statesManager.databaseBackupText = 'basic'
+        this.statesManager.Database.BackupText = 'basic'
         fs.copyFileSync(this.backupFolderPath + 'basic.json', this.databaseFolderPath + 'basic.json', )
-        this.statesManager.databaseBackupText = 'stickers'
+        this.statesManager.Database.BackupText = 'stickers'
         fs.copyFileSync(this.backupFolderPath + 'stickers.json', this.databaseFolderPath + 'stickers.json', )
-        this.statesManager.databaseBackupText = 'bot'
+        this.statesManager.Database.BackupText = 'bot'
         fs.copyFileSync(this.backupFolderPath + 'bot.json', this.databaseFolderPath + 'bot.json', )
-        this.statesManager.databaseBackupText = 'market'
+        this.statesManager.Database.BackupText = 'market'
         fs.copyFileSync(this.backupFolderPath + 'market.json', this.databaseFolderPath + 'market.json', )
-        this.statesManager.databaseBackupText = 'userNames'
+        this.statesManager.Database.BackupText = 'userNames'
         fs.copyFileSync(this.backupFolderPath + 'userNames.json', this.databaseFolderPath + 'userNames.json', )
-        this.statesManager.databaseBackupText = 'mails'
+        this.statesManager.Database.BackupText = 'mails'
         fs.copyFileSync(this.backupFolderPath + 'mails.json', this.databaseFolderPath + 'mails.json', )
-        this.statesManager.databaseBackupText = 'polls'
+        this.statesManager.Database.BackupText = 'polls'
         fs.copyFileSync(this.backupFolderPath + 'polls.json', this.databaseFolderPath + 'polls.json', )
-        this.statesManager.databaseBackupText = 'userstats'
+        this.statesManager.Database.BackupText = 'userstats'
         fs.copyFileSync(this.backupFolderPath + 'userstats.json', this.databaseFolderPath + 'userstats.json', )
-        this.statesManager.databaseBackupText = 'businesses'
+        this.statesManager.Database.BackupText = 'businesses'
         fs.copyFileSync(this.backupFolderPath + 'businesses.json', this.databaseFolderPath + 'businesses.json', )
-        this.statesManager.databaseBackupText = ''
+        this.statesManager.Database.BackupText = ''
     }
 
     /** @param {Discord.User} user */

@@ -279,26 +279,26 @@ class NewsManager {
         }
 
         if (this.enableLogs) SystemLog('[NEWS]: Fetch news channel...')
-        this.statesManager.newsLoadingText = 'Fetch news channel...'
+        this.statesManager.News.LoadingText = 'Fetch news channel...'
         client.channels.fetch(NewsIncomingChannel, { force: true })
             .then((c) => {
                 /** @type {Discord.GuildTextBasedChannel | null} */
                 const channel = c
                 if (this.enableLogs) SystemLog('[NEWS]: Fetch news messages...')
-                this.statesManager.newsLoadingText = 'Fetch news messages...'
+                this.statesManager.News.LoadingText = 'Fetch news messages...'
                 channel.messages.fetch()
                     .then((messages) => {
                         /** @type {Discord.Message<true>[]} */
                         const listOfMessage = []
             
                         if (this.enableLogs) SystemLog(`[NEWS]: Looping messages... (${messages.size})`)
-                        this.statesManager.newsLoadingText = 'Looping messages...'
+                        this.statesManager.News.LoadingText = 'Looping messages...'
                         messages.forEach((message) => {
                             listOfMessage.push(message)
                         })
             
                         if (this.enableLogs) SystemLog(`[NEWS]: Processing messages... (${listOfMessage.length})`)
-                        this.statesManager.newsLoadingText = 'Processing messages...'
+                        this.statesManager.News.LoadingText = 'Processing messages...'
                         listOfMessage.reverse()
                         listOfMessage.forEach(message => {
                             this.ProcessMessage(message)
@@ -326,7 +326,7 @@ class NewsManager {
             const newsMessage = this.listOfNews.shift()
             if (newsMessage == null || newsMessage == undefined) { return }
             const embed = newsMessage.embed
-            this.statesManager.newsLoadingText2 = 'Send new message...'
+            this.statesManager.News.LoadingText2 = 'Send new message...'
 
             if (this.enableLogs) SystemLog(`[NEWS]: Send copy of news message...`)
             /** @type {Discord.GuildTextBasedChannel | null} */
@@ -345,16 +345,16 @@ class NewsManager {
                             .then(() => {
                                 if (DeleteRawNewsMessages) {
                                     if (this.enableLogs) SystemLog(`[NEWS]: Delete raw message...`)
-                                    this.statesManager.newsLoadingText2 = 'Delete raw message...'
+                                    this.statesManager.News.LoadingText2 = 'Delete raw message...'
                                     newsMessage.message.delete()
                                         .catch((error) => {
                                             if (this.enableLogs) SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
                                         })
                                         .finally(() => {
-                                            this.statesManager.newsLoadingText2 = ''
+                                            this.statesManager.News.LoadingText2 = ''
                                         })                                    
                                 } else {
-                                    this.statesManager.newsLoadingText2 = ''
+                                    this.statesManager.News.LoadingText2 = ''
                                 }
                             })
                             .catch((error) => {                    
@@ -365,16 +365,16 @@ class NewsManager {
                             .then(() => {
                                 if (DeleteRawNewsMessages) {
                                     if (this.enableLogs) SystemLog(`[NEWS]: Delete raw message...`)
-                                    this.statesManager.newsLoadingText2 = 'Delete raw message...'
+                                    this.statesManager.News.LoadingText2 = 'Delete raw message...'
                                     newsMessage.message.delete()
                                         .catch((error) => {
                                             if (this.enableLogs) SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
                                         })
                                         .finally(() => {
-                                            this.statesManager.newsLoadingText2 = ''
+                                            this.statesManager.News.LoadingText2 = ''
                                         })
                                 } else {
-                                    this.statesManager.newsLoadingText2 = ''
+                                    this.statesManager.News.LoadingText2 = ''
                                 }
                             })
                             .catch((error) => {                    
@@ -387,19 +387,19 @@ class NewsManager {
                 })
             }
             this.lastNoNews = false
-            this.statesManager.allNewsProcessed = false
+            this.statesManager.News.AllProcessed = false
         } else if (this.lastNoNews == false) {
-            this.statesManager.newsLoadingText = ''
-            this.statesManager.newsLoadingText2 = ''
+            this.statesManager.News.LoadingText = ''
+            this.statesManager.News.LoadingText2 = ''
             this.lastNoNews = true
-            this.statesManager.allNewsProcessed = true
+            this.statesManager.News.AllProcessed = true
             if (this.enableLogs) SystemLog(`[NEWS]: All news processed!`)
         }
     }
 
     /** @param {Discord.Message} message */
     async ProcessMessage(message) {
-        this.statesManager.allNewsProcessed = false
+        this.statesManager.News.AllProcessed = false
         this.listOfNews.push(await CreateNews(message))
     }
     

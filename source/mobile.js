@@ -295,8 +295,8 @@ bot.on('invalidated', () => {
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
     log(ERROR + ': Lecsatlakozva')
-    statesManager.shardCurrentlyLoading = true
-    statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
+    statesManager.Shard.IsLoading = true
+    statesManager.Shard.LoadingText = 'Lecsatlakozva'
 })
 
 bot.on('shardReady', (shardID) => {
@@ -309,17 +309,17 @@ bot.on('shardReady', (shardID) => {
             channel.messages.fetch()
         })
     }
-    statesManager.shardCurrentlyLoading = false
+    statesManager.Shard.IsLoading = false
 })
 
 bot.on('shardReconnecting', (shardID) => {
-    statesManager.shardCurrentlyLoading = true
-    statesManager.shardCurrentlyLoadingText = 'Újracsatlakozás...'
+    statesManager.Shard.IsLoading = true
+    statesManager.Shard.LoadingText = 'Újracsatlakozás...'
 })
 
 bot.on('shardResume', (shardID, replayedEvents) => {
     log(SHARD & ': Folytatás: ' + replayedEvents.toString())
-    statesManager.shardCurrentlyLoading = false
+    statesManager.Shard.IsLoading = false
 })
 
 bot.on('raw', async event => {
@@ -427,9 +427,9 @@ async function playAudio(command) {
             }
         })
         .on("error", (error) => { log(ERROR + ': ' + error, 24) })
-        .on("start", () => { statesManager.ytdlCurrentlyPlaying = true; log('') })
+        .on("start", () => { statesManager.Ytdl.IsPlaying = true; log('') })
         .on("debug", (message) => { log(DEBUG + ': ytdl: ' + message) })
-        .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') })
+        .on("close", () => { statesManager.Ytdl.IsPlaying = false; log('') })
     */
 
     const embed = new Discord.EmbedBuilder()
@@ -447,8 +447,8 @@ async function playAudio(command) {
     } else {
         command.reply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
     }
-    statesManager.ytdlCurrentlyPlayingText = info.videoDetails.title
-    statesManager.ytdlCurrentlyPlayingUrl = link
+    statesManager.Ytdl.PlayingText = info.videoDetails.title
+    statesManager.Ytdl.PlayingUrl = link
     return true
 }
 
@@ -473,13 +473,13 @@ async function commandMusic(command, link) {
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
 async function commandMusicList(command) {
-    if (musicArray.length === 0 && statesManager.ytdlCurrentlyPlaying === false) {
+    if (musicArray.length === 0 && statesManager.Ytdl.IsPlaying === false) {
         command.reply({ content: '> **\\➖ A lejátszólista üres \\🎧**' })
     } else {
         const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: command.member.displayName, iconURL: command.member.avatarURL() })
         embed.setColor(Color.Purple)
-        await ytdl.getBasicInfo(statesManager.ytdlCurrentlyPlayingUrl).then(info => {
+        await ytdl.getBasicInfo(statesManager.Ytdl.PlayingUrl).then(info => {
             embed.addFields([{
                 name: '\\🎧 Most hallható: ' + info.videoDetails.title,
                 value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds),

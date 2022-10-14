@@ -407,8 +407,8 @@ bot.on('invalidated', () => {
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
     log(SHARD + ': Lecsatlakozva')
-    statesManager.shardCurrentlyLoading = true
-    statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
+    statesManager.Shard.IsLoading = true
+    statesManager.Shard.LoadingText = 'Lecsatlakozva'
 })
 
 bot.on('shardReady', (shardID) => {
@@ -421,17 +421,17 @@ bot.on('shardReady', (shardID) => {
             channel.messages.fetch()
         })
     }
-    statesManager.shardCurrentlyLoading = false
+    statesManager.Shard.IsLoading = false
 })
 
 bot.on('shardReconnecting', (shardID) => {
-    statesManager.shardCurrentlyLoading = true
-    statesManager.shardCurrentlyLoadingText = 'Újracsatlakozás...'
+    statesManager.Shard.IsLoading = true
+    statesManager.Shard.LoadingText = 'Újracsatlakozás...'
 })
 
 bot.on('shardResume', (shardID, replayedEvents) => {
     log(SHARD & ': Folytatás: ' + replayedEvents.toString())
-    statesManager.shardCurrentlyLoading = false
+    statesManager.Shard.IsLoading = false
 })
 
 bot.on('raw', async event => {
@@ -1946,7 +1946,8 @@ bot.on('clickMenu', async (button) => {
 
 bot.once('ready', async () => {
     SystemLog('Bot is ready')
-    statesManager.botLoadingState = 'Ready'
+    statesManager.botLoadingState = 'Ready'    
+    logManager.AddTimeline(TimeLine.Primary)
 
     const { Taxation } = require('./functions/tax')
     const { MarketOnStart } = require('./functions/market')
@@ -1968,12 +1969,8 @@ bot.once('ready', async () => {
     }, 10000)
 
     TrySendWeatherReport(statesManager, bot, ChannelId.ProcessedNews)
-    
-    logManager.AddTimeline(TimeLine.Primary)
 
     MarketOnStart(database)
-
-    log(DONE + ': A BOT kész!')
 
     Taxation(database, lastDay)
 
@@ -2654,11 +2651,7 @@ async function processApplicationCommand(command, privateCommand) {
 function StartBot() {
     SystemLog('Start bot...')
     bot.login(tokens.discord).catch((err) => {
-        if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
-            log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
-        } else {
-            log(ERROR + ': ' + err)
-        }
+        log(ERROR + ': ' + err)
     })
 }
 

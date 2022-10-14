@@ -284,8 +284,8 @@ function CreateCommands(bot, statesManager) {
     const globalCommands = GenerateGlobalCommands()
 
     try {
-        statesManager.commandAllCommandCount = guildCommands.length + globalCommands
-        statesManager.commandCreatedCount = 0
+        statesManager.Commands.All = guildCommands.length + globalCommands
+        statesManager.Commands.Created = 0
 
         bot.application.commands.create()
         const commandsGuild = bot.guilds.cache.get('737954264386764812').commands
@@ -294,14 +294,14 @@ function CreateCommands(bot, statesManager) {
         for (let i = 0; i < guildCommands.length; i++) {
             const command = guildCommands[i];
             commandsGuild?.create(command).finally(() => {
-               statesManager.commandCreatedCount += 1
+               statesManager.Commands.Created += 1
             })
         }
 
         for (let i = 0; i < globalCommands.length; i++) {
             const command = globalCommands[i];
             commandsGlobal?.create(command).finally(() => {
-               statesManager.commandCreatedCount += 1
+               statesManager.Commands.Created += 1
             })
         }
     } catch (error) {
@@ -339,19 +339,19 @@ async function DeleteCommands(bot) {
 */
 function DeleteCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
     try {
-        statesManager.commandDeletedCount = 0
+        statesManager.Commands.Deleted = 0
 
         const guildCommands = bot.guilds.cache.get('737954264386764812').commands
         const appCommands = bot.application?.commands
         guildCommands.fetch().then(() => {
             appCommands.fetch().then(() => {    
-                statesManager.commandAllCommandCount = guildCommands.cache.size + appCommands.cache.size
+                statesManager.Commands.All = guildCommands.cache.size + appCommands.cache.size
 
                 guildCommands.cache.forEach(async (val, key) => {
                     guildCommands.delete(val).finally(() => {
-                        statesManager.commandDeletedCount += 1
-                        StepCallback(statesManager.commandDeletedCount / statesManager.commandAllCommandCount)
-                        if (statesManager.commandDeletedCount == statesManager.commandAllCommandCount) {
+                        statesManager.Commands.Deleted += 1
+                        StepCallback(statesManager.Commands.Deleted / statesManager.Commands.All)
+                        if (statesManager.Commands.Deleted == statesManager.Commands.All) {
                              FinishCallback()
                         }
                     })
@@ -360,9 +360,9 @@ function DeleteCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
 
                 appCommands.cache.forEach(async (val, key) => {
                     appCommands.delete(val).finally(() => {
-                        statesManager.commandDeletedCount += 1
-                        StepCallback(statesManager.commandDeletedCount / statesManager.commandAllCommandCount)
-                        if (statesManager.commandDeletedCount == statesManager.commandAllCommandCount) {
+                        statesManager.Commands.Deleted += 1
+                        StepCallback(statesManager.Commands.Deleted / statesManager.Commands.All)
+                        if (statesManager.Commands.Deleted == statesManager.Commands.All) {
                              FinishCallback()
                         }
                     })
@@ -386,8 +386,8 @@ function CreateCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
     const globalCommands = GenerateGlobalCommands()
 
     try {
-        statesManager.commandAllCommandCount = guildCommands.length + globalCommands.length
-        statesManager.commandCreatedCount = 0
+        statesManager.Commands.All = guildCommands.length + globalCommands.length
+        statesManager.Commands.Created = 0
 
         const commandsGuild = bot.guilds.cache.get('737954264386764812').commands
         const commandsGlobal = bot.application.commands
@@ -395,10 +395,10 @@ function CreateCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
         for (let i = 0; i < guildCommands.length; i++) {
             const command = guildCommands[i];
             commandsGuild?.create(command).finally(() => {
-                //console.log('create bot command ' + Math.round(statesManager.commandCreatedCount / statesManager.commandAllCommandCount * 100) + '%')
-                statesManager.commandCreatedCount += 1
-                StepCallback(statesManager.commandCreatedCount / statesManager.commandAllCommandCount)
-                if (statesManager.commandCreatedCount == statesManager.commandAllCommandCount) {
+                //console.log('create bot command ' + Math.round(statesManager.Commands.Created / statesManager.Commands.All * 100) + '%')
+                statesManager.Commands.Created += 1
+                StepCallback(statesManager.Commands.Created / statesManager.Commands.All)
+                if (statesManager.Commands.Created == statesManager.Commands.All) {
                     FinishCallback()
                 }
             })
@@ -407,10 +407,10 @@ function CreateCommandsSync(bot, statesManager, StepCallback, FinishCallback) {
         for (let i = 0; i < globalCommands.length; i++) {
             const command = globalCommands[i];
             commandsGlobal?.create(command).finally(() => {
-                //console.log('create global command ' + Math.round(statesManager.commandCreatedCount / statesManager.commandAllCommandCount * 100) + '%')
-                statesManager.commandCreatedCount += 1
-                StepCallback(statesManager.commandCreatedCount / statesManager.commandAllCommandCount)
-                if (statesManager.commandCreatedCount == statesManager.commandAllCommandCount) {
+                //console.log('create global command ' + Math.round(statesManager.Commands.Created / statesManager.Commands.All * 100) + '%')
+                statesManager.Commands.Created += 1
+                StepCallback(statesManager.Commands.Created / statesManager.Commands.All)
+                if (statesManager.Commands.Created == statesManager.Commands.All) {
                     FinishCallback()
                 }
             })

@@ -33,13 +33,17 @@ const { Color } = require('../functions/enums')
  * @param {any} weatherData
  * @returns {Discord.EmbedBuilder}
  */
-function getEmbedEarth(weatherData) {
+function GetEmbed(weatherData) {
     const embed = new Discord.EmbedBuilder()
         .setColor(Color.Highlight)
         .setAuthor({ name: weatherData.city.name, url: 'https://openweathermap.org/city/' + weatherData.city.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
     embed
         .setTitle(`Napi időjárás jelentés`)
+        .setDescription(
+            `\\🌇 Napkelte: <t:${weatherData.city.sunrise}:R>` + '\n' +
+            `\\🌆 Napnyugta: <t:${weatherData.city.sunset}:R>`
+            )
 
     for (let i = 0; i < 5; i++) {
         const currentWeatherItem = weatherData.list[i]
@@ -78,8 +82,8 @@ function getEmbedEarth(weatherData) {
 }
 
 /** @param {Discord.TextChannel} channel @param {StatesManager} statesManager */
-module.exports = async (channel, statesManager) => {
-    statesManager.dailyWeatherReportLoadingText = 'Send loading message...'
+module.exports = async (channel, statesManager, isTest = false) => {
+    statesManager.WeatherReport.Text = 'Send loading message...'
 
     const loadingEmbed = new Discord.EmbedBuilder()
         .setColor(Color.Highlight)
@@ -90,21 +94,21 @@ module.exports = async (channel, statesManager) => {
 
     const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=46.678889&lon=21.090833&appid=' + tokens.openweathermap + '&cnt=24&units=metric'
 
-    statesManager.dailyWeatherReportLoadingText = 'Get weather data...'
+    statesManager.WeatherReport.Text = 'Get weather data...'
     request(url, async function (err, res, body) {
         if (err) {
-            statesManager.dailyWeatherReportLoadingText = 'Get weather is fault!'
+            statesManager.WeatherReport.Text = 'Get weather is fault!'
             await loadingMessage.edit({ content: '> \\❌ **OpenWeatherMap Error:** ' + err.toString })
         } else {
-            statesManager.dailyWeatherReportLoadingText = 'Parse weather data...'
+            statesManager.WeatherReport.Text = 'Parse weather data...'
             const weather = JSON.parse(body) // JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/forecast.json'))
-            const embed = getEmbedEarth(weather)
+            const embed = GetEmbed(weather)
 
-            statesManager.dailyWeatherReportLoadingText = 'Delete loading message...'
+            statesManager.WeatherReport.Text = 'Delete loading message...'
             await loadingMessage.delete()
-            statesManager.dailyWeatherReportLoadingText = 'Send report message...'
+            statesManager.WeatherReport.Text = 'Send report message...'
             await channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
-            statesManager.dailyWeatherReportLoadingText = ''
+            statesManager.WeatherReport.Text = ''
         }
     })
 }

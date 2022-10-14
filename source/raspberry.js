@@ -323,25 +323,25 @@ bot.on('invalidated', () => {
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
     log(ERROR + ': Lecsatlakozva')
-    statesManager.shardCurrentlyLoading = true
-    statesManager.shardCurrentlyLoadingText = 'Lecsatlakozva'
+    statesManager.Shard.IsLoading = true
+    statesManager.Shard.LoadingText = 'Lecsatlakozva'
 })
 
 bot.on('shardReady', (shardID) => {
     const mainGuild = bot.guilds.cache.get('737954264386764812')
     const quizChannel = mainGuild.channels.cache.get('799340273431478303')
     quizChannel.messages.fetch()
-    statesManager.shardCurrentlyLoading = false
+    statesManager.Shard.IsLoading = false
 })
 
 bot.on('shardReconnecting', (shardID) => {
-    statesManager.shardCurrentlyLoading = true
-    statesManager.shardCurrentlyLoadingText = 'Újracsatlakozás...'
+    statesManager.Shard.IsLoading = true
+    statesManager.Shard.LoadingText = 'Újracsatlakozás...'
 })
 
 bot.on('shardResume', (shardID, replayedEvents) => {
     log(SHARD & ': Folytatás: ' + replayedEvents.toString())
-    statesManager.shardCurrentlyLoading = false
+    statesManager.Shard.IsLoading = false
 })
 
 bot.on('raw', async event => {
@@ -414,9 +414,9 @@ async function playAudio(command) {
             }
         })
         .on("error", (error) => { log(ERROR + ': ' + error, 24) })
-        .on("start", () => { statesManager.ytdlCurrentlyPlaying = true; log('') })
+        .on("start", () => { statesManager.Ytdl.IsPlaying = true; log('') })
         .on("debug", (message) => { log(DEBUG + ': ytdl: ' + message) })
-        .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') })
+        .on("close", () => { statesManager.Ytdl.IsPlaying = false; log('') })
     */
 
     const embed = new Discord.EmbedBuilder()
@@ -434,8 +434,8 @@ async function playAudio(command) {
     } else {
         command.reply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
     }
-    statesManager.ytdlCurrentlyPlayingText = info.videoDetails.title
-    statesManager.ytdlCurrentlyPlayingUrl = link
+    statesManager.Ytdl.PlayingText = info.videoDetails.title
+    statesManager.Ytdl.PlayingUrl = link
     return true
 }
 
@@ -460,13 +460,13 @@ async function commandMusic(command, link) {
 
 /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
 async function commandMusicList(command) {
-    if (musicArray.length === 0 && statesManager.ytdlCurrentlyPlaying === false) {
+    if (musicArray.length === 0 && statesManager.Ytdl.IsPlaying === false) {
         command.reply({ content: '> **\\➖ A lejátszólista üres \\🎧**' })
     } else {
         const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: command.member.displayName, iconURL: command.member.avatarURL() })
         embed.setColor(Color.Purple)
-        await ytdl.getBasicInfo(statesManager.ytdlCurrentlyPlayingUrl).then(info => {
+        await ytdl.getBasicInfo(statesManager.Ytdl.PlayingUrl).then(info => {
             embed.addFields([{ name: '\\🎧 Most hallható: ' + info.videoDetails.title, value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), inline: false}])
         })
         musicArray.forEach(async (_link) => {
@@ -710,20 +710,20 @@ bot.on('clickMenu', async (menu) => {
 async function GetOldDailyWeatherReport(channelId) {
     /** @type {Discord.TextChannel} */
     const channel = bot.channels.cache.get(channelId)
-    statesManager.dailyWeatherReportLoadingText = 'Fetch old messages...'
+    statesManager.WeatherReport.Text = 'Fetch old messages...'
     await channel.messages.fetch({ limit: 10 })
-    statesManager.dailyWeatherReportLoadingText = 'Loop messages...'
+    statesManager.WeatherReport.Text = 'Loop messages...'
     for (let i = 0; i < channel.messages.cache.size; i++) {
         const element = channel.messages.cache.at(i)
         if (element.embeds.length == 1) {
             if (element.embeds[0].title == 'Napi időjárás jelentés') {
-                statesManager.dailyWeatherReportLoadingText = 'Old report message found'
+                statesManager.WeatherReport.Text = 'Old report message found'
                 return element
             }
         }
     }
 
-    statesManager.dailyWeatherReportLoadingText = 'No messages found'
+    statesManager.WeatherReport.Text = 'No messages found'
     return null
 }
 
@@ -743,10 +743,10 @@ bot.once('ready', async () => {
         bot.user.setActivity(activitiesMobile[index])
     }, 10000)
 
-    statesManager.dailyWeatherReportLoadingText = 'Fetch news channel...'
+    statesManager.WeatherReport.Text = 'Fetch news channel...'
     await bot.channels.fetch(ChannelId.ProcessedNews)
     setTimeout(async () => {
-        statesManager.dailyWeatherReportLoadingText = 'Search old weather report message...'
+        statesManager.WeatherReport.Text = 'Search old weather report message...'
         const oldWeatherMessage = await GetOldDailyWeatherReport(ChannelId.ProcessedNews)
         if (oldWeatherMessage == null) {
             if (new Date(Date.now()).getHours() < 10) {
@@ -754,11 +754,11 @@ bot.once('ready', async () => {
             }
         } else {
             if (new Date(oldWeatherMessage.createdTimestamp).getDate() != new Date(Date.now()).getDate() && new Date(Date.now()).getHours() < 10) {
-                statesManager.dailyWeatherReportLoadingText = 'Delete old weather report message...'
+                statesManager.WeatherReport.Text = 'Delete old weather report message...'
                 await oldWeatherMessage.delete()
                 CommandDailyWeatherReport(bot.channels.cache.get(ChannelId.ProcessedNews), statesManager)
             } else {
-                statesManager.dailyWeatherReportLoadingText = ''
+                statesManager.WeatherReport.Text = ''
             }
         }
     }, 100)
@@ -780,18 +780,18 @@ bot.once('ready', async () => {
 
 
 
-    statesManager.newsLoadingText = 'Fetch news...'
+    statesManager.News.LoadingText = 'Fetch news...'
     const channel = bot.channels.cache.get(ChannelId.IncomingNews)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
         /** @type {[Discord.Message]} */
         const listOfMessage = []
 
-        statesManager.newsLoadingText = 'Looping messages...'
+        statesManager.News.LoadingText = 'Looping messages...'
         messages.forEach((message) => {
             listOfMessage.push(message)
         })
 
-        statesManager.newsLoadingText = 'Processing messages...'
+        statesManager.News.LoadingText = 'Processing messages...'
         listOfMessage.reverse()
         listOfMessage.forEach(message => {
             processNewsMessage(message)
@@ -811,31 +811,31 @@ bot.once('ready', async () => {
             /** @type {Discord.TextChannel} */
             const newsChannel = bot.channels.cache.get(ChannelId.ProcessedNews)
             const embed = newsMessage.embed
-            statesManager.newsLoadingText2 = 'Send new message...'
+            statesManager.News.LoadingText2 = 'Send new message...'
             if (newsMessage.NotifyRoleId.length == 0) {
                 newsChannel.send({ embeds: [embed] })
                     .then(() => {
-                        statesManager.newsLoadingText2 = 'Delete raw message...'
+                        statesManager.News.LoadingText2 = 'Delete raw message...'
                         newsMessage.message.delete().then(() => {
-                            statesManager.newsLoadingText2 = ''
+                            statesManager.News.LoadingText2 = ''
                         })
                     })
             } else {
                 newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
                     .then(() => {
-                        statesManager.newsLoadingText2 = 'Delete raw message...'
+                        statesManager.News.LoadingText2 = 'Delete raw message...'
                         newsMessage.message.delete().then(() => {
-                            statesManager.newsLoadingText2 = ''
+                            statesManager.News.LoadingText2 = ''
                         })
                     })
             }
             lastNoNews = false
-            statesManager.allNewsProcessed = false
+            statesManager.News.AllProcessed = false
         } else if (lastNoNews == false) {
-            statesManager.newsLoadingText = ''
-            statesManager.newsLoadingText2 = ''
+            statesManager.News.LoadingText = ''
+            statesManager.News.LoadingText2 = ''
             lastNoNews = true
-            statesManager.allNewsProcessed = true
+            statesManager.News.AllProcessed = true
             log(DONE + ': Minden hír közzétéve')
         }
     }, 2000)
@@ -858,7 +858,7 @@ bot.once('ready', async () => {
 
 /** @param {Discord.Message} message */
 function processNewsMessage(message) {
-    statesManager.allNewsProcessed = false
+    statesManager.News.AllProcessed = false
     listOfNews.push(CreateNews(message))
 }
 bot.on('messageCreate', async message => { //Message

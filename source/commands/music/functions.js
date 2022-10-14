@@ -92,9 +92,9 @@ class MusicPlayer {
                 }
             })
             .on("error", (error) => { log(ERROR + ': ' + error, 24) })
-            .on("start", () => { statesManager.ytdlCurrentlyPlaying = true; log('') })
+            .on("start", () => { statesManager.Ytdl.IsPlaying = true; log('') })
             .on("debug", (message) => { log(DEBUG + ': ytdl: ' + message) })
-            .on("close", () => { statesManager.ytdlCurrentlyPlaying = false; log('') })
+            .on("close", () => { statesManager.Ytdl.IsPlaying = false; log('') })
         */
 
         const embed = new Discord.EmbedBuilder()
@@ -112,8 +112,8 @@ class MusicPlayer {
         } else {
             command.reply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
         }
-        this.statesManager.ytdlCurrentlyPlayingText = info.videoDetails.title
-        this.statesManager.ytdlCurrentlyPlayingUrl = link
+        this.statesManager.Ytdl.PlayingText = info.videoDetails.title
+        this.statesManager.Ytdl.PlayingUrl = link
         return true
     }
     
@@ -144,13 +144,13 @@ class MusicPlayer {
      * @param {boolean} privateCommand
      */
     async CommandMusicList(command) {
-        if (this.musicArray.length === 0 && this.statesManager.ytdlCurrentlyPlaying === false) {
+        if (this.musicArray.length === 0 && this.statesManager.Ytdl.IsPlaying === false) {
             command.reply({ content: '> **A lejátszólista üres \\🎧**' })
         } else {
             const embed = new Discord.EmbedBuilder()
                 .setAuthor({ name: command.member.displayName, iconURL: command.member.avatarURL() })
             embed.setColor(Color.Purple)
-            await ytdl.getBasicInfo(this.statesManager.ytdlCurrentlyPlayingUrl).then(info => {
+            await ytdl.getBasicInfo(this.statesManager.Ytdl.PlayingUrl).then(info => {
                 embed.addFields([{ name: '\\🎧 Most hallható: ' + info.videoDetails.title, value: '  Hossz: ' + musicGetLengthText(info.videoDetails.lengthSeconds), inline: false}])
             })
             this.musicArray.forEach(async (_link) => {

@@ -129,8 +129,8 @@ class WebSocket {
 
         this.OnStartListen = () => {
             this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
-            this.statesManager.handlebarsDone = true
-            this.statesManager.handlebarsURL = 'http://' + this.server.address().address + ":" + this.server.address().port
+            this.statesManager.WebInterface.IsDone = true
+            this.statesManager.WebInterface.URL = 'http://' + this.server.address().address + ":" + this.server.address().port
             if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'NORMAL', message: 'Listening on ' + ip + ':' + port })
             }
@@ -140,9 +140,9 @@ class WebSocket {
 
         this.server.on('error', (err) => {
             if (err.message.startsWith('listen EADDRNOTAVAIL: address not available')) {
-                this.statesManager.handlebarsErrorMessage = 'Address not available'
+                this.statesManager.WebInterface.Error = 'Address not available'
             } else {
-                this.statesManager.handlebarsErrorMessage = err.message
+                this.statesManager.WebInterface.Error = err.message
             }
             if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'ERROR', message: err.message, helperMessage: 'Server error: ' + err.message })
@@ -160,8 +160,8 @@ class WebSocket {
             socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
         })
         this.server.on('close', () => {
-            this.statesManager.handlebarsDone = false
-            this.statesManager.handlebarsURL = ''
+            this.statesManager.WebInterface.IsDone = false
+            this.statesManager.WebInterface.URL = ''
             this.logManager.Log(SERVER + ': ' + "Closed", true)
             if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'NORMAL', message: 'Server closed' })
@@ -174,11 +174,11 @@ class WebSocket {
             }
         })
         this.server.on('connection', (socket) => {
-            this.statesManager.handlebarsClients.push(socket)
-            this.statesManager.handlebarsClientsTime.push(10)
+            this.statesManager.WebInterface.Clients.push(socket)
+            this.statesManager.WebInterface.ClientsTime.push(10)
         })
         this.server.on('request', (req, res) => {
-            this.statesManager.handlebarsRequiests.push(10)
+            this.statesManager.WebInterface.Requests.push(10)
             if (this.ClientType != 'MOBILE') {
                 HbLog({ IP: req.socket.remoteAddress, type: 'REQUIEST', url: req.url, method: req.method, helperMessage: 'Someone requiested' })
             }
@@ -551,8 +551,8 @@ class WebSocket {
             shard: {
                 state: shardState,
             },
-            showWeatherStatus: (this.statesManager.dailyWeatherReportLoadingText.length > 0),
-            showNewsStatus: (this.statesManager.allNewsProcessed == false),
+            showWeatherStatus: (this.statesManager.WeatherReport.Text.length > 0),
+            showNewsStatus: (this.statesManager.News.AllProcessed == false),
             system: systemInfo
         }
 
@@ -997,9 +997,9 @@ class WebSocket {
                 botLoadingState: this.statesManager.botLoadingState,
                 botLoaded: this.statesManager.botLoaded,
                 botReady: this.statesManager.botReady,
-                shardCurrentlyLoading: this.statesManager.shardCurrentlyLoading,
-                shardCurrentlyLoadingText: this.statesManager.shardCurrentlyLoadingText,
-                shardErrorText: this.statesManager.shardErrorText,
+                Shard_IsLoading: this.statesManager.Shard.IsLoading,
+                Shard_LoadingText: this.statesManager.Shard.LoadingText,
+                Shard_Error: this.statesManager.Shard.Error,
                 uptime: GetTime(uptime),
                 shardState: shardState,
                 ws: {

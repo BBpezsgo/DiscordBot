@@ -315,15 +315,15 @@ class LogManager {
                 }
 
                 var delIndex = -1
-                for (let i = 0; i < this.statesManager.handlebarsRequiests.length; i++) {
-                    this.statesManager.handlebarsRequiests[i] -= this.deltaTime
-                    if (this.statesManager.handlebarsRequiests[i] <= 0) {
+                for (let i = 0; i < this.statesManager.WebInterface.Requests.length; i++) {
+                    this.statesManager.WebInterface.Requests[i] -= this.deltaTime
+                    if (this.statesManager.WebInterface.Requests[i] <= 0) {
                         delIndex = i
                     }
                 }
 
                 if (delIndex > -1) {
-                    this.statesManager.handlebarsRequiests.splice(delIndex)
+                    this.statesManager.WebInterface.Requests.splice(delIndex)
                 }
 
                 this.blinkerTime += this.deltaTime
@@ -332,13 +332,13 @@ class LogManager {
                     this.blinkerTime = -1000
                 }
 
-                if (this.statesManager.dailyWeatherReportLoadingText.length == 0) {
+                if (this.statesManager.WeatherReport.Text.length == 0) {
                     this.dailyWeatherReportLoadingTextTimeout += this.deltaTime
                 } else {
                     this.dailyWeatherReportLoadingTextTimeout = 0
                 }
 
-                if (this.statesManager.newsLoadingText.length == 0) {
+                if (this.statesManager.News.LoadingText.length == 0) {
                     this.newsLoadingTextTimeout += this.deltaTime
                 } else {
                     this.newsLoadingTextTimeout = 0
@@ -357,18 +357,18 @@ class LogManager {
                 }
 
                 var removeIndex = -1
-                for (let i = 0; i < this.statesManager.handlebarsClients.length; i++) {
-                    const element = this.statesManager.handlebarsClients[i]
+                for (let i = 0; i < this.statesManager.WebInterface.Clients.length; i++) {
+                    const element = this.statesManager.WebInterface.Clients[i]
                     if (element.destroyed == true) {
-                        this.statesManager.handlebarsClientsTime[i] -= 1
-                        if (this.statesManager.handlebarsClientsTime[i] <= 0) {
+                        this.statesManager.WebInterface.ClientsTime[i] -= 1
+                        if (this.statesManager.WebInterface.ClientsTime[i] <= 0) {
                             removeIndex = i
                         }
                     }
                 }
                 if (removeIndex > -1) {
-                    this.statesManager.handlebarsClients.splice(removeIndex, 1)
-                    this.statesManager.handlebarsClientsTime.splice(removeIndex, 1)
+                    this.statesManager.WebInterface.Clients.splice(removeIndex, 1)
+                    this.statesManager.WebInterface.ClientsTime.splice(removeIndex, 1)
                 }
 
                 this.RefreshScreen()
@@ -387,13 +387,13 @@ class LogManager {
                     this.blinkerTime = -1
                 }
 
-                /*if (this.statesManager.dailyWeatherReportLoadingText.length == 0) {
+                /*if (this.statesManager.WeatherReport.Text.length == 0) {
                     this.dailyWeatherReportLoadingTextTimeout += this.deltaTime
                 } else {
                     this.dailyWeatherReportLoadingTextTimeout = 0
                 }
 
-                if (this.statesManager.newsLoadingText.length == 0) {
+                if (this.statesManager.News.LoadingText.length == 0) {
                     this.newsLoadingTextTimeout += this.deltaTime
                 } else {
                     this.newsLoadingTextTimeout = 0
@@ -553,10 +553,10 @@ class LogManager {
                 txt += '│ ' + genLine(genLine('BOT State:', 20) + StateTextBot(this.statesManager.botLoadingState), window.width - 4) + ' ┃\n'
                 txt += '│ ' + genLine(genLine('Timeouts:', 20) + timeout[this.statesManager.heartbeat] + ' ' + timeout[this.statesManager.hello], window.width - 4) + ' ┃\n'
                 txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.handlebarsErrorMessage, this.statesManager.handlebarsDone, this.statesManager.handlebarsURL), window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine(genLine('HB Requiests:', 20) + this.statesManager.handlebarsRequiests.length, window.width - 4) + ' ┃\n'
-                for (let i = 0; i < this.statesManager.handlebarsClients.length; i++) {
-                    const socket = this.statesManager.handlebarsClients[i]
+                txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.WebInterface.Error, this.statesManager.WebInterface.IsDone, this.statesManager.WebInterface.URL), window.width - 4) + ' ┃\n'
+                txt += '│ ' + genLine(genLine('HB Requiests:', 20) + this.statesManager.WebInterface.Requests.length, window.width - 4) + ' ┃\n'
+                for (let i = 0; i < this.statesManager.WebInterface.Clients.length; i++) {
+                    const socket = this.statesManager.WebInterface.Clients[i]
                     if (i == 0) {
                         txt += '│ ' + genLine(genLine('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width - 4) + ' ┃\n'
                     } else {
@@ -582,37 +582,37 @@ class LogManager {
             }
 
             if (this.statesManager != undefined) {
-                if (this.statesManager.shardCurrentlyLoading == true) {
-                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading Shard:', 20) + this.statesManager.shardCurrentlyLoadingText, window.width - 4) + ' ┃\n'
+                if (this.statesManager.Shard.IsLoading == true) {
+                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading Shard:', 20) + this.statesManager.Shard.LoadingText, window.width - 4) + ' ┃\n'
                 }
-                if (this.statesManager.shardErrorText.length > 0) {
-                    txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.shardErrorText + CliColor.FgDefault, window.width - 4) + ' ┃\n'
+                if (this.statesManager.Shard.Error.length > 0) {
+                    txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.Shard.Error + CliColor.FgDefault, window.width - 4) + ' ┃\n'
                 }
-                if (this.statesManager.ytdlCurrentlyLoading == true) {
-                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' YTDL:', 20) + this.statesManager.ytdloadingText, window.width - 4) + ' ┃\n'
+                if (this.statesManager.Ytdl.IsLoading == true) {
+                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' YTDL:', 20) + this.statesManager.Ytdl.LoadingText, window.width - 4) + ' ┃\n'
                 }
                 txt += '│ ' + genLine(genLine('Timeline:', 20) + this.GetTimelineText(), window.width - 4) + ' ┃\n'
-                if (this.statesManager.commandAllCommandCount != this.statesManager.commandCreatedCount) {
-                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading commands:', 20) + Math.round(this.statesManager.commandCreatedCount / this.statesManager.commandAllCommandCount * 100) + "%", window.width - 4) + ' ┃\n'
+                if (this.statesManager.Commands.All != this.statesManager.Commands.Created) {
+                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading commands:', 20) + Math.round(this.statesManager.Commands.Created / this.statesManager.Commands.All * 100) + "%", window.width - 4) + ' ┃\n'
                 }
                 if (this.dailyWeatherReportLoadingTextTimeout < 30) {
-                    if (this.statesManager.dailyWeatherReportLoadingText.length > 0) {
-                        txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Weather report:', 20) + this.statesManager.dailyWeatherReportLoadingText, window.width - 4) + ' ┃\n'
+                    if (this.statesManager.WeatherReport.Text.length > 0) {
+                        txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Weather report:', 20) + this.statesManager.WeatherReport.Text, window.width - 4) + ' ┃\n'
                     } else {
                         txt += '│ ' + genLine(genLine('Weather report:', 20) + 'Done', window.width - 4) + ' ┃\n'
                     }
                 }
                 if (this.newsLoadingTextTimeout < 30) {
-                    if (this.statesManager.newsLoadingText.length > 0) {
-                        if (this.statesManager.newsLoadingText2.length > 0) {
-                            txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.newsLoadingText + ' (' + this.statesManager.newsLoadingText2 + ')', window.width - 4) + ' ┃\n'
+                    if (this.statesManager.News.LoadingText.length > 0) {
+                        if (this.statesManager.News.LoadingText2.length > 0) {
+                            txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.News.LoadingText + ' (' + this.statesManager.News.LoadingText2 + ')', window.width - 4) + ' ┃\n'
                         } else {
-                            txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.newsLoadingText, window.width - 4) + ' ┃\n'
+                            txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.News.LoadingText, window.width - 4) + ' ┃\n'
                         }
                     } else {
                         txt += '│ ' + genLine(genLine('News:', 20) + 'Done', window.width - 4) + ' ┃\n'
                     }
-                } else if (this.statesManager.allNewsProcessed == false) {
+                } else if (this.statesManager.News.AllProcessed == false) {
                     txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + 'Loading...', window.width - 4) + ' ┃\n'
                 }
             }
@@ -621,14 +621,14 @@ class LogManager {
             txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width - 4) + ' ┃\n'
         }
         if (this.statesManager != undefined) {
-            if (this.statesManager.databaseLoadText.length > 0) {
-                txt += '│ ' + genLine(genLine('Loading database:', 20) + this.statesManager.databaseLoadText, window.width - 4) + ' ┃\n'
+            if (this.statesManager.Database.LoadText.length > 0) {
+                txt += '│ ' + genLine(genLine('Loading database:', 20) + this.statesManager.Database.LoadText, window.width - 4) + ' ┃\n'
             }
-            if (this.statesManager.databaseParsingText.length > 0) {
-                txt += '│ ' + genLine(genLine('Parsing database:', 20) + this.statesManager.databaseParsingText, window.width - 4) + ' ┃\n'
+            if (this.statesManager.Database.ParsingText.length > 0) {
+                txt += '│ ' + genLine(genLine('Parsing database:', 20) + this.statesManager.Database.ParsingText, window.width - 4) + ' ┃\n'
             }
-            if (this.statesManager.databaseSaveText.length > 0) {
-                txt += '│ ' + genLine(genLine('Saving database:', 20) + this.statesManager.databaseSaveText, window.width - 4) + ' ┃\n'
+            if (this.statesManager.Database.SaveText.length > 0) {
+                txt += '│ ' + genLine(genLine('Saving database:', 20) + this.statesManager.Database.SaveText, window.width - 4) + ' ┃\n'
             }
         }
 
