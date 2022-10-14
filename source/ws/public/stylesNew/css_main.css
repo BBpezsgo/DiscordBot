@@ -45,8 +45,8 @@ a:focus, a:hover {
 	text-decoration: underline;
 }
 
-button,
-input[type=submit] {
+button:not(.btn-tool),
+input[type=submit]:not(.btn-tool) {
 	border: none;
 	background-color: var(--btn-primary-bg);
 	color: var(--btn-primary-text);
@@ -58,24 +58,62 @@ input[type=submit] {
 	font-weight: bold;
 }
 
-button:focus-visible,
-input[type=submit]:focus-visible,
-button:focus,
-input[type=submit]:focus {
+button:not(.btn-tool):focus-visible,
+input[type=submit]:not(.btn-tool):focus-visible,
+button:not(.btn-tool):focus,
+input[type=submit]:not(.btn-tool):focus {
 	outline-offset: -4px;
 	outline-style: solid;
 	outline-width: 2px;
 	outline-color: #000;
 }
 
-button:hover,
-input[type=submit]:hover {
+button:not(.btn-tool):hover,
+input[type=submit]:not(.btn-tool):hover {
 	background-color: var(--btn-primary-hover-bg);
 }
 
-button:active,
-input[type=submit]:active {
+button:not(.btn-tool):active,
+input[type=submit]:not(.btn-tool):active {
 	background-color: var(--btn-primary-active-bg);
+	outline: none;
+}
+
+.btn-tool-back {
+	background-image: url('/imagesNew/icon-back.png');
+	background-size: 32px;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+button.btn-tool,
+input[type=submit].btn-tool {
+	border: none;
+	color: var(--text);
+	background-color: transparent;
+	border-radius: 24px;
+	transition: background 200ms;
+	cursor: pointer;
+	font-weight: bold;
+	width: 48px;
+	height: 48px;
+}
+
+button.btn-tool:focus-visible,
+input[type=submit].btn-tool:focus-visible,
+button.btn-tool:focus,
+input[type=submit].btn-tool:focus {
+	outline: 1px solid #fff2;
+}
+
+button.btn-tool:hover,
+input[type=submit].btn-tool:hover {
+	background-color: #fff2;
+}
+
+button.btn-tool:active,
+input[type=submit].btn-tool:active {
+	background-color: #fff4;
 	outline: none;
 }
 
