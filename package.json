@@ -22,6 +22,7 @@
     "jsdom": "latest",
     "moonphase-js": "latest",
     "nodejs-weather-app": "1.1.0",
+    "suncalc": "^1.9.0",
     "weather-js": "latest",
     "ytdl-core": "latest"
   }

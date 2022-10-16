@@ -5,6 +5,7 @@ const weather2 = require('nodejs-weather-app');
 const fs = require('fs')
 const request = require("request");
 const { tokens } = require('../config.json')
+const SunCalc = require('suncalc')
 
 const urlWeather = 'http://api.openweathermap.org/data/2.5/weather?lat=46.678889&lon=21.090833&units=metric&appid=' + tokens.openweathermap
 const urlPollution = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + tokens.openweathermap
@@ -49,7 +50,9 @@ const {
     weatherSkytextIcon,
     weatherSkytextImgName
 } = require('../commands/weatherFunctions');
-const { inflate } = require('zlib');
+
+const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
+const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 /**
  * @param {any} data0 Msn weather data
@@ -93,6 +96,8 @@ function getEmbedEarth(data0, data1, data2, data3) {
 
         const visibilityValue = Math.floor(data1.visibility / 1000)
 
+        const times = SunCalc.getTimes(new Date(Date.now()), 46.677227, 21.089993)
+        
         embed
             .setTitle(`**${skyTxt}** ||(${data1.weather[0].description})|||| (${data1.weather[0].id})||`)
         
@@ -126,8 +131,13 @@ function getEmbedEarth(data0, data1, data2, data3) {
             '\n\n**Egyéb:**\n\n' +
 
             `${moonIcon} ${moonText} (${Math.floor(data2[1].illum * 100)} %-a látható)\n` +
-            `\\🌇 Napkelte: ${unixToTime(data1.sys.sunrise)}\n` +
-            `\\🌆 Napnyugta: ${unixToTime(data1.sys.sunset)}\n\n` +
+            `\\🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
+            `\\🌇 Napkelte: <t:${AverageUnix(data1.sys.sunrise, ToUnix(times.sunrise))}:R>\n` +
+            `\\🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
+            `\\📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:R>\n` +
+            `\\🌆 Napnyugta: <t:${AverageUnix(data1.sys.sunset, ToUnix(times.sunset))}:R>\n` +
+            `\\🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>\n` +
+            `\\🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>\n\n`
 
             '**Előrejelzés:**'
 

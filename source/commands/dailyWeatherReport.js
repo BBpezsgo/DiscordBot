@@ -3,6 +3,7 @@ const fs = require('fs')
 const request = require("request");
 const { tokens } = require('../config.json')
 const { StatesManager } = require('../functions/statesManager')
+const SunCalc = require('suncalc')
 
 let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
 if (fs.existsSync('./Helper/output.txt') == true) {
@@ -29,6 +30,9 @@ const {
 
 const { Color } = require('../functions/enums')
 
+const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
+const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
+
 /**
  * @param {any} weatherData
  * @returns {Discord.EmbedBuilder}
@@ -38,11 +42,16 @@ function GetEmbed(weatherData) {
         .setColor(Color.Highlight)
         .setAuthor({ name: weatherData.city.name, url: 'https://openweathermap.org/city/' + weatherData.city.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
+    const times = SunCalc.getTimes(new Date(Date.now()), 46.677227, 21.089993)
+
     embed
         .setTitle(`Napi időjárás jelentés`)
         .setDescription(
-            `\\🌇 Napkelte: <t:${weatherData.city.sunrise}:R>` + '\n' +
-            `\\🌆 Napnyugta: <t:${weatherData.city.sunset}:R>`
+            `\\🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
+            `\\🌇 Napkelte: <t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:R>\n` +
+            `\\🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
+            `\\🌆 Napnyugta: <t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:R>\n` +
+            `\\🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>`
             )
 
     for (let i = 0; i < 5; i++) {
@@ -73,11 +82,12 @@ function GetEmbed(weatherData) {
             value: stringBuilder.trimEnd(),
             inline: false
         }])
+        embed.setThumbnail('https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/commands/weatherImages/earth.gif')
     }
 
     embed
         .setTimestamp(Date.now())
-        .setFooter({ text: '• openweathermap.org • ⚠️ Tesztverzió', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        .setFooter({ text: '• openweathermap.org', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
     return embed
 }
 
