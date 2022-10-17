@@ -15,14 +15,14 @@ function Taxation(database, lastDay) {
                 const userMoney = database.dataBasic[element].money
                 const finalTax = Math.floor(userMoney * 0.001) * 2
                 const userMoneyFinal = userMoney - finalTax
-                console.log("Adó:  " + userMoney + " ---1%-->" + finalTax + " ------->" + userMoneyFinal)
+                // console.log("Adó:  " + userMoney + " ---1%-->" + finalTax + " ------->" + userMoneyFinal)
                 database.dataBasic[element].money = userMoneyFinal
             } catch (error) {
                 SystemLog('Tax error: ' + error.message)
                 fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
             }
         }
-        console.log("Mindenki megadózva")
+        // console.log("Mindenki megadózva")
     }
 }
 

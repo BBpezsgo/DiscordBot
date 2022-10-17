@@ -1347,10 +1347,6 @@ class WebSocket {
         })
 
         this.app.get('/userViews/LogError', (req, res) => {
-            if (this.ClientType == 'MOBILE') {
-                this.RenderPage(req, res, 'ErrorLogsNotSupported', {})
-                return
-            }
             const data = fs.readFileSync('./node.error.log', 'utf8')
             const lines = data.split('\n')
 
