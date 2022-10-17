@@ -5,9 +5,9 @@
 
 
 
-    
 
-    
+
+
 
 const LogError = require('./functions/errorLog')
 
@@ -414,7 +414,7 @@ async function playAudio(command) {
     let resource = createAudioResource(stream)
 
     connection.subscribe(player)
-    
+
     player.play(resource)
 
     const info = await ytdl.getInfo(link)
@@ -440,7 +440,7 @@ async function playAudio(command) {
         .setThumbnail(info.videoDetails.thumbnails[0].url)
         .addFields([
             { name: 'Csatorna', value: info.videoDetails.author.name, inline: true },
-            { name: 'Hossz', value: musicGetLengthText(info.videoDetails.lengthSeconds), inline: true }    
+            { name: 'Hossz', value: musicGetLengthText(info.videoDetails.lengthSeconds), inline: true }
         ])
     if (command.replied == true) {
         command.editReply({ content: '> **\\✔️ Most hallható: \\🎧**', embeds: [embed] })
@@ -540,7 +540,7 @@ function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, remov
     if (image != undefined) {
         embed.setImage(image.url)
     }
-    
+
     bot.channels.cache.get('799340273431478303').send({ embeds: [embed] }).then(message => {
         message.channel.send('> <@&799342836931231775>')
         message.react('🎯')
@@ -691,7 +691,7 @@ bot.on('interactionCreate', interaction => {
                 return
             }
         }
-        
+
         try {
             if (interaction.user.username === interaction.message.embeds[0].author.name) { } else {
                 interaction.reply({content: '> \\❗ **Ez nem a tied!**', ephemeral: true})
@@ -738,18 +738,18 @@ bot.once('ready', async () => {
     } catch (error) {
         console.error(error)
     }
-    
+
     setInterval(() => {
         const index = Math.floor(Math.random() * (activitiesMobile.length - 1))
         bot.user.setActivity(activitiesMobile[index])
     }, 10000)
 
     TrySendWeatherReport(statesManager, bot, '746266528508411935')
-    
+
     logManager.AddTimeline(2)
 
     log(DONE + ': A BOT kész!')
-    
+
     newsManager.OnStart(bot)
     setInterval(() => {
         newsManager.TryProcessNext(bot)
@@ -839,7 +839,7 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
                 value:
                 '.quiz\n' +
                 'Cím\n' +
-                'Opció;Opció;Opció\n' + 
+                'Opció;Opció;Opció\n' +
                 '💥;💥;💥\n' +
                 '5000 (add XP)\n' +
                 '2500 (remove XP)\n' +
@@ -953,7 +953,7 @@ async function processApplicationCommand(command) {
     if (command.commandName === `weather`) {
         if (command.options.getSubcommand() == 'mars') {
             CommandWeather(command, privateCommand, false)
-        } else {            
+        } else {
             CommandWeather(command, privateCommand)
         }
         return
