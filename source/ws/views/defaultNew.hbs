@@ -159,6 +159,10 @@
         nav > div > iframe {
             height: 100%;
         }
+
+        a:hover {
+            color: #8ab4f8;
+        }
     </style>
 </head>
 
@@ -166,7 +170,7 @@
 
     <header>
         <h3>BOT</h3>
-        <a href="javascript:void(0)" onclick="OpenSidebar()">
+        <a href="javascript:void(0)" onclick="OpenSidebar()" aria-label="Open sidebar">
             <i class="fa fa-bars w3-hide-large"></i>
         </a>
     </header>
@@ -174,7 +178,7 @@
     <nav class="w3-sidebar w3-bar-block w3-collapse w3-top" style="z-index: 3; width: 250px;" id="mySidebar">
         <div class="w3-large">
             <div onclick="CloseSidebar()" class="w3-hide-large button-close"><i class="fa fa-remove"></i></div>
-            <iframe src="/userViewsNew/MenuRpm"></iframe>
+            <iframe src="/userViewsNew/MenuRpm" title="Menu Frame"></iframe>
         </div>
     </nav>
 
@@ -182,7 +186,7 @@
     <div class="w3-overlay w3-hide-large" onclick="CloseSidebar()" title="close side menu" id="myOverlay"></div>
 
     <div class="w3-main" style="margin-left: 250px; margin-top:83px; height: calc(100% - 83px);">
-        <iframe src="/userViews/Status?new" name="mainFrame" style="height: calc(100% - 7px);"></iframe>
+        <iframe src="/userViews/Status?new" name="mainFrame" title="Main Frame" style="height: calc(100% - 7px);"></iframe>
     </div>
 
     <script>
@@ -207,11 +211,17 @@
     </script>
 
     <script>
+        var GetTitlePending = false
         setInterval(() => {
+            if (GetTitlePending === true) { return }
+            GetTitlePending = true
             var xmlHttp = new XMLHttpRequest()
-            xmlHttp.open("GET", '/title', false)
+            xmlHttp.open("GET", '/title', true)
+            xmlHttp.onloadend = function(e) {
+                document.title = xmlHttp.responseText
+                GetTitlePending = false
+            }
             xmlHttp.send(null)
-            document.title = xmlHttp.responseText
         }, 1000)
     </script>
 

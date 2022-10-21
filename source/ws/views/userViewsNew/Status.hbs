@@ -25,7 +25,7 @@
 
 	<h1>Status</h1>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>Process</h2>
 		<table style="width: 100%;">
 			<tbody>
@@ -133,7 +133,7 @@
 		</table>
 	</div>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>BOT</h2>
 		<table style="width: 100%;">
 			<tbody>
@@ -173,7 +173,7 @@
 		</table>
 	</div>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>Web Socket</h2>
 		<table id="autoWidth" style="width: 598px;">
 			<tbody>
@@ -227,7 +227,7 @@
 		</table>
 	</div>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>System</h2>
 		<table style="width: 100%;">
 			<tbody>
@@ -356,16 +356,18 @@
 		</table>
 	</div>
 
-
 	<script>
+        var GetDataPending = false
 		setInterval(() => {
 			if (!refreshing) { return }
-			var xd =  new XMLHttpRequest()
-			xd.open('GET', '/json/status')
-			xd.send()
-			xd.onloadend = (a) => {
-				if (xd.status == 200) {
-					const res = JSON.parse(xd.responseText)
+            if (GetDataPending === true) { return }
+            GetDataPending = true
+			var xmlHttp =  new XMLHttpRequest()
+			xmlHttp.open('GET', '/json/status')
+			xmlHttp.onloadend = (e) => {
+            	GetDataPending = false
+				if (xmlHttp.status == 200) {
+					const res = JSON.parse(xmlHttp.responseText)
 					document.getElementById('bot-loading-state-label').innerText = res.botLoadingState
 					document.getElementById('bot-loading-state-icon').src = "/imagesNew/state-" + res.botLoadingState + ".png"
 					
@@ -381,8 +383,10 @@
 					document.getElementById('system-uptime-label').innerText = res.systemUptime
 				}
 			}
+			xmlHttp.send(null)
 		}, 500)
 	</script>
+    <script src="../scripts/loadEffect.js"></script>
 </body>
 
 </html>

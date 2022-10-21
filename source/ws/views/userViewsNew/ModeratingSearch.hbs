@@ -16,97 +16,82 @@
 <body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
    	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
 
-    <table id="autoWidth" style="width: 598px;">
-        <tbody>
-            <tr>
-                <td class="h1" colspan="3">Moderating</td>
-            </tr>
-            <tr>
-                <td class="blue" colspan="3"></td>
-            </tr>
-            <tr>
-                <td class="h2" colspan="3">Servers</td>
-            </tr>
-            <tr>
-                <td width="698" align="center">
-                    <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
-                        <tbody>
-                            <tr>
-                                <td class="ListM">
-                                    <b>Icon</b>
-                                </td>
-                                <td class="ListM" style="width: 100%;">
-                                    <b>Name</b>
-                                </td>
-                                <td class="ListM">
-                                    <b>ID</b>
-                                </td>
-                                <td class="ListM">
-                                    <b>Avai.</b>
-                                </td>
-                                <td class="ListM">
-                                    
-                                </td>
-                                <td class="ListM">
-                                    
-                                </td>
-                            </tr>
-                            {{#each servers}}
-                            <tr>
-                                <td style="padding:0 2 0 2;word-break:break-all">
-                                    <div class="tooltip">
-                                        <img class="server-icon" src="{{this.iconUrlSmall}}" width="16" height="16" title="{{this.nameAcronym}}">
-                                        <span class="tooltiptext">
-                                            <img src="{{this.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
-                                        </span>
-                                    </div>
-                                </td>
-                                <td style="padding:0 2 0 2;word-break:break-all">
-                                    {{this.name}}
-                                </td>
-                                <td style="padding:0 2 0 2;word-break:break-all">
-                                    {{this.id}}
-                                </td>
-                                <td style="padding:0 2 0 2;word-break:break-all">
-                                    <img width="16" height="16" src="/imagesNew/bool-{{this.available}}.png">
-                                </td>
-                                <td style="padding:0 2 0 2;word-break:break-all">
-                                    <form action="/userViews/Moderating/FetchGuild" method="post"
-                                        style="margin: 0;"
-                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
-                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
-                                        <input type="submit" value="Fetch">
-                                    </form>
-                                </td>
-                                <td style="padding:0 2 0 2;word-break:break-all">
-                                    <form action="/userViews/Moderating/Search" method="post"
-                                        style="margin: 0;"
-                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
-                                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
-                                        <input type="submit" value="View">
-                                    </form>
-                                </td>
-                            </tr>
-                            {{/each}}
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td class="blue" colspan="3"></td>
-            </tr>
-            <tr>
-                <td width="698" align="center">
-                    <form action="/userViews/Moderating/Search" method="post"
-                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
-                        <input type="text" name="id" value="{{serverId}}" placeholder="Server ID" required>
-                        <input type="submit" value="Search">
-                        <span style="font-weight: bold; color: red;">{{searchError}}</span>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <h1>Moderating</h1>
+
+    <div class="container loading-effect">
+		<h2>Guilds</h2>
+        <table id="autoWidth" style="width: 598px;">
+            <tbody>
+                <tr>
+                    <td width="698" align="center">
+                        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td class="ListM">
+                                        <b>Icon</b>
+                                    </td>
+                                    <td class="ListM" style="width: 100%;">
+                                        <b>Name</b>
+                                    </td>
+                                    <td class="ListM">
+                                        <b>ID</b>
+                                    </td>
+                                    <td class="ListM">
+                                        <b>Avai.</b>
+                                    </td>
+                                    <td class="ListM">
+                                        
+                                    </td>
+                                    <td class="ListM">
+                                        
+                                    </td>
+                                </tr>
+                                {{#each servers}}
+                                <tr>
+                                    <td style="padding:0 2px">
+                                        <div class="tooltip">
+                                            <img class="server-icon" src="{{this.iconUrlSmall}}" width="16" height="16" title="{{this.nameAcronym}}">
+                                            <span class="tooltiptext">
+                                                <img src="{{this.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td style="padding:0 2px">
+                                        {{this.name}}
+                                    </td>
+                                    <td style="padding:0 2px">
+                                        {{this.id}}
+                                    </td>
+                                    <td style="padding:0 2px">
+                                        <img width="16" height="16" src="/imagesNew/bool-{{this.available}}.png">
+                                    </td>
+                                    <td style="padding:0 2px">
+                                        <form action="/userViews/Moderating/FetchGuild" method="post"
+                                            style="margin: 0;"
+                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                            <input type="submit" value="" class="btn-fetch">
+                                        </form>
+                                    </td>
+                                    <td style="padding:0 2px">
+                                        <form action="/userViews/Moderating/Search" method="post"
+                                            style="margin: 0;"
+                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                            <input type="submit" value="View">
+                                        </form>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <script src="../scripts/loadEffect.js"></script>
 </body>
 
 </html>

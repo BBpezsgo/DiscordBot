@@ -128,7 +128,7 @@ const timer = setInterval(() => {
         if (spinnerIndex >= spinner.length) {
             spinnerIndex = 0
         }
-    }   
+    }
 }, 100)
 
 Log('  Loading npm packages')
@@ -146,9 +146,15 @@ Log(`%TASK% Request sent`)
 const requestedAt = Date.now()
 var showRequestEllapsed = true
 
-/** @type {string} num */
-const AddZeros = (num) => {
-
+/** @param {number} ms Milliseconds */
+function GetTime(ms) {
+    if (ms < 1000) {
+        return ms + ' ms'
+    } else if (ms < 60) {
+        return (ms/1000) + ' secs'
+    } else if (ms < 60*60) {
+        return (ms/1000/60) + ':' + (ms/1000)
+    }
 }
 
 const requestEllapsedTimer = setInterval(() => {
@@ -159,8 +165,8 @@ const requestEllapsedTimer = setInterval(() => {
             j = i
         }
     }
-    if (j > -1) {            
-        logs[j] = `%TASK% Request sent (${new Date(Date.now() - requestedAt).getSeconds()} sec)`
+    if (j > -1) {
+        logs[j] = `%TASK% Request sent (${GetTime(new Date(Date.now() - requestedAt).getMilliseconds())})`
     }
     if (showRequestEllapsed == false) {
         clearInterval(requestEllapsedTimer)
@@ -172,23 +178,25 @@ const request = https.get(url, function (res) {
     Log(`  Got a response: ${res.statusCode} ${res.statusMessage}`)
 
     var cur = 0
+    const full = 3529561
 
     res.on('data', function (chunk) {
         cur += chunk.length
-        
+
         if (logs.length > 0) {
             if (logs[logs.length - 1].includes(' Downloading ')) {
-                logs[logs.length - 1] = `%TASK% Downloading ${GetDataSize(cur)}`
+                logs[logs.length - 1] = `%TASK% Downloading ${Math.round(cur/full*100)}% (${GetDataSize(cur)})`
             } else {
-                Log(`%TASK% Downloading ${GetDataSize(cur)}`)
+                Log(`%TASK% Downloading ${Math.round(cur/full*100)}% (${GetDataSize(cur)})`)
             }
         } else {
-            Log(`%TASK% Downloading ${GetDataSize(cur)}`)
+            Log(`%TASK% Downloading ${Math.round(cur/full*100)}% (${GetDataSize(cur)})`)
         }
         RefreshScreen()
     })
 
     res.on('end', function () {
+        Log(`  Downloaded ${cur} bytes`)
         Log('%TASK% Waiting 1s before unzip')
 
         setTimeout(async () => {
@@ -207,14 +215,6 @@ const request = https.get(url, function (res) {
 
     res.on('error', (err) => {
         Log(`  ${CliColor.FgRed}Response error:${CliColor.FgDefault} ${err.message}`)
-    })
-
-    res.on('pause', () => {
-        Log('  Response paused')
-    })
-
-    res.on('resume', () => {
-        Log('  Response resumed')
     })
 
     res.on('close', () => {
@@ -242,7 +242,7 @@ request.on("error", (err) => {
 request.on('abort', () => { Log(`  Request aborted`) })
 request.on('close', () => { Log(`  Request closed`) })
 request.on('connect', (res, soc, head) => { Log(`  Request connected`) })
-request.on('timeout', () => { 
+request.on('timeout', () => {
     Log(`  Request timeout`)
 })
 

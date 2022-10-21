@@ -91,13 +91,26 @@
             padding-inline-start: 0px;
         }
 
+        ol img {
+            height: 100%;
+            display: inline-block;
+            position: relative;
+            bottom: 6px;
+            opacity: 50%;
+            transform: scale(.8);
+        }
+
+        ol.dot2 img {
+            display: none !important;
+        }
+
         menu ol {
             position: relative;
             border-end-end-radius: 100px;
             border-start-end-radius: 100px;
             height: 30px;
             overflow: hidden;
-            padding-left: 65px;
+            padding-left: 25px;
             padding-top: 12px;
             cursor: pointer;
         }
@@ -108,6 +121,11 @@
             color: #eee;
             font-size: 14px;
             font-weight: 600;
+        }
+
+        menu ol:not(.dot2)>a {
+            position: relative;
+            bottom: 16px;
         }
 
         menu ol:hover {

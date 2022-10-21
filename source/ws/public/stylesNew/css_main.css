@@ -58,16 +58,6 @@ input[type=submit]:not(.btn-tool) {
 	font-weight: bold;
 }
 
-button:not(.btn-tool):focus-visible,
-input[type=submit]:not(.btn-tool):focus-visible,
-button:not(.btn-tool):focus,
-input[type=submit]:not(.btn-tool):focus {
-	outline-offset: -4px;
-	outline-style: solid;
-	outline-width: 2px;
-	outline-color: #000;
-}
-
 button:not(.btn-tool):hover,
 input[type=submit]:not(.btn-tool):hover {
 	background-color: var(--btn-primary-hover-bg);
@@ -76,7 +66,6 @@ input[type=submit]:not(.btn-tool):hover {
 button:not(.btn-tool):active,
 input[type=submit]:not(.btn-tool):active {
 	background-color: var(--btn-primary-active-bg);
-	outline: none;
 }
 
 .btn-tool-back {
@@ -380,16 +369,12 @@ input[type="buttonBigL"]:disabled {
 	transform: translateY(calc(-100% + 16px));
 }
 
-.tag-true {
+.tag {
 	background-color: var(--main-primary-color);
 	font-size: .9em;
 	padding: 0px 4px;
 	border-radius: 4px;
-}
-
-.tag-false,
-.tag- {
-	display: none;
+	user-select: none;
 }
 
 .server-icon {
@@ -557,11 +542,24 @@ textarea {
 	caret-color: #ddd;
 }
 
-input[type=text]:focus,
-input[type=number]:focus,
-textarea:focus {
+input[type=text][readonly],
+input[type=number][readonly],
+textarea[readonly] {
+	background-color: #20212370;
+}
+
+input[type=text]:focus:not([readonly]),
+input[type=number]:focus:not([readonly]),
+textarea:focus:not([readonly]) {
 	outline: 2px solid var(--primary);
 	border-color: #0000;
+}
+
+input[type=text][readonly]:focus,
+input[type=number][readonly]:focus,
+textarea[readonly]:focus {
+	outline: none;
+	border-color: #5c7192;
 }
 
 input[type=number] {
@@ -569,10 +567,13 @@ input[type=number] {
 }
 
 ::-webkit-scrollbar {
-	background-color: #424242;
+	background-color: transparent /*#424242*/;
+	width: 5px;
+	height: 5px;
 }
 ::-webkit-scrollbar-thumb {
 	background-color: #686868;
+	border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
 	background-color: #7b7b7b; 
@@ -593,8 +594,8 @@ h1 {
 
 .container {
 	background-color: #292a2d;
-	border-radius: 6px;
-	box-shadow: #0005 3px 3px 5px;
+	border-radius: 8px;
+	box-shadow: #0005 0px 0px 8px;
 	padding: 1px 20px 20px 20px;
 	margin: 0px 50px 30px 50px;
 }
@@ -671,4 +672,83 @@ textarea {
 	width: 100%;
 	min-height: 26px;
 	resize: vertical;
+}
+
+.circle-32 {
+	border-radius: 16px;
+}
+
+button.btn-fetch,
+input[type=submit].btn-fetch {
+	border: none;
+	color: var(--text);
+	background-color: transparent;
+	border-radius: 50%;
+	transition: background 200ms, opacity 200ms;
+	cursor: pointer;
+	font-weight: bold;
+	width: 24px;
+	height: 24px;
+	position: relative;
+	display: inline-block;
+	padding: unset;
+	min-width: unset;
+	opacity: 50%;
+	background-image: url('../imagesNew/sync.svg');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+
+button.btn-fetch:focus-visible,
+button.btn-fetch:focus,
+input[type=submit].btn-fetch:focus-visible,
+input[type=submit].btn-fetch:focus {
+	outline: 1px solid #fff2;
+	opacity: 100%;
+}
+
+button.btn-fetch:hover,
+input[type=submit].btn-fetch:hover {
+	background-color: #fff2;
+	opacity: 100%;
+}
+
+button.btn-fetch:active,
+input[type=submit].btn-fetch:active {
+	background-color: #fff4;
+	outline: none;
+	opacity: 100%;
+}
+
+.user-badge {
+	user-select: none;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	transform: translateY(2px);
+}
+
+.user-badge > img {
+	width: 100%;
+	height: 100%;
+}
+
+.disabled {
+	pointer-events: none !important;
+	opacity: 50% !important;
+}
+
+.loading-effect {
+    opacity: 0;
+    transition: opacity 400ms;
+}
+
+.loading-effect.loading-effect-loaded {
+    opacity: 1;
+}
+
+.loading-effect.loading-effect-loaded-instant {
+    transition: opacity 0ms;
+    opacity: 1;
 }

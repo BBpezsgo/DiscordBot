@@ -16,7 +16,7 @@
 
 	<h1>Cache</h1>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>Emojis</h2>
         <table class="datas" border="1" align="center" width="100%" cellspacing="0" cellpadding="0">
             <tbody>
@@ -37,9 +37,6 @@
                         <b>Identifier</b>
                     </td>
                     <td class="ListM">
-                        <b>Anim.</b>
-                    </td>
-                    <td class="ListM">
                         <b>Aval.</b>
                     </td>
                     <td class="ListM">
@@ -50,38 +47,38 @@
                 <tr>
                     <td style="padding:0 2 0 2;word-break:break-all">
                         <div class="tooltip">
-                            <img src="{{this.url}}" width="16" height="16">
+                            <img src="{{url}}" width="16" height="16">
                             <span class="tooltiptext">
-                                <img src="{{this.url}}" width="128" height="128">
+                                <img src="{{url}}" width="128" height="128">
                             </span>
                         </div>
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.name}}
+                        {{name}}
+                        {{#if animated}}<img width="16" height="16" class="miniicon" src="/imagesNew/video.png">{{/if}}
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.id}}
+                        {{id}}
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.createdAt}}
+                        {{createdAt}}
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        <:{{this.identifier}}>
+                        <:{{identifier}}>
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/imagesNew/bool-{{this.animated}}.png">
+                        <img width="16" height="16" src="/imagesNew/bool-{{available}}.png">
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/imagesNew/bool-{{this.available}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/imagesNew/bool-{{this.deletable}}.png">
+                        <img width="16" height="16" src="/imagesNew/bool-{{deletable}}.png">
                     </td>
                 </tr>
                 {{/each}}
             </tbody>
         </table>
 	</div>
+    
+    <script src="../scripts/loadEffect.js"></script>
 </body>
 
 </html>

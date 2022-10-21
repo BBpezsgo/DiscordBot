@@ -88,7 +88,24 @@ function menuDisplay() {
             display = "none";
         }
         var power = (menuList[n + 2] > 0) ? (menuList[n + 2] - 1) : 0;
-        document.write('<ol id=ol' + i + ' class=' + className + ' style="display:' + display + ';" onClick="doClick2(' + i + ');"><a id=a' + i + ' href="/userViews/' + menuList[n] + '?new" target=mainFrame class=L1 onClick="doClick(' + i + ');">' + menuList[n + 3] + '</a></ol>');
+        if (['Application','CacheEmojis','Database','LogError','Moderating','Process','Status','Testing'].includes(menuList[n])) {
+            document.write(
+                `
+                <ol id=ol${i} class=${className} style="display:${display};" onClick="doClick2(${i})">
+                    <img src='/imagesNew/${menuList[n]}.svg'>
+                    <a id=a${i} href="/userViews/${menuList[n]}?new" target=mainFrame class=L1 onClick="doClick(${i})">
+                        ${menuList[n + 3]}
+                    </a>
+                </ol>`);
+        } else {
+            document.write(
+                `
+                <ol id=ol${i} class=${className} style="display:${display};" onClick="doClick2(${i})">
+                    <a id=a${i} href="/userViews/${menuList[n]}?new" target=mainFrame class=L1 onClick="doClick(${i})">
+                        ${menuList[n + 3]}
+                    </a>
+                </ol>`);
+        }
         //added by zqq,07.11.1
         //map.push(menuList[n+2]);
         map[map.length] = menuList[n + 2];

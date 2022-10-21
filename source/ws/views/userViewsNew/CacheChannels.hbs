@@ -19,7 +19,7 @@
 
 	<h1>Cache</h1>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>Channels</h2>
         <table class="datas" border="1" align="center" width="100%" cellspacing="0" cellpadding="0">
             <tbody>
@@ -68,7 +68,7 @@
                             title="{{this.typeText}}">
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.name}}
+                        <a href="{{url}}" target="_blank">{{this.name}}</a>
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
                         {{this.id}}
@@ -108,7 +108,7 @@
                         <div class="caret" id="{{this.id}}"></div>
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.name}}
+                        <a href="{{url}}" target="_blank">{{this.name}}</a>
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
                         {{this.id}}
@@ -133,8 +133,8 @@
                             title="{{this.typeText}}">
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.name}}
-                        <span class="tag-{{this.nsfw}}">NSFW</span>
+                        <a href="{{url}}" target="_blank">{{this.name}}</a>
+                        {{#if nsfw}}<span class="tag">NSFW</span>{{/if}}
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all">
                         {{this.id}}
@@ -172,6 +172,8 @@
             </tbody>
         </table>
 	</div>
+    
+    <script src="../scripts/loadEffect.js"></script>
 </body>
 
 </html>

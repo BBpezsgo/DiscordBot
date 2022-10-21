@@ -209,6 +209,25 @@ class WebSocket {
             avatarUrlSmall: user.avatarURL({ size: 16 }),
             avatarUrlBig: user.avatarURL({ size: 128 }),
             id: user.id,
+            flags: {
+                BotHTTPInteractions: user.flags.has('BotHTTPInteractions'),
+                BugHunterLevel1: user.flags.has('BugHunterLevel1'),
+                BugHunterLevel2: user.flags.has('BugHunterLevel2'),
+                CertifiedModerator: user.flags.has('CertifiedModerator'),
+                HypeSquadOnlineHouse1: user.flags.has('HypeSquadOnlineHouse1'),
+                HypeSquadOnlineHouse2: user.flags.has('HypeSquadOnlineHouse2'),
+                HypeSquadOnlineHouse3: user.flags.has('HypeSquadOnlineHouse3'),
+                Hypesquad: user.flags.has('Hypesquad'),
+                Partner: user.flags.has('Partner'),
+                PremiumEarlySupporter: user.flags.has('PremiumEarlySupporter'),
+                Quarantined: user.flags.has('Quarantined'),
+                Spammer: user.flags.has('Spammer'),
+                Staff: user.flags.has('Staff'),
+                TeamPseudoUser: user.flags.has('TeamPseudoUser'),
+                VerifiedBot: user.flags.has('VerifiedBot'),
+                VerifiedDeveloper: user.flags.has('VerifiedDeveloper'),
+            },
+            partial: user.partial,
             hexAccentColor: user.hexAccentColor,
             bot: user.bot,
             createdAt: GetDate(user.createdAt),
@@ -216,7 +235,8 @@ class WebSocket {
             system: user.system,
             username: user.username,
             haveHash: (GetHash(user.id) != null && GetHash(user.id) != undefined),
-            hash: '' + GetHash(user.id)
+            hash: '' + GetHash(user.id),
+            createdAtText: user.createdAt.getFullYear() + '. ' + user.createdAt.getMonth() + '. ' + user.createdAt.getDate() + '.'
         }
     }
 
@@ -265,7 +285,7 @@ class WebSocket {
                 splash: server.splash,
 
                 available: server.available,
-                large: server.large,
+                large: server.large
                 // partnered: server.partnered,
                 // verified: server.verified,
             }
@@ -304,12 +324,11 @@ class WebSocket {
             if (channel.type == Discord.ChannelType.GuildCategory) {
                 const channels = []
 
-                channel.children.forEach(child => {
+                channel.children.cache.forEach(child => {
                     const newChannel = {
                         id: child.id,
                         createdAt: GetDate(child.createdAt),
                         deletable: child.deletable,
-                        invitable: child.invitable,
                         joinable: child.joinable,
                         locked: child.locked,
                         manageable: child.manageable,
@@ -323,6 +342,7 @@ class WebSocket {
                         parentId: child.parentId,
                         typeText: GetTypeText(child.type),
                         typeUrl: GetTypeUrl(child.type),
+                        url: child.url,
                         commands: ['Fetch'],
                     }
 
@@ -340,6 +360,7 @@ class WebSocket {
                     manageable: channel.manageable,
                     name: channel.name,
                     viewable: channel.viewable,
+                    url: channel.url,
                     channels: channels,
                     commands: ['Fetch'],
                 }
@@ -363,6 +384,7 @@ class WebSocket {
                     parentId: channel.parentId,
                     typeText: GetTypeText(channel.type),
                     typeUrl: GetTypeUrl(channel.type),
+                    url: channel.url,
                     commands: ['Fetch'],
                 }
 
@@ -1132,6 +1154,16 @@ class WebSocket {
             this.RenderPage(req, res, 'Testing')
         })
 
+        this.app.post('/FetchUser', (req, res) => {
+            this.client.users.fetch(req.query.id)
+                .then(() => {
+                    res.status(200).send('ok')
+                })
+                .catch((error) => {
+                    res.status(200).send(error)
+                })
+        })
+
         this.app.post('/userViews/Moderating/FetchGuild', (req, res) => {
             this.client.guilds.fetch(req.body.id)
                 .then(() => {
@@ -1549,8 +1581,6 @@ class WebSocket {
         })
 
         this.app.post('/userViews/Log/Clear', (req, res) => {
-            if (this.ClientType == 'MOBILE') { res.status(501).send('This is not available: the server is running on the phone'); return }
-
             fs.writeFileSync('./node.error.log', '')
         })
 

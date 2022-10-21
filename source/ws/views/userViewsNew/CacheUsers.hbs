@@ -16,72 +16,75 @@
 
 	<h1>Cache</h1>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>Users</h2>
-        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+        <table border="1" cellspacing="0">
             <tbody>
                 <tr>
-                    <td class="ListM">
-                        <b>Avatar</b>
-                    </td>
-                    <td class="ListM" style="width: 100%;">
-                        <b>Username</b>
-                    </td>
+                    <td class="ListM" style="width: 100%;"></td>
                     <td class="ListM">
                         <b>ID</b>
                     </td>
                     <td class="ListM">
-                        <b>Discriminator</b>
-                    </td>
-                    <td class="ListM">
                         <b>Created At</b>
                     </td>
-                    <td class="ListM">
-                        <b>Accent Color</b>
-                    </td>
+                    <td></td>
                     <td class="ListM">
                         <b>Hash</b>
                     </td>
                 </tr>
                 {{#each users}}
                 <tr>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img src="{{this.defaultAvatarUrl}}" width="16" height="16" title="Default avatar">
-                        
-                        <div class="tooltip">
-                            <img src="{{this.avatarUrlSmall}}" width="16" height="16" title="Avatar">
-                            <span class="tooltiptext">
-                                <img src="{{this.avatarUrlBig}}">
-                            </span>
+                    <td style="padding:0 4px 4px 4px;">
+                        <div style="display: inline-block; transform: translate(-2px, 4px);">
+                            {{#if avatarUrlSmall}}
+                            <div class="tooltip">
+                                <img src="{{this.avatarUrlSmall}}" width="16" height="16" title="Avatar">
+                                <span class="tooltiptext">
+                                    <img src="{{this.avatarUrlBig}}">
+                                </span>
+                            </div>      
+                            {{else}}
+                            <img src="{{this.defaultAvatarUrl}}" width="16" height="16" title="Default avatar">
+                            {{/if}}
                         </div>
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.username}}
-                        <span class="tag-{{this.bot}}">BOT</span>
-                        <span class="tag-{{this.system}}">System</span>
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.id}}
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        #{{this.discriminator}}
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.createdAt}}
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+
+                        <span title="Username">{{this.username}}</span><span style="color: #999;" title="Discriminator">#{{this.discriminator}}</span>
+                        
+                        {{#if bot}}<span class="tag">BOT</span>{{/if}}
+                        {{#if system}}<span class="tag">System</span>{{/if}}
+                        {{#if flags.HypeSquadOnlineHouse1}}<span class="user-badge">
+                            <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">
+                        </span>{{/if}}
+                        {{#if flags.HypeSquadOnlineHouse2}}<span class="user-badge">
+                            <img src="https://static.wikia.nocookie.net/discord/images/2/27/Hypesquad_brilliance_badge.png">
+                        </span>{{/if}}
+                        {{#if flags.HypeSquadOnlineHouse3}}<span class="user-badge">
+                            <img src="https://static.wikia.nocookie.net/discord/images/c/ca/Hypesquad_balance_badge.png">
+                        </span>{{/if}}
+
                         <div style="
                             width: 16px;
                             height: 16px;
                             border: 1px solid black;
                             border-radius: 3px;
-                            background-color: {{this.hexAccentColor}};                                            
-                        ">
-                        </div>
+                            background-color: {{this.hexAccentColor}};
+                            float: right;
+                            transform: translateY(4px);
+                        " title="Accent color">
                     </td>
-                    <td>                                    
+                    <td>
+                        {{this.id}}
+                    </td>
+                    <td>
+                        <span title="{{this.createdAt}}">{{this.createdAtText}}</span>
+                    </td>
+                    <td>
+                        <button class="btn-fetch" onclick="Post('/FetchUser?id={{id}}', event, () => { window.location.reload() })"></button>
+                    </td>
+                    <td>
                         <img width="16" height="16" src="/imagesNew/bool-{{this.haveHash}}.png" style="transform: translateY(3px);">
-                        <input type="text" value="{{this.hash}}" readonly>
+                        <input type="text" value="{{this.hash}}" readonly style="width: 100px;">
                         <form action="/userViews/GenerateHash" method="post"
                             style="margin: 0; display: inline-block;"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
@@ -94,6 +97,28 @@
             </tbody>
         </table>
 	</div>
+
+    <script>
+        /** @param {Event} event */
+        function Post(url, event, callback)
+        {
+            event.srcElement.classList.add('disabled')
+            var xmlHttp = new XMLHttpRequest()
+            xmlHttp.onreadystatechange = function() { 
+                if (xmlHttp.readyState == 4)
+                {
+                    event.srcElement.classList.remove('disabled')
+                    console.log(xmlHttp.response)
+                    if (xmlHttp.status == 200) {
+                        callback(xmlHttp.responseText)
+                    }
+                }
+            }
+            xmlHttp.open('POST', url, true)
+            xmlHttp.send(null)
+        }
+    </script>
+    <script src="../scripts/loadEffect.js"></script>
 </body>
 
 </html>

@@ -13,33 +13,28 @@
 <body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
    	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
     
-	<h1>
-        <form action="/userViews/Moderating/Server/Back" method="post"
-            style="display: inline-block; margin-right: 20px;"
-            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
-            <input type="submit" value="" class="btn-tool btn-tool-back">
-        </form>
-        Moderating
-    </h1>
+	<h1>Moderating</h1>
     
-	<div class="container">
+	<div class="container loading-effect">
+        <h2>
+            <form action="/userViews/Moderating/Server/Back" method="post"
+                style="display: inline-block; margin-right: 20px;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                <input type="submit" value="" class="btn-tool btn-tool-back">
+            </form>
+            <span style="color: #aaa">Channel</span>
+            {{channel.name}}
+            <span style="color: #aaa">in guild</span>
+            <div class="tooltip" style="transform: translateY(10px);">
+                <img class="server-icon circle-32" src="{{server.iconUrlSmall}}" width="32" height="32" title="{{server.nameAcronym}}">
+                <span class="tooltiptext" style="font-weight: normal;">
+                    <img src="{{server.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
+                </span>
+            </div>
+            {{server.name}}
+        </h2>
 		<table style="width: 100%;">
             <tbody>
-                <tr>
-                    <td class="h2" colspan="3" style="padding-bottom: 10px;">
-                        Moderating channel
-                        {{channel.name}}
-                        in guild
-                        <div class="tooltip" style="transform: translateY(10px);">
-                            <img class="server-icon" src="{{server.iconUrlSmall}}" width="32" height="32"
-                                title="{{server.nameAcronym}}">
-                            <span class="tooltiptext" style="font-weight: normal;">
-                                <img src="{{server.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
-                            </span>
-                        </div>
-                        {{server.name}}
-                    </td>
-                </tr>
                 <tr>
                     <td width="25%" class="Item">ID:</td>
                     <td colspan="2">
@@ -177,7 +172,7 @@
 		</table>
 	</div>
     
-	<div class="container">
+	<div class="container loading-effect">
         <h2>Send message</h2>
 		<table style="width: 100%;">
             <tbody>
@@ -201,7 +196,7 @@
 		</table>
 	</div>
     
-	<div class="container">
+	<div class="container loading-effect">
         <h2>Messages</h2>
 		<table style="width: 100%;">
             <tbody>
@@ -288,6 +283,8 @@
             </tbody>
 		</table>
 	</div>
+    
+    <script src="../scripts/loadEffect.js"></script>
 </body>
 
 </html>

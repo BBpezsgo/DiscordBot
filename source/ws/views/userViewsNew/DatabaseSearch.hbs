@@ -18,7 +18,7 @@
 
     <h1>Database</h1>
 
-	<div class="container">
+	<div class="container loading-effect">
         <table border="0" width="100%">
             <tbody>
                 <tr>
@@ -72,7 +72,7 @@
         </table>
 	</div>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>BOT's database</h2>
         <table border="0" width="100%">
             <tbody>
@@ -90,7 +90,7 @@
         </table>
 	</div>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>Market</h2>
         <table border="0" width="100%">
             <tbody>
@@ -124,71 +124,50 @@
         </table>
 	</div>
 
-	<div class="container">
+	<div class="container loading-effect">
 		<h2>Users</h2>
-        <table border="0" width="100%">
+        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
             <tbody>
                 <tr>
-                    <td width="698" align="center">
-                        <form action="/userViews/Database/Search" method="post"
+                    <td class="ListM" style="width: 100%;"></td>
+                    <td class="ListM">
+                        <b>ID</b>
+                    </td>
+                    <td class="ListM">
+
+                    </td>
+                </tr>
+                {{#each users}}
+                <tr>
+                    <td style="padding:0 4px">
+                        <div style="display: inline-block; transform: translate(-2px, 4px);">
+                            <div class="tooltip">
+                                <img src="{{avatarUrlSmall}}" width="16" height="16" title="Avatar">
+                                <span class="tooltiptext">
+                                    <img src="{{avatarUrlLarge}}">
+                                </span>
+                            </div>
+                        </div>
+                        <span title="Username">{{name}}</span>
+                    </td>
+                    <td style="padding:0 4px">
+                        {{id}}
+                    </td>
+                    <td style="padding:0 4px">
+                        <img class="show-invert-{{haveDatabase}} miniicon" src="/imagesNew/err2.png" width="16" height="16">
+                        <form action="/userViews/Database/Search" method="post" style="margin: 0; display: inline-block;"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
-                            <input type="text" name="id" value="{{../this.id}}" placeholder="User ID" required>
-                            <input type="submit" value="Search">
-                            <span style="font-weight: bold; color: red;">{{searchError}}</span>
+                            <input type="text" name="id" value="{{id}}" style="display: none;">
+                            <input type="submit" value="View">
                         </form>
                     </td>
                 </tr>
-                <tr>
-                    <td width="698" align="center" colspan="2">
-                        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
-                            <tbody>
-                                <tr>
-                                    <td class="ListM">
-                                        <b>Avatar</b>
-                                    </td>
-                                    <td class="ListM" style="width: 100%;">
-                                        <b>Username</b>
-                                    </td>
-                                    <td class="ListM">
-                                        <b>ID</b>
-                                    </td>
-                                    <td class="ListM">
-
-                                    </td>
-                                </tr>
-                                {{#each users}}
-                                <tr>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
-                                        <div class="tooltip">
-                                            <img src="{{this.avatarUrlSmall}}" width="16" height="16" title="Avatar">
-                                            <span class="tooltiptext">
-                                                <img src="{{this.avatarUrlLarge}}">
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
-                                        {{this.name}}
-                                    </td>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
-                                        {{this.id}}
-                                    </td>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
-                                        <img class="show-invert-{{this.haveDatabase}} miniicon" src="/imagesNew/err2.png" width="16" height="16">
-                                        <form action="/userViews/Database/Search" method="post" style="margin: 0; display: inline-block;"
-                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
-                                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
-                                            <input type="submit" value="View">
-                                        </form>
-                                    </td>
-                                </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
+                {{/each}}
             </tbody>
         </table>
 	</div>
+    
+    <script src="../scripts/loadEffect.js"></script>
 </body>
 
 </html>
