@@ -989,8 +989,10 @@ class WebSocket {
             }
 
             var statusIcon = ' - ❌'
-            if (this.client.ws.shards.first().status == 0) {
-                statusIcon = ''
+            if (this.client.ws.shards.size > 0) {
+                if (this.client.ws.shards.first().status == 0) {
+                    statusIcon = ''
+                }
             }
 
             return 'Discord BOT' + statusIcon + ' - ' + icon

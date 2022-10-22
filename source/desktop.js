@@ -2650,13 +2650,19 @@ async function processApplicationCommand(command, privateCommand) {
 
 function StartBot() {
     SystemLog('Start bot...')
-    bot.login(tokens.discord).catch((err) => {
-        log(ERROR + ': ' + err)
-    })
+    bot.login(tokens.discord)
+        .then((token) => {
+            SystemLog('Logged in')
+        })
+        .catch((error) => {
+            SystemLog('Error: ' + error.message)
+            LogError(error)
+        })
 }
 
 function StopBot() {
     bot.destroy()
+    SystemLog('Destroyed')
     botStopped = true
 }
 
