@@ -185,12 +185,12 @@ const request = https.get(url, function (res) {
 
         if (logs.length > 0) {
             if (logs[logs.length - 1].includes(' Downloading ')) {
-                logs[logs.length - 1] = `%TASK% Downloading ${Math.round(cur/full*100)}% (${GetDataSize(cur)})`
+                logs[logs.length - 1] = `%TASK% Downloading ${Math.min(Math.round(cur/full*100), 100)}% (${GetDataSize(cur)})`
             } else {
-                Log(`%TASK% Downloading ${Math.round(cur/full*100)}% (${GetDataSize(cur)})`)
+                Log(`%TASK% Downloading ${Math.min(Math.round(cur/full*100), 100)}% (${GetDataSize(cur)})`)
             }
         } else {
-            Log(`%TASK% Downloading ${Math.round(cur/full*100)}% (${GetDataSize(cur)})`)
+            Log(`%TASK% Downloading ${Math.min(Math.round(cur/full*100), 100)}% (${GetDataSize(cur)})`)
         }
         RefreshScreen()
     })
