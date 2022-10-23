@@ -181,7 +181,7 @@ logManager.Loading("Loading extensions", "MusicPlayer")
 const MusicPlayer = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
-const { WebSocket } = require('./ws/ws')
+const WebInterface = require('./web-interface/manager')
 const { GetHash } = require('./functions/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
@@ -261,7 +261,7 @@ if (!databaseIsSuccesfullyLoaded) {
     })
 }
 
-const ws = new WebSocket('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager, 'DESKTOP')
+const ws = new WebInterface('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager, 'DESKTOP')
 logManager.BlankScreen()
 
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))

@@ -14,7 +14,7 @@ function GetTimePrefix() {
 }
 
 function Log(message) {
-    fs.appendFile('./ws/log/' + GetFilename() + '.log', '\n' + GetTimePrefix() + ' ' + message, function (err) {
+    fs.appendFile('./web-interface/log/' + GetFilename() + '.log', '\n' + GetTimePrefix() + ' ' + message, function (err) {
         if (err) {
             throw err
         }
@@ -22,7 +22,7 @@ function Log(message) {
 }
 
 function LogRaw(message) {
-    fs.appendFile('./ws/log/' + GetFilename() + '.log', message, function (err) {
+    fs.appendFile('./web-interface/log/' + GetFilename() + '.log', message, function (err) {
         if (err) {
             throw err
         }
@@ -40,10 +40,10 @@ function LogRaw(message) {
  * }} message
  */
 function HbLog(message) {
-    if (fs.existsSync('./ws/log')) {
+    if (fs.existsSync('./web-interface/log')) {
         Log(JSON.stringify(message))
     } else {
-        fs.mkdir('./ws/log', (err) => {
+        fs.mkdir('./web-interface/log', (err) => {
             if (err) throw err
             Log(JSON.stringify(message))
         })
@@ -53,10 +53,10 @@ function HbLog(message) {
 function HbStart() {
     const message =
         '\n\n\n\n' + GetTimePrefix() + ' ' + startedMessage
-    if (fs.existsSync('./ws/log')) {
+    if (fs.existsSync('./web-interface/log')) {
         LogRaw(message)
     } else {
-        fs.mkdir('./ws/log', (err) => {
+        fs.mkdir('./web-interface/log', (err) => {
             if (err) throw err
             LogRaw(message)
         })
@@ -67,10 +67,10 @@ function HbStart() {
 function HbGetLogs(invisibleIp) {
     /** @type {{ dateText: string; content: string;}[]} */
     const filesRaw = []
-    fs.readdirSync('./ws/log/').forEach(filename => {
+    fs.readdirSync('./web-interface/log/').forEach(filename => {
         filesRaw.push({
             dateText: filename.split('.')[0],
-            content: fs.readFileSync('./ws/log/' + filename, 'utf-8')
+            content: fs.readFileSync('./web-interface/log/' + filename, 'utf-8')
         })
     })
 

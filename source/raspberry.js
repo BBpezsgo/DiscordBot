@@ -164,7 +164,7 @@ const ytdl = require('ytdl-core')
 const { musicGetLengthText } = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
-const { WebSocket } = require('./ws/ws')
+const WebInterface = require('./web-interface/manager')
 const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
@@ -238,7 +238,7 @@ function log(message = '', translateResult = null) {
 
 
 
-const ws = new WebSocket('1234', '192.168.1.101', 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'RASPBERRY')
+const ws = new WebInterface('1234', '192.168.1.101', 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'RASPBERRY')
 logManager.BlankScreen()
 
 

@@ -28,7 +28,7 @@ const https = require('https');
 
 const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
-class WebSocket {
+class WebInterfaceManager {
     /**
      * @param {string} password
      * @param {string} ip
@@ -2115,4 +2115,4 @@ function xpRankNext(score) {
     return next
 }
 
-module.exports = { WebSocket }
+module.exports = WebInterfaceManager

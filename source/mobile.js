@@ -146,7 +146,7 @@ const ytdl = require('ytdl-core')
 
 
 logManager.Loading('Loading', "WS")
-const { WebSocket } = require('./ws/ws')
+const WebInterface = require('./web-interface/manager')
 
 
 logManager.Loading('Loading packet', "discord.js")
@@ -217,7 +217,7 @@ function log(message = '', translateResult = null) {
 
 
 
-const ws = new WebSocket('1234', '192.168.1.102', 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'MOBILE')
+const ws = new WebInterface('1234', '192.168.1.102', 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'MOBILE')
 logManager.BlankScreen()
 
 
