@@ -27,8 +27,8 @@ SystemStart(false, true)
 
 const startDateTime = new Date(Date.now())
 
-const { LogManager } = require('./functions/log.js')
-var logManager = new LogManager(true, null, null)
+const LogManager = require('./functions/log')
+var logManager = new LogManager(null, null)
 
 logManager.Loading('Loading packet', "fs")
 const fs = require('fs')
@@ -205,7 +205,7 @@ const bot = new Discord.Client({ properties: { $browser: "Discord iOS" }, intent
 logManager.Destroy()
 
 const statesManager = new StatesManager()
-logManager = new LogManager(true, bot, statesManager)
+logManager = new LogManager(bot, statesManager)
 
 statesManager.botLoaded = true
 
@@ -298,10 +298,6 @@ bot.on('debug', debug => {
     const translatedDebug = TranslateMessage(debug)
 
     if (translatedDebug == null) return
-
-    if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
-        logManager.AddTimeline(2)
-    }
 
     if (translatedDebug.secret == true) return
 
@@ -763,8 +759,6 @@ bot.once('ready', async () => {
         }
     }, 100)
     
-    logManager.AddTimeline(2)
-
 
 
 

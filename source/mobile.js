@@ -24,8 +24,8 @@ process.on('uncaughtException', function (err) {
 
 
 
-const { LogManager } = require('./functions/log.js')
-var logManager = new LogManager(true, null, null)
+const LogManager = require('./functions/log')
+var logManager = new LogManager(null, null)
 
 
 
@@ -183,15 +183,12 @@ const bot = new Discord.Client({ properties: { $browser: "Discord iOS" }, intent
 logManager.Destroy()
 
 const statesManager = new StatesManager()
-logManager = new LogManager(true, bot, statesManager)
+logManager = new LogManager(bot, statesManager)
 const newsManager = new NewsManager(statesManager, false)
 
 statesManager.botLoaded = true
 
-/** @param {string} message */
-function log(message = '', translateResult = null) {
-    logManager.Log(message, false, translateResult)
-}
+function log() {}
 
 
 
@@ -270,10 +267,6 @@ bot.on('debug', debug => {
     const translatedDebug = TranslateMessage(debug)
 
     if (translatedDebug == null) return
-
-    if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
-        logManager.AddTimeline(2)
-    }
 
     if (translatedDebug.secret == true) return
 
@@ -745,8 +738,6 @@ bot.once('ready', async () => {
     }, 10000)
 
     TrySendWeatherReport(statesManager, bot, '746266528508411935')
-
-    logManager.AddTimeline(2)
 
     log(DONE + ': A BOT kész!')
 

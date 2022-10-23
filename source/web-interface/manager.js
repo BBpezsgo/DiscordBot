@@ -3,18 +3,13 @@ const { engine } = require('express-handlebars')
 const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
-const { LogManager, MessageCodes } = require('../functions/log.js')
+const LogManager = require('../functions/log')
 const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../functions/userHashManager')
 const fs = require('fs')
 const os = require('os')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
 const {
-    INFO,
-    ERROR,
-    WARNING,
-    DEBUG,
-    DONE,
     WsStatusText,
     NsfwLevel,
     VerificationLevel,
@@ -24,9 +19,6 @@ const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
 const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
-const https = require('https');
-
-const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
 
 class WebInterfaceManager {
     /**
@@ -128,7 +120,6 @@ class WebInterfaceManager {
         this.RegisterPublicRoots()
 
         this.OnStartListen = () => {
-            this.logManager.Log(SERVER + ': ' + 'Listening on http://' + this.server.address().address + ":" + this.server.address().port, true, null, MessageCodes.HandlebarsFinishLoading)
             this.statesManager.WebInterface.IsDone = true
             this.statesManager.WebInterface.URL = 'http://' + this.server.address().address + ":" + this.server.address().port
             if (this.ClientType != 'MOBILE') {
@@ -149,7 +140,6 @@ class WebInterfaceManager {
             }
         })
         this.server.on('clientError', (err, socket) => {
-            this.logManager.Log(ERROR + ': ' + err, true)
             if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'CLIENT_ERROR', message: err.message, helperMessage: 'Client error: ' + err.message })
             }
@@ -162,13 +152,11 @@ class WebInterfaceManager {
         this.server.on('close', () => {
             this.statesManager.WebInterface.IsDone = false
             this.statesManager.WebInterface.URL = ''
-            this.logManager.Log(SERVER + ': ' + "Closed", true)
             if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'NORMAL', message: 'Server closed' })
             }
         })
         this.server.on('connect', (req, socket, head) => {
-            this.logManager.Log(DEBUG + ': ' + "connect", true)
             if (this.ClientType != 'MOBILE') {
                 HbLog({ IP: req.socket.remoteAddress, type: 'CONNECT', url: req.url, method: req.method, helperMessage: 'Someone wanted to connect' })
             }
@@ -184,7 +172,6 @@ class WebInterfaceManager {
             }
         })
         this.server.on('upgrade', (req, socket, head) => {
-            this.logManager.Log(DEBUG + ': ' + "upgrade", true)
             if (this.ClientType != 'MOBILE') {
                 HbLog({ IP: req.socket.remoteAddress, type: 'NORMAL', message: 'Upgrade', helperMessage: 'Someone upgraded' })
             }

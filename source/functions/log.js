@@ -1,16 +1,6 @@
 const { GetTime, GetDataSize, Capitalize } = require('../functions/functions')
 const { WsStatus } = require('../functions/enums')
 
-const fontColor = '\033[37m'
-
-const INFO = '[' + '\033[34m' + 'INFO' + '\033[40m' + '' + fontColor + ']'
-const ERROR = '[' + '\033[31m' + 'ERROR' + '\033[40m' + '' + fontColor + ']'
-const WARNING = '[' + '\033[33m' + 'WARNING' + '\033[40m' + '' + fontColor + ']'
-const SHARD = '[' + '\033[35m' + 'SHARD' + '\033[40m' + '' + fontColor + ']'
-const DEBUG = '[' + '\033[30m' + 'DEBUG' + '\033[40m' + '' + fontColor + ']'
-const DONE = '[' + '\033[32m' + 'DONE' + '\033[40m' + '' + fontColor + ']'
-const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + fontColor + ']'
-
 const timelineStepSize = 20000
 
 const enabled = true
@@ -34,29 +24,31 @@ const CliColor = {
     BgCyan: "\x1b[46m",
     BgWhite: "\x1b[47m",
 
-    FgDefault: fontColor
+    FgDefault: '\033[37m'
 }
 
 const { StatesManager } = require('./statesManager.js')
 
 const Discord = require('discord.js')
 
-const MessageCodes = {
-    HandlebarsStartLoading: 0,
-    HandlebarsFinishLoading: 1
-}
-
-const TimeLine = {
-    None: 0,
-    Secondary: 1,
-    Primary: 2
-}
-
 const spinner = ['─', '\\', '|', '/']
-const timeline = [' ', '▓', '█']
 const timeout = ['◌', '○', '●']
 
-const { TranslateResult } = require('./translator.js')
+const terminalSize = {
+    width: process.stdout.columns,
+    height: process.stdout.rows
+}
+
+const window = {
+    width: terminalSize.width,
+    height: 20
+}
+
+process.stdout.addListener('resize', () => {
+    terminalSize.width = process.stdout.columns
+    terminalSize.height = process.stdout.rows
+    window.width = terminalSize.width
+})
 
 /**Reprints a line on the console */
 const reprint = (text, x = 0, y = 0) => {
@@ -66,79 +58,11 @@ const reprint = (text, x = 0, y = 0) => {
     process.stdout.write('\n')
 }
 
-/**Prints a text to the console */
-const print = async (text) => {
-    process.stdout.write(text)
-    process.stdout.write('\n')
-}
-
-/**Sleep for 'ms' milliseconds */
-const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 function chars(char, len) {
     txt = ""
     for (let i = 0; i < len; i++) {
         txt += char
     }
-    return txt
-}
-
-/**@param {string} str */
-function ThisContainsColorcode(str) {
-    return (
-        str.includes(CliColor.BgBlack) ||
-        str.includes(CliColor.BgBlue) ||
-        str.includes(CliColor.BgCyan) ||
-        str.includes(CliColor.BgGreen) ||
-        str.includes(CliColor.BgMagenta) ||
-        str.includes(CliColor.BgRed) ||
-        str.includes(CliColor.BgWhite) ||
-        str.includes(CliColor.BgYellow) ||
-        str.includes(CliColor.FgBlack) ||
-        str.includes(CliColor.FgBlue) ||
-        str.includes(CliColor.FgCyan) ||
-        str.includes(CliColor.FgDefault) ||
-        str.includes(CliColor.FgGreen) ||
-        str.includes(CliColor.FgMagenta) ||
-        str.includes(CliColor.FgRed) ||
-        str.includes(CliColor.FgWhite) ||
-        str.includes(CliColor.FgYellow)
-    )
-}
-
-function RemoveColorcodes(text) {
-    var txt = text + ''
-    while (ThisContainsColorcode(txt)) {
-        txt = txt.replace(CliColor.BgBlack, '')
-        txt = txt.replace(CliColor.BgBlue, '')
-        txt = txt.replace(CliColor.BgCyan, '')
-        txt = txt.replace(CliColor.BgGreen, '')
-        txt = txt.replace(CliColor.BgMagenta, '')
-        txt = txt.replace(CliColor.BgRed, '')
-        txt = txt.replace(CliColor.BgWhite, '')
-        txt = txt.replace(CliColor.BgYellow, '')
-        txt = txt.replace(CliColor.FgBlack, '')
-        txt = txt.replace(CliColor.FgBlue, '')
-        txt = txt.replace(CliColor.FgCyan, '')
-        txt = txt.replace(CliColor.FgDefault, '')
-        txt = txt.replace(CliColor.FgGreen, '')
-        txt = txt.replace(CliColor.FgMagenta, '')
-        txt = txt.replace(CliColor.FgRed, '')
-        txt = txt.replace(CliColor.FgWhite, '')
-        txt = txt.replace(CliColor.FgYellow, '')
-    }
-    return txt
-}
-
-/**@param {string} text @param {number} width */
-function genLine(text, width) {
-    var txt = text + ''
-    if (RemoveColorcodes(text).length > width) {
-        txt = txt.substring(0, width - 3) + CliColor.FgDefault + '...'
-    }
-    txt += chars(' ', width - RemoveColorcodes(text).length)
     return txt
 }
 
@@ -165,25 +89,25 @@ function StateText(state) {
         return CliColor.FgGreen + 'Ready' + CliColor.FgDefault
     }
     if (state == 'CONNECTING') {
-        return CliColor.FgYellow + 'Connecting...' + CliColor.FgDefault
+        return CliColor.FgYellow + 'Connecting' + CliColor.FgDefault
     }
     if (state == 'RECONNECTING') {
-        return CliColor.FgYellow + 'Reconnecting...' + CliColor.FgDefault
+        return CliColor.FgYellow + 'Reconnecting' + CliColor.FgDefault
     }
     if (state == 'NEARLY') {
-        return CliColor.FgYellow + 'Nearly...' + CliColor.FgDefault
+        return CliColor.FgYellow + 'Nearly' + CliColor.FgDefault
     }
     if (state == 'DISCONNECTED') {
         return CliColor.FgRed + 'Disconnected' + CliColor.FgDefault
     }
     if (state == 'WAITING_FOR_GUILDS') {
-        return CliColor.FgYellow + 'Waiting for guilds...' + CliColor.FgDefault
+        return CliColor.FgYellow + 'Waiting for guilds' + CliColor.FgDefault
     }
     if (state == 'IDENTIFYING') {
-        return CliColor.FgYellow + 'Identifying...' + CliColor.FgDefault
+        return CliColor.FgYellow + 'Identifying' + CliColor.FgDefault
     }
     if (state == 'RESUMING') {
-        return CliColor.FgYellow + 'Resuming...' + CliColor.FgDefault
+        return CliColor.FgYellow + 'Resuming' + CliColor.FgDefault
     }
     return Capitalize(state)
 }
@@ -225,33 +149,35 @@ function StateTextBot(state) {
     return Capitalize(state)
 }
 
+/** @param {string} text */
+function RemoveColors(text) {
+    return text.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '')
+}
+
+/** @param {string} text @param {number} width @param {number} marginLeft */
+function FixedWidth(text, width, marginLeft) {
+    var txt = text + ''
+    if (marginLeft !== undefined) {
+        if (RemoveColors(txt).length + marginLeft > width) {
+            txt = txt.substring(0, width - 3 - marginLeft) + '...'
+        }
+        txt += chars(' ', width - RemoveColors(txt).length - marginLeft)
+        txt = chars(' ', marginLeft) + txt
+    } else {
+        if (RemoveColors(txt).length > width) {
+            txt = txt.substring(0, width - 3) + '...'
+        }
+        txt += chars(' ', width - RemoveColors(txt).length)
+    }
+    return txt
+}
+
 class LogManager {
-    /**@param {boolean} isPhone */
-    constructor(isPhone, bot, statesManager) {
-
-        /** @type {[LogMsg]}*/
-        this.logs = []
-        /** @type {number}*/
-        this.timer = 0
-
-        /** @type {number}*/
-        this.loggedCount = 0
-
-        /** @type {string}*/
-        this.currentlyTyping = ""
-        /** @type {number}*/
-        this.blinkerTime = 0
-
+    constructor(bot, statesManager) {
         /** @type {LoadingProgress}*/
         this.loading = new LoadingProgress()
         /** @type {number}*/
         this.loadingIndex = 0
-
-        /**@type {boolean} */
-        this.enableLog = true
-
-        /**@type {boolean} */
-        this.isPhone = isPhone
 
         /**@type {Discord.Client} */
         this.bot = bot
@@ -269,12 +195,6 @@ class LogManager {
 
         /** @type {NodeJS.Timer} */
         this.timer = null
-
-        /** @type {number[]} */
-        this.timeline = []
-
-        /** @type {number} */
-        this.lastTimelineTime = 0
 
         /** @type {number} */
         this.dailyWeatherReportLoadingTextTimeout = 0
@@ -295,20 +215,6 @@ class LogManager {
         if (bot != null && statesManager != null) {
             if (enabled == false) { return }
             this.timer = setInterval(async () => {
-                if (this.enableLog == true) {
-                    if (this.timer > 3) {
-                        for (let i = 0; i < this.logs.length; i++) {
-                            const log = this.logs[i]
-                            if (log.printed == false) {
-                                this.loggedCount += 1
-                                this.logs[i].printed = true
-                            }
-                        }
-                    } else {
-                        this.timer += 1
-                    }
-                }
-
                 this.loadingIndex += (this.deltaTime * 12)
                 if (Math.round(this.loadingIndex) >= spinner.length) {
                     this.loadingIndex = 0
@@ -326,13 +232,9 @@ class LogManager {
                     this.statesManager.WebInterface.Requests.splice(delIndex)
                 }
 
-                this.blinkerTime += this.deltaTime
-
-                if (this.blinkerTime > 1000) {
-                    this.blinkerTime = -1000
-                }
-
                 if (this.statesManager.WeatherReport.Text.length == 0) {
+                    this.dailyWeatherReportLoadingTextTimeout += this.deltaTime
+                } else if (this.statesManager.WeatherReport.Text == 'I don\'t need to send a new report') {
                     this.dailyWeatherReportLoadingTextTimeout += this.deltaTime
                 } else {
                     this.dailyWeatherReportLoadingTextTimeout = 0
@@ -350,11 +252,6 @@ class LogManager {
                 this.deltaTime = now - this.lastTime
                 if (this.deltaTime < 0) { this.deltaTime = 0 }
                 this.lastTime = now
-
-                if (this.lastTimelineTime < Date.now() - timelineStepSize) {
-                    this.lastTimelineTime = Date.now()
-                    this.AddTimeline(1)
-                }
 
                 var removeIndex = -1
                 for (let i = 0; i < this.statesManager.WebInterface.Clients.length; i++) {
@@ -381,61 +278,14 @@ class LogManager {
                     this.loadingIndex = 0
                 }
 
-                this.blinkerTime += this.deltaTime
-
-                if (this.blinkerTime > 1) {
-                    this.blinkerTime = -1
-                }
-
-                /*if (this.statesManager.WeatherReport.Text.length == 0) {
-                    this.dailyWeatherReportLoadingTextTimeout += this.deltaTime
-                } else {
-                    this.dailyWeatherReportLoadingTextTimeout = 0
-                }
-
-                if (this.statesManager.News.LoadingText.length == 0) {
-                    this.newsLoadingTextTimeout += this.deltaTime
-                } else {
-                    this.newsLoadingTextTimeout = 0
-                }*/
-
-
                 const now = (Date.now() / 1000)
                 this.deltaTime = now - this.lastTime
                 if (this.deltaTime < 0) { this.deltaTime = 0 }
                 this.lastTime = now
 
-                if (this.lastTimelineTime < Date.now() - timelineStepSize) {
-                    this.lastTimelineTime = Date.now()
-                    this.AddTimeline(1)
-                }
-
                 this.RefreshScreen()
             }, 100)
         }
-    }
-
-    AddTimeline(val) {
-        this.timeline.push(Date.now(), val)
-    }
-
-    GetTimelineText() {
-        var str = '|'
-        const width = 30
-        for (let i = Date.now() - (timelineStepSize * width); i < Date.now(); i += timelineStepSize) {
-            var x = ' '
-            for (let j = 0; j < this.timeline.length; j += 2) {
-                if (this.timeline[j] >= (i - timelineStepSize) && this.timeline[j] <= i) {
-                    x = timeline[this.timeline[j + 1]]
-                    if (this.timeline[j + 1] == 2) { break }
-                }
-            }
-            str += x
-        }
-        if ((str.length - 1) > width) {
-            str = str.substring(0, width + 1)
-        }
-        return str + '|'
     }
 
     Destroy() {
@@ -463,11 +313,6 @@ class LogManager {
             this.loadingIndex = 0
         }
 
-        this.blinkerTime += this.deltaTime
-
-        if (this.blinkerTime > 1) {
-            this.blinkerTime = -1
-        }
         const now = Date.now()
         this.deltaTime = now - this.lastTime
         this.lastTime = now
@@ -480,165 +325,142 @@ class LogManager {
         
         this.loadingOverride = ''
 
-        const window = { width: 80, height: 25 }
-        if (this.isPhone == true) {
-            window.width = 48
-        } else {
-            window.width = 80
-        }
-
-        var txt = '┌' + chars('─', window.width - 2) + '┒\n'
-        txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+        var txt = ''
+        txt += '\n'
         
         if (this.promtMessage.length > 0) {
             const remaingHeight = (window.height - txt.split('\n').length - 1) - 2
             for (let i = 0; i < remaingHeight; i++) {
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+                txt += '\n'
             }
 
-            txt += '│ ' + genLine(this.promtMessage, window.width - 4) + ' ┃\n'
+            txt += FixedWidth(this.promtMessage, window.width, 1) + '\n'
             const buttons = this.promtButtons
             var buttonsText = ''
             for (let i = 0; i < buttons.length; i++) {
                 const button = buttons[i]
                 buttonsText += CliColor.BgWhite + CliColor.FgBlack + '| ' + button + ' |' + CliColor.FgDefault + CliColor.BgBlack + '  '
             }
-            txt += '│ ' + genLine(buttonsText, window.width - 4) + ' ┃\n'
+            txt += FixedWidth(buttonsText, window.width, 1) + '\n'
         } else {
             const remaingHeight = window.height - txt.split('\n').length - 1
             for (let i = 0; i < remaingHeight; i++) {
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+                txt += '\n'
             }
         }
 
-        txt += '┕' + chars('━', window.width - 2) + '┛\n'
-        txt += chars(' ', window.width) + '\n'
+        txt += '\n'
 
         reprint(txt)
     }
 
-    //txt += '˥ ˦ ˧ ˨ ˩' + '\n'
-    //txt += '˹˺˻˼' + '\n'
-
     RefreshScreen() {
         if (enabled == false) { return }
-        const window = { width: 80, height: 25 }
-        if (this.isPhone == true) {
-            window.width = 48
-        } else {
-            window.width = 80
-        }
 
-        var txt = '┌' + chars('─', window.width - 2) + '┒\n'
+        var txt = ''
 
         if (this.loadingOverride == '') {
-            txt += '│ ' + genLine(genLine('Delta time:', 20) + genLine(Math.round((this.deltaTime-0.1)*1000)/1000, 5) + ' sec', window.width - 4) + ' ┃\n'
-           
             if (this.bot != undefined) {
-                txt += '│ ' + genLine(genLine('Ready at:', 20) + GetTime(this.bot.readyAt), window.width - 4) + ' ┃\n'
+                txt += FixedWidth('┌──── BOT', window.width)
+                txt += FixedWidth('│' + FixedWidth('Ready at:', 20) + GetTime(this.bot.readyAt), window.width) + '\n'
                 var dfdfdf = new Date(0)
                 dfdfdf.setSeconds(this.bot.uptime / 1000)
                 dfdfdf.setHours(dfdfdf.getHours() - 1)
-                txt += '│ ' + genLine(genLine('Uptime:', 20) + GetTime(dfdfdf), window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine(genLine('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine(genLine('WS State:', 20) + StateText(WsStatus[this.bot.ws.status]), window.width - 4) + ' ┃\n'
-            } else {
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+                txt += FixedWidth('│' + FixedWidth('Uptime:', 20) + GetTime(dfdfdf), window.width) + '\n'
+                txt += FixedWidth('│' + FixedWidth('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width) + '\n'
+                txt += FixedWidth('│' + FixedWidth('WS State:', 20) + StateText(WsStatus[this.bot.ws.status]), window.width) + '\n'
+                if (this.bot.ws.shards.size == 0) {
+                    txt += FixedWidth('│' + FixedWidth('Shard State:', 20) + 'No shard', window.width) + '\n'
+                } else {
+                    txt += FixedWidth('│' + FixedWidth('Shard State:', 20) + StateText(WsStatus[this.bot.ws.shards.first().status]), window.width) + '\n'
+                }   
             }
             
             if (this.statesManager != undefined) {
-                txt += '│ ' + genLine(genLine('BOT State:', 20) + StateTextBot(this.statesManager.botLoadingState), window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine(genLine('Timeouts:', 20) + timeout[this.statesManager.heartbeat] + ' ' + timeout[this.statesManager.hello], window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine(genLine('HB State:', 20) + StateText_HB(this.statesManager.WebInterface.Error, this.statesManager.WebInterface.IsDone, this.statesManager.WebInterface.URL), window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine(genLine('HB Requiests:', 20) + this.statesManager.WebInterface.Requests.length, window.width - 4) + ' ┃\n'
+                txt += FixedWidth('│' + FixedWidth('BOT State:', 20) + StateTextBot(this.statesManager.botLoadingState), window.width) + '\n'
+                txt += FixedWidth('│' + FixedWidth('Timeouts:', 20) + timeout[this.statesManager.heartbeat] + ' ' + timeout[this.statesManager.hello], window.width) + '\n'
+                if (this.statesManager.Shard.IsLoading == true) {
+                    txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading Shard:', 20) + this.statesManager.Shard.LoadingText, window.width) + '\n'
+                }
+                if (this.statesManager.Shard.Error.length > 0) {
+                    txt += FixedWidth('│' + FixedWidth('Shard:', 20) + CliColor.FgRed + this.statesManager.Shard.Error + CliColor.FgDefault, window.width) + '\n'
+                }
+                txt += FixedWidth('', window.width) + '\n'
+                txt += FixedWidth('┌──── Web Interface', window.width)
+                txt += FixedWidth('│' + FixedWidth('HB State:', 20) + StateText_HB(this.statesManager.WebInterface.Error, this.statesManager.WebInterface.IsDone, this.statesManager.WebInterface.URL), window.width) + '\n'
+                txt += FixedWidth('│' + FixedWidth('HB Requiests:', 20) + this.statesManager.WebInterface.Requests.length, window.width) + '\n'
                 for (let i = 0; i < this.statesManager.WebInterface.Clients.length; i++) {
                     const socket = this.statesManager.WebInterface.Clients[i]
                     if (i == 0) {
-                        txt += '│ ' + genLine(genLine('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width - 4) + ' ┃\n'
+                        txt += FixedWidth('│' + FixedWidth('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
                     } else {
-                        txt += '│ ' + genLine(genLine('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + ", " + "]", window.width - 4) + ' ┃\n'
+                        txt += FixedWidth('│' + FixedWidth('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
                     }
                 }
-            } else {
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
-            }
-
-            if (this.bot != undefined) {
-                if (this.bot.ws.shards.size == 0) {
-                    txt += '│ ' + genLine(genLine('Shard State:', 20) + 'None', window.width - 4) + ' ┃\n'
-                } else {
-                    txt += '│ ' + genLine(genLine('Shard State:', 20) + StateText(WsStatus[this.bot.ws.shards.first().status]), window.width - 4) + ' ┃\n'
-                }                
-            } else {
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
             }
 
             if (this.statesManager != undefined) {
-                if (this.statesManager.Shard.IsLoading == true) {
-                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading Shard:', 20) + this.statesManager.Shard.LoadingText, window.width - 4) + ' ┃\n'
-                }
-                if (this.statesManager.Shard.Error.length > 0) {
-                    txt += '│ ' + genLine(genLine('Shard:', 20) + CliColor.FgRed + this.statesManager.Shard.Error + CliColor.FgDefault, window.width - 4) + ' ┃\n'
-                }
-                if (this.statesManager.Ytdl.IsLoading == true) {
-                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' YTDL:', 20) + this.statesManager.Ytdl.LoadingText, window.width - 4) + ' ┃\n'
-                }
-                txt += '│ ' + genLine(genLine('Timeline:', 20) + this.GetTimelineText(), window.width - 4) + ' ┃\n'
-                if (this.statesManager.Commands.All != this.statesManager.Commands.Created) {
-                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading commands:', 20) + Math.round(this.statesManager.Commands.Created / this.statesManager.Commands.All * 100) + "%", window.width - 4) + ' ┃\n'
-                }
-                if (this.dailyWeatherReportLoadingTextTimeout < 30) {
-                    if (this.statesManager.WeatherReport.Text.length > 0) {
-                        txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Weather report:', 20) + this.statesManager.WeatherReport.Text, window.width - 4) + ' ┃\n'
-                    } else {
-                        txt += '│ ' + genLine(genLine('Weather report:', 20) + 'Done', window.width - 4) + ' ┃\n'
+                const needPrintThis =
+                    (this.dailyWeatherReportLoadingTextTimeout < 30) ||
+                    (this.statesManager.Commands.All != this.statesManager.Commands.Created) ||
+                    (this.statesManager.Ytdl.IsLoading == true) ||
+                    (this.newsLoadingTextTimeout < 30) ||
+                    (this.statesManager.News.AllProcessed == false)
+
+                if (needPrintThis) {
+                    txt += FixedWidth('', window.width) + '\n'
+                    txt += FixedWidth('┌──── Other', window.width)
+                    if (this.statesManager.Ytdl.IsLoading == true) {
+                        txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' YTDL:', 20) + this.statesManager.Ytdl.LoadingText, window.width) + '\n'
                     }
-                }
-                if (this.newsLoadingTextTimeout < 30) {
-                    if (this.statesManager.News.LoadingText.length > 0) {
-                        if (this.statesManager.News.LoadingText2.length > 0) {
-                            txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.News.LoadingText + ' (' + this.statesManager.News.LoadingText2 + ')', window.width - 4) + ' ┃\n'
+                    if (this.statesManager.Commands.All != this.statesManager.Commands.Created) {
+                        txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading commands:', 20) + Math.round(this.statesManager.Commands.Created / this.statesManager.Commands.All * 100) + "%", window.width) + '\n'
+                    }
+                    if (this.dailyWeatherReportLoadingTextTimeout < 30) {
+                        if (this.statesManager.WeatherReport.Text.length > 0) {
+                            txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Weather report:', 20) + this.statesManager.WeatherReport.Text, window.width) + '\n'
                         } else {
-                            txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.News.LoadingText, window.width - 4) + ' ┃\n'
+                            txt += FixedWidth('│' + FixedWidth('Weather report:', 20) + 'Done', window.width) + '\n'
                         }
-                    } else {
-                        txt += '│ ' + genLine(genLine('News:', 20) + 'Done', window.width - 4) + ' ┃\n'
                     }
-                } else if (this.statesManager.News.AllProcessed == false) {
-                    txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + 'Loading...', window.width - 4) + ' ┃\n'
+                    if (this.newsLoadingTextTimeout < 30) {
+                        if (this.statesManager.News.LoadingText.length > 0 && this.statesManager.News.LoadingText !== 'I don\'t need to send a new report') {
+                            if (this.statesManager.News.LoadingText2.length > 0) {
+                                txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.News.LoadingText + ' (' + this.statesManager.News.LoadingText2 + ')', window.width) + '\n'
+                            } else {
+                                txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.News.LoadingText, window.width) + '\n'
+                            }
+                        } else {
+                            txt += FixedWidth('│' + FixedWidth('News:', 20) + 'Done', window.width) + '\n'
+                        }
+                    } else if (this.statesManager.News.AllProcessed == false) {
+                        txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + 'Loading...', window.width) + '\n'
+                    }
                 }
             }
         } else {
-            txt += '│ ' + genLine(genLine('Delta time:', 20) + genLine(Math.round((this.deltaTime-0.1)*1000)/1000, 5) + ' sec', window.width - 4) + ' ┃\n'
-            txt += '│ ' + genLine(genLine(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width - 4) + ' ┃\n'
+            txt += FixedWidth(FixedWidth('Delta time:', 20) + FixedWidth(Math.round((this.deltaTime-0.1)*1000)/1000, 5) + ' sec', window.width) + '\n'
+            txt += FixedWidth(FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width) + '\n'
         }
         if (this.statesManager != undefined) {
             if (this.statesManager.Database.LoadText.length > 0) {
-                txt += '│ ' + genLine(genLine('Loading database:', 20) + this.statesManager.Database.LoadText, window.width - 4) + ' ┃\n'
+                txt += FixedWidth(FixedWidth('Loading database:', 20) + this.statesManager.Database.LoadText, window.width) + '\n'
             }
             if (this.statesManager.Database.ParsingText.length > 0) {
-                txt += '│ ' + genLine(genLine('Parsing database:', 20) + this.statesManager.Database.ParsingText, window.width - 4) + ' ┃\n'
+                txt += FixedWidth(FixedWidth('Parsing database:', 20) + this.statesManager.Database.ParsingText, window.width) + '\n'
             }
             if (this.statesManager.Database.SaveText.length > 0) {
-                txt += '│ ' + genLine(genLine('Saving database:', 20) + this.statesManager.Database.SaveText, window.width - 4) + ' ┃\n'
+                txt += FixedWidth(FixedWidth('Saving database:', 20) + this.statesManager.Database.SaveText, window.width) + '\n'
             }
         }
 
         if (this.promtMessage.length > 0) {
             const remaingHeight = ((window.height - txt.split('\n').length - 2) - 1) - 2
             for (let i = 0; i < remaingHeight; i++) {
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+                txt += FixedWidth('', window.width) + '\n'
             }
 
-            txt += '│ ' + genLine(this.promtMessage, window.width - 4) + ' ┃\n'
+            txt += FixedWidth(this.promtMessage, window.width) + '\n'
             const buttons = this.promtButtons
             var buttonsText = ''
             for (let i = 0; i < buttons.length; i++) {
@@ -649,126 +471,15 @@ class LogManager {
                     buttonsText += CliColor.BgWhite + CliColor.FgBlack + '| ' + button + ' |' + CliColor.FgDefault + CliColor.BgBlack + '  '
                 }
             }
-            txt += '│ ' + genLine(buttonsText, window.width - 4) + ' ┃\n'
+            txt += FixedWidth(buttonsText, window.width) + '\n'
         } else {
-            const remaingHeight = window.height - txt.split('\n').length - 2 - 1
+            const remaingHeight = terminalSize.height - txt.split('\n').length - 4
             for (let i = 0; i < remaingHeight; i++) {
-                txt += '│ ' + genLine('', window.width - 4) + ' ┃\n'
+                txt += FixedWidth('', window.width) + '\n'
             }
         }
-
-        var cursor = ''
-        if (this.blinkerTime > 0) {
-            cursor = '_'
-        } else {
-            cursor = ' '
-        }
-
-        txt += '│ ' + genLine('> ' + this.currentlyTyping + cursor, window.width - 4) + ' ┃\n'
-        txt += '│ ' + genLine(CliColor.BgWhite + CliColor.FgBlack + 'Ctrl+C: Disconnect' + CliColor.BgBlack + CliColor.FgDefault, window.width - 4) + ' ┃\n'
-        txt += '┕' + chars('━', window.width - 2) + '┛\n'
-        txt += chars(' ', window.width) + '\n'
 
         reprint(txt)
-    }
-
-    /**
-     * @param {string} message
-     * @param {boolean} privateLog
-     * @param {TranslateResult} translateResult
-     * @param {number} code
-     */
-    Log(message, privateLog, translateResult = null, code = null) {
-        if (message === '') return
-        if (message === ' ') return
-        if (!message) return
-        if (message.length == 0) return
-
-        if (this.logs.length == 0) {
-            console.log('\x1b[1m' + fontColor)
-        }
-
-        /*
-        if (code == MessageCodes.HandlebarsStartLoading) {
-            this.loading.handlebarsLoading = true
-            this.loading.handlebarsState = 'Betöltés'
-        } else  if (code == MessageCodes.HandlebarsFinishLoading) {
-            this.loading.handlebarsLoading = false
-            this.loading.handlebarsState = ''
-        }
-
-        if (translateResult != null) {
-            if (translateResult.status != null) {
-                this.loading.botPercent = translateResult.status.percent
-                if (translateResult.status.percent == 100) {
-                    this.loading.botLoading = false
-                    process.stdout.cursorTo(0, 0)
-                    process.stdout.clearLine()
-                    this.enableLog = true
-                }
-                return
-            }
-        }
-        */
-
-        let hour = new Date().getHours()
-        let minute = new Date().getMinutes()
-        if (minute < 10) {
-            minute = '0' + new Date().getMinutes()
-        }
-        let seconds = new Date().getSeconds()
-        if (seconds < 10) {
-            seconds = '0' + new Date().getSeconds()
-        }
-        const timeStamp = hour + ':' + minute + ':' + seconds
-
-        var msg = message
-        var type = 0
-        var prefix = DEBUG
-        if (msg.includes(INFO)) {
-            msg = msg.replace(INFO + ": ", "")
-            type = this.type.Info
-            prefix = INFO
-        }
-        if (msg.includes(ERROR)) {
-            msg = msg.replace(ERROR + ": ", "")
-            type = this.type.Err
-            prefix = ERROR
-        }
-        if (msg.includes(WARNING)) {
-            msg = msg.replace(WARNING + ": ", "")
-            type = this.type.Warn
-            prefix = WARNING
-        }
-        if (msg.includes(SHARD)) {
-            msg = msg.replace(SHARD + ": ", "")
-            type = this.type.Shard
-            prefix = SHARD
-        }
-        if (msg.includes(DEBUG)) {
-            msg = msg.replace(DEBUG + ": ", "")
-            type = this.type.Debug
-            prefix = DEBUG
-        }
-        if (msg.includes(DONE)) {
-            msg = msg.replace(DONE + ": ", "")
-            type = this.type.Done
-            prefix = DONE
-        }
-        if (msg.includes(SERVER)) {
-            msg = msg.replace(SERVER + ": ", "")
-            prefix = SERVER
-        }
-
-        if (this.logs.length == 0) {
-            this.logs.push(new LogMsg(msg, timeStamp, type, privateLog, prefix, translateResult))
-        } else if (this.timer < 3 && msg == this.logs[this.logs.length - 1].message && this.logs[this.logs.length - 1].printed == false) {
-            this.logs[this.logs.length - 1].count += 1
-        } else {
-            this.logs.push(new LogMsg(msg, timeStamp, type, privateLog, prefix, translateResult))
-        }
-
-        this.timer = 0
     }
 
     type = {
@@ -844,27 +555,4 @@ class LoadingProgress {
     }
 }
 
-class LogMsg {
-    /**
-     * @param {string} message
-     * @param {string} time
-     * @param {number} type
-     * @param {number} count
-     * @param {boolean} priv
-     * @param {boolean} printed
-     * @param {string} prefix
-     * @param {TranslateResult} translateResult
-    */
-    constructor(message, time, type, priv, prefix, translateResult) {
-        this.message = message
-        this.time = time
-        this.type = type
-        this.count = 1
-        this.priv = priv
-        this.printed = false
-        this.prefix = prefix
-        this.translateResult = translateResult
-    }
-}
-
-module.exports = { LogManager, LogMsg, INFO, DEBUG, SERVER, WARNING, ERROR, SHARD, DONE, MessageCodes, TimeLine }
+module.exports = LogManager

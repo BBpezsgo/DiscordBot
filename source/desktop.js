@@ -24,8 +24,8 @@ SystemStart(startedInvisible, startedByUser)
 
 const startDateTime = new Date(Date.now())
 
-const { LogManager, TimeLine } = require('./functions/log.js')
-var logManager = new LogManager(false, null, null)
+const LogManager = require('./functions/log')
+var logManager = new LogManager(null, null)
 
 logManager.Loading('Loading packet', "fs")
 const fs = require('fs')
@@ -227,15 +227,12 @@ const statesManager = new StatesManager()
 
 const musicPlayer = new MusicPlayer(statesManager, bot)
 
-logManager = new LogManager(false, bot, statesManager)
+logManager = new LogManager(bot, statesManager)
 const newsManager = new NewsManager(statesManager, true)
 
 statesManager.botLoaded = true
 
-/** @param {string} message */
-function log(message = '', translateResult = null) {
-    logManager.Log(message, false, translateResult)
-}
+function log() {}
 
 logManager.Loading('Loading database', 'Manager')
 const database = new DatabaseManager('./database/', './database-copy/', statesManager)
@@ -243,7 +240,7 @@ logManager.Loading('Loading database', 'datas')
 const databaseIsSuccesfullyLoaded = database.LoadDatabase()
 
 if (!databaseIsSuccesfullyLoaded) {
-    SystemLog('Error: Database is not found')
+    SystemLog('Error: Database not found')
     console.log(CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
     autoStartBot = false
 
@@ -383,7 +380,6 @@ bot.on('debug', debug => {
     if (translatedDebug == null) return
 
     if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
-        logManager.AddTimeline(TimeLine.Primary)
         SystemLog('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
     }
 
@@ -1946,8 +1942,7 @@ bot.on('clickMenu', async (button) => {
 
 bot.once('ready', async () => {
     SystemLog('Bot is ready')
-    statesManager.botLoadingState = 'Ready'    
-    logManager.AddTimeline(TimeLine.Primary)
+    statesManager.botLoadingState = 'Ready'
 
     const { Taxation } = require('./functions/tax')
     const { MarketOnStart } = require('./functions/market')
