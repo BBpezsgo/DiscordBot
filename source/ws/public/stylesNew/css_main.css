@@ -752,3 +752,48 @@ input[type=submit].btn-fetch:active {
     transition: opacity 0ms;
     opacity: 1;
 }
+
+button.btn-toggle-info {
+	border: none;
+	color: var(--text);
+	background-color: transparent;
+	border-radius: 50%;
+	transition: background 200ms, opacity 200ms;
+	cursor: pointer;
+	font-weight: bold;
+	width: 24px;
+	height: 24px;
+	position: relative;
+	display: inline-block;
+	padding: unset;
+	min-width: unset;
+	opacity: 50%;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+
+button.btn-toggle-info.btn-toggle-info-show {
+	background-image: url('../imagesNew/expand-more.png');
+}
+
+button.btn-toggle-info.btn-toggle-info-hide {
+	background-image: url('../imagesNew/close.png');
+}
+
+button.btn-toggle-info:focus-visible,
+button.btn-toggle-info:focus {
+	outline: 1px solid #fff2;
+	opacity: 100%;
+}
+
+button.btn-toggle-info:hover {
+	background-color: #fff2;
+	opacity: 100%;
+}
+
+button.btn-toggle-info:active {
+	background-color: #fff4;
+	outline: none;
+	opacity: 100%;
+}

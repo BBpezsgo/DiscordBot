@@ -276,18 +276,17 @@ class WebSocket {
 
                 createdAt: GetDate(server.createdAt),
                 joinedAt: GetDate(server.joinedAt),
+                createdAtText: server.createdAt.getFullYear() + '. ' + server.createdAt.getMonth() + '. ' + server.createdAt.getDate() + '.',
+                joinedAtText: server.joinedAt.getFullYear() + '. ' + server.joinedAt.getMonth() + '. ' + server.joinedAt.getDate() + '.',
 
                 memberCount: server.memberCount,
                 nsfwLevel: server.nsfwLevel,
-                // nameAcronym: '-',
                 mfaLevel: server.mfaLevel,
                 verificationLevel: server.verificationLevel,
                 splash: server.splash,
 
                 available: server.available,
-                large: server.large
-                // partnered: server.partnered,
-                // verified: server.verified,
+                large: server.large,
             }
 
             servers.push(newServer)
@@ -1159,7 +1158,21 @@ class WebSocket {
         this.app.post('/FetchUser', (req, res) => {
             this.client.users.fetch(req.query.id)
                 .then(() => {
-                    res.status(200).send('ok')
+                    res.status(200).send({ message: 'ok' })
+                })
+                .catch((error) => {
+                    res.status(200).send(error)
+                })
+        })
+
+        this.app.post('/FetchGuild', (req, res) => {
+            var id = req.query.id
+            if (id == undefined || id == null) {
+                id = req.body.id
+            }
+            this.client.guilds.fetch(id)
+                .then(() => {
+                    res.status(200).send({ message: 'ok' })
                 })
                 .catch((error) => {
                     res.status(200).send(error)
