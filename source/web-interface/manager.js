@@ -118,6 +118,31 @@ class WebInterfaceManager {
 
         this.RegisterHandlebarsRoots()
         this.RegisterPublicRoots()
+        
+        this.app.get('/', (req, res) => {
+            res.status(200).render('start')
+        })
+        
+        this.app.get('/config.json', (req, res) => {
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+
+            if (ip.startsWith('127.') || ip.startsWith('192.168.1.')) {
+                const Config = require('../config.json')
+                res.status(200).send({
+                    config: Config
+                })
+
+                return
+            }
+
+            res.status(401).send()
+        })
+        
+        this.app.get('*', (req, res) => {
+            res.status(404).render('404', {
+                url: req.url
+            })
+        })
 
         this.OnStartListen = () => {
             this.statesManager.WebInterface.IsDone = true

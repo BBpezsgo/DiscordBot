@@ -129,7 +129,7 @@ function getEmbedEarth(data0, data1, data2, data3) {
             description += `A Hold ma mindig a **horizont alatt lesz**\n`
         }
 
-        description += '\n**Előrejelzés:**'
+        description += '\n🗓️ **Előrejelzés:**'
         embed.setDescription(description)
         
         if (ImgExists(skyImgName) === true) {

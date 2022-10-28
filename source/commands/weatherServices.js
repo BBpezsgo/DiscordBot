@@ -37,7 +37,7 @@ const URLs = {
 
 const request = require("request");
 
-const ReadFromCache = true
+const ReadFromCache = false
 
 /** @param {(result: ({
  *   location: {

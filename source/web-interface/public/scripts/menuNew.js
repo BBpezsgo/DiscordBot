@@ -93,7 +93,7 @@ function menuDisplay() {
                 `
                 <ol id=ol${i} class=${className} style="display:${display};" onClick="doClick2(${i})">
                     <img src='/imagesNew/${menuList[n]}.svg'>
-                    <a id=a${i} href="/userViews/${menuList[n]}?new" target=mainFrame class=L1 onClick="doClick(${i})">
+                    <a id=a${i} href="/userViews/${menuList[n]}?new" target=mainFrame class=L1 onClick="doClick(${i},'${menuList[n]}')">
                         ${menuList[n + 3]}
                     </a>
                 </ol>`);
@@ -101,7 +101,7 @@ function menuDisplay() {
             document.write(
                 `
                 <ol id=ol${i} class=${className} style="display:${display};" onClick="doClick2(${i})">
-                    <a id=a${i} href="/userViews/${menuList[n]}?new" target=mainFrame class=L1 onClick="doClick(${i})">
+                    <a id=a${i} href="/userViews/${menuList[n]}?new" target=mainFrame class=L1 onClick="doClick(${i},'${menuList[n]}')">
                         ${menuList[n + 3]}
                     </a>
                 </ol>`);
@@ -186,8 +186,8 @@ function expandBranch(n) {
     }
 }
 
-/** @param {number} n */
-function doClick(n) {
+/** @param {number} n @param {string} menuName */
+function doClick(n, menuName) {
     collapseAll();
     UnselectAll();
     

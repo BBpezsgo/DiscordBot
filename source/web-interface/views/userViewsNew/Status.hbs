@@ -175,7 +175,7 @@
 
 	<div class="container loading-effect">
 		<h2>Web Socket</h2>
-		<table id="autoWidth" style="width: 598px;">
+		<table style="width: 100%;">
 			<tbody>
 				<tr>
 					<td class="Item">Ping:</td>
@@ -343,7 +343,7 @@
 				<tr>
 					<td width="25%" class="Item">Memory:</td>
 					<td colspan="2">
-						<meter min="0" max="{{bot.system.TotalMemory}}" value="{{bot.system.UsedMemory}}"></meter>
+						<meter min="0" max="{{bot.system.TotalMemory}}" value="{{bot.system.UsedMemory}}" title="{{bot.system.UsedMemory}}/{{bot.system.TotalMemory}}"></meter>
 					</td>
 				</tr>
 				<tr>
