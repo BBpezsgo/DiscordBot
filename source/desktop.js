@@ -1,3 +1,9 @@
+const LogError = require('./functions/errorLog')
+const fs = require('fs')
+process.on('uncaughtException', function (err) {
+    fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
+    LogError(err)
+})
 
 var startedInvisible = false
 var startedByUser = false
@@ -7,13 +13,6 @@ process.argv.forEach(function (val, index, array) {
     } else if (val == 'user') {
         startedByUser = true
     }
-})
-
-const LogError = require('./functions/errorLog')
-
-process.on('uncaughtException', function (err) {
-    fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
-    LogError(err)
 })
 
 var autoStartBot = true
@@ -26,9 +25,6 @@ const startDateTime = new Date(Date.now())
 
 const LogManager = require('./functions/log')
 var logManager = new LogManager(null, null)
-
-logManager.Loading('Loading packet', "fs")
-const fs = require('fs')
 
 process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
 
@@ -111,8 +107,6 @@ process.on('exit', function (code) {
 
 //#region NPM Packages and variables
 
-logManager.Loading("Loading commands", 'weather')
-const CommandWeather = require('./commands/weather')
 logManager.Loading("Loading commands", 'profil')
 const CommandProfil = require('./commands/profil')
 logManager.Loading("Loading commands", 'help')
@@ -192,22 +186,12 @@ const { perfix, tokens } = require('./config.json')
 const { AutoReact } = require('./functions/autoReact')
 
 logManager.Loading('Loading packet', "other functions")
-const GetUserColor = require('./functions/userColor')
 const { abbrev } = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
 const { NewsManager } = require('./functions/news')
 const { MailManager, Mail, MailUser, CurrentlyWritingMail } = require('./commands/mail')
 const {
-    INFO,
-    ERROR,
-    WARNING,
-    SHARD,
-    DEBUG,
-    DONE,
     Color,
-    ColorRoles,
-    activitiesDesktop,
-    usersWithTax,
     ChannelId,
     CliColor
 } = require('./functions/enums.js')
@@ -231,8 +215,6 @@ logManager = new LogManager(bot, statesManager)
 const newsManager = new NewsManager(statesManager, true)
 
 statesManager.botLoaded = true
-
-function log() {}
 
 logManager.Loading('Loading database', 'Manager')
 const database = new DatabaseManager('./database/', './database-copy/', statesManager)
@@ -349,25 +331,21 @@ function addXp(user, channel, ammount) {
 //#region Listener-ek
 
 bot.on('reconnecting', () => {
-    log(INFO + ': Újracsatlakozás...')
     statesManager.botLoadingState = 'Reconnecting'
     SystemLog('Reconnecting')
 })
 
 bot.on('disconnect', () => {
-    log(ERROR + ': Megszakadt a kapcsolat!')
     statesManager.botLoadingState = 'Disconnect'
     SystemLog('Disconnect')
 })
 
 bot.on('resume', () => {
-    log(INFO + ': Folytatás')
     statesManager.botLoadingState = 'Resume'
     SystemLog('Resume')
 })
 
 bot.on('error', error => {
-    log(ERROR + ': ' + error)
     statesManager.botLoadingState = 'Error'
     SystemLog('Error: ' + error.message)
     LogError(error)
@@ -382,27 +360,21 @@ bot.on('debug', debug => {
     if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
         SystemLog('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
     }
-
-    if (translatedDebug.secret == true) return
-
-    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
 })
 
 bot.on('warn', warn => {
-    log(WARNING + ': ' + warn)
     statesManager.botLoadingState = 'Warning'
 })
 
 bot.on('shardError', (error, shardID) => {
-    log(ERROR + ': shardError: ' + error)
+    
 })
 
 bot.on('invalidated', () => {
-    log(ERROR + ': Érvénytelen')
+    
 })
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
-    log(SHARD + ': Lecsatlakozva')
     statesManager.Shard.IsLoading = true
     statesManager.Shard.LoadingText = 'Lecsatlakozva'
 })
@@ -426,38 +398,33 @@ bot.on('shardReconnecting', (shardID) => {
 })
 
 bot.on('shardResume', (shardID, replayedEvents) => {
-    log(SHARD & ': Folytatás: ' + replayedEvents.toString())
     statesManager.Shard.IsLoading = false
 })
 
 bot.on('raw', async event => {
-    log(DEBUG & ': raw')
+    
 })
 
 bot.on('close', () => {
-    log(SHARD & ': close')
     statesManager.botLoadingState = 'Close'
     SystemLog('Close')
 })
 
 bot.on('destroyed', () => {
-    log(SHARD & ': destroyed')
     statesManager.botLoadingState = 'Destroyed'
     SystemLog('Destroyed')
 })
 
 bot.on('invalidSession', () => {
-    log(SHARD & ': invalidSession')
     statesManager.botLoadingState = 'Invalid Session'
 })
 
 bot.on('allReady', () => {
-    log(SHARD & ': allReady')
     statesManager.botLoadingState = 'All Ready'
 })
 
 bot.on('presenceUpdate', (oldPresence, newPresence) => {
-    log(DEBUG & ': newStatus: ' + newPresence.status.toString())
+    
 })
 
 //#endregion
@@ -503,6 +470,8 @@ function openDayCrate(userId) {
  * @param {boolean} privateCommand
  */
 function commandStore(sender, privateCommand) {
+    const GetUserColor = require('./functions/userColor')
+    
     var dayCrates = (database.dataBot.day - database.dataBasic[sender.id].day) / 7
     var crates = database.dataBackpacks[sender.id].crates
     var gifts = database.dataBackpacks[sender.id].gifts
@@ -1249,8 +1218,6 @@ bot.on('interactionCreate', async interaction => {
                     gameResetCameraPos(isOnPhone, interaction.user, game)
 
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-
-                    log(game.gameUserSettings)
                 } else if (interaction.component.customId === 'gameSwitchDebug') {
                     for (let i = 0; i < game.gameUserSettings.length; i++) {
                         if (game.gameUserSettings[i].userId === interaction.user.id) {
@@ -1267,8 +1234,6 @@ bot.on('interactionCreate', async interaction => {
                     }
 
                     resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-
-                    log(game.gameUserSettings)
                 } else if (interaction.component.customId === 'gameRestart') {
                     game.gameMap = createGame(50, 50)
                     connectTogame(interaction.user, game)
@@ -1604,6 +1569,8 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.customId == 'shopNameColors') {
+            const { ColorRoles } = require('./functions/enums.js')
+
             const selectedIndex = interaction.values[0]
             const money = database.dataBasic[interaction.user.id].money
 
@@ -1947,7 +1914,8 @@ bot.once('ready', async () => {
     const { Taxation } = require('./functions/tax')
     const { MarketOnStart } = require('./functions/market')
     const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
-    
+    const { activitiesDesktop } = require('./functions/enums.js')
+
     const lastDay = database.dataBot.day
 
     try {
@@ -2511,6 +2479,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `weather`) {
+        const CommandWeather = require('./commands/weather')
         /** @type {"earth" | "mars" | null} */
         const weatherLocation = command.options.getString('location', false)
         if (weatherLocation == 'mars') {

@@ -160,6 +160,7 @@ logManager.Loading('Loading packet', "other functions")
 
 const { DateToString } = require('./functions/dateToString')
 const { NewsManager } = require('./functions/news')
+const GetAddress = require('./functions/getAddress')
 const {
     INFO,
     ERROR,
@@ -214,7 +215,7 @@ function log() {}
 
 
 
-const ws = new WebInterface('1234', '192.168.1.102', 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'MOBILE')
+const ws = new WebInterface('1234', GetAddress(), 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'MOBILE')
 logManager.BlankScreen()
 
 

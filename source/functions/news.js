@@ -76,65 +76,45 @@ async function CreateNews(message) {
     
     if (message.author.id == '802864588877856789') { // Crossout
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
-        if (message.content.includes('@Entertainment')) {
-            role = '902881176719622145'
-        } else if (message.content.includes('@Console News')) {
-            role = '902878741364105238'
-        } else if (message.content.includes('@PC News')) {
-            role = '902878695742652437'
-        } else {
-            role = '902877945876598784'
+        
+        var NewsContent = message.content.trim()
+        
+        /** @type {null | "Entertainment" | "General News" | "PC News" | "Console News"} */
+        var NewsType = null
+        if (NewsContent.startsWith('@')) {
+            NewsType = NewsContent.split('\n')[0].trim().substring(1).trim()
+            NewsContent = NewsContent.substring(NewsType.length + 1).trim()
         }
 
-        const lines = message.content.split('\n')
-        let title = '<null>'
-        if (message.content.startsWith('@')) {
-            title = lines[1].trim()
-        } else {
-            title = lines[0].trim()
+        switch (NewsType) {
+            case "Console News":
+                role = '902878741364105238'
+                break
+            case "Entertainment":
+                role = '902881176719622145'
+                break
+            case "PC News":
+                role = '902878695742652437'
+                break
+            default:
+                role = '902877945876598784'
+                break
         }
 
-        /*
-        if (title.includes('PS4') || title.includes('Xbox') || title.includes('PlayStation')) {
-            role = '902878741364105238'
-        } else if (title.includes('PC')) {
-            role = '902878695742652437'
-        }
-        title = title
-            .replace('[Sale]', '')
-            .replace('[Developer blog]', '')
-            .replace('[Panorama]', '')
-            .replace('[Announcement]', '')
-            .replace('[PS4]', '')
-            .replace('[Xbox]', '')
-            .replace('[Update]', '')
-            .replace('[Video]', '')
-            .replace('[Special]', '')
-            .replace('[PC]', '')
-            .replace('[Stories]', '')
-            .replace('[Calendar]', '')
-        */
-
-        title = title.trim()
-        if (title === undefined || title.length == 0) {
-            title = '<null>'
-        }
-        embed.setTitle(title)
+        const title = NewsContent.split('\n')[0].trim()
+        try {
+            embed.setTitle(title)
+            NewsContent = NewsContent.substring(NewsContent.split('\n')[0].length).trim()
+        } catch (e) { }
         embed.setURL('https://crossout.net/en/news/')
         if (message.attachments.size > 0) {
             embed.setImage(message.attachments.first().url)
         }
-        var description = ''
-        for (let i = 2; i < lines.length; i++) {
-            const line = lines[i]
-            description += line + '\n'
+        if (NewsContent.endsWith('#crossout')) {
+            NewsContent = NewsContent.substring(0, NewsContent.length - 9).trim()
         }
-        description = description.trim()
-        if (description.endsWith('#crossout')) {
-            description = description.substring(0, description.length - 9).trim()
-        }
-        embed.setDescription(description)
-        embed.setFooter({ text: message.content.split('\n')[0].trim().replace('@', '• #') })
+        embed.setDescription(NewsContent)
+        embed.setFooter({ text: '• #' + NewsType })
     } else if (message.author.id == '813398275305898014') { // Warzone 2100
         embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://wz2100.net/' })
         if (message.embeds.length > 0) {

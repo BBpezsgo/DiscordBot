@@ -157,17 +157,18 @@ function RemoveColors(text) {
 /** @param {string} text @param {number} width @param {number} marginLeft */
 function FixedWidth(text, width, marginLeft) {
     var txt = text + ''
+    const textLength = RemoveColors(txt).length
     if (marginLeft !== undefined) {
-        if (RemoveColors(txt).length + marginLeft > width) {
+        if (textLength + marginLeft > width) {
             txt = txt.substring(0, width - 3 - marginLeft) + '...'
         }
-        txt += chars(' ', width - RemoveColors(txt).length - marginLeft)
+        txt += chars(' ', width - textLength - marginLeft)
         txt = chars(' ', marginLeft) + txt
     } else {
-        if (RemoveColors(txt).length > width) {
-            txt = txt.substring(0, width - 3) + '...'
+        if (textLength > width) {
+            txt = txt.substring(0, width - 3) + CliColor.FgDefault + CliColor.BgBlack + '...'
         }
-        txt += chars(' ', width - RemoveColors(txt).length)
+        txt += chars(' ', width - textLength)
     }
     return txt
 }

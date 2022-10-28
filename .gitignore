@@ -22,3 +22,5 @@ DiscordBot.sln
 DiscordBot.njsproj.user
 OldDCVer
 Properties
+.vscode
+source/weather-cache

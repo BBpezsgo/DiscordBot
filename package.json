@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "A discord.js application",
   "main": "./source/desktop.js",
-  "scripts": {
-    "start": "node source/desktop.js visible user"
-  },
   "repository": "https://github.com/BBpezsgo/DiscordBot",
   "dependencies": {
     "@discordjs/voice": "latest",

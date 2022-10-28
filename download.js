@@ -178,7 +178,8 @@ const request = https.get(url, function (res) {
     Log(`  Got a response: ${res.statusCode} ${res.statusMessage}`)
 
     var cur = 0
-    const full = 3529561
+    /** @type {number} */
+    const full = JSON.parse(fs.readFileSync('./full-bytes.json'))
 
     res.on('data', function (chunk) {
         cur += chunk.length

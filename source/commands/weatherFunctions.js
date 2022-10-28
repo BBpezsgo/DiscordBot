@@ -572,7 +572,74 @@ function weatherSkytextImgName(skyTxt, sunset, sunrise, clouds) {
     return IsToString(time, cloud, rain, fog)
 }
 
-const bekescsabaId = '722437'
+const CityBekescsaba = {
+    ID: '722437',
+    Lat: 46.677227,
+    Lon: 21.089993,
+    AccuWeatherData: {
+        "Version": 1,
+        "Key": "187162",
+        "Type": "City",
+        "Rank": 51,
+        "LocalizedName": "Békéscsaba",
+        "EnglishName": "Békéscsaba",
+        "PrimaryPostalCode": "",
+        "Region": {
+            "ID": "EUR",
+            "LocalizedName": "Europe",
+            "EnglishName": "Europe"
+        },
+        "Country": {
+            "ID": "HU",
+            "LocalizedName": "Hungary",
+            "EnglishName": "Hungary"
+        },
+        "AdministrativeArea": {
+            "ID": "BC",
+            "LocalizedName": "Békéscsaba",
+            "EnglishName": "Békéscsaba",
+            "Level": 1,
+            "LocalizedType": "City with county rights",
+            "EnglishType": "City with county rights",
+            "CountryID": "HU"
+        },
+        "TimeZone": {
+            "Code": "CEST",
+            "Name": "Europe/Budapest",
+            "GmtOffset": 2,
+            "IsDaylightSaving": true,
+            "NextOffsetChange": "2022-10-30T01:00:00Z"
+        },
+        "GeoPosition": {
+            "Latitude": 46.684,
+            "Longitude": 21.088,
+            "Elevation": {
+                "Metric": {
+                    "Value": 90,
+                    "Unit": "m",
+                    "UnitType": 5
+                },
+                "Imperial": {
+                    "Value": 295,
+                    "Unit": "ft",
+                    "UnitType": 0
+                }
+            }
+        },
+        "IsAlias": false,
+        "SupplementalAdminAreas": [],
+        "DataSets": [
+            "AirQualityCurrentConditions",
+            "AirQualityForecasts",
+            "Alerts",
+            "DailyPollenForecast",
+            "ForecastConfidence",
+            "FutureRadar",
+            "MinuteCast",
+            "Radar"
+        ]
+    }
+}
 
 module.exports = {
     ImgExists,
@@ -594,5 +661,5 @@ module.exports = {
     dayName,
     weatherSkytextIcon,
     weatherSkytextImgName,
-    bekescsabaId
+    CityBekescsaba
 }

@@ -1,29 +1,8 @@
 const Discord = require('discord.js')
 const MoonPhase = require('moonphase-js')
-const weather1 = require('weather-js')
-const weather2 = require('nodejs-weather-app');
 const fs = require('fs')
-const request = require("request");
-const { tokens } = require('../config.json')
 const SunCalc = require('suncalc')
-
-const urlWeather = 'http://api.openweathermap.org/data/2.5/weather?lat=46.678889&lon=21.090833&units=metric&appid=' + tokens.openweathermap
-const urlPollution = 'http://api.openweathermap.org/data/2.5/air_pollution?lat=46.678889&lon=21.090833&appid=' + tokens.openweathermap
-const urlMarsWeather = 'https://mars.nasa.gov/rss/api/?feed=weather&category=mars2020&feedtype=json&ver=1.0'
-const urlMarsWeeklyImage = 'https://mars.nasa.gov/rss/api/?feed=weekly_raws&category=mars2020&feedtype=json&num=1&page=0&tags=mars2020_featured_image&format=json'
-const urlSatellite = 'https://api.nasa.gov/planetary/earth/assets?lon=46.678889&lat=21.090833&date=2014-02-01&dim=0.15&api_key=' + tokens.nasa
-
-let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
-if (fs.existsSync('./Helper/output.txt') == true) {
-    dataToAvoidErrors_SunDatasRaw = fs.readFileSync('./Helper/output.txt').toString().split("|")
-    dataToAvoidErrors_Dawn = sunDatasRaw[0]
-    dataToAvoidErrors_Dusk = sunDatasRaw[3]
-} else {
-    dataToAvoidErrors_Dawn = ''
-    dataToAvoidErrors_Dusk = ''
-}
-const Dawn = dataToAvoidErrors_Dawn
-const Dusk = dataToAvoidErrors_Dusk
+const WeatherServices = require('./weatherServices')
 
 const seasons = {
     'late autumn': { name: 'Késő ősz', icon: '🍂' },
@@ -48,21 +27,21 @@ const {
     GetPollutionText,
     dayName,
     weatherSkytextIcon,
-    weatherSkytextImgName
+    weatherSkytextImgName,
+    CityBekescsaba
 } = require('../commands/weatherFunctions');
 
 const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
 const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 /**
- * @param {any} data0 Msn weather data
- * @param {any} data1 Openweather weather data
- * @param {any[]} data2 Moon data
- * @param {any} data3 Openweather pollution data
- * @returns {Discord.EmbedBuilder}
+ * @param {WeatherServices.MSN.WeatherResult[]} data0 Msn weather data
+ * @param {WeatherServices.OpenWeatherMap.WeatherResult} data1 Openweather weather data
+ * @param {MoonPhase[]} data2 Moon data
+ * @param {WeatherServices.OpenWeatherMap.PollutionResult} data3 Openweather pollution data
  */
 function getEmbedEarth(data0, data1, data2, data3) {
-    var current = data0[0].current
+    const current = data0[0].current
     const embed = new Discord.EmbedBuilder()
         .setColor('#00AE86')
         .setAuthor({ name: current.observationpoint.replace(', Hungary', ''), url: 'https://openweathermap.org/city/' + data1.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
@@ -96,7 +75,8 @@ function getEmbedEarth(data0, data1, data2, data3) {
 
         const visibilityValue = Math.floor(data1.visibility / 1000)
 
-        const times = SunCalc.getTimes(new Date(Date.now()), 46.677227, 21.089993)
+        const times = SunCalc.getTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
+        const moonTimes = SunCalc.getMoonTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
         
         embed
             .setTitle(`**${skyTxt}** ||(${data1.weather[0].description})|||| (${data1.weather[0].id})||`)
@@ -111,13 +91,13 @@ function getEmbedEarth(data0, data1, data2, data3) {
             `${weatherPressureIcon(data1.main.pressure)} ${data1.main.pressure} pHa légnyomás\n` +
             `\\👁️ ${visibilityValue} km látótávolság`
 
-        if (data3 != undefined && data3 != null) {
-            description +=
-            '\n\n**Levegőminőség:**\n\n' +
+        if (data3 !== undefined) {
+            description += '\n\n😷 **Levegőminőség:**\n\n'
 
-            'Levőminőség index: \\' + GetPollutionIndex(8, data3.main.aqi) + ' ' + GetPollutionText(data3.main.aqi) +
-
-            '\n\nCO: \\' + GetPollutionIndex(0, data3.components.co) + ' ' + data3.components.co + ' μg/m³' +
+            description += 'Levőminőség index: \\' + GetPollutionIndex(8, data3.main.aqi) + ' ' + GetPollutionText(data3.main.aqi)
+        
+            description += '' +
+            '\nCO: \\' + GetPollutionIndex(0, data3.components.co) + ' ' + data3.components.co + ' μg/m³' +
             '\nNO: \\' + GetPollutionIndex(1, data3.components.no) + ' ' + data3.components.no + ' μg/m³' +
             '\nNO₂: \\' + GetPollutionIndex(2, data3.components.no2) + ' ' + data3.components.no2 + ' μg/m³' +
             '\nO₃: \\' + GetPollutionIndex(3, data3.components.o3) + ' ' + data3.components.o3 + ' μg/m³' +
@@ -127,20 +107,29 @@ function getEmbedEarth(data0, data1, data2, data3) {
             '\nNH₃: \\' + GetPollutionIndex(7, data3.components.nh3) + ' ' + data3.components.nh3 + ' μg/m³'
         }
 
-            description +=
-            '\n\n**Egyéb:**\n\n' +
+        description +=
+            '\n\n☀️ **Nap:**\n\n' +
 
-            `${moonIcon} ${moonText} (${Math.floor(data2[1].illum * 100)} %-a látható)\n` +
             `\\🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
             `\\🌇 Napkelte: <t:${AverageUnix(data1.sys.sunrise, ToUnix(times.sunrise))}:R>\n` +
             `\\🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
             `\\📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:R>\n` +
             `\\🌆 Napnyugta: <t:${AverageUnix(data1.sys.sunset, ToUnix(times.sunset))}:R>\n` +
             `\\🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>\n` +
-            `\\🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>\n\n`
+            `\\🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>`
+        description +=
+            '\n\n🌕 **Hold:**\n\n'
+        description += `${moonIcon} ${moonText} (${Math.floor(data2[1].illum * 100)} %-a látható)\n`
+        description += `Holdkelte: <t:${ToUnix(moonTimes.rise)}:R>\n`
+        description += `Holdnyugta: <t:${ToUnix(moonTimes.set)}:R>\n`
+        if (moonTimes.alwaysUp) {
+            description += `A Hold ma mindig a **horizont felett lesz**\n`
+        }
+        if (moonTimes.alwaysDown) {
+            description += `A Hold ma mindig a **horizont alatt lesz**\n`
+        }
 
-            '**Előrejelzés:**'
-
+        description += '\n**Előrejelzés:**'
         embed.setDescription(description)
         
         if (ImgExists(skyImgName) === true) {
@@ -287,23 +276,7 @@ function DateToDate(date) {
     return newDate
 }
 
-/**
- * @param {{
- *      sols: {
- *          terrestrial_date: string;
- *          sol: string;
- *          ls: string;
- *          season: string;
- *          min_temp: number;
- *          max_temp: number;
- *          pressure: number;
- *          sunrise: string;
- *          sunset: string;
- *      }[];
- *  }} data Mars weather data
- * @param {any} data Mars image data
- * @returns {Discord.EmbedBuilder}
- */
+/** @param {WeatherServices.NasaMars.WeatherResult} data @param {WeatherServices.NasaMars.WeeklyImagesResult} weeklyImage */
 function getEmbedMars(data, weeklyImage) {
     const embed = new Discord.EmbedBuilder()
         .setColor('#fd875f')
@@ -395,133 +368,54 @@ function addDays(date, days) {
     return date
 }
 
-/** @param {(error: string, embeds: Discord.EmbedBuilder[]) => void} callback */
-function GetMarsWeather(callback) {
-    try {
-        request(urlMarsWeeklyImage, function (err, res, body) {
-            var bodyImage = null
-            if (res.statusCode === 200) {
-                bodyImage = body
-            }
-
-            try {
-                //const body = fs.readFileSync('C:/Users/bazsi/Desktop/letöltés (1).json')
-                request(urlMarsWeather, function (err, res, body) {
-                    if (res.statusCode === 200) {
-                        if (err) {
-                            callback('**Mars Weather Error:** ' + err.toString(), [])
-                        } else {
-                            const data = JSON.parse(body)
-                            if (bodyImage != null) {
-                                bodyImage = JSON.parse(bodyImage)
-                            }
-                            callback(null, [ getEmbedMars(data, bodyImage) ])
-                        }
-                    } else {
-                        callback('**HTTP Response Error:** ' + res.statusCode, [])
-                    }
-                })
-            } catch (err) {
-                callback('**HTTP Requiest Error:** ' + err.toString(), [])
-            }
-        })
-    } catch (err) {
-        callback('**HTTP Requiest Error:** ' + err.tostring(), [])
-    }
-}
-
-/**
- * @param {
- *      (
- *          msnWeather: any,
- *          openweathermapWeather: any,
- *          openweathermapPollution: any,
- *          errorMessage: string
- *      ) => void
- *  } callback
- */
-function GetEarthWeather(callback) {
-    try {
-        weather1.find({ search: 'Békéscsaba, HU', degreeType: 'C' }, function (msnWeatherError, msnWeather) {
-            if (msnWeatherError) {
-                callback(null, null, null, '**MSN Error:** ' + msnWeatherError.toString())
-                return
-            }
-            try {
-                request(urlWeather, function (err1, res1, openweathermapWeatherBody) {
-                    if (res1.statusCode === 200) {
-                        if (err1) {
-                            callback(null, null, null, '**OpenWeatherMap Error:** ' + err1.toString())
-                        } else {
-                            /** @type {{ coord: { lon: number; lat: number; }; weather: { id: number; main: string; description: string; icon: string; }[]; base: string; main: { temp: number; feels_like: number; temp_min: number; temp_max: number; pressure: number; humidity: number; }; visibility: number; wind: { speed: number; deg: number; gust: number; }; clouds: { all: number; }; dt: number; sys: { type: number; id: number; country: string; sunrise: number; sunset: number; }; timezone: number; id: number; name: string; cod: number; }} */
-                            const openweathermapWeather = JSON.parse(openweathermapWeatherBody)
-                            try {
-                                request(urlPollution, function (err2, res2, openweathermapPollutionBody) {
-                                    if (res2.statusCode === 200) {
-                                        if (err2) {
-                                            callback(null, null, null, '**OpenWeatherMap Error:** ' + err2.toString())
-                                        } else {
-                                            /** @type {{coord: { lon: number; lat: number; }; list: { main: { aqi: number; }; components: { co: number; no: number; no2: number; o3: number; so2: number; pm2_5: number; pm10: number; nh3: number; }; dt: number; }[];}} */
-                                            const openweathermapPollution = JSON.parse(openweathermapPollutionBody)
-
-                                            callback(msnWeather, openweathermapWeather, openweathermapPollution.list[0], null)
-                                        }
-                                    } else {
-                                        callback(null, null, null, '**HTTP Response Error:** ' + res2.statusCode)
-                                    }
-                                })
-                            } catch (err) {
-                                callback(null, null, null, '**HTTP Requiest Error:** ' + err.toString())
-                            }
-                        }
-                    } else {
-                        callback(null, null, null, '**HTTP Response Error:** ' + res1.statusCode)
-                    }
-                })
-            } catch (err) {
-                callback(null, null, null, '**HTTP Requiest Error:** ' + err.toString())
-            }
-        })
-    } catch (error) {
-        callback(null, null, null, '**MSN Error:** ' + error.toString())
-    }
-}
-
-/**
- * @param {Discord.CommandInteraction<Discord.CacheType>} command
- * @param {boolean} privateCommand
-*/
+/** @param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
 module.exports = async (command, privateCommand, earth = true) => {
-    if (earth == true) {
+    await command.deferReply({ ephemeral: privateCommand })
+
+    if (earth == true) {        
         const year = new Date().getFullYear()
         const month = new Date().getMonth() + 1
         const day = new Date().getDate()
-        const m = [
-            new MoonPhase(addDays(new Date(year, month, day), -1)),
-            new MoonPhase(new Date(year, month, day)),
-            new MoonPhase(addDays(new Date(year, month, day), 1)),
-            new MoonPhase(addDays(new Date(year, month, day), 2)),
-            new MoonPhase(addDays(new Date(year, month, day), 3))
-        ]
-    
-        await command.deferReply({ ephemeral: privateCommand })
-    
-        GetEarthWeather((msnWeather, openweathermapWeather, openweathermapPollution, errorMessage) => {
-            if (errorMessage != null) {
-                command.editReply({ content: '> \\❌ ' + errorMessage })
-            } else {
-                const embed = getEmbedEarth(msnWeather, openweathermapWeather, m, openweathermapPollution)
-                command.editReply({ embeds: [embed] })
+
+        WeatherServices.MsnWeather((msnWeather, msnWeatherError) => {
+            if (msnWeatherError) {
+                command.editReply({ content: '> \\❌ **MSN Error:** ' + msnWeatherError })
+                return
             }
+            WeatherServices.OpenweathermapWeather((openweathermapWeather, openweathermapWeatherError) => {
+                if (openweathermapWeatherError) {
+                    command.editReply({ content: '> \\❌ ' + openweathermapWeatherError })
+                    return
+                }
+                WeatherServices.OpenweathermapPollution((openweathermapPollution, openweathermapPollutionError) => {
+                    if (openweathermapPollutionError) {
+                        command.editReply({ content: '> \\❌ ' + openweathermapPollutionError })
+                        return
+                    }
+
+                    const MoonPhases = [
+                        new MoonPhase(addDays(new Date(year, month, day), -1)),
+                        new MoonPhase(new Date(year, month, day)),
+                        new MoonPhase(addDays(new Date(year, month, day), 1)),
+                        new MoonPhase(addDays(new Date(year, month, day), 2)),
+                        new MoonPhase(addDays(new Date(year, month, day), 3))
+                    ]
+
+                    const embed = getEmbedEarth(msnWeather, openweathermapWeather, MoonPhases, openweathermapPollution.list[0])
+                    command.editReply({ embeds: [embed] })
+                })
+            })
         })
     } else {
-        await command.deferReply()
-        GetMarsWeather((errorMessage, embeds) => {
-            if (errorMessage != null) {
-                command.editReply({ content: '> \\❌ ' + errorMessage })
-            } else {
-                command.editReply({ embeds: embeds })
+        WeatherServices.NasaMarsWeather((weatherData, weatherError) => {
+            if (weatherError) {
+                command.editReply({ content: '> \\❌ ' + weatherError })
+                return
             }
+
+            WeatherServices.NasaMarsWeeklyImage((bodyImage, imageError) => {
+                command.editReply({ embeds: [ getEmbedMars(weatherData, bodyImage)] })
+            })
         })
     }
 }
