@@ -199,6 +199,11 @@ const OpenweathermapWeather = function(callback) {
                 return
             }
 
+            var headersText = ''
+            for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
+            { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
+            fs.writeFileSync('./weather-cache/openweathermap-weather-headers.txt', headersText, { encoding: 'utf-8' })
+
             fs.writeFileSync('./weather-cache/openweathermap-weather.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
@@ -252,6 +257,11 @@ const OpenweathermapPollution = function(callback) {
                 return
             }
 
+            var headersText = ''
+            for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
+            { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
+            fs.writeFileSync('./weather-cache/openweathermap-pollution-headers.txt', headersText, { encoding: 'utf-8' })
+
             fs.writeFileSync('./weather-cache/openweathermap-pollution.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
@@ -295,6 +305,11 @@ const NasaMarsWeather = function(callback) {
                 callback(undefined, `**HTTP Error:** No body recived`)
                 return
             }
+
+            var headersText = ''
+            for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
+            { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
+            fs.writeFileSync('./weather-cache/nasa-mars-weather-headers.txt', headersText, { encoding: 'utf-8' })
 
             fs.writeFileSync('./weather-cache/nasa-mars-weather.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
@@ -373,6 +388,11 @@ const NasaMarsWeeklyImage = function(callback) {
                 return
             }
 
+            var headersText = ''
+            for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
+            { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
+            fs.writeFileSync('./weather-cache/nasa-mars-image-headers.txt', headersText, { encoding: 'utf-8' })
+
             fs.writeFileSync('./weather-cache/nasa-mars-image.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
@@ -404,7 +424,12 @@ const AccuWeather = function(callback) {
                 return
             }
 
-            const RateLimitRemaining = res.headers["RateLimit-Remaining"]
+            var headersText = ''
+            for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
+            { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
+            fs.writeFileSync('./weather-cache/accu-weather-headers.txt', headersText, { encoding: 'utf-8' })
+
+            // const RateLimitRemaining = res.headers["RateLimit-Remaining"]
 
             fs.writeFileSync('./weather-cache/accu-weather.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
