@@ -1591,6 +1591,59 @@ class WebInterfaceManager {
             this.RenderPage(req, res, 'ErrorLogs', { logs: linesProcessed })
         })
 
+        this.app.get('/json/errors', (req, res) => {
+            const data = fs.readFileSync('./node.error.log', 'utf8')
+            const lines = data.split('\n')
+
+            var notificationIcon = 0
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i]
+                if (line.length < 2) { continue }
+                
+                if (line == 'CRASH') {
+                    if (notificationIcon < 4)
+                    { notificationIcon = 4 }
+                    break
+                } else if (line.startsWith('Error: ')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('DiscordAPIError[')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('Error [')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('TypeError: ')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('ReferenceError: ')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('DiscordAPIError: ')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('    at ')) {
+                    if (notificationIcon < 1)
+                    { notificationIcon = 1 }
+                } else if (line.includes(' DeprecationWarning:')) {
+                    if (notificationIcon < 2)
+                    { notificationIcon = 2 }
+                } else if (line.includes(' ExperimentalWarning:')) {
+                    if (notificationIcon < 2)
+                    { notificationIcon = 2 }
+                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
+                    if (notificationIcon < 1)
+                    { notificationIcon = 1 }    
+                } else {
+                    if (notificationIcon < 1)
+                    { notificationIcon = 1 }
+                }
+            }
+
+            res.status(200).send(JSON.stringify(notificationIcon))
+        })
+
         this.app.get('/userViews/LogSystem', (req, res) => {
             if (this.ClientType == 'MOBILE') {
                 this.RenderPage(req, res, 'SystemLogsNotSupported', {})

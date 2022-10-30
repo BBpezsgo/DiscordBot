@@ -223,6 +223,7 @@ input[type="buttonBigL"]:disabled {
 .tooltip {
 	position: relative;
 	display: inline-block;
+	z-index: 9;
 }
 
 /* Tooltip text */
@@ -240,6 +241,7 @@ input[type="buttonBigL"]:disabled {
 
 	/* Position the tooltip text - see examples below! */
 	position: absolute;
+	z-index: 10;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */

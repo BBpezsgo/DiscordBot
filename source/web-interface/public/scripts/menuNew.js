@@ -88,24 +88,46 @@ function menuDisplay() {
             display = "none";
         }
         var power = (menuList[n + 2] > 0) ? (menuList[n + 2] - 1) : 0;
-        if (['Application','CacheEmojis','Database','LogError','Moderating','Process','Status','Testing'].includes(menuList[n])) {
-            document.write(
-                `
-                <ol id=ol${i} class=${className} style="display:${display};" onClick="doClick2(${i})">
-                    <img src='/imagesNew/${menuList[n]}.svg'>
-                    <a id=a${i} href="/userViews/${menuList[n]}?new" target=mainFrame class=L1 onClick="doClick(${i},'${menuList[n]}')">
-                        ${menuList[n + 3]}
-                    </a>
-                </ol>`);
-        } else {
-            document.write(
-                `
-                <ol id=ol${i} class=${className} style="display:${display};" onClick="doClick2(${i})">
-                    <a id=a${i} href="/userViews/${menuList[n]}?new" target=mainFrame class=L1 onClick="doClick(${i},'${menuList[n]}')">
-                        ${menuList[n + 3]}
-                    </a>
-                </ol>`);
+        {
+            const haveIcon = ['Application','CacheEmojis','Database','LogError','Moderating','Process','Status','Testing'].includes(menuList[n])
+
+            const newOL = document.createElement('ol')
+            newOL.id = `ol${i}`
+            newOL.className = className
+            newOL.style.display = display
+            newOL.onclick = (e) => {
+                newA.click()
+            }
+            document.getElementsByTagName('menu')[0].appendChild(newOL)
+
+            if (haveIcon) {
+                const newIMG = document.createElement('img')
+                newIMG.src = `/imagesNew/${menuList[n]}.svg`
+                newOL.appendChild(newIMG)
+            }
+
+            const newA = document.createElement('a')
+            newA.id = `a${i}`
+            newA.href = `/userViews/${menuList[n]}?new`
+            newA.target = 'mainFrame'
+            newA.className = 'L1'
+            newA.setAttribute('data', `${i}-${n}`)
+            newA.onclick = (e) => {
+                /** @type {HTMLAnchorElement} */
+                const target = e.target
+                doClick(Number.parseInt(target.getAttribute('data').split('-')[0]), Number.parseInt(menuList[target.getAttribute('data').split('-')[1]]))
+            }
+            newA.innerText = menuList[n + 3]
+            newOL.appendChild(newA)
+
+            if (menuList[n] === 'LogError') {
+                const newIMG = document.createElement('div')
+                newIMG.id = 'status-icon-error'
+                newIMG.className = 'status-icon'
+                newOL.appendChild(newIMG)
+            }
         }
+
         //added by zqq,07.11.1
         //map.push(menuList[n+2]);
         map[map.length] = menuList[n + 2];
@@ -115,9 +137,6 @@ function menuDisplay() {
 
 }
 
-function doClick2(n) {
-    document.getElementById('a' + n).click()
-}
 
 function UnselectAll() {
     for (var i = 0; ; i++) {

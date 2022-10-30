@@ -91,7 +91,7 @@
             padding-inline-start: 0px;
         }
 
-        ol img {
+        ol img:not(.status-icon) {
             height: 100%;
             display: inline-block;
             position: relative;
@@ -100,7 +100,24 @@
             transform: scale(.8);
         }
 
-        ol.dot2 img {
+        ol.dot2 img:not(.status-icon) {
+            display: none !important;
+        }
+
+        ol .status-icon {
+            height: 24px;
+            width: 24px;
+            display: inline-block;
+            position: relative;
+            bottom: 2px;
+            left: -45px;
+            border-radius: 50%;
+            background-color: #0000;
+            transform: scale(0.5);
+            transition: background-color 1s;
+        }
+
+        ol.dot2 .status-icon {
             display: none !important;
         }
 
@@ -197,6 +214,37 @@
         </script>
     </menu>
 </body>
+
+    <script>
+        var GetDataPending = false
+        const statusIconErrors = document.getElementById('status-icon-error')
+		setInterval(() => {
+            if (GetDataPending === true) { return }
+            GetDataPending = true
+			var xmlHttp =  new XMLHttpRequest()
+			xmlHttp.open('GET', '/json/errors')
+			xmlHttp.onloadend = (e) => {
+            	GetDataPending = false
+				if (xmlHttp.status == 200) {
+                    /** @type {number} */
+					const res = JSON.parse(xmlHttp.responseText)
+                    console.log(res)
+                    if (res === 0) {
+                        statusIconErrors.style.backgroundColor = '#5550'
+                    } else if (res === 1) {
+                        statusIconErrors.style.backgroundColor = '#555'
+                    } else if (res === 2) {                            
+                        statusIconErrors.style.backgroundColor = '#fc6'
+                    } else if (res === 3) {                            
+                        statusIconErrors.style.backgroundColor = '#f62'
+                    } else if (res === 4) {                            
+                        statusIconErrors.style.backgroundColor = '#f00'
+                    }
+                }
+			}
+			xmlHttp.send(null)
+		}, 2000)
+    </script>
 
     <script>
         const buttons = document.getElementsByTagName("ol");

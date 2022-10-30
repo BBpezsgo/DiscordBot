@@ -149,13 +149,13 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         text += `\n${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C`
         text += `\n${skyIcon} ${skyTxt}`
 
-        var dayName = dayName(new Date().getDay() + i - 1)
+        var dayNameText = dayName(new Date().getDay() + i - 1)
         if (i === 0) {
-            dayName += ' (ma)'
+            dayNameText += ' (ma)'
         }
 
         embed.addFields([{
-            name: dayName,
+            name: dayNameText,
             value: text.trim(),
             inline: true
         }])
