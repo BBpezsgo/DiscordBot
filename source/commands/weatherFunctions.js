@@ -641,6 +641,18 @@ const CityBekescsaba = {
     }
 }
 
+function MetAlert_TypeIconNameToIcon(IconName) {
+    if (IconName === 'fog1.gif')
+    { return '🌫️' }
+    return null
+}
+
+function MetAlert_DegreeIconNameToText(IconName) {
+    if (IconName === 'w1.gif')
+    { return 'Mérsékelt' }
+    return null
+}
+
 module.exports = {
     ImgExists,
     weatherSkytxt,
@@ -661,5 +673,7 @@ module.exports = {
     dayName,
     weatherSkytextIcon,
     weatherSkytextImgName,
+    MetAlert_TypeIconNameToIcon,
+    MetAlert_DegreeIconNameToText,
     CityBekescsaba
 }

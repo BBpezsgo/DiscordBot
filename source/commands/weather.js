@@ -3,6 +3,7 @@ const MoonPhase = require('moonphase-js')
 const fs = require('fs')
 const SunCalc = require('suncalc')
 const WeatherServices = require('./weatherServices')
+const WeatherAlertsService = require('./weatherMet')
 
 const seasons = {
     'late autumn': { name: 'Késő ősz', icon: '🍂' },
@@ -29,6 +30,8 @@ const {
     dayName,
     weatherSkytextIcon,
     weatherSkytextImgName,
+    MetAlert_DegreeIconNameToText,
+    MetAlert_TypeIconNameToIcon,
     CityBekescsaba
 } = require('../commands/weatherFunctions');
 
@@ -40,8 +43,9 @@ const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
  * @param {WeatherServices.OpenWeatherMap.WeatherResult} OpenweatherWeather Openweather weather data
  * @param {MoonPhase[]} data2 Moon data
  * @param {WeatherServices.OpenWeatherMap.PollutionResult} OpenweatherPollution Openweather pollution data
+ * @param {WeatherAlertsService.MET.ResultCounty | null} MetAlerts
  */
-function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution) {
+function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution, MetAlerts) {
     const current = MsnWeather.current
     const embed = new Discord.EmbedBuilder()
         .setColor('#00AE86')
@@ -84,6 +88,35 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         
         if (visibilityValue !== 10)
         { description += '\n' + `\\👁️ ${visibilityValue} km látótávolság` }
+
+        if (MetAlerts !== undefined && MetAlerts !== null) {
+            if (MetAlerts.alerts.length > 0) {
+                description += '\n' + '\n🔔 **Riasztások:**\n'
+                
+                for (let i = 0; i < MetAlerts.alerts.length; i++) {
+                    const alert = MetAlerts.alerts[i]
+                    const alertIcon = MetAlert_TypeIconNameToIcon(alert.typeIcon)
+                    const alertDegree = MetAlert_DegreeIconNameToText(alert.degreeIcon)
+                    var result = ''
+                    
+                    if (alertIcon !== null) {
+                        result += `\\${alertIcon} `
+                    } else {
+                        result += `||${alert.typeIcon}|| `
+                    }
+                    
+                    if (alertDegree !== null) {
+                        result += `${alertDegree} `
+                    } else {
+                        result += `||${alert.degreeIcon}|| `
+                    }
+
+                    result += alert.Name.toLowerCase()
+
+                    description += '\n' + result
+                }
+            }
+        }
 
         if (OpenweatherPollution !== undefined) {
             description += '\n' + '\n😷 **Levegőminőség:**\n'
@@ -149,11 +182,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         text += `\n${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C`
         text += `\n${skyIcon} ${skyTxt}`
 
-        var dayNameText = dayName(new Date().getDay() + i - 1)
-        if (i === 0) {
-            dayNameText += ' (ma)'
-        }
-
+        const dayNameText = dayName(new Date().getDay() + i - 1)
         embed.addFields([{
             name: dayNameText,
             value: text.trim(),
@@ -304,7 +333,7 @@ module.exports = async (command, privateCommand, earth = true) => {
                     command.editReply({ content: '> \\❌ ' + openweathermapWeatherError })
                     return
                 }
-                WeatherServices.OpenweathermapPollution((openweathermapPollution, openweathermapPollutionError) => {
+                WeatherServices.OpenweathermapPollution(async (openweathermapPollution, openweathermapPollutionError) => {
                     if (openweathermapPollutionError) {
                         command.editReply({ content: '> \\❌ ' + openweathermapPollutionError })
                         return
@@ -318,7 +347,13 @@ module.exports = async (command, privateCommand, earth = true) => {
                         new MoonPhase(addDays(new Date(year, month, day), 3))
                     ]
 
-                    const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0])
+                    /** @type {WeatherAlertsService.MET.ResultCounty} */
+                    var alerts = null
+                    try {
+                        alerts = await WeatherAlertsService.GetCountyAlerts('Bekes')
+                    } catch (e) { }
+
+                    const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts)
                     command.editReply({ embeds: [embed] })
                 })
             })
