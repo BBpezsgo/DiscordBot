@@ -1,16 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
 const LogError = require('./functions/errorLog')
-
+const fs = require('fs')
 process.on('uncaughtException', function (err) {
     fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
     LogError(err)
@@ -24,13 +13,20 @@ process.on('uncaughtException', function (err) {
 
 
 
+
+
+
+
+
+
+
+
+
+
 const LogManager = require('./functions/log')
 var logManager = new LogManager(null, null)
 
-
-
-
-
+process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
 
 
 
