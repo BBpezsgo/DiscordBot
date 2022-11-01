@@ -4,11 +4,265 @@ const fs = require('fs')
 const SunCalc = require('suncalc')
 const WeatherServices = require('./weatherServices')
 const WeatherAlertsService = require('./weatherMet')
+const { Canvas } = require('canvas')
 
 const seasons = {
     'late autumn': { name: 'Késő ősz', icon: '🍂' },
     'early winter': { name: 'Kora tél', icon: '❄️' },
     'mid winter': { name: 'Tél közepe', icon: '❄️' },
+}
+/**
+ * @returns {Promise<string>}
+ * @param {WeatherServices.MSN.WeatherResult} MsnWeather Msn weather data
+ * @param {WeatherServices.OpenWeatherMap.WeatherResult} OpenweatherWeather Openweather weather data
+ * @param {MoonPhase[]} data2 Moon data
+ */
+const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
+    const tempMax = []
+    const tempMin = []
+    const precip = []
+    const dataLabels = []
+    var dataSize = 0
+    /** @type {'LINE' | 'FILL'} */
+    var dataType = 'LINE'
+    /** @type {'LINE' | 'FILL'} */
+    var currentDataType = dataType
+    var currentDataLabelSuffix = ''
+
+    var currentData = []
+
+    for (let i = 0; i < MsnWeather.forecast.length; i++) {
+        const Element = MsnWeather.forecast[i]
+        
+        const skyIcon = weatherSkytextIcon(Element.skytextday, false)
+        const skyTxt = weatherSkytxt(Element.skytextday)
+
+        const tempMinValue = Number.parseInt(Element.low)
+
+        const tempMaxValue = Number.parseInt(Element.high)
+        const tempMaxIcon = weatherTempIcon(tempMaxValue)
+
+        var text = ''
+        if (Element.precip !== undefined && Element.precip !== '0')
+        { text += `\n\\☔ ${Element.precip} %` }
+        text += `\n${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C`
+        text += `\n${skyIcon} ${skyTxt}`
+
+        const dayNameText = dayName(new Date().getDay() + i - 1)
+
+        tempMax.push(tempMaxValue)
+        tempMin.push(tempMinValue)
+        precip.push(Number.parseInt(Element.precip))
+        dataLabels.push(dayNameText)
+        dataSize += 1
+    }
+
+    const DrawGraph = function () {
+        const graph = {
+            Top: 25,
+            Left: 25,
+            Bottom: 32,
+            Right: 0,
+            Height: 250,
+            Width: 450
+        }
+
+        const GraphOffsetX = 25
+
+        const canvas = new Canvas(graph.Width + graph.Left + graph.Right, graph.Height + graph.Top + graph.Bottom)
+        const context = canvas.getContext('2d')
+
+        graph.Right += graph.Width
+        graph.Bottom += graph.Height
+
+        context.clearRect(0, 0, canvas.height, canvas.width)
+
+        // draw X and Y axis  
+        context.beginPath();
+        context.strokeStyle = "#fffc";
+        context.moveTo(graph.Left, graph.Bottom);
+        context.lineTo(graph.Right, graph.Bottom);
+        context.lineTo(graph.Right, graph.Top);
+        context.stroke();
+
+        const DrawLine = function(fromX, fromY, toX, toY) {
+            context.beginPath()
+            context.moveTo(fromX, fromY)
+            context.lineTo(toX, toY)
+            context.stroke()
+        }
+
+        context.strokeStyle = "#fff4"
+        DrawLine(graph.Left, graph.Top, graph.Right, graph.Top)
+
+        DrawLine(graph.Left, (graph.Height) / 4 * 3 + graph.Top, graph.Right, (graph.Height) / 4 * 3 + graph.Top)
+
+        DrawLine(graph.Left, (graph.Height) / 2 + graph.Top, graph.Right, (graph.Height) / 2 + graph.Top)
+
+        DrawLine(graph.Left, (graph.Height) / 4 + graph.Top, graph.Right, (graph.Height) / 4 + graph.Top)
+
+        context.strokeStyle = "#fffc";
+        for (let i = 0; i < dataSize; i++) {
+            const x = (graph.Right / dataSize * i + graph.Left) + GraphOffsetX
+            DrawLine(x, graph.Bottom, x, graph.Bottom - 16)
+
+            if (dataLabels[i] === undefined) { continue }
+            context.font = "bold 12px Arial"
+            context.fillStyle = '#fff'
+            context.fillText(dataLabels[i], x - (context.measureText(dataLabels[i]).width / 2), graph.Bottom + 12)
+        }
+
+        // context.font = "bold 16px Arial"
+        // context.fillStyle = '#fff'
+        // context.fillText("Day of the week", graph.Left + (graph.Width / 2) - (context.measureText('Day of the week').width / 2), graph.Bottom + 50)
+        // context.fillText("C°", graph.Right + 15, graph.Top + (graph.Height / 2))
+
+        var largest = -100
+        var smallest = 100
+        var largestI = -1
+        var smallestI = -1
+
+        /** @param {boolean} ClearPrev */
+        const CalculateLimits = function(ClearPrev) {
+            if (ClearPrev) {
+                largest = -500
+                smallest = 500
+                largestI = -1
+                smallestI = -1
+            }
+
+            for (var i = 0; i < dataSize; i++) {
+                if (currentData[i] > largest) {
+                    largest = currentData[i]
+                    largestI = i
+                }
+                if (currentData[i] < smallest) {
+                    smallest = currentData[i]
+                    smallestI = i
+                }
+            }
+        }
+        const DrawDataLines = function() {
+            if (currentDataType === 'LINE') {
+                context.beginPath()
+                context.lineJoin = "round"
+                // add first point in the graph
+                context.moveTo(graph.Left + GraphOffsetX, (graph.Height - currentData[0] / largest * graph.Height) + graph.Top)
+                // loop over data and add points starting from the 2nd index in the array as the first has been added already  
+                for (var i = 1; i < dataSize; i++) {
+                    context.lineTo(graph.Right / dataSize * i + graph.Left + GraphOffsetX, (graph.Height - currentData[i] / largest * graph.Height) + graph.Top)
+                }
+                context.stroke()
+            } else if (currentDataType === 'FILL') {
+                context.beginPath()
+                context.lineJoin = "round"
+                context.moveTo(graph.Left + GraphOffsetX, (graph.Height - currentData[0] / largest * graph.Height) + graph.Top)
+                for (var i = 1; i < dataSize; i++) {
+                    context.lineTo(graph.Right / dataSize * i + graph.Left + GraphOffsetX, (graph.Height - currentData[i] / largest * graph.Height) + graph.Top)
+                }
+                context.lineTo(graph.Right / dataSize * (dataSize - 1) + graph.Left + GraphOffsetX, graph.Bottom) // bottom-right
+                context.lineTo(graph.Left + GraphOffsetX, graph.Bottom) // bottom-left
+              
+                context.globalCompositeOperation = "destination-over" // draw behind
+                context.fill()
+                context.globalCompositeOperation = "source-over" // normal behavior
+            }
+        }
+        const DrawDataPoints = function(radius) {
+            context.beginPath()
+            context.arc(graph.Left + GraphOffsetX, (graph.Height - currentData[0] / largest * graph.Height) + graph.Top, radius, 0, 2 * Math.PI, false)
+            context.fill()
+            context.closePath()
+
+            // loop over data and add points starting from the 2nd index in the array as the first has been added already  
+            for (var i = 1; i < dataSize; i++) {
+                context.beginPath()
+                context.arc(graph.Right / dataSize * i + graph.Left + GraphOffsetX, (graph.Height - currentData[i] / largest * graph.Height) + graph.Top, radius, 0, 2 * Math.PI, false)
+                context.fill()
+                context.closePath()
+            }
+        }
+        const DrawDataLabels = function() {
+            context.font = "bold 12px Arial"
+
+            for (var i = 0; i < dataSize; i++) {
+                const x = graph.Right / dataSize * i + graph.Left + GraphOffsetX
+                const y = (graph.Height - currentData[i] / largest * graph.Height) + graph.Top
+
+                if (y < graph.Height/2) {
+                    context.fillText(currentData[i] + currentDataLabelSuffix, x, y+12+8)
+                } else {
+                    context.fillText(currentData[i] + currentDataLabelSuffix, x, y-12)
+                }
+            }
+
+        }
+
+        var currentColors = {
+            Primary: '#fff',
+            Secondary: '#fff7'
+        }
+
+        const DrawData = function() {
+            currentDataType = 'LINE'
+            context.lineWidth = 8
+            context.strokeStyle = currentColors.Secondary
+            DrawDataLines()
+    
+            currentDataType = 'LINE'
+            context.lineWidth = 2
+            context.strokeStyle = currentColors.Primary
+            DrawDataLines()
+
+            if (dataType === 'FILL') {
+                currentDataType = 'FILL'
+                context.fillStyle = currentColors.Secondary
+                DrawDataLines()
+            }
+    
+            context.fillStyle = currentColors.Secondary
+            DrawDataPoints(8)
+    
+            context.fillStyle = currentColors.Primary
+            DrawDataPoints(4)
+    
+            context.fillStyle = '#fff'
+            DrawDataLabels()
+        }
+        
+        dataType = 'FILL'
+        currentData = precip
+        currentColors.Primary = '#34bfdb'
+        currentColors.Secondary = '#34bfdb40'
+        currentDataLabelSuffix = '%'
+        CalculateLimits(true)
+        DrawData()
+        
+        dataType = 'LINE'
+        currentData = tempMax
+        currentColors.Primary = '#ed4245'
+        currentColors.Secondary = '#ed424540'
+        currentDataLabelSuffix = ' C°'
+        CalculateLimits(true)
+        DrawData()
+        
+        dataType = 'LINE'
+        currentData = tempMin
+        currentColors.Primary = '#5865f2'
+        currentColors.Secondary = '#5865f240'
+        currentDataLabelSuffix = ' C°'
+        CalculateLimits(false)
+        DrawData()
+
+        return { canvas: canvas, context: context }
+    }
+
+    return new Promise((callback) => {
+        const out = fs.createWriteStream(__dirname + '/graph.png')
+        const stream = DrawGraph().canvas.createPNGStream()
+        stream.pipe(out)
+        out.on('finish', () => callback(__dirname + '/graph.png'))
+    })
 }
 
 const {
@@ -158,11 +412,14 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         description += '\n🗓️ **Előrejelzés:**'
         embed.setDescription(description)
         
+        /*
         const skyImgName = weatherSkytextImgName(current.skytext, unixToTime(OpenweatherWeather.sys.sunset).split(':')[0], unixToTime(OpenweatherWeather.sys.sunrise).split(':')[0], OpenweatherWeather.clouds.all)
+        
         if (ImgExists(skyImgName) === true)
         { embed.setImage('https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/commands/weatherImages/' + skyImgName + '.jpg') }
         else
         { embed.addFields([{ name: 'ImgCode', value: skyImgName, inline: false }]) }
+        */
     }
 
     for (let i = 0; i < MsnWeather.forecast.length; i++) {
@@ -190,9 +447,17 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         }])
     }
 
-    embed.setTimestamp(Date.parse(current.date + 'T' + current.observationtime))
+    embed.addFields({
+        name: '📈 Grafikon:',
+        value: 'Minimum-, maximum hőmérséklet és csapadék',
+        inline: false
+    })
+
+    embed.setTimestamp(Date.parse(current.date + 'T' + current.observationtime))    
+    // embed.setThumbnail('attachment://graph.png')
     embed.setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(current.skytext, true).replace('\\', '')))
     embed.setFooter({ text: '• weather.service.msn.com • openweathermap.org' })
+    embed.setImage('attachment://graph.png')
     return embed
 }
 
@@ -354,7 +619,13 @@ module.exports = async (command, privateCommand, earth = true) => {
                     } catch (e) { }
 
                     const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts)
-                    command.editReply({ embeds: [embed] })
+                    const attachmentPath = await CreateGraph(msnWeather[0], openweathermapWeather, MoonPhases)
+                    command.editReply({ embeds: [embed],
+                        files: [{
+                            attachment: attachmentPath,
+                            name: 'graph.png'
+                        }]
+                    })
                 })
             })
         })

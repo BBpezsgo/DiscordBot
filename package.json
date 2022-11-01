@@ -4,11 +4,15 @@
   "description": "A discord.js application",
   "main": "./source/desktop.js",
   "repository": "https://github.com/BBpezsgo/DiscordBot",
+  "scripts": {
+    "test": "node ./source/tests/test.js"
+  },
   "dependencies": {
     "@discordjs/voice": "latest",
     "adm-zip": "latest",
     "asciichart": "latest",
     "axios": "latest",
+    "canvas": "^2.10.2",
     "discord.js": "latest",
     "express": "latest",
     "express-handlebars": "latest",

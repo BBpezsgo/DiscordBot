@@ -25,3 +25,4 @@ Properties
 .vscode
 source/weather-cache
 source/tests
+source/commands/graph.png
