@@ -119,26 +119,20 @@ const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
 
         var largest = -100
         var smallest = 100
-        var largestI = -1
-        var smallestI = -1
 
         /** @param {boolean} ClearPrev */
         const CalculateLimits = function(ClearPrev) {
             if (ClearPrev) {
                 largest = -500
                 smallest = 500
-                largestI = -1
-                smallestI = -1
             }
 
             for (var i = 0; i < dataSize; i++) {
                 if (currentData[i] > largest) {
                     largest = currentData[i]
-                    largestI = i
                 }
                 if (currentData[i] < smallest) {
                     smallest = currentData[i]
-                    smallestI = i
                 }
             }
         }
@@ -236,6 +230,8 @@ const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
         currentColors.Secondary = '#34bfdb40'
         currentDataLabelSuffix = '%'
         CalculateLimits(true)
+        largest = 100
+        smallest = 0
         DrawData()
         
         dataType = 'LINE'
