@@ -387,28 +387,32 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
             description += '\n' + `NH₃: \\${GetPollutionIndex(7, OpenweatherPollution.components.nh3)} ${OpenweatherPollution.components.nh3}g/m³`
         }
 
-        description +=
-            '\n\n☀️ **Nap:**\n\n' +
+        try {                
+            description +=
+                '\n\n☀️ **Nap:**\n\n' +
 
-            `\\🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
-            `\\🌇 Napkelte: <t:${AverageUnix(OpenweatherWeather.sys.sunrise, ToUnix(times.sunrise))}:R>\n` +
-            `\\🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
-            `\\📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:R>\n` +
-            `\\🌆 Napnyugta: <t:${AverageUnix(OpenweatherWeather.sys.sunset, ToUnix(times.sunset))}:R>\n` +
-            `\\🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>\n` +
-            `\\🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>`
+                `\\🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
+                `\\🌇 Napkelte: <t:${AverageUnix(OpenweatherWeather.sys.sunrise, ToUnix(times.sunrise))}:R>\n` +
+                `\\🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
+                `\\📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:R>\n` +
+                `\\🌆 Napnyugta: <t:${AverageUnix(OpenweatherWeather.sys.sunset, ToUnix(times.sunset))}:R>\n` +
+                `\\🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>\n` +
+                `\\🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>`            
+        } catch (error) { }
+
         description +=
             '\n\n🌕 **Hold:**\n\n'
         description += `${weatherMoonIcon(data2[1].phaseName())} ${weatherMoonText(data2[1].phaseName())} (${Math.floor(data2[1].illum * 100)} %-a látható)\n`
-        description += `Holdkelte: <t:${ToUnix(moonTimes.rise)}:R>\n`
-        description += `Holdnyugta: <t:${ToUnix(moonTimes.set)}:R>\n`
-        if (moonTimes.alwaysUp) {
-            description += `A Hold ma mindig a **horizont felett lesz**\n`
-        }
-        if (moonTimes.alwaysDown) {
-            description += `A Hold ma mindig a **horizont alatt lesz**\n`
-        }
+        
+        if (moonTimes.rise !== undefined)
+        { description += `Holdkelte: <t:${ToUnix(moonTimes.rise)}:R>\n` }
+        if (moonTimes.set !== undefined)
+        { description += `Holdnyugta: <t:${ToUnix(moonTimes.set)}:R>\n` }
 
+        if (moonTimes.alwaysUp)
+        { description += `A Hold ma mindig a **horizont felett lesz**\n` }
+        if (moonTimes.alwaysDown)
+        { description += `A Hold ma mindig a **horizont alatt lesz**\n` }
         description += '\n🗓️ **Előrejelzés:**'
         embed.setDescription(description)
         
