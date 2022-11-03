@@ -1,3 +1,108 @@
+const MenuList = [
+    {
+        url: "Status",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.status,
+    },
+    {
+        url: "Process",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.process,
+    },
+    {
+        url: "LogError",
+        displayLevel: 0,
+        directoryLevel: 1,
+        name: str_menu.log,
+    },
+    {
+        url: "LogError",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.logErrors,
+    },
+    {
+        url: "LogSystem",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.logSystem,
+    },
+    {
+        url: "LogHandlebars",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.logHandlebars,
+    },
+    {
+        url: "CacheEmojis",
+        displayLevel: 0,
+        directoryLevel: 1,
+        name: str_menu.cache,
+    },
+    {
+        url: "CacheEmojis",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.cacheEmojis,
+    },
+    {
+        url: "CacheUsers",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.cacheUsers,
+    },
+    {
+        url: "CacheChannels",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.cacheChannels,
+    },
+    {
+        url: "CacheServers",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.cacheServers,
+    },
+    {
+        url: "Application",
+        displayLevel: 0,
+        directoryLevel: 1,
+        name: str_menu.application,
+    },
+    {
+        url: "Application",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.application,
+    },
+    {
+        url: "ApplicationCommands",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.commands,
+    },
+    {
+        url: "Moderating",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.moderating,
+    },
+    {
+        url: "Database",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.database,
+    },
+    {
+        url: "Testing",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.testing,
+    }
+]
+
 var menuList = new Array(
     //	url							display	level			string
     //	url:	url to visite when click on this menu item. it's not full path, but only filename.
@@ -7,6 +112,15 @@ var menuList = new Array(
     
     // Status
     "Status", 0, 0, str_menu.status,
+    // Process
+    "Process", 0, 0, str_menu.process,
+    // Logs
+    "LogError", 0, 1, str_menu.log,
+    "LogError", 0, 2, str_menu.logErrors,
+    "LogSystem", 0, 2, str_menu.logSystem,
+    "LogHandlebars", 0, 2, str_menu.logHandlebars,
+    "---", 0, 0, "---",
+
     // Cache
     "CacheEmojis", 0, 1, str_menu.cache,
     "CacheEmojis", 0, 2, str_menu.cacheEmojis,
@@ -17,17 +131,15 @@ var menuList = new Array(
     "Application", 0, 1, str_menu.application,
     "Application", 0, 2, str_menu.application,
     "ApplicationCommands", 0, 2, str_menu.commands,
-    // Process
-    "Process", 0, 0, str_menu.process,
-    // Database
-    "Database", 0, 0, str_menu.database,
     // Moderating
     "Moderating", 0, 0, str_menu.moderating,
-    // Logs
-    "LogError", 0, 1, str_menu.log,
-    "LogError", 0, 2, str_menu.logErrors,
-    "LogSystem", 0, 2, str_menu.logSystem,
-    "LogHandlebars", 0, 2, str_menu.logHandlebars,
+
+    "---", 0, 0, "---",
+
+    // Database
+    "Database", 0, 0, str_menu.database,
+
+    "---", 0, 0, "---",
 
     // Testing
     "Testing", 0, 0, str_menu.testing,
@@ -35,17 +147,11 @@ var menuList = new Array(
 
 var map = new Array();
 
-function menuInit(option) {
-    for (var i = 0; i < option.length; i++) {
-        if (option[i] == 0) {
-            continue;
-        }
-        for (var n = 0; n < menuList.length; n += 4) {
-            if (true) { //if (menuList[n] == option[i]) {
-                menuList[n + 1] = 1;
-            }
-        }
+function menuInit() {
+    for (var n = 0; n < menuList.length; n += 4) {
+        menuList[n + 1] = 1
     }
+        
     n = menuList.length - 4;
     var url = "";
     var level = 0;
@@ -88,7 +194,12 @@ function menuDisplay() {
             display = "none";
         }
         var power = (menuList[n + 2] > 0) ? (menuList[n + 2] - 1) : 0;
-        {
+        
+        if (menuList[n] === '---') {
+            const newOL = document.createElement('hr')
+            newOL.id = `hr${i}`
+            document.getElementsByTagName('menu')[0].appendChild(newOL)
+        } else {
             const haveIcon = ['Application','CacheEmojis','Database','LogError','Moderating','Process','Status','Testing'].includes(menuList[n])
 
             const newOL = document.createElement('ol')
@@ -139,17 +250,19 @@ function menuDisplay() {
 
 
 function UnselectAll() {
-    for (var i = 0; ; i++) {
+    const l = menuList.length / 4 // document.getElementsByTagName('ol').length
+    for (var i = 0; i < l; i++) {
         try {
             document.getElementById('ol' + i).classList.remove('selected')
         } catch (ex) {
-            break
+            continue
         }
     }
 }
 
 function collapseAll() {
-    for (var i = 0; ; i++) {
+    const l = menuList.length / 4 //document.getElementsByTagName('ol').length
+    for (var i = 0; i < l; i++) {
         try {
             if (map[i] > 1) {
                 document.getElementById('ol' + i).style.display = "none";
@@ -158,7 +271,7 @@ function collapseAll() {
                 document.getElementById('ol' + i).className = "plus";
             }
         } catch (ex) {
-            break
+            continue
         }
     }
     for (var i = 0; i < document.links.length; i++) {
