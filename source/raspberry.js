@@ -177,7 +177,7 @@ logManager.Loading('Loading packet', "other functions")
 
 
 const { DateToString } = require('./functions/dateToString')
-const { NewsMessage, CreateNews } = require('./functions/news')
+const NewsManager = require('./functions/news')
 const {
     INFO,
     ERROR,

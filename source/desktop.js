@@ -188,7 +188,7 @@ const { AutoReact } = require('./functions/autoReact')
 logManager.Loading('Loading packet', "other functions")
 const { abbrev } = require('./functions/abbrev')
 const { DateToString } = require('./functions/dateToString')
-const { NewsManager } = require('./functions/news')
+const NewsManager = require('./functions/news')
 const { MailManager, Mail, MailUser, CurrentlyWritingMail } = require('./commands/mail')
 const {
     Color,

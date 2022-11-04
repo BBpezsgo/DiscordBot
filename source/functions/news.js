@@ -6,26 +6,6 @@ const { FormatError } = require('./formatError')
 const { SystemLog } = require('./systemLog')
 const ytdl = require("ytdl-core")
 
-/**
- * @param {string} id
- * @returns {string}
- */
-function ConvertNewsIdToName(id) {
-    if (id == '802864588877856789') {
-        return 'Crossout - Bejelentés'
-    } else if (id == '802864713323118603') {
-        return 'Ingyenes Játékok'
-    } else if (id == '813398275305898014') {
-        return 'Warzone 2100 - Bejelentés'
-    } else if (id == '875340034537062400') {
-        return 'Minecraft - Frissítés'
-    } else if (id == '726127512521932880') {
-        return 'Bejelentés'
-    } else {
-        return id
-    }
-}
-
 class NewsMessage {
     /**
      * @param {Discord.EmbedBuilder} embed
@@ -69,13 +49,13 @@ async function CreateNews(message) {
     let role = ''
     const newDate = new Date(message.createdTimestamp)
     const embed = new Discord.EmbedBuilder()
-        .setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
+        .setAuthor({ name: 'Bejelentés', iconURL: message.author.displayAvatarURL() })
         .setDescription(message.cleanContent)
         .setColor(Color.Highlight)
         .setTimestamp(newDate)
     
     if (message.author.id == '802864588877856789') { // Crossout
-        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
+        embed.setAuthor({ name: 'Crossout', iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
         
         var NewsContent = message.content.trim()
         
@@ -116,7 +96,7 @@ async function CreateNews(message) {
         embed.setDescription(NewsContent)
         embed.setFooter({ text: '• #' + NewsType })
     } else if (message.author.id == '813398275305898014') { // Warzone 2100
-        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL(), url: 'https://wz2100.net/' })
+        embed.setAuthor({ name: 'Warzone 2100', iconURL: 'https://wz2100.net/img/warzone2100.large.png', url: 'https://wz2100.net/' })
         if (message.embeds.length > 0) {
             const embed2 = message.embeds[0]
 
@@ -137,7 +117,7 @@ async function CreateNews(message) {
         }
         role = '902878851938517043'
     } else if (message.author.id == '802864713323118603') { // Free games
-        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: message.author.displayAvatarURL() })
+        embed.setAuthor({ name: 'Game sales', iconURL: message.author.displayAvatarURL() })
         if (message.embeds.length == 1) {
             let content = message.content.replace('@Free Games Ping', '')
             let title = ''
@@ -178,30 +158,25 @@ async function CreateNews(message) {
         }
         role = '902878798956093510'
     } else if (message.author.id == '875340034537062400') { // Minecraft
-        embed.setAuthor({ name: ConvertNewsIdToName(message.author.id), iconURL: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/favicon-32x32.png', url: 'https://www.minecraft.net/en-us' })
+        embed.setAuthor({ name: 'Minecraft', iconURL: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/favicon-32x32.png', url: 'https://www.minecraft.net/en-us' })
 
-        let content = message.content
-        let title = ''
-        let url = ''
-        while (content.startsWith(' ')) {
-            content = content.substring(1)
-        }
+        let content = message.content.trim()
+
         const contentLines = content.split('\n')
         for (let i = 0; i < contentLines.length; i++) {
-            const line = contentLines[i]
-            if (i == 0) {
-                title = line
+            const line = contentLines[i].trim()
+            if (i === 0) {
+                embed.setTitle(line)
                 content = content.replace(line, '')
-            } else if (i == 1) {
-                url = line
+            } else if (i === 1) {
+                try
+                { embed.setURL(line) }
+                catch (e)
+                { content = line + '\n' + content.trim() }
                 content = content.replace(line, '')
-            } else if (i == 2) {
-                content = content.substring(1)
             }
         }
-        embed.setDescription(content)
-        embed.setTitle(title)
-        embed.setURL(url)
+        embed.setDescription(content.trim())
 
         if (message.embeds.length == 1) {
             const embed2 = message.embeds[0]
@@ -394,4 +369,4 @@ class NewsManager {
 const NewsIncomingChannel = '902894789874311198'
 const NewsProcessedChannel = '746266528508411935'
 
-module.exports = { NewsManager }
+module.exports = NewsManager
