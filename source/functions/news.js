@@ -81,20 +81,24 @@ async function CreateNews(message) {
                 break
         }
 
-        const title = NewsContent.split('\n')[0].trim()
-        try {
-            embed.setTitle(title)
-            NewsContent = NewsContent.substring(NewsContent.split('\n')[0].length).trim()
-        } catch (e) { }
+        if (NewsContent.endsWith('#crossout')) {
+            NewsContent = NewsContent.substring(0, NewsContent.length - 9).trim()
+        }
+
+        if (NewsContent.substring(NewsContent.split('\n')[0].length).trim().length > 0) {
+            try {
+                embed.setTitle(NewsContent.split('\n')[0].trim())
+                NewsContent = NewsContent.substring(NewsContent.split('\n')[0].length).trim()
+            } catch (e) { }
+        }
+
         embed.setURL('https://crossout.net/en/news/')
         if (message.attachments.size > 0) {
             embed.setImage(message.attachments.first().url)
         }
-        if (NewsContent.endsWith('#crossout')) {
-            NewsContent = NewsContent.substring(0, NewsContent.length - 9).trim()
-        }
+
         embed.setDescription(NewsContent)
-        embed.setFooter({ text: '• #' + NewsType })
+        embed.setFooter({ text: '• ' + NewsType })
     } else if (message.author.id == '813398275305898014') { // Warzone 2100
         embed.setAuthor({ name: 'Warzone 2100', iconURL: 'https://wz2100.net/img/warzone2100.large.png', url: 'https://wz2100.net/' })
         if (message.embeds.length > 0) {

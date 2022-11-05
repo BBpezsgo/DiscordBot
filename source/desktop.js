@@ -88,7 +88,9 @@ process.stdin.on('data', function (b) {
 if (process.stdin.setRawMode) {
     process.stdin.setRawMode(true)
 } else {
-    require('tty').setRawMode(true)
+    const tty = require('tty')
+    if (tty.setRawMode)
+    { tty.setRawMode(true) }    
 }
 
 // Enable "mouse reporting"
