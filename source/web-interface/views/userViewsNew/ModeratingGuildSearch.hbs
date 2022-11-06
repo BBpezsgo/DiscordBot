@@ -102,7 +102,7 @@
 
     <div class="container loading-effect">
         <h2>Channels</h2>
-        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+        <table border="1" cellspacing="0" cellpadding="0" style="width: 100%;">
             <tbody>
                 <tr>
                     <td class="ListM">
@@ -124,25 +124,10 @@
                         <b>Viewb.</b>
                     </td>
                     <td class="ListM">
-                        <b>Edit.</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Invt.</b>
-                    </td>
-                    <td class="ListM">
                         <b>Join.</b>
                     </td>
                     <td class="ListM">
-                        <b>Lock.</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Send.</b>
-                    </td>
-                    <td class="ListM">
                         <b>Spek.</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Uarc.</b>
                     </td>
                     <td class="ListM">
                         
@@ -150,47 +135,32 @@
                 </tr>
                 {{#each singleChannels}}
                 <tr>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img src="/imagesNew/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.name}}
+                    <td style="padding:0 2px;word-break:break-all">
+                        <span class="fake-link" onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">{{this.name}}</span>
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         {{this.id}}
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         <img width="16" height="16" src="/imagesNew/bool-{{this.deletable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         <img width="16" height="16" src="/imagesNew/bool-{{this.manageable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         <img width="16" height="16" src="/imagesNew/bool-{{this.viewable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/imagesNew/bool-{{this.editable}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/imagesNew/bool-{{this.invitable}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         <img width="16" height="16" src="/imagesNew/bool-{{this.joinable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/imagesNew/bool-{{this.locked}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/imagesNew/bool-{{this.sendable}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         <img width="16" height="16" src="/imagesNew/bool-{{this.speakable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/imagesNew/bool-{{this.unarchivable}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <form action="/userViews/Moderating/Server/Search" method="post"
+                    <td style="padding:0 2px;word-break:break-all;">
+                        <form action="/userViews/Moderating/Server/Search" method="post" id="view-channel-{{this.id}}"
                             style="margin: 0;"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
@@ -201,28 +171,28 @@
                 {{/each}}
                 {{#each groups}}
                 <tr>
-                    <td style="padding:0 2 0 2;word-break:break-all; width: 16px;">
+                    <td style="padding:0 2px;word-break:break-all; width: 16px;">
                         <div class="caret" id="{{this.id}}"></div>
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all" class="fake-link" onclick="OnCaretClick('{{id}}')">
                         {{this.name}}
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         {{this.id}}
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.deletable}}.png">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.deletable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.manageable}}.png">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.manageable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.viewable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all" colspan="7">
+                    <td style="padding:0 2px;word-break:break-all" colspan="2">
                         
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         <form action="/userViews/Moderating/Server/Search" method="post"
                             style="margin: 0;"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
@@ -233,49 +203,33 @@
                 </tr>
                 {{#each channels}}
                 <tr class="nested {{this.parentId}}">
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img src="../images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img src="../imagesNew/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        {{this.name}}
+                    <td style="padding:0 2px;word-break:break-all">
+                        <span class="fake-link" onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">{{this.name}}</span>
                         {{#if nsfw}}<span class="tag">NSFW</span>{{/if}}
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
+                    <td style="padding:0 2px;word-break:break-all">
                         {{this.id}}
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.deletable}}.png">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.deletable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.manageable}}.png">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.manageable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.viewable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.editable}}.png">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.joinable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.invitable}}.png">
+                    <td style="padding:0 2px;word-break:break-all">
+                        <img width="16" height="16" src="/imagesNew/bool-{{this.speakable}}.png">
                     </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.joinable}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.locked}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.sendable}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.speakable}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.unarchivable}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <form action="/userViews/Moderating/Server/Search" method="post"
-                            style="margin: 0;"
+                    <td style="padding:0 2px;word-break:break-all">
+                        <form action="/userViews/Moderating/Server/Search" method="post" style="margin: 0" id="view-channel-{{this.id}}"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                             <input type="submit" value="View">
@@ -288,7 +242,98 @@
         </table>
     </div>
     
-    <script src="../scripts/loadEffect.js"></script>
+    <script>
+        /** @param {Event} event */
+        function Post(url, event, callback, errorLabelID)
+        {
+            event.srcElement.classList.add('disabled')
+            const xmlHttp = new XMLHttpRequest()
+            xmlHttp.onreadystatechange = function() { 
+                if (xmlHttp.readyState == 4)
+                {
+                    event.srcElement.classList.remove('disabled')
+                    const res = JSON.parse(xmlHttp.responseText)
+                    if (res.message === 'ok') {
+                        console.log('Success')
+                        callback(xmlHttp.responseText)
+                    } else if (res.rawError !== undefined) {
+                        console.warn(JSON.stringify(res, null, ' '))
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            if (res.rawError.errors !== undefined) {
+                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
+                            }
+                            errorLabel.innerHTML = 
+                            `
+                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
+                            ${res.rawError.message} (code: ${res.rawError.code})${details}
+                            `
+                        }
+                    } else {
+                        console.warn(res)
+                    }
+                }
+            }
+            xmlHttp.open('POST', url, true)
+            xmlHttp.send(null)
+        }
+
+        /** @param {HTMLFormElement} form */
+        function PostFormData(url, form, callback, errorLabelID) {
+            const formData = new FormData(form)
+            
+            const xmlHttp = new XMLHttpRequest()
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4)
+                {
+                    if (xmlHttp.status === 404) {
+                        console.log('404')
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            errorLabel.innerHTML = 
+                            `
+                            <b>HTTP ${'POST'} <a href='${url}' target='_blank'>${url}</a>:</b><br>
+                            ${xmlHttp.status} ${xmlHttp.statusText}
+                            `
+                        }
+                        return
+                    }
+                    const res = JSON.parse(xmlHttp.responseText)
+                    if (res.message === 'ok') {
+                        console.log('Success')
+                        callback(xmlHttp.responseText)
+                    } else if (res.rawError !== undefined) {
+                        console.warn(JSON.stringify(res, null, ' '))
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            if (res.rawError.errors !== undefined) {
+                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
+                            }
+                            errorLabel.innerHTML = 
+                            `
+                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
+                            ${res.rawError.message} (code: ${res.rawError.code})${details}
+                            `
+                        }
+                    } else {
+                        console.warn(res)
+                    }
+                }
+            }
+            xmlHttp.onerror = function(ev) {
+                console.warn(ev)
+            }
+            xmlHttp.onabort = function(ev) {
+                console.warn(ev)
+            }
+            xmlHttp.open('POST', url, true)
+            xmlHttp.send(formData)
+        }
+    </script>
+    <script src="/scripts/loadEffect.js"></script>
 </body>
 
 </html>

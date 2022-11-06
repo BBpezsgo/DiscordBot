@@ -19,6 +19,8 @@ const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
 const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
+const { MessageType } = require('discord.js')
+const process = require('process')
 
 class WebInterfaceManager {
     /**
@@ -412,32 +414,41 @@ class WebInterfaceManager {
 
     /** @param {Discord.Guild} guild */
     Get_ChannelsInGuild(guild) {
+        /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
         const GetTypeUrl = (type) => {
-            if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+            if (type == Discord.ChannelType.GuildText) {
                 return 'text'
             }
-            if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+            if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
                 return 'voice'
             }
         }
 
+        /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
         const GetTypeText = (type) => {
-            if (type == "GUILD_NEWS" || type == "GUILD_STORE" || type == "GUILD_TEXT") {
+            if (type == Discord.ChannelType.GuildText) {
                 return 'Text channel'
             }
-            if (type == "GUILD_STAGE_VOICE" || type == "GUILD_VOICE") {
+            if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
                 return 'Voice channel'
             }
         }
 
         const groups = []
+        /**
+         * @type {{
+         *   id: string
+         *   name: string
+         *   position: number
+         * }[]}
+         */
         const singleChannels = []
 
         guild.channels.cache.forEach(channel => {
-            if (channel.type == "GUILD_CATEGORY") {
+            if (channel.type === Discord.ChannelType.GuildCategory) {
                 const channels = []
 
-                channel.children.forEach(child => {
+                channel.children.cache.forEach(child => {
                     const newChannel = {
                         id: child.id,
                         createdAt: GetDate(child.createdAt),
@@ -456,6 +467,7 @@ class WebInterfaceManager {
                         parentId: child.parentId,
                         typeText: GetTypeText(child.type),
                         typeUrl: GetTypeUrl(child.type),
+                        position: child.position,
                         commands: ['Fetch'],
                     }
 
@@ -465,6 +477,8 @@ class WebInterfaceManager {
 
                     channels.push(newChannel)
                 })
+                
+                channels.sort(function(a, b) { return a.position - b.position })
 
                 const newGroup = {
                     id: channel.id,
@@ -486,6 +500,7 @@ class WebInterfaceManager {
                     invitable: channel.invitable,
                     joinable: channel.joinable,
                     locked: channel.locked,
+                    position: channel.position,
                     manageable: channel.manageable,
                     name: channel.name,
                     nsfw: channel.nsfw,
@@ -507,6 +522,8 @@ class WebInterfaceManager {
                 singleChannels.push(newChannel)
             }
         });
+
+        singleChannels.sort(function(a, b) { return a.position - b.position })
 
         return { groups: groups, singleChannels: singleChannels }
     }
@@ -872,15 +889,16 @@ class WebInterfaceManager {
 
         const messages = []
 
-        if (c.type === "GUILD_TEXT") {
-            /** @type {Discord.DMChannel | Discord.PartialDMChannel | Discord.NewsChannel | Discord.TextChannel | Discord.ThreadChannel | Discord.VoiceChannel} */
+        if (c.type === Discord.ChannelType.GuildText) {
             const cTxt = c
 
             cTxt.messages.cache.forEach((message) => {
                 messages.push({
                     id: message.id,
+                    position: message.position,
                     applicationId: message.applicationId,
                     cleanContent: message.cleanContent,
+                    tts: message.tts,
                     content: message.content,
                     createdAt: GetDate(message.createdAt),
                     crosspostable: message.crosspostable,
@@ -888,14 +906,39 @@ class WebInterfaceManager {
                     editable: message.editable,
                     editedAt: GetDate(message.editedAt),
                     nonce: message.nonce,
+                    partial: message.partial,
                     pinnable: message.pinnable,
                     pinned: message.pinned,
                     system: message.system,
                     type: message.type,
+                    types: {
+                        AutoModerationAction: message.type === MessageType.AutoModerationAction,
+                        Call: message.type === MessageType.Call,
+                        ChannelFollowAdd: message.type === MessageType.ChannelFollowAdd,
+                        ChannelIconChange: message.type === MessageType.ChannelIconChange,
+                        ChannelNameChange: message.type === MessageType.ChannelNameChange,
+                        ChannelPinnedMessage: message.type === MessageType.ChannelPinnedMessage,
+                        ChatInputCommand: message.type === MessageType.ChatInputCommand,
+                        ContextMenuCommand: message.type === MessageType.ContextMenuCommand,
+                        Default: message.type === MessageType.Default,
+                        GuildBoost: message.type === MessageType.GuildBoost,
+                        GuildBoostTier1: message.type === MessageType.GuildBoostTier1,
+                        GuildBoostTier2: message.type === MessageType.GuildBoostTier2,
+                        GuildBoostTier3: message.type === MessageType.GuildBoostTier3,
+                        RecipientRemove: message.type === MessageType.RecipientRemove,
+                        RecipientAdd: message.type === MessageType.RecipientAdd,
+                        GuildInviteReminder: message.type === MessageType.GuildInviteReminder,
+                        Reply: message.type === MessageType.Reply,
+                        ThreadCreated: message.type === MessageType.ThreadCreated,
+                        ThreadStarterMessage: message.type === MessageType.ThreadStarterMessage,
+                        UserJoin: message.type === MessageType.UserJoin,
+                    },
                     url: message.url,
                     author: this.Get_UserJson(message.author)
                 })
             })
+
+            messages.sort(function(a, b) { return a.position - b.position })
         }
 
         this.RenderPage(req, res, 'Moderating', { server: guild, channel: channel, messages: messages })
@@ -1174,6 +1217,125 @@ class WebInterfaceManager {
                 })
                 .catch((error) => {
                     res.status(200).send(error)
+                })
+        })
+
+        this.app.post('/Message/Pin', (req, res) => {
+            this.client.channels.fetch(req.query.channel)
+                .then((channel) => {
+                    if (channel === null) {
+                        res.status(200).send(`Unknown channel (channel: ${req.query.channel})`)
+                        return
+                    }
+                    if (channel.type !== Discord.ChannelType.GuildText) {
+                        res.status(200).send(`Unknown channel type ${channel.type.toString()} (channel: ${req.query.channel})`)
+                        return
+                    }
+                    channel.messages.fetch(req.query.id)
+                        .then((message) => {
+                            message.pin()
+                                .then(() => {                                    
+                                    res.status(200).send({ message: 'ok' })
+                                })
+                                .catch((error) => {
+                                    res.status(200).send({ message: 'Failed to pin message', error: error })
+                                })
+                        })
+                        .catch((error) => {
+                            res.status(200).send({ message: 'Failed to fetch message', error: error })
+                        })
+                })
+                .catch((error) => {
+                    res.status(200).send({ message: 'Failed to fetch channel', error: error })
+                })
+        })
+
+        this.app.post('/Message/Unpin', (req, res) => {
+            this.client.channels.fetch(req.query.channel)
+                .then((channel) => {
+                    if (channel === null) {
+                        res.status(200).send(`Unknown channel (channel: ${req.query.channel})`)
+                        return
+                    }
+                    if (channel.type !== Discord.ChannelType.GuildText) {
+                        res.status(200).send(`Unknown channel type ${channel.type.toString()} (channel: ${req.query.channel})`)
+                        return
+                    }
+                    channel.messages.fetch(req.query.id)
+                        .then((message) => {
+                            message.unpin()
+                                .then(() => {                                    
+                                    res.status(200).send({ message: 'ok' })
+                                })
+                                .catch((error) => {
+                                    res.status(200).send({ message: 'Failed to unpin message', error: error })
+                                })
+                        })
+                        .catch((error) => {
+                            res.status(200).send({ message: 'Failed to fetch message', error: error })
+                        })
+                })
+                .catch((error) => {
+                    res.status(200).send({ message: 'Failed to fetch channel', error: error })
+                })
+        })
+
+        this.app.post('/Message/Delete', (req, res) => {
+            this.client.channels.fetch(req.query.channel)
+                .then((channel) => {
+                    if (channel === null) {
+                        res.status(200).send(`Unknown channel (channel: ${req.query.channel})`)
+                        return
+                    }
+                    if (channel.type !== Discord.ChannelType.GuildText) {
+                        res.status(200).send(`Unknown channel type ${channel.type.toString()} (channel: ${req.query.channel})`)
+                        return
+                    }
+                    channel.messages.fetch(req.query.id)
+                        .then((message) => {
+                            message.delete()
+                                .then(() => {                                    
+                                    res.status(200).send({ message: 'ok' })
+                                })
+                                .catch((error) => {
+                                    res.status(200).send({ message: 'Failed to delete message', error: error })
+                                })
+                        })
+                        .catch((error) => {
+                            res.status(200).send({ message: 'Failed to fetch message', error: error })
+                        })
+                })
+                .catch((error) => {
+                    res.status(200).send({ message: 'Failed to fetch channel', error: error })
+                })
+        })
+
+        this.app.post('/Message/Send', (req, res) => {
+            const channel = this.client.channels.cache.get(req.body.channel)
+
+            if (channel === undefined) {
+                this.RenderPage_Moderating(req, res)
+                return
+                res.status(200).send({ message: `Unknown channel (channel: ${req.body.channel})` })
+            }
+
+            if (channel.type !== Discord.ChannelType.GuildText) {
+                this.RenderPage_Moderating(req, res)
+                return
+                return
+            }
+
+            channel.send({ content: req.body.content, tts: req.body.tts })
+                .then(() => {
+                    return
+                    res.status(200).send({ message: 'ok' })
+                })
+                .catch((error) => {
+                    return
+                    res.status(200).send({ message: 'Failed to send message', error: error })
+                })
+                .finally(() => {                        
+                    this.RenderPage_Moderating(req, res)
                 })
         })
 
@@ -1665,16 +1827,17 @@ class WebInterfaceManager {
         })
 
         this.app.post('/userViews/Moderating/SendMessage', (req, res) => {
-            /** @type {Discord.DMChannel | Discord.PartialDMChannel | Discord.NewsChannel | Discord.TextChannel | Discord.ThreadChannel | Discord.VoiceChannel} */
             const channel = this.client.channels.cache.get(req.body.id)
 
-            if (channel != undefined) {
-                if (channel.type === "GUILD_TEXT") {
-                    channel.send({ content: req.body.content, tts: req.body.tts }).then(() => {
-                        this.RenderPage_ModeratingSearch(req, res, '')
-                    }).catch((err) => {
-                        this.RenderPage_ModeratingSearch(req, res, '')
-                    })
+            if (channel !== undefined) {
+                if (channel.type === Discord.ChannelType.GuildText) {
+                    channel.send({ content: req.body.content, tts: req.body.tts })
+                        .then(() => {
+                            this.RenderPage_ModeratingSearch(req, res, '')
+                        })
+                        .catch((err) => {
+                            this.RenderPage_ModeratingSearch(req, res, '')
+                        })
                     return
                 }
             }

@@ -50,3 +50,8 @@ setTimeout(() => {
         }
     });
 }, 1000);
+
+/** @param {string} id */
+function OnCaretClick(id) {
+    document.getElementById(id).click()
+}

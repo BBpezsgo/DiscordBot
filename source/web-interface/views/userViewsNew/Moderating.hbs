@@ -8,6 +8,29 @@
     <link href="/stylesNew/css_main.css" rel="stylesheet" type="text/css">
     <script language="javascript" src="/scripts/commonNew.js" type="text/javascript"></script>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        .material-icons {
+            font-size: 1.2em;
+            transform: translate(0px, 3px);
+            user-select: none;
+        }
+
+        a:hover .material-icons::after {
+            content: '';
+            display: block;
+            width: 1em;
+            height: 1px;
+            background-color: currentColor;
+            transform: translateY(-2px);
+        }
+
+        img.badge {
+            display: inline-block;
+            transform: translateY(4px);
+        }
+    </style>
 </head>
 
 <body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
@@ -178,17 +201,19 @@
             <tbody>
                 <tr>
                     <td colspan="3">
-                        <form action="/userViews/Moderating/SendMessage" method="post"
+                        <form action="/Message/Send" method="post"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
-                            <input type="text" name="id" value="{{channel.id}}" style="display: none;">
+                            <input type="text" name="channel" value="{{channel.id}}" style="display: none;">
 
-                            <textarea name="content" rows="2" cols="60" maxlength="2000" placeholder="Content"></textarea><br>
+                            <textarea name="content" rows="2" cols="60" maxlength="2000" placeholder="Content" required></textarea><br>
                         
                             <input type="checkbox" id="tts" name="tts" value="tts">
                             <label for="tts">Tts</label><br>
 
                             <input type="reset" value="Reset">
                             <input type="submit" value="Send">
+
+                            <p style="color: #f00" id="send-message-error"></p>
                         </form>
                     </td>
                 </tr>
@@ -205,12 +230,8 @@
                         <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
                             <tbody>
                                 <tr>
-                                    <td class="ListM">
-                                        
-                                    </td>
-                                    <td class="ListM" style="width: 100%;">
-                                        <b>Clean Content</b>
-                                    </td>
+                                    <td class="ListM"></td>
+                                    <td class="ListM" style="width: 100%;"></td>
                                     <td class="ListM">
                                         <b>ID</b>
                                     </td>
@@ -224,20 +245,36 @@
                                         <b>Cross.</b>
                                     </td>
                                     <td class="ListM">
-                                        <b>Pinn.</b>
-                                    </td>
-                                    <td class="ListM">
-                                        <b>Edit.</b>
-                                    </td>
-                                    <td class="ListM">
                                         <b>Type</b>
                                     </td>
-                                    <td class="ListM">
-                                        <b>Sys.</b>
-                                    </td>
+                                    <td class="ListM" colspan="2"></td>
                                 </tr>
                                 {{#each messages}}
                                 <tr>
+                                    {{#if types.ChannelPinnedMessage}}
+                                    <td style="padding:0 2 0 2;word-break:break-all"></td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        <div class="tooltip">
+                                            <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar">
+                                            <span class="tooltiptext">
+                                                <img src="{{author.avatarUrlBig}}" style="transform: translateY(4px);">
+                                            </span>
+                                        </div>
+                                        <span>{{author.username}}</span><span style="opacity: .7;">#{{author.discriminator}}</span>
+
+                                        <span>pinned a message</span>
+
+                                        <a href="{{url}}" target="_blank" title="Message Link"><i class="material-icons" style="margin-left: 4px;">link</i></a>
+                                        
+                                        {{#if crosspostable}}<span class="tag" style="float: right;">Crosspostable</span>{{/if}}
+                                        {{#if system}}<span class="tag" style="float: right;">System</span>{{/if}}
+                                        {{#if pinned}}
+                                        <span class="user-badge" style="float: right;">
+                                            <img src="/imagesNew/pinned.png" title="Pinned">
+                                        </span>
+                                        {{/if}}
+                                    </td>
+                                    {{else}}
                                     <td style="padding:0 2 0 2;word-break:break-all">
                                         <div class="tooltip">
                                             <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar">
@@ -249,7 +286,25 @@
                                     </td>
                                     <td style="padding:0 2 0 2;word-break:break-all">
                                         {{this.cleanContent}}
+
+                                        <a href="{{url}}" target="_blank" title="Message Link"><i class="material-icons" style="margin-left: 4px;">link</i></a>
+
+                                        {{#if crosspostable}}<span class="tag" style="float: right;">Crosspostable</span>{{/if}}
+                                        <!--
+                                        {{#if editable}}
+                                        <span class="user-badge" style="float: right;">
+                                            <img src="/imagesNew/edit.png" title="Editable">
+                                        </span>
+                                        {{/if}}
+                                        -->
+                                        {{#if system}}<span class="tag" style="float: right;">System</span>{{/if}}
+                                        {{#if pinned}}
+                                        <span class="user-badge" style="float: right;">
+                                            <img src="/imagesNew/pinned.png" title="Pinned">
+                                        </span>
+                                        {{/if}}
                                     </td>
+                                    {{/if}}
                                     <td style="padding:0 2 0 2;word-break:break-all">
                                         {{this.id}}
                                     </td>
@@ -263,16 +318,27 @@
                                         <img width="16" height="16" src="/imagesNew/bool-{{this.crosspostable}}.png">
                                     </td>
                                     <td style="padding:0 2 0 2;word-break:break-all">
-                                        <img width="16" height="16" src="/imagesNew/bool-{{this.pinnable}}.png">
-                                    </td>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
-                                        <img width="16" height="16" src="/imagesNew/bool-{{this.editable}}.png">
-                                    </td>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
                                         {{this.type}}
                                     </td>
                                     <td style="padding:0 2 0 2;word-break:break-all">
-                                        <img width="16" height="16" src="/imagesNew/bool-{{this.system}}.png">
+                                        {{#if deletable}}
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Delete?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { window.location.reload() }, 200) })">
+                                            <img src="/imagesNew/delete.png" title="Delete">
+                                        </button>
+                                        {{/if}}
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{#if pinned}}
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Unpin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { window.location.reload() }, 200) })">
+                                            <img src="/imagesNew/pinned.png" title="Unpin">
+                                        </button>
+                                        {{else}}
+                                        {{#if pinnable}}
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Pin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { window.location.reload() }, 200) })">
+                                            <img src="/imagesNew/pin.png" title="Pin">
+                                        </button>
+                                        {{/if}}
+                                        {{/if}}
                                     </td>
                                 </tr>
                                 {{/each}}
@@ -284,7 +350,99 @@
 		</table>
 	</div>
     
-    <script src="../scripts/loadEffect.js"></script>
+    <script>
+        /** @param {Event} event */
+        function Post(url, event, callback, errorLabelID)
+        {
+            event.srcElement.classList.add('disabled')
+            const xmlHttp = new XMLHttpRequest()
+            xmlHttp.onreadystatechange = function() { 
+                if (xmlHttp.readyState == 4)
+                {
+                    event.srcElement.classList.remove('disabled')
+                    const res = JSON.parse(xmlHttp.responseText)
+                    if (res.message === 'ok') {
+                        console.log('Success')
+                        callback(xmlHttp.responseText)
+                    } else if (res.rawError !== undefined) {
+                        console.warn(JSON.stringify(res, null, ' '))
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            if (res.rawError.errors !== undefined) {
+                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
+                            }
+                            errorLabel.innerHTML = 
+                            `
+                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
+                            ${res.rawError.message} (code: ${res.rawError.code})${details}
+                            `
+                        }
+                    } else {
+                        console.warn(res)
+                    }
+                }
+            }
+            xmlHttp.open('POST', url, true)
+            xmlHttp.send(null)
+        }
+
+        /** @param {HTMLFormElement} form */
+        function PostFormData(url, form, callback, errorLabelID) {
+            console.log('Post form data...')
+            const formData = new FormData(form)
+            
+            const xmlHttp = new XMLHttpRequest()
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4)
+                {
+                    if (xmlHttp.status === 404) {
+                        console.log('404')
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            errorLabel.innerHTML = 
+                            `
+                            <b>HTTP ${'POST'} <a href='${url}' target='_blank'>${url}</a>:</b><br>
+                            ${xmlHttp.status} ${xmlHttp.statusText}
+                            `
+                        }
+                        return
+                    }
+                    const res = JSON.parse(xmlHttp.responseText)
+                    if (res.message === 'ok') {
+                        console.log('Success')
+                        callback(xmlHttp.responseText)
+                    } else if (res.rawError !== undefined) {
+                        console.warn(JSON.stringify(res, null, ' '))
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            if (res.rawError.errors !== undefined) {
+                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
+                            }
+                            errorLabel.innerHTML = 
+                            `
+                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
+                            ${res.rawError.message} (code: ${res.rawError.code})${details}
+                            `
+                        }
+                    } else {
+                        console.warn(res)
+                    }
+                }
+            }
+            xmlHttp.onerror = function(ev) {
+                console.warn(ev)
+            }
+            xmlHttp.onabort = function(ev) {
+                console.warn(ev)
+            }
+            xmlHttp.open('POST', url, true)
+            xmlHttp.send(formData)
+        }
+    </script>
+    <script src="/scripts/loadEffect.js"></script>
 </body>
 
 </html>

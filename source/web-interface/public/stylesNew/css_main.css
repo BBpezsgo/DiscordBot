@@ -377,6 +377,10 @@ input[type="buttonBigL"]:disabled {
 	user-select: none;
 }
 
+.tag:not(:last-child) {
+	margin-left: 5px;
+}
+
 .server-icon {
 	background-color: var(--main-primary-color);
 	color: #fff;
@@ -676,6 +680,61 @@ textarea {
 
 .circle-32 {
 	border-radius: 16px;
+}
+
+.fake-link {
+	cursor: pointer;
+}
+
+.fake-link:hover {
+	text-decoration: underline;
+}
+
+button.btn-custom,
+input[type=submit].btn-custom {
+	border: none;
+	color: var(--text);
+	background-color: transparent;
+	border-radius: 50%;
+	transition: background 200ms, opacity 200ms;
+	cursor: pointer;
+	font-weight: bold;
+	width: 24px;
+	height: 24px;
+	position: relative;
+	display: inline-block;
+	padding: unset;
+	min-width: unset;
+	opacity: 50%;
+}
+
+.btn-custom > img {
+	width: 80%;
+	height: 80%;
+	margin: 0px;
+	padding: 0px;
+	transform: translate(-1px, 2px);
+}
+
+button.btn-custom:focus-visible,
+button.btn-custom:focus,
+input[type=submit].btn-custom:focus-visible,
+input[type=submit].btn-custom:focus {
+	outline: 1px solid #fff2;
+	opacity: 100%;
+}
+
+button.btn-custom:hover,
+input[type=submit].btn-custom:hover {
+	background-color: #fff2;
+	opacity: 100%;
+}
+
+button.btn-custom:active,
+input[type=submit].btn-custom:active {
+	background-color: #fff4;
+	outline: none;
+	opacity: 100%;
 }
 
 button.btn-fetch,
