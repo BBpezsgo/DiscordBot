@@ -4,7 +4,6 @@ const fs = require('fs')
 const SunCalc = require('suncalc')
 const WeatherServices = require('./weatherServices')
 const WeatherAlertsService = require('./weatherMet')
-const { Canvas } = require('canvas')
 
 const seasons = {
     'late autumn': { name: 'Késő ősz', icon: '🍂' },
@@ -18,6 +17,8 @@ const seasons = {
  * @param {MoonPhase[]} data2 Moon data
  */
 const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
+    const { Canvas } = require('canvas')
+
     const tempMax = []
     const tempMin = []
     const precip = []
@@ -619,13 +620,17 @@ module.exports = async (command, privateCommand, earth = true) => {
                     } catch (e) { }
 
                     const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts)
-                    const attachmentPath = await CreateGraph(msnWeather[0], openweathermapWeather, MoonPhases)
-                    command.editReply({ embeds: [embed],
-                        files: [{
-                            attachment: attachmentPath,
-                            name: 'graph.png'
-                        }]
-                    })
+                    try {
+                        const attachmentPath = await CreateGraph(msnWeather[0], openweathermapWeather, MoonPhases)
+                        command.editReply({ embeds: [embed],
+                            files: [{
+                                attachment: attachmentPath,
+                                name: 'graph.png'
+                            }]
+                        })
+                    } catch (error) {
+                        command.editReply({ embeds: [embed] })
+                    }
                 })
             })
         })
