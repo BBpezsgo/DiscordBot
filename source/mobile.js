@@ -26,7 +26,7 @@ process.on('uncaughtException', function (err) {
 const LogManager = require('./functions/log')
 var logManager = new LogManager(null, null)
 
-process.__defineGetter__('stderr', function() { return fs.createWriteStream('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/node.error.log', {flags:'a'}) })
+process.__defineGetter__('stderr', function() { return fs.createWriteStream(__dirname + '\\node.error.log', {flags:'a'}) })
 
 
 
