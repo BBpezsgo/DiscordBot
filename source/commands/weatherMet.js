@@ -15,7 +15,14 @@ async function Sleep(ms) {
 
 const UrlPaths = {
     'Main': '/en/idojaras/veszelyjelzes/index.php?c=',
-    'County': '/idojaras/veszelyjelzes/hover.php?lng=en&id=wbex&kod='
+    'County': '/idojaras/veszelyjelzes/hover.php?lng=en&'
+}
+
+const CountyDays = {
+    'Today': 'wbex',
+    'Tomorrow': 'wcex',
+    'ThirdDay': 'wdex',
+    'FourthDay': 'weex',
 }
 
 const FsSettings = {encoding:'utf-8'}
@@ -157,7 +164,7 @@ async function CreateSnapshotAsync() {
     
     const Func1 = async function(countyID) {
         try {
-            const data = await DownloadAsync(baseUrl + UrlPaths.County + countyID)
+            const data = await DownloadAsync(baseUrl + UrlPaths.County + 'id=' + CountyDays.Today + '&kod=' + countyID)
             fs.writeFileSync(basePath + snapshot + 'county-' + countyID + '.html', data, FsSettings)
             fs.writeFileSync(basePath + snapshot + 'county-' + countyID + '.json', JSON.stringify(ProcessCountyData(data), undefined, ' '), FsSettings)    
         } catch (error) {
@@ -186,14 +193,18 @@ async function CreateSnapshotAsync() {
 
 /** @param {string} page */
 async function GetMainAlerts(page) {
-    const data = await DownloadAsync(baseUrl + UrlPaths.Main + Pages[page])
-    return ProcessData(data)
+    const dataRaw = await DownloadAsync(baseUrl + UrlPaths.Main + Pages[page])
+    const data = ProcessData(dataRaw)
+    fs.writeFileSync(basePath + `${page}.json`, JSON.stringify({ url: baseUrl + UrlPaths.Main + Pages[page], data: data }, undefined, ' '), { encoding: 'utf-8' })
+    return data
 }
 
-/** @param {string} countyID */
-async function GetCountyAlerts(countyID) {
-    const data = await DownloadAsync(baseUrl + UrlPaths.County + CountyIDs[countyID])
-    return ProcessCountyData(data)
+/** @param {string} countyID @param {string} day */
+async function GetCountyAlerts(countyID, day) {
+    const dataRaw = await DownloadAsync(baseUrl + UrlPaths.County + 'id=' + CountyDays[day] + '&kod=' + CountyIDs[countyID])
+    const data = ProcessCountyData(dataRaw)
+    fs.writeFileSync(basePath + `${countyID}-${day}.json`, JSON.stringify({ url: baseUrl + UrlPaths.County + 'id=' + CountyDays[day] + '&kod=' + CountyIDs[countyID], data: data }, undefined, ' '), { encoding: 'utf-8' })
+    return data
 }
 
-module.exports = { CountyIDs, Pages, GetMainAlerts, GetCountyAlerts }
+module.exports = { CountyIDs, Pages, CountyDays,  GetMainAlerts, GetCountyAlerts }

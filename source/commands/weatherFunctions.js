@@ -653,6 +653,18 @@ function MetAlert_DegreeIconNameToText(IconName) {
     return null
 }
 
+const MetAlert_TypeIcons = {
+    'fog1.gif': '🌫️',
+}
+
+const MetAlert_DegreeIconNames = {
+    'w1.gif': 'Mérsékelt',
+}
+
+const MetAlert_TypeNames = {
+    'dense fog': 'Sűrű köd',
+}
+
 module.exports = {
     ImgExists,
     weatherSkytxt,
@@ -675,5 +687,8 @@ module.exports = {
     weatherSkytextImgName,
     MetAlert_TypeIconNameToIcon,
     MetAlert_DegreeIconNameToText,
+    MetAlert_DegreeIconNames,
+    MetAlert_TypeIcons,
+    MetAlert_TypeNames,
     CityBekescsaba
 }

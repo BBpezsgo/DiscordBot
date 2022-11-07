@@ -281,8 +281,9 @@ const {
     dayName,
     weatherSkytextIcon,
     weatherSkytextImgName,
-    MetAlert_DegreeIconNameToText,
-    MetAlert_TypeIconNameToIcon,
+    MetAlert_DegreeIconNames,
+    MetAlert_TypeIcons,
+    MetAlert_TypeNames,
     CityBekescsaba
 } = require('../commands/weatherFunctions');
 
@@ -294,7 +295,7 @@ const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
  * @param {WeatherServices.OpenWeatherMap.WeatherResult} OpenweatherWeather Openweather weather data
  * @param {MoonPhase[]} data2 Moon data
  * @param {WeatherServices.OpenWeatherMap.PollutionResult} OpenweatherPollution Openweather pollution data
- * @param {WeatherAlertsService.MET.ResultCounty | null} MetAlerts
+ * @param {WeatherAlertsService.MET.ResultCounty[]} MetAlerts
  */
 function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution, MetAlerts) {
     const current = MsnWeather.current
@@ -340,24 +341,23 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         if (visibilityValue !== 10)
         { description += '\n' + `\\👁️ ${visibilityValue} km látótávolság` }
 
-        if (MetAlerts !== undefined && MetAlerts !== null) {
-            if (MetAlerts.alerts.length > 0) {
+        console.log(MetAlerts[0])
+        if (MetAlerts[0] !== null) {
+            if (MetAlerts[0].alerts.length > 0) {
                 description += '\n' + '\n🔔 **Riasztások:**\n'
                 
-                for (let i = 0; i < MetAlerts.alerts.length; i++) {
-                    const alert = MetAlerts.alerts[i]
-                    const alertIcon = MetAlert_TypeIconNameToIcon(alert.typeIcon)
-                    const alertDegree = MetAlert_DegreeIconNameToText(alert.degreeIcon)
+                for (let i = 0; i < MetAlerts[0].alerts.length; i++) {
+                    const alert = MetAlerts[0].alerts[i]
                     var result = ''
                     
-                    if (alertIcon !== null) {
-                        result += `\\${alertIcon} `
+                    if (MetAlert_TypeIcons[alert.degreeIcon] !== undefined) {
+                        result += `\\${MetAlert_TypeIcons[alert.degreeIcon]} `
                     } else {
                         result += `||${alert.typeIcon}|| `
                     }
                     
-                    if (alertDegree !== null) {
-                        result += `${alertDegree} `
+                    if (MetAlert_DegreeIconNames[alert.degreeIcon] !== undefined) {
+                        result += `${MetAlert_DegreeIconNames[alert.degreeIcon]} `
                     } else {
                         result += `||${alert.degreeIcon}|| `
                     }
@@ -435,12 +435,50 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
         var text = ''
+
         if (Element.precip !== undefined && Element.precip !== '0')
         { text += `\n\\☔ ${Element.precip} %` }
+
         text += `\n${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C`
+        
         text += `\n${skyIcon} ${skyTxt}`
 
         const dayNameText = dayName(new Date().getDay() + i - 1)
+
+        console.log(i)
+        if (i > 1 && i < MetAlerts.length) {
+            console.log(MetAlerts[i-1])
+            if (MetAlerts[i-1] !== null) {
+                if (MetAlerts[i-1].alerts.length > 0) {
+                    
+                    for (let j = 0; j < MetAlerts[i-1].alerts.length; j++) {
+                        const alert = MetAlerts[i-1].alerts[j]
+                        var result = ''
+                        
+                        if (MetAlert_TypeIcons[alert.typeIcon] !== undefined) {
+                            result += `\\${MetAlert_TypeIcons[alert.typeIcon]} `
+                        } else {
+                            result += `||${alert.typeIcon}|| `
+                        }
+                        
+                        if (MetAlert_DegreeIconNames[alert.degreeIcon] !== undefined) {
+                            result += `${MetAlert_DegreeIconNames[alert.degreeIcon]} `
+                        } else {
+                            result += `||${alert.degreeIcon}|| `
+                        }
+
+                        if (MetAlert_TypeNames[alert.Name.toLowerCase()] !== undefined) {
+                            result += MetAlert_TypeNames[alert.Name.toLowerCase()].toLowerCase()
+                        } else {
+                            result += alert.Name.toLowerCase()
+                        }
+
+                        text += '\n' + result
+                    }
+                }
+            }
+        }
+
         embed.addFields([{
             name: dayNameText,
             value: text.trim(),
@@ -613,11 +651,28 @@ module.exports = async (command, privateCommand, earth = true) => {
                         new MoonPhase(addDays(new Date(year, month, day), 3))
                     ]
 
-                    /** @type {WeatherAlertsService.MET.ResultCounty} */
-                    var alerts = null
-                    try {
-                        alerts = await WeatherAlertsService.GetCountyAlerts('Bekes')
-                    } catch (e) { }
+                    /** @type {WeatherAlertsService.MET.ResultCounty[]} */
+                    var alerts = []
+
+                    try
+                    { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Today')) }
+                    catch (e)
+                    { alerts.push(null) }
+
+                    try
+                    { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Tomorrow')) }
+                    catch (e)
+                    { alerts.push(null) }
+
+                    try
+                    { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'ThirdDay')) }
+                    catch (e)
+                    { alerts.push(null) }
+
+                    try
+                    { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'FourthDay')) }
+                    catch (e)
+                    { alerts.push(null) }
 
                     const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts)
                     try {

@@ -26,6 +26,12 @@ export type Page =
     'ThirdDay' |
     'FourthDay'
 
+export type CountyDays =
+    'Today' |
+    'Tomorrow' |
+    'ThirdDay' |
+    'FourthDay'
+
 export type CountyID  =
     'Baranya' |
     'BacsKiskun' |
@@ -48,4 +54,4 @@ export type CountyID  =
     'Zala'
 
 export function GetMainAlerts(page: Page): Promise<ResultMain[]>
-export function GetCountyAlerts(countyID: CountyID): Promise<ResultCounty>
+export function GetCountyAlerts(countyID: CountyID, day: CountyDays): Promise<ResultCounty>
