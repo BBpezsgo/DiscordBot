@@ -120,6 +120,7 @@ class WebInterfaceManager {
 
         this.RegisterHandlebarsRoots()
         this.RegisterPublicRoots()
+        this.RegisterWeatherRoots()
         
         this.app.get('/', (req, res) => {
             res.status(200).render('start')
@@ -2161,6 +2162,12 @@ class WebInterfaceManager {
                 return
             }
             RenderStartpage(req, res, userId, userHash, false, {})
+        })
+    }
+
+    RegisterWeatherRoots() {
+        this.app.get('/weather', (req, res) => {
+            res.render('weather/weather', { })
         })
     }
 }
