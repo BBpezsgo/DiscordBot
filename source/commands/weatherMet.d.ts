@@ -17,6 +17,18 @@ export namespace MET {
             Name: string | null
         }[]
     }
+
+    type ResultMainWeather = {
+        time: string
+        time_stamp: number
+        temp: number
+        wind_dir: string
+        wind_sp: number
+        gust: number
+        pressure: number
+        humidity: number
+        precipitation: number
+    }
 }
 
 export type Page =
@@ -55,3 +67,4 @@ export type CountyID  =
 
 export function GetMainAlerts(page: Page): Promise<ResultMain[]>
 export function GetCountyAlerts(countyID: CountyID, day: CountyDays): Promise<ResultCounty>
+export function GetMainWeather(forceDownload = false): Promise<ResultMainWeather>

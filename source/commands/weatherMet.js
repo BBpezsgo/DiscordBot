@@ -13,9 +13,26 @@ async function Sleep(ms) {
     })
 }
 
+function SaveCache(cacheName, data) {
+    fs.writeFileSync(basePath + `${cacheName}.json`, JSON.stringify({ date: Date.now(), data: data }, undefined, ' '), { encoding: 'utf-8' })
+}
+
+/** @returns {{date: number, data: any}} */
+function LoadCache(cacheName) {
+    return JSON.parse(fs.readFileSync(basePath + `${cacheName}.json`, { encoding: 'utf-8' }))
+}
+
+function SaveCacheRaw(cacheName, rawData) {
+    fs.writeFileSync(basePath + `${cacheName}.json`, rawData)
+}
+
 const UrlPaths = {
-    'Main': '/en/idojaras/veszelyjelzes/index.php?c=',
-    'County': '/idojaras/veszelyjelzes/hover.php?lng=en&'
+    Warnings: {
+        Main: baseUrl + '/en/idojaras/veszelyjelzes/index.php?c=',
+        County: baseUrl + '/idojaras/veszelyjelzes/hover.php?lng=en&',
+    },
+    SnowReport: baseUrl + '/en/idojaras/aktualis_idojaras/hojelentes/main.php',
+    MainWeather: baseUrl + '/en/idojaras/aktualis_idojaras/mert_adatok/main.php?v=Bekescsaba&c=tablazat'
 }
 
 const CountyDays = {
@@ -154,7 +171,7 @@ async function CreateSnapshotAsync() {
     
     const Func0 = async function(page) {
         try {
-            const data = await DownloadAsync(baseUrl + UrlPaths.Main + page)
+            const data = await DownloadAsync(UrlPaths.Warnings.Main + page)
             fs.writeFileSync(basePath + snapshot + 'page-' + page + '.html', data, FsSettings)
             fs.writeFileSync(basePath + snapshot + 'page-' + page + '.json', JSON.stringify(ProcessData(data), undefined, ' '), FsSettings)    
         } catch (error) {
@@ -164,7 +181,7 @@ async function CreateSnapshotAsync() {
     
     const Func1 = async function(countyID) {
         try {
-            const data = await DownloadAsync(baseUrl + UrlPaths.County + 'id=' + CountyDays.Today + '&kod=' + countyID)
+            const data = await DownloadAsync(UrlPaths.Warnings.County + 'id=' + CountyDays.Today + '&kod=' + countyID)
             fs.writeFileSync(basePath + snapshot + 'county-' + countyID + '.html', data, FsSettings)
             fs.writeFileSync(basePath + snapshot + 'county-' + countyID + '.json', JSON.stringify(ProcessCountyData(data), undefined, ' '), FsSettings)    
         } catch (error) {
@@ -193,18 +210,56 @@ async function CreateSnapshotAsync() {
 
 /** @param {string} page */
 async function GetMainAlerts(page) {
-    const dataRaw = await DownloadAsync(baseUrl + UrlPaths.Main + Pages[page])
+    const dataRaw = await DownloadAsync(UrlPaths.Warnings.Main + Pages[page])
     const data = ProcessData(dataRaw)
-    fs.writeFileSync(basePath + `${page}.json`, JSON.stringify({ url: baseUrl + UrlPaths.Main + Pages[page], data: data }, undefined, ' '), { encoding: 'utf-8' })
+    SaveCache(page, { url: UrlPaths.Warnings.Main + Pages[page], data: data })
     return data
 }
 
 /** @param {string} countyID @param {string} day */
 async function GetCountyAlerts(countyID, day) {
-    const dataRaw = await DownloadAsync(baseUrl + UrlPaths.County + 'id=' + CountyDays[day] + '&kod=' + CountyIDs[countyID])
+    const dataRaw = await DownloadAsync(UrlPaths.Warnings.County + 'id=' + CountyDays[day] + '&kod=' + CountyIDs[countyID])
     const data = ProcessCountyData(dataRaw)
-    fs.writeFileSync(basePath + `${countyID}-${day}.json`, JSON.stringify({ url: baseUrl + UrlPaths.County + 'id=' + CountyDays[day] + '&kod=' + CountyIDs[countyID], data: data }, undefined, ' '), { encoding: 'utf-8' })
+    SaveCache(`${countyID}-${day}`, { url: UrlPaths.Warnings.County + 'id=' + CountyDays[day] + '&kod=' + CountyIDs[countyID], data: data })
     return data
 }
 
-module.exports = { CountyIDs, Pages, CountyDays,  GetMainAlerts, GetCountyAlerts }
+async function GetMainWeather(forceDownload = false) {
+    const cache = LoadCache('main-weather')
+
+    if (forceDownload) { }
+    else if (Date.now() - cache.date < 5 * 60 * 1000)
+    { return cache.data }
+
+    const dataRaw = await DownloadAsync(UrlPaths.MainWeather)
+    const doc_tbody = new JSDOM(dataRaw).window.document.body.querySelector('table.tbl-def1>tbody')
+    const rows = doc_tbody.querySelectorAll('tr')
+    var data = []
+    rows.forEach((row, i) => {
+        data[i] = {}
+        data[i]['time'] = row.querySelector('th>a').textContent.trim()
+        data[i]['time_stamp'] = new Date(data[i]['time']).getTime()
+        row.querySelectorAll('td').forEach((c_, j) => {
+            const cell = c_
+            if (j === 0) {
+                data[i]['temp'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 2) {
+                data[i]['wind_dir'] = cell.textContent.trim()
+            } else if (j === 3) {
+                data[i]['wind_sp'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 4) {
+                data[i]['gust'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 5) {
+                data[i]['pressure'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 6) {
+                data[i]['humidity'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 7) {
+                data[i]['precipitation'] = Number.parseFloat(cell.textContent.trim())
+            }
+        })
+    })
+    SaveCache(`main-weather`, data)
+    return data
+}
+
+module.exports = { CountyIDs, Pages, CountyDays, GetMainAlerts, GetCountyAlerts, GetMainWeather }
