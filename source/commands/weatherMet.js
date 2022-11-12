@@ -262,4 +262,42 @@ async function GetMainWeather(forceDownload = false) {
     return data
 }
 
+async function GetSnowReport(forceDownload = false) {
+    const cache = LoadCache('snow-report')
+
+    if (forceDownload) { }
+    else if (Date.now() - cache.date < 5 * 60 * 1000)
+    { return cache.data }
+
+    const dataRaw = await DownloadAsync(UrlPaths.SnowReport)
+    const doc_tbody = new JSDOM(dataRaw).window.document.body.querySelector('table.tbl-def1>tbody')
+    const rows = doc_tbody.querySelectorAll('tr')
+    var data = []
+    rows.forEach((row, i) => {
+        data[i] = {}
+        data[i]['time'] = row.querySelector('th>a').textContent.trim()
+        data[i]['time_stamp'] = new Date(data[i]['time']).getTime()
+        row.querySelectorAll('td').forEach((c_, j) => {
+            const cell = c_
+            if (j === 0) {
+                data[i]['temp'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 2) {
+                data[i]['wind_dir'] = cell.textContent.trim()
+            } else if (j === 3) {
+                data[i]['wind_sp'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 4) {
+                data[i]['gust'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 5) {
+                data[i]['pressure'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 6) {
+                data[i]['humidity'] = Number.parseInt(cell.textContent.trim())
+            } else if (j === 7) {
+                data[i]['precipitation'] = Number.parseFloat(cell.textContent.trim())
+            }
+        })
+    })
+    SaveCache(`snow-report`, data)
+    return data
+}
+
 module.exports = { CountyIDs, Pages, CountyDays, GetMainAlerts, GetCountyAlerts, GetMainWeather }

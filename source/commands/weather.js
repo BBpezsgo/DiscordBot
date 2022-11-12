@@ -35,20 +35,8 @@ const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
     for (let i = 0; i < MsnWeather.forecast.length; i++) {
         const Element = MsnWeather.forecast[i]
         
-        const skyIcon = weatherSkytextIcon(Element.skytextday, false)
-        const skyTxt = weatherSkytxt(Element.skytextday)
-
         const tempMinValue = Number.parseInt(Element.low)
-
         const tempMaxValue = Number.parseInt(Element.high)
-        const tempMaxIcon = weatherTempIcon(tempMaxValue)
-
-        var text = ''
-        if (Element.precip !== undefined && Element.precip !== '0')
-        { text += `\n\\☔ ${Element.precip} %` }
-        text += `\n${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C`
-        text += `\n${skyIcon} ${skyTxt}`
-
         const dayNameText = dayName(new Date().getDay() + i - 1)
 
         tempMax.push(tempMaxValue)
@@ -287,6 +275,8 @@ const {
     CityBekescsaba
 } = require('../commands/weatherFunctions');
 
+const EmojiPrefix = ''
+
 const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
 const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
@@ -308,11 +298,8 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         embed.setTitle(`**${skyTxt}** ||(${OpenweatherWeather.weather[0].description})|||| (${OpenweatherWeather.weather[0].id})||`)
 
         const humidityValue = Average([current.humidity, OpenweatherWeather.main.humidity])
-        const humidityIcon = weatherHumidityIcon(humidityValue)
 
         const windValue = GetReadableNumber(Average([OpenweatherWeather.wind.speed * 3.6, parseInt(current.windspeed.replace(' km/h', ''))]))
-
-        const windGustValue = GetReadableNumber(OpenweatherWeather.wind.gust * 3.6)
 
         const tempValue = GetReadableNumber(Average([current.temperature, OpenweatherWeather.main.temp]))
 
@@ -329,17 +316,17 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         const moonTimes = SunCalc.getMoonTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
                 
         var description = ''
-        description += '\n' + `\\☁️ ${OpenweatherWeather.clouds.all} % felhősség`
+        description += '\n' + `${EmojiPrefix}☁️ ${OpenweatherWeather.clouds.all} % felhősség`
         if (MsnWeather.forecast[1].precip !== '0')
-        { description += '\n' + `\\☔ ${MsnWeather.forecast[1].precip} % csapadék` }
-        description += '\n' + `${humidityIcon} ${humidityValue} % páratartalom`
-        description += '\n' + `${weatherTempIcon(tempFeelslikeValue)} ${tempMinValue} - ${tempValue} - ${tempMaxValue} °C (Hőérzet: ${tempFeelslikeValue} °C)`
-        description += '\n' + `${weatherWindIcon(windValue)} ${windDirection} (${OpenweatherWeather.wind.deg}°) ${windValue} km/h szél`
-        description += '\n' + `\\🌬️ ${windGustValue} km/h széllökés`
-        description += '\n' + `${weatherPressureIcon(OpenweatherWeather.main.pressure)} ${OpenweatherWeather.main.pressure} pHa légnyomás`
+        { description += '\n' + `${EmojiPrefix}☔ ${MsnWeather.forecast[1].precip} % csapadék` }
+        description += '\n' + `${EmojiPrefix}${weatherHumidityIcon(humidityValue)} ${humidityValue} % páratartalom`
+        description += '\n' + `${EmojiPrefix}${weatherTempIcon(tempFeelslikeValue)} ${tempMinValue} - ${tempValue} - ${tempMaxValue} °C (Hőérzet: ${tempFeelslikeValue} °C)`
+        description += '\n' + `${EmojiPrefix}${weatherWindIcon(windValue)} ${windDirection} (${OpenweatherWeather.wind.deg}°) ${windValue} km/h szél`
+        description += '\n' + `${EmojiPrefix}🌬️ ${GetReadableNumber(OpenweatherWeather.wind.gust * 3.6)} km/h széllökés`
+        description += '\n' + `${EmojiPrefix}${weatherPressureIcon(OpenweatherWeather.main.pressure)} ${OpenweatherWeather.main.pressure} pHa légnyomás`
         
         if (visibilityValue !== 10)
-        { description += '\n' + `\\👁️ ${visibilityValue} km látótávolság` }
+        { description += '\n' + `${EmojiPrefix}👁️ ${visibilityValue} km látótávolság` }
 
         console.log(MetAlerts[0])
         if (MetAlerts[0] !== null) {
@@ -351,7 +338,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
                     var result = ''
                     
                     if (MetAlert_TypeIcons[alert.degreeIcon] !== undefined) {
-                        result += `\\${MetAlert_TypeIcons[alert.degreeIcon]} `
+                        result += `${EmojiPrefix}${MetAlert_TypeIcons[alert.degreeIcon]} `
                     } else {
                         result += `||${alert.typeIcon}|| `
                     }
@@ -372,34 +359,34 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         if (OpenweatherPollution !== undefined) {
             description += '\n' + '\n😷 **Levegőminőség:**\n'
 
-            description += '\n' + `Levőminőség: \\${GetPollutionIndex(8, OpenweatherPollution.main.aqi)} ${GetPollutionText(OpenweatherPollution.main.aqi)}`
+            description += '\n' + `Levőminőség: ${EmojiPrefix}${GetPollutionIndex(8, OpenweatherPollution.main.aqi)} ${GetPollutionText(OpenweatherPollution.main.aqi)}`
         
-            description += '\n' + `CO: \\${GetPollutionIndex(0, OpenweatherPollution.components.co)} ${OpenweatherPollution.components.co} μg/m³`
-            description += '\n' + `NO: \\${GetPollutionIndex(1, OpenweatherPollution.components.no)} ${OpenweatherPollution.components.no}μg/m³`
-            description += '\n' + `NO₂: \\${GetPollutionIndex(2, OpenweatherPollution.components.no2)} ${OpenweatherPollution.components.no2}μg/m³`
-            description += '\n' + `O₃: \\${GetPollutionIndex(3, OpenweatherPollution.components.o3)} ${OpenweatherPollution.components.o3}μg/m³`
-            description += '\n' + `SO₂: \\${GetPollutionIndex(4, OpenweatherPollution.components.so2)} ${OpenweatherPollution.components.so2}μg/m³`
-            description += '\n' + `PM₂.₅: \\${GetPollutionIndex(5, OpenweatherPollution.components.pm2_5)} ${OpenweatherPollution.components.pm2_5}μg/m³`
-            description += '\n' + `PM₁₀: \\${GetPollutionIndex(6, OpenweatherPollution.components.pm10)} ${OpenweatherPollution.components.pm10}μg/m³`
-            description += '\n' + `NH₃: \\${GetPollutionIndex(7, OpenweatherPollution.components.nh3)} ${OpenweatherPollution.components.nh3}g/m³`
+            description += '\n' + `CO: ${EmojiPrefix}${GetPollutionIndex(0, OpenweatherPollution.components.co)} ${OpenweatherPollution.components.co} μg/m³`
+            description += '\n' + `NO: ${EmojiPrefix}${GetPollutionIndex(1, OpenweatherPollution.components.no)} ${OpenweatherPollution.components.no}μg/m³`
+            description += '\n' + `NO₂: ${EmojiPrefix}${GetPollutionIndex(2, OpenweatherPollution.components.no2)} ${OpenweatherPollution.components.no2}μg/m³`
+            description += '\n' + `O₃: ${EmojiPrefix}${GetPollutionIndex(3, OpenweatherPollution.components.o3)} ${OpenweatherPollution.components.o3}μg/m³`
+            description += '\n' + `SO₂: ${EmojiPrefix}${GetPollutionIndex(4, OpenweatherPollution.components.so2)} ${OpenweatherPollution.components.so2}μg/m³`
+            description += '\n' + `PM₂.₅: ${EmojiPrefix}${GetPollutionIndex(5, OpenweatherPollution.components.pm2_5)} ${OpenweatherPollution.components.pm2_5}μg/m³`
+            description += '\n' + `PM₁₀: ${EmojiPrefix}${GetPollutionIndex(6, OpenweatherPollution.components.pm10)} ${OpenweatherPollution.components.pm10}μg/m³`
+            description += '\n' + `NH₃: ${EmojiPrefix}${GetPollutionIndex(7, OpenweatherPollution.components.nh3)} ${OpenweatherPollution.components.nh3}g/m³`
         }
 
-        try {                
+        try {
             description +=
                 '\n\n☀️ **Nap:**\n\n' +
 
-                `\\🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
-                `\\🌇 Napkelte: <t:${AverageUnix(OpenweatherWeather.sys.sunrise, ToUnix(times.sunrise))}:R>\n` +
-                `\\🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
-                `\\📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:R>\n` +
-                `\\🌆 Napnyugta: <t:${AverageUnix(OpenweatherWeather.sys.sunset, ToUnix(times.sunset))}:R>\n` +
-                `\\🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>\n` +
-                `\\🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>`            
+                `${EmojiPrefix}🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
+                `${EmojiPrefix}🌇 Napkelte: <t:${AverageUnix(OpenweatherWeather.sys.sunrise, ToUnix(times.sunrise))}:R>\n` +
+                `${EmojiPrefix}🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
+                `${EmojiPrefix}📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:R>\n` +
+                `${EmojiPrefix}🌆 Napnyugta: <t:${AverageUnix(OpenweatherWeather.sys.sunset, ToUnix(times.sunset))}:R>\n` +
+                `${EmojiPrefix}🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>\n` +
+                `${EmojiPrefix}🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>`            
         } catch (error) { }
 
         description +=
             '\n\n🌕 **Hold:**\n\n'
-        description += `${weatherMoonIcon(data2[1].phaseName())} ${weatherMoonText(data2[1].phaseName())} (${Math.floor(data2[1].illum * 100)} %-a látható)\n`
+        description += `${EmojiPrefix}${weatherMoonIcon(data2[1].phaseName())} ${weatherMoonText(data2[1].phaseName())} (${Math.floor(data2[1].illum * 100)} %-a látható)\n`
         
         if (moonTimes.rise !== undefined)
         { description += `Holdkelte: <t:${ToUnix(moonTimes.rise)}:R>\n` }
@@ -437,11 +424,11 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         var text = ''
 
         if (Element.precip !== undefined && Element.precip !== '0')
-        { text += `\n\\☔ ${Element.precip} %` }
+        { text += `\n${EmojiPrefix}☔ ${Element.precip} %` }
 
-        text += `\n${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C`
+        text += `\n${EmojiPrefix}${tempMaxIcon} ${tempMinValue} - ${tempMaxValue} °C`
         
-        text += `\n${skyIcon} ${skyTxt}`
+        text += `\n${EmojiPrefix}${skyIcon} ${skyTxt}`
 
         const dayNameText = dayName(new Date().getDay() + i - 1)
 
@@ -456,7 +443,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
                         var result = ''
                         
                         if (MetAlert_TypeIcons[alert.typeIcon] !== undefined) {
-                            result += `\\${MetAlert_TypeIcons[alert.typeIcon]} `
+                            result += `${EmojiPrefix}${MetAlert_TypeIcons[alert.typeIcon]} `
                         } else {
                             result += `||${alert.typeIcon}|| `
                         }
@@ -494,7 +481,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
 
     embed.setTimestamp(Date.parse(current.date + 'T' + current.observationtime))    
     // embed.setThumbnail('attachment://graph.png')
-    embed.setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(current.skytext, true).replace('\\', '')))
+    embed.setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(current.skytext, true)))
     embed.setFooter({ text: '• weather.service.msn.com • openweathermap.org' })
     embed.setImage('attachment://graph.png')
     return embed
@@ -505,18 +492,18 @@ function GetMarsPressureIcon(pressure, averagePressure) {
         return ''
     } else {
         if (pressure-5 > averagePressure) {
-            return '\\🔺 '
+            return `${EmojiPrefix}🔺 `
         } else if (pressure+5 < averagePressure) {
-            return '\\🔻 '
+            return `${EmojiPrefix}🔻 `
         }
-        return '\\◼️ '
+        return `${EmojiPrefix}◼️ `
     }
 }
 
 function GetSeason(season) {
     var seasonName = season
     if (seasons[seasonName] != undefined) {
-        seasonName = `\\${seasons[seasonName].icon} ${seasons[seasonName].name}`
+        seasonName = `${EmojiPrefix}${seasons[seasonName].icon} ${seasons[seasonName].name}`
     }
     return seasonName
 }
@@ -570,23 +557,23 @@ function getEmbedMars(data, weeklyImage) {
     embed
         .setTitle(`sol ${latestSol.sol}`)
         .setDescription(
-            `\\🌡️ ${latestSol.min_temp} - ${latestSol.max_temp} °C\n` +
+            `${EmojiPrefix}🌡️ ${latestSol.min_temp} - ${latestSol.max_temp} °C\n` +
             `${GetMarsPressureIcon(latestSol.pressure, averagePressure)} ${latestSol.pressure} pHa légnyomás\n` +
             `${GetSeason(latestSol.season)}\n` +
-            `\\🌍 Földi dátum: ${latestSol.terrestrial_date}` +
+            `${EmojiPrefix}🌍 Földi dátum: ${latestSol.terrestrial_date}` +
 
             '\n\n☀️ **Nap:**\n\n' +
 
-            `\\🌇 Napkelte: ${latestSol.sunrise}\n` +
-            `\\🌆 Napnyugta: ${latestSol.sunset}\n\n` +
+            `${EmojiPrefix}🌇 Napkelte: ${latestSol.sunrise}\n` +
+            `${EmojiPrefix}🌆 Napnyugta: ${latestSol.sunset}\n\n` +
 
-            '\\🗓️ **Előző sol-ok:**')
+            '🗓️ **Előző sol-ok:**')
 
     data.sols.forEach(sol => {
         if (latestSol.sol != sol.sol) {
             embed.addFields([{
                 name: 'Sol ' + sol.sol,
-                value: '\\🌡️ ' + sol.min_temp + ' - ' + sol.max_temp + ' C°\n' + 
+                value: `${EmojiPrefix}🌡️ ` + sol.min_temp + ' - ' + sol.max_temp + ' C°\n' + 
                     GetSeason(sol.season),
                 inline: true
             }])

@@ -59,10 +59,10 @@ function GetEmbed(weatherData) {
 
         var stringBuilder = ''
 
-        stringBuilder += `${weatherTempIcon(currentWeatherItem.main.temp)} ${currentWeatherItem.main.temp} C°\n`
-        stringBuilder += `${weatherHumidityIcon(currentWeatherItem.main.humidity)} ${currentWeatherItem.main.humidity}% páratartalom\n`
+        stringBuilder += `\\${weatherTempIcon(currentWeatherItem.main.temp)} ${currentWeatherItem.main.temp} C°\n`
+        stringBuilder += `\\${weatherHumidityIcon(currentWeatherItem.main.humidity)} ${currentWeatherItem.main.humidity}% páratartalom\n`
         stringBuilder += `\\☁️ ${currentWeatherItem.clouds.all} %\n`
-        stringBuilder += `${DirectionToArrow(currentWeatherItem.wind.deg)} ${weatherWindIcon(currentWeatherItem.wind.speed)} ${currentWeatherItem.wind.speed} km/h szél\n`
+        stringBuilder += `${DirectionToArrow(currentWeatherItem.wind.deg)} \\${weatherWindIcon(currentWeatherItem.wind.speed)} ${currentWeatherItem.wind.speed} km/h szél\n`
         stringBuilder += `\\🌬️ ${currentWeatherItem.wind.gust} km/h széllökés\n`
         if (currentWeatherItem.visibility != 10000) {
             stringBuilder += `\\👁️ ${currentWeatherItem.visibility / 1000} km látótávolság\n`
@@ -78,7 +78,7 @@ function GetEmbed(weatherData) {
         }
 
         embed.addFields([{
-            name: unixToTime(currentWeatherItem.dt) + ` ${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
+            name: unixToTime(currentWeatherItem.dt) + ` \\${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
             value: stringBuilder.trimEnd(),
             inline: false
         }])

@@ -4,7 +4,7 @@ const fs = require('fs')
  * @param {string} name
  * @returns {boolean}
  */
- function ImgExists(name) {
+function ImgExists(name) {
     const avaliableImages = [
         '0000',
         '0200',
@@ -78,49 +78,49 @@ function weatherSkytxt(skyTxt) {
 }
 function weatherWindIcon(windValue) {
     if (windValue < 7) {
-        return '\\〰️'
+        return '〰️'
     } else if (windValue < 16) {
-        return '\\🍃'
+        return '🍃'
     } else if (windValue < 40) {
-        return '\\💨'
+        return '💨'
     } else {
-        return '\\🌪️'
+        return '🌪️'
     }
 }
 function weatherTempIcon(tempValue) {
     if (tempValue < 0) {
-        return '\\❄️'
+        return '❄️'
     } else if (tempValue < 10) {
-        return '\\🥶'
+        return '🥶'
     } else if (tempValue < 15) {
-        return '\\😐'
+        return '😐'
     } else if (tempValue < 20) {
-        return '\\😐'
+        return '😐'
     } else if (tempValue < 25) {
-        return '\\🙂'
+        return '🙂'
     } else if (tempValue < 30) {
-        return '\\🥵'
+        return '🥵'
     } else {
-        return '\\🔥'
+        return '🔥'
     }
 }
 function weatherMoonIcon(moonText) {
     if (moonText === 'New Moon') {
-        return '\\🌑'
+        return '🌑'
     } else if (moonText === 'Waxing Crescent') {
-        return '\\🌒'
+        return '🌒'
     } else if (moonText === 'First Quarter') {
-        return '\\🌓'
+        return '🌓'
     } else if (moonText === 'Waxing Gibbous') {
-        return '\\🌔'
+        return '🌔'
     } else if (moonText === 'Full Moon') {
-        return '\\🌕'
+        return '🌕'
     } else if (moonText === 'Waning Gibbous') {
-        return '\\🌖'
+        return '🌖'
     } else if (moonText === 'Third Quarter') {
-        return '\\🌗'
+        return '🌗'
     } else if (moonText === 'Waning Crescent') {
-        return '\\🌘'
+        return '🌘'
     }
 
     return '?'
@@ -148,11 +148,11 @@ function weatherMoonText(moonText) {
 }
 function weatherHumidityIcon(humidityValue) {
     if (humidityValue < 40) {
-        return '\\🌵'
+        return '🌵'
     } else if (humidityValue < 60) {
-        return '\\🙂'
+        return '🙂'
     } else {
-        return '\\🌫️'
+        return '🌫️'
     }
 }
 /**
@@ -245,15 +245,15 @@ function unixToTime(unixValue) {
 }
 function weatherPressureIcon(pressureValue) {
     if (pressureValue < 980) {
-        return '\\🔷'
+        return '🔷'
     } else if (pressureValue < 1008) {
-        return '\\🔹'
+        return '🔹'
     } else if (pressureValue < 1019) {
-        return '\\⬛'
+        return '⬛'
     } else if (pressureValue < 1026) {
-        return '\\🔸'
+        return '🔸'
     } else {
-        return '\\🔶'
+        return '🔶'
     }
 }
 
@@ -416,68 +416,68 @@ function dayName(dayOfWeek) {
  */
 function weatherSkytextIcon(skyTxt, useMoon) {
     if (skyTxt === 'Mostly Cloudy') {
-        return '\\☁️'
+        return '☁️'
     } else if (skyTxt === 'Cloudy') {
-        return '\\☁️'
+        return '☁️'
     } else if (skyTxt === 'Clouds') {
-        return '\\☁️'
+        return '☁️'
     } else if (skyTxt === 'Partly Sunny') {
-        return '\\⛅'
+        return '⛅'
     } else if (skyTxt === 'Sunny') {
-        return '\\☀️'
+        return '☀️'
     } else if (skyTxt === 'Rain') {
-        return '\\🌧️'
+        return '🌧️'
     } else if (skyTxt === 'Fog') {
-        return '\\🌫️'
+        return '🌫️'
     } else if (skyTxt === 'Rain Showers') {
-        return '\\🌧️'
+        return '🌧️'
     } else if (skyTxt === 'Light Rain') {
-        return '\\🌦️'
+        return '🌦️'
     } else if (skyTxt === 'Clear') {
         if (useMoon === true) {
             var hour = new Date().getHours()
             if (hour > 0 && hour < 6) {
-                return '\\🌙'
+                return '🌙'
             } else if (hour < 15) {
-                return '\\☀️'
+                return '☀️'
             } else if (hour < 16) {
-                return '\\🌙'
+                return '🌙'
             } else {
-                return '\\🌙'
+                return '🌙'
             } 
         }
-        return '\\☀️'
+        return '☀️'
     } else if (skyTxt === 'Mostly Clear') {
         if (useMoon === true) {
             var hour = new Date().getHours()
             if (hour > 0 && hour < 6) {
-                return '\\🌙'
+                return '🌙'
             } else if (hour < 15) {
-                return '\\🌤️'
+                return '🌤️'
             } else if (hour < 16) {
-                return '\\🌙'
+                return '🌙'
             } else {
-                return '\\🌙'
+                return '🌙'
             }
         }
-        return '\\🌤️'
+        return '🌤️'
     } else if (skyTxt === 'T-Storms') {
-        return '\\⛈️'
+        return '⛈️'
     } else if (skyTxt === 'Snow') {
-        return '\\🌨️'
+        return '🌨️'
     } else if (skyTxt === 'Light Snow') {
-        return '\\🌨️'
+        return '🌨️'
     } else if (skyTxt === 'Mostly Sunny') {
-        return '\\🌤️'
+        return '🌤️'
     } else if (skyTxt === 'Light Rain and Snow') {
-        return '\\🌧️'
+        return '🌧️'
     } else if (skyTxt === 'Heavy T-Storms') {
-        return '\\⛈️'
+        return '⛈️'
     } else if (skyTxt === 'Partly Cloudy') {
-        return '\\⛅'
+        return '⛅'
     }
 
-    return '\\🌍'
+    return '🌍'
 }
 /**
  * @param {number} i0 

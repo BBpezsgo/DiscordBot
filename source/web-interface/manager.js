@@ -824,7 +824,25 @@ class WebInterfaceManager {
             // verified: g.verified,
         }
 
-        this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError })
+        const emojis = []
+        g.emojis.cache.forEach((emoji) => {
+            emojis.push({
+                animated: emoji.animated,
+                author: emoji.author,
+                available: emoji.available,
+                deletable: emoji.deletable,
+                id: emoji.id,
+                identifier: emoji.identifier,
+                managed: emoji.managed,
+                name: emoji.name,
+                requiresColons: emoji.requiresColons,
+                roles: emoji.roles,
+                url: emoji.url,
+                createdAt: GetDate(emoji.createdAt)
+            })
+        })
+
+        this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError, emojis: emojis })
     }
 
     RenderPage_Moderating(req, res) {
@@ -2205,43 +2223,6 @@ function OneNumberToTwoNumber(number) {
     }
 }
 
-function xpRankIcon(score) {
-    let rank = ''
-    if (score < 1000) {
-        rank = '🔰' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/japanese-symbol-for-beginner_1f530.png'
-    } else if (score < 5000) {
-        rank = 'Ⓜ️' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/circled-latin-capital-letter-m_24c2.png'
-    } else if (score < 10000) {
-        rank = '📛' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/name-badge_1f4db.png'
-    } else if (score < 50000) {
-        rank = '💠' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/diamond-shape-with-a-dot-inside_1f4a0.png'
-    } else if (score < 80000) {
-        rank = '⚜️' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/fleur-de-lis_269c.png'
-    } else if (score < 100000) {
-        rank = '🔱' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/trident-emblem_1f531.png'
-    } else if (score < 140000) {
-        rank = '㊗️' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/circled-ideograph-congratulation_3297.png'
-    } else if (score < 180000) {
-        rank = '🉐' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/circled-ideograph-advantage_1f250.png'
-    } else if (score < 250000) {
-        rank = '🉑' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/circled-ideograph-accept_1f251.png'
-    } else if (score < 350000) {
-        rank = '💫' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/dizzy-symbol_1f4ab.png'
-    } else if (score < 500000) {
-        rank = '🌠' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/shooting-star_1f320.png'
-    } else if (score < 780000) {
-        rank = '☄️' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/comet_2604.png'
-    } else if (score < 1000000) {
-        rank = '🪐' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/ringed-planet_1fa90.png'
-    } else if (score < 1500000) {
-        rank = '🌀' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/cyclone_1f300.png'
-    } else if (score < 1800000) {
-        rank = '🌌' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/milky-way_1f30c.png'
-    } else {
-        rank = '🧿' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/nazar-amulet_1f9ff.png'
-    }
-    return rank
-}
 function xpRankText(score) {
     let rankName = ''
     if (score < 1000) {
@@ -2278,41 +2259,6 @@ function xpRankText(score) {
         rankName = 'Isten'
     }
     return rankName
-}
-function xpRankPrevoius(score) {
-    let prevoius = 0
-    if (score < 1000) {
-        prevoius = 0
-    } else if (score < 5000) {
-        prevoius = 1000
-    } else if (score < 10000) {
-        prevoius = 5000
-    } else if (score < 50000) {
-        prevoius = 10000
-    } else if (score < 80000) {
-        prevoius = 50000
-    } else if (score < 100000) {
-        prevoius = 80000
-    } else if (score < 140000) {
-        prevoius = 100000
-    } else if (score < 180000) {
-        prevoius = 140000
-    } else if (score < 250000) {
-        prevoius = 180000
-    } else if (score < 350000) {
-        prevoius = 250000
-    } else if (score < 500000) {
-        prevoius = 350000
-    } else if (score < 780000) {
-        prevoius = 500000
-    } else if (score < 1000000) {
-        prevoius = 780000
-    } else if (score < 1500000) {
-        prevoius = 1000000
-    } else if (score < 1800000) {
-        prevoius = 1500000
-    }
-    return prevoius
 }
 function xpRankNext(score) {
     let next = 0
