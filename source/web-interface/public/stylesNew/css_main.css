@@ -36,12 +36,13 @@
 	box-sizing: border-box;
 }
 
-a {
+.fake-url, a {
 	color: var(--primary);
 	text-decoration: none;
+	cursor: pointer;
 }
 
-a:focus, a:hover {
+.fake-url:focus, .fake-url:hover, a:focus, a:hover {
 	text-decoration: underline;
 }
 
@@ -855,4 +856,83 @@ button.btn-toggle-info:active {
 	background-color: #fff4;
 	outline: none;
 	opacity: 100%;
+}
+
+.mention {
+	background-color: #8ab4f860;
+	border-radius: 2px;
+	font-weight: 600;
+}
+
+.mention:hover {
+	background-color: #8ab4f8b0;
+}
+
+.mention-clickable {
+	background-color: #8ab4f860;
+	border-radius: 2px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.mention-clickable:hover {
+	background-color: #8ab4f8b0;
+	text-decoration: underline;
+}
+
+.mention-clickable:active {
+	background-color: #8ab4f8;
+	text-decoration: underline;
+}
+
+.mention-spinner::before {
+	display: inline-block;
+	position: relative;
+	top: 4px;
+	content: '';
+	width: 12px;
+	height: 12px;
+	border-left: 2px solid #fff;
+	border-top: 2px solid transparent;
+	border-right: 2px solid transparent;
+	border-bottom: 2px solid transparent;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.message-attachment {
+	color: var(--text);
+}
+
+.message-attachment:focus,
+.message-attachment:hover {
+	text-decoration: none;
+}
+
+.message-attachment:hover .material-icons::after {
+    display: none;
+}
+
+.message-attachment {
+	border: 1px solid #fff4;
+	padding: 0px 2px 1px 0px;
+	border-radius: 2px;
+	cursor: pointer;
+}
+
+.message-attachment:hover {
+	background-color: #fff1;
+}
+
+.message-attachment:active {
+	background-color: #fff2;
 }

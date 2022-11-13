@@ -13,6 +13,7 @@
     "asciichart": "latest",
     "axios": "latest",
     "canvas": "^2.10.2",
+    "csv": "^6.2.2",
     "discord.js": "latest",
     "express": "latest",
     "express-formidable": "^1.2.0",

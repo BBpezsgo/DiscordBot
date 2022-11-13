@@ -21,6 +21,7 @@ const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
 const { MessageType } = require('discord.js')
 const process = require('process')
+const archivePath = 'D:/Mappa/Discord/DiscordOldData/'
 
 class WebInterfaceManager {
     /**
@@ -121,6 +122,7 @@ class WebInterfaceManager {
         this.RegisterHandlebarsRoots()
         this.RegisterPublicRoots()
         this.RegisterWeatherRoots()
+        this.RegisterArchiveBrowserRoots()
         
         this.app.get('/', (req, res) => {
             res.status(200).render('start')
@@ -211,6 +213,8 @@ class WebInterfaceManager {
         this.moderatingSearchedServerId = ''
         this.moderatingSearchedChannelId = ''
 
+        this.archiveModeratingSearchedServerId = ''
+        this.archiveModeratingSearchedChannelId = ''
 
         this.commandsDeleting = false
         this.commandsCreating = false
@@ -1229,14 +1233,14 @@ class WebInterfaceManager {
             this.RenderPage(req, res, 'Testing')
         })
 
-        this.app.post('/FetchUser', (req, res) => {
+        this.app.post('/User/Fetch', (req, res) => {
             this.client.users.fetch(req.query.id)
-                .then(() => {
-                    res.status(200).send({ message: 'ok' })
-                })
-                .catch((error) => {
-                    res.status(200).send(error)
-                })
+            .then(() => {
+                res.status(200).send({ message: 'ok' })
+            })
+            .catch((error) => {
+                res.status(200).send(error)
+            })
         })
 
         this.app.post('/Message/Pin', (req, res) => {
@@ -2183,10 +2187,596 @@ class WebInterfaceManager {
         })
     }
 
+
+    RenderArchivePage_ModeratingSearch(req, res, error) {
+        const index = JSON.parse(fs.readFileSync(archivePath + 'servers/' + 'index.json', { encoding: 'utf-8' }))
+            
+        const guildList = fs.readdirSync(archivePath + 'servers/')
+        const guilds = []
+        for (let i = 0; i < guildList.length; i++) {
+            const guildID = guildList[i]
+            try {
+                guilds.push(JSON.parse(fs.readFileSync(archivePath + 'servers/' + guildID + '/guild.json', { encoding: 'utf-8' })))
+            } catch (err) { }
+        }
+
+        const channelList = fs.readdirSync(archivePath + 'messages/')
+        const channelsIndex = JSON.parse(fs.readFileSync(archivePath + 'messages/' + 'index.json', { encoding: 'utf-8' }))
+        const dms = []
+        for (let i = 0; i < channelList.length; i++) {
+            const channelID = channelList[i]
+            try {
+                const channel = JSON.parse(fs.readFileSync(archivePath + 'messages/' + channelID + '/channel.json', { encoding: 'utf-8' }))
+                channel.data = channelsIndex[channelID]
+                if (channel.guild === undefined) {
+                    dms.push(channel)
+                }
+            } catch (err) { }
+        }
+
+        res.render('archive/views/ModeratingSearch', { servers: guilds, dms: dms, error: error })
+    }
+
+    RenderArchivePage_ModeratingGuildSearch(req, res, error) {
+        const guildList = fs.readdirSync(archivePath + 'servers/')
+        var guild = {}
+        for (let i = 0; i < guildList.length; i++) {
+            const guildID = guildList[i]
+            if (guildID !== this.archiveModeratingSearchedServerId) { continue }
+            try {
+                var guild_ = JSON.parse(fs.readFileSync(archivePath + 'servers/' + guildID + '/guild.json', { encoding: 'utf-8' }))
+                guild = guild_
+            } catch (err) { }
+            break
+        }
+
+        const channelList = fs.readdirSync(archivePath + 'messages/')
+        const channelsIndex = JSON.parse(fs.readFileSync(archivePath + 'messages/' + 'index.json', { encoding: 'utf-8' }))
+        const channels = []
+        for (let i = 0; i < channelList.length; i++) {
+            const channelID = channelList[i]
+            if (fs.existsSync(archivePath + 'messages/' + channelID + '/channel.json')) {
+                const channel = JSON.parse(fs.readFileSync(archivePath + 'messages/' + channelID + '/channel.json', { encoding: 'utf-8' }))
+                channel.data = channelsIndex[channelID]
+                if (channel.guild !== undefined) {
+                    if (channel.guild.id == this.archiveModeratingSearchedServerId) {
+                        channels.push(channel)
+                    }
+                }
+            }
+        }
+
+        res.render('archive/views/ModeratingGuildSearch', { guild: guild, channels: channels, error: error })
+    }
+
+    RenderArchivePage_Moderating(req, res, error) {
+        var guild = undefined
+        if (this.archiveModeratingSearchedServerId.length > 0) {
+            const guildList = fs.readdirSync(archivePath + 'servers/')
+            for (let i = 0; i < guildList.length; i++) {
+                const guildID = guildList[i]
+                if (guildID !== this.archiveModeratingSearchedServerId) { continue }
+                try {
+                    var guild_ = JSON.parse(fs.readFileSync(archivePath + 'servers/' + guildID + '/guild.json', { encoding: 'utf-8' }))
+                    guild = guild_
+                } catch (err) { }
+                break
+            }
+        }
+
+        const channelList = fs.readdirSync(archivePath + 'messages/')
+        const channelsIndex = JSON.parse(fs.readFileSync(archivePath + 'messages/' + 'index.json', { encoding: 'utf-8' }))
+        var channel = {}
+        for (let i = 0; i < channelList.length; i++) {
+            const channelID = channelList[i]
+            if (channelID !== this.archiveModeratingSearchedChannelId) { continue }
+            if (fs.existsSync(archivePath + 'messages/' + channelID + '/channel.json')) {
+                const channel_ = JSON.parse(fs.readFileSync(archivePath + 'messages/' + channelID + '/channel.json', { encoding: 'utf-8' }))
+                if (this.archiveModeratingSearchedServerId.length === 0 && channel_.guild === undefined) {
+                    channel = channel_
+                    channel.data = channelsIndex[channelID]
+                    break
+                } else if (channel_.guild !== undefined) {
+                    if (channel_.guild.id == this.archiveModeratingSearchedServerId) {
+                        channel = channel_
+                        channel.data = channelsIndex[channelID]
+                        break
+                    }
+                }
+            }
+        }
+
+        const csv = require('csv')
+
+        const messages = []
+
+        const self = this
+        if (fs.existsSync(archivePath + 'messages/' + channel.id + '/messages.csv')) {
+            fs.createReadStream(archivePath + 'messages/' + channel.id + '/messages.csv')
+                .pipe(csv.parse({ delimiter: ",", from_line: 2 }))
+                .on('data', function (row) {
+                    if (row.length > 3) {
+                        messages.push({ id: row[0], date: row[1], content: self.ParseMessageContentToHandlebars(self.ParseMessageContent(row[2] + '')), attachment: row[3] })
+                    } else {
+                        messages.push({  })
+                    }
+                })
+                .on('end', () => {
+                    res.render('archive/views/Moderating', { guild: guild, channel: channel, messages: messages, error: error })
+                })
+                .on('error', (err) => {
+                    res.render('archive/views/Moderating', { guild: guild, channel: channel, messages: messages, error: error })
+                })
+        } else {
+            res.render('archive/views/Moderating', { guild: guild, channel: channel, messages: messages, error: error })
+        }
+    }
+    RegisterArchiveBrowserRoots() {
+        this.app.get('/archive', (req, res) => {
+            const view = req.query.view
+            if (view === 'default' || view == undefined) {
+                res.render('archive/default')
+            } else {
+                res.status(404).send("Not found")
+            }
+        })
+
+        this.app.get('/archive/views/MenuRpm', (req, res) => {
+            res.render('archive/views/MenuRpm')
+        })
+
+        this.app.get('/archive/views/Startpage', (req, res) => {
+            const readme = fs.readFileSync(archivePath + 'README.txt', { encoding: 'utf-8' })
+            res.render('archive/views/Startpage', { ReadmeTxt: readme })
+        })
+
+        this.app.get('/archive/views/Account', (req, res) => {
+            const userData = JSON.parse(fs.readFileSync(archivePath + 'account/' + 'user.json', { encoding: 'utf-8' }))
+
+            res.render('archive/views/Account', { userData: userData })
+        })
+
+        this.app.get('/archive/views/Channels', (req, res) => {
+            const index = JSON.parse(fs.readFileSync(archivePath + 'messages/' + 'index.json', { encoding: 'utf-8' }))
+            
+            const channelList = fs.readdirSync(archivePath + 'messages/')
+            const channels = []
+            for (let i = 0; i < channelList.length; i++) {
+                const channelID = channelList[i]
+                try {
+                    channels.push(JSON.parse(fs.readFileSync(archivePath + 'messages/' + channelID + '/channel.json', { encoding: 'utf-8' })))
+                } catch (error) { }
+            }
+
+            res.render('archive/views/Channels', { channels: channels })
+        })
+
+        this.app.get('/archive/views/Applications', (req, res) => {
+            const appList = fs.readdirSync(archivePath + 'account/applications/')
+            const apps = []
+            for (let i = 0; i < appList.length; i++) {
+                const appID = appList[i]
+                apps.push(JSON.parse(fs.readFileSync(archivePath + 'account/applications/' + appID + '/application.json', { encoding: 'utf-8' })))
+            }
+            res.render('archive/views/Applications', { apps: apps })
+        })
+
+        this.app.get('/archive/views/Moderating', (req, res) => {
+            if (this.archiveModeratingSearchedChannelId.length > 0) {
+                this.RenderArchivePage_Moderating(req, res)
+            } else if (this.archiveModeratingSearchedServerId.length > 0) {
+                this.RenderArchivePage_ModeratingGuildSearch(req, res)
+            } else {
+                this.RenderArchivePage_ModeratingSearch(req, res)
+            }
+        })
+
+        this.app.post('/archive/views/Moderating/Search', (req, res) => {
+            const serverId = req.body.id
+
+            const guildList = fs.readdirSync(archivePath + 'servers/')
+
+            if (guildList.includes(serverId)) {
+                this.archiveModeratingSearchedServerId = serverId
+                this.archiveModeratingSearchedChannelId = ''
+
+                this.RenderArchivePage_ModeratingGuildSearch(req, res)
+            } else {
+                this.RenderArchivePage_ModeratingSearch(req, res, `Server not found. (id: "${req.body.id}")`)
+            }
+        })
+
+        this.app.post('/archive/views/Moderating/Back', (req, res) => {
+            this.archiveModeratingSearchedServerId = ''
+            this.archiveModeratingSearchedChannelId = ''
+
+            this.RenderArchivePage_ModeratingSearch(req, res)
+        })
+
+        this.app.post('/archive/views/Moderating/Server/Back', (req, res) => {
+            this.archiveModeratingSearchedChannelId = ''
+
+            if (this.archiveModeratingSearchedServerId.length > 0) {
+                this.RenderArchivePage_ModeratingGuildSearch(req, res)
+            } else {
+                this.RenderArchivePage_ModeratingSearch(req, res)
+            }
+        })
+
+        this.app.post('/archive/views/Moderating/Server/Search', (req, res) => {
+            const channelId = req.body.id
+    
+            const channelList = fs.readdirSync(archivePath + 'messages/')
+            if (channelList.includes(channelId)) {
+                this.archiveModeratingSearchedChannelId = channelId
+
+                this.RenderArchivePage_Moderating(req, res)
+            } else {
+                this.RenderArchivePage_ModeratingSearch(req, res, `Channel not found. (id: "${req.body.id}")`)
+            }
+        })
+    }
+
     RegisterWeatherRoots() {
         this.app.get('/weather', (req, res) => {
             res.render('weather/weather', { })
         })
+    }
+    
+    ParseMessageContent(messageContent) {
+        
+        const ParseUsers = function(content) {
+            const res = content.matchAll(/<@![0-9]{18}>/g)
+            /** @type {{value: string, index: number}[]} */
+            const result = []
+            while (true) {
+                /** @type {RegExpMatchArray | undefined} */
+                const next = res.next().value
+                if (next === undefined) { break }
+                result.push({
+                    value: next[0],
+                    index: next.index
+                })
+            }
+
+            /** @type {{type:'TEXT'|'USER';data:string;}[]} */
+            var resultTxt = []
+            if (result.length > 0) {
+                var j = 0
+                for (let i = 0; i < result.length; i++) {
+                    const resItem = result[i]
+                    resultTxt.push({
+                        type: 'TEXT',
+                        data: content.substring(j, resItem.index)
+                    })
+                    resultTxt.push({
+                        type: 'USER',
+                        data: resItem.value.substring(3, 21)
+                    })
+                    j = resItem.index + resItem.value.length
+                }
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content.substring(j)
+                })
+            } else {
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content
+                })
+            }
+
+            return resultTxt
+        }
+        
+        const ParseChannels = function(content) {
+            const res = content.matchAll(/<#[0-9]{18}>/g)
+            /** @type {{value: string, index: number}[]} */
+            const result = []
+            while (true) {
+                /** @type {RegExpMatchArray | undefined} */
+                const next = res.next().value
+                if (next === undefined) { break }
+                result.push({
+                    value: next[0],
+                    index: next.index
+                })
+            }
+
+            /** @type {{type:'TEXT'|'CHANNEL';data:string;}[]} */
+            var resultTxt = []
+            if (result.length > 0) {
+                var j = 0
+                for (let i = 0; i < result.length; i++) {
+                    const resItem = result[i]
+                    resultTxt.push({
+                        type: 'TEXT',
+                        data: content.substring(j, resItem.index)
+                    })
+                    resultTxt.push({
+                        type: 'CHANNEL',
+                        data: resItem.value.substring(2, 20)
+                    })
+                    j = resItem.index + resItem.value.length
+                }
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content.substring(j)
+                })
+            } else {
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content
+                })
+            }
+
+            return resultTxt
+        }
+        
+        const ParseEmojis = function(content) {
+            const res = content.matchAll(/<:[a-zA-Z]*:[0-9]{18}>/g)
+            /** @type {{value: string, index: number}[]} */
+            const result = []
+            while (true) {
+                /** @type {RegExpMatchArray | undefined} */
+                const next = res.next().value
+                if (next === undefined) { break }
+                result.push({
+                    value: next[0],
+                    index: next.index
+                })
+            }
+
+            /** @type {{type:'TEXT'|'EMOJI';data:string;}[]} */
+            var resultTxt = []
+            if (result.length > 0) {
+                var j = 0
+                for (let i = 0; i < result.length; i++) {
+                    const resItem = result[i]
+                    resultTxt.push({
+                        type: 'TEXT',
+                        data: content.substring(j, resItem.index)
+                    })
+                    resultTxt.push({
+                        type: 'EMOJI',
+                        data: resItem.value.substring(0, resItem.value.length)
+                    })
+                    j = resItem.index + resItem.value.length
+                }
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content.substring(j)
+                })
+            } else {
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content
+                })
+            }
+
+            return resultTxt
+        }
+        
+        const ParsePings = function(content) {
+            const res = content.matchAll(/@(everyone|here)/g)
+            /** @type {{value: string, index: number}[]} */
+            const result = []
+            while (true) {
+                /** @type {RegExpMatchArray | undefined} */
+                const next = res.next().value
+                if (next === undefined) { break }
+                result.push({
+                    value: next[0],
+                    index: next.index
+                })
+            }
+
+            /** @type {{type:'TEXT'|'PING';data:string;}[]} */
+            var resultTxt = []
+            if (result.length > 0) {
+                var j = 0
+                for (let i = 0; i < result.length; i++) {
+                    const resItem = result[i]
+                    resultTxt.push({
+                        type: 'TEXT',
+                        data: content.substring(j, resItem.index)
+                    })
+                    resultTxt.push({
+                        type: 'PING',
+                        data: resItem.value
+                    })
+                    j = resItem.index + resItem.value.length
+                }
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content.substring(j)
+                })
+            } else {
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content
+                })
+            }
+
+            return resultTxt
+        }
+        
+        const ParseURLs = function(content) {
+            const res = content.matchAll(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=\!]*)/g)
+            /** @type {{value: string, index: number}[]} */
+            const result = []
+            while (true) {
+                /** @type {RegExpMatchArray | undefined} */
+                const next = res.next().value
+                if (next === undefined) { break }
+                result.push({
+                    value: next[0],
+                    index: next.index
+                })
+            }
+
+            /** @type {{type:'TEXT'|'URL';data:string;}[]} */
+            var resultTxt = []
+            if (result.length > 0) {
+                var j = 0
+                for (let i = 0; i < result.length; i++) {
+                    const resItem = result[i]
+                    resultTxt.push({
+                        type: 'TEXT',
+                        data: content.substring(j, resItem.index)
+                    })
+                    resultTxt.push({
+                        type: 'URL',
+                        data: resItem.value
+                    })
+                    j = resItem.index + resItem.value.length
+                }
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content.substring(j)
+                })
+            } else {
+                resultTxt.push({
+                    type: 'TEXT',
+                    data: content
+                })
+            }
+
+            return resultTxt
+        }
+
+        const parseResult = []
+
+        ParseUsers(messageContent).forEach(e1 => {
+            if (e1.type === 'TEXT') {
+                ParseChannels(e1.data).forEach(e2 => {
+                    if (e2.type === 'TEXT') {
+                        ParseEmojis(e2.data).forEach(e3 => {
+                            if (e3.type === 'TEXT') {
+                                ParsePings(e3.data).forEach(e4 => {
+                                    if (e4.type === 'TEXT') {
+                                        ParseURLs(e4.data).forEach(e5 => {
+                                            parseResult.push(e5)
+                                        })
+                                    } else {
+                                        parseResult.push(e4)
+                                    }
+                                })
+                            } else {
+                                parseResult.push(e3)
+                            }
+                        })
+                    } else {
+                        parseResult.push(e2)
+                    }
+                })
+            } else {
+                parseResult.push(e1)
+            }
+        })
+
+        var attachmentCounter = 0
+        for (let i = 0; i < parseResult.length; i++) {
+            const element = parseResult[i]
+            if (element.type === 'URL') {
+                const URL = require('node:url')
+                const url = URL.parse(element.data)
+                if (url.path.toLowerCase().endsWith('.png') ||
+                url.path.toLowerCase().endsWith('.jpg') ||
+                url.path.toLowerCase().endsWith('.gif')) {
+                    attachmentCounter += 1
+                    parseResult[i].attachmentID = attachmentCounter
+                    parseResult.push({
+                        type: 'IMG',
+                        data: element.data,
+                        attachmentID: attachmentCounter
+                    })
+                } else if (url.path.toLowerCase().endsWith('.mov') ||
+                url.path.toLowerCase().endsWith('.mp4')) {
+                    attachmentCounter += 1
+                    parseResult[i].attachmentID = attachmentCounter
+                    parseResult.push({
+                        type: 'VIDEO',
+                        data: element.data,
+                        attachmentID: attachmentCounter
+                    })
+                }
+            }
+        }
+
+        return parseResult
+    }
+    /** @param {{type:'TEXT'|'USER'|'CHANNEL'|'EMOJI'|'PING'|'URL'|'IMG';data:string;attachmentID:number|undefined}[]} parsedContent */
+    ParseMessageContentToHandlebars(parsedContent) {
+        if (typeof parsedContent === 'string') {
+            return(this.ParseMessageContent(parsedContent))
+        }
+        var result = []
+        for (let i = 0; i < parsedContent.length; i++) {
+            const element = parsedContent[i]
+            if (element.type === 'TEXT') {
+                result.push({
+                    text: element.data
+                })
+            } else if (element.type === 'USER') {
+                var userData = undefined
+                if (this.client.users.cache.has(element.data)) {
+                    const cacheUser = this.client.users.cache.get(element.data)
+                    userData = {
+                        username: cacheUser.username,
+                        avatarURL: cacheUser.avatarURL({ size: 16 }),
+                        defaultAvatarURL: cacheUser.defaultAvatarURL
+                    }
+                }
+                result.push({
+                    user: element.data,
+                    userData: userData
+                })
+            } else if (element.type === 'CHANNEL') {
+                var channelData = undefined
+                if (this.client.channels.cache.has(element.data)) {
+                    const cacheChannel = this.client.channels.cache.get(element.data)
+                    channelData = {
+                        name: cacheChannel.name
+                    }
+                }
+                result.push({
+                    channel: element.data,
+                    channelData: channelData
+                })
+            } else if (element.type === 'EMOJI') {
+                const parsedEmoji = Discord.parseEmoji(element.data)
+                var emoji = {
+                    id: parsedEmoji.id,
+                    animated: parsedEmoji.animated,
+                    name: parsedEmoji.name
+                }
+                
+                if (this.client.emojis.cache.has(parsedEmoji.id)) {
+                    emoji.url = this.client.emojis.cache.get(parsedEmoji.id).url
+                }
+
+                result.push({ emoji: emoji })
+            } else if (element.type === 'PING') {
+                result.push({ ping: element.data })
+            } else if (element.type === 'URL') {
+                result.push({
+                    url: element.data,
+                    attachmentID: element.attachmentID
+                })
+            } else if (element.type === 'IMG') {
+                result.push({
+                    img: element.data,
+                    attachmentID: element.attachmentID
+                })
+            } else if (element.type === 'VIDEO') {
+                result.push({
+                    video: element.data,
+                    attachmentID: element.attachmentID
+                })
+            }
+        }
+        return result
     }
 }
 

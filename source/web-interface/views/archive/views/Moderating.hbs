@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <link href="/stylesNew/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/stylesNew/css_main.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/scripts/commonNew.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        .material-icons {
+            font-size: 1.2em;
+            transform: translate(0px, 3px);
+            user-select: none;
+        }
+
+        a:hover .material-icons::after {
+            content: '';
+            display: block;
+            width: 1em;
+            height: 1px;
+            background-color: currentColor;
+            transform: translateY(-2px);
+        }
+
+        img.badge {
+            display: inline-block;
+            transform: translateY(4px);
+        }
+    </style>
+</head>
+
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
+   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+    
+	<h1>Moderating</h1>
+    
+    {{#if error}}
+    <div class="container loading-effect">
+        <h2>Error</h2>
+        <p style="color: #d33; font-weight: bold;">{{error}}</p>
+    </div>
+    {{/if}}
+
+	<div class="container loading-effect">
+        <h2>
+            <form action="/archive/views/Moderating/Server/Back" method="post"
+                style="display: inline-block; margin-right: 20px;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                <input type="submit" value="" class="btn-tool btn-tool-back">
+            </form>
+            {{#if channel.name}}
+            <span style="color: #aaa">Channel</span>
+            {{channel.name}}
+            {{else}}
+            Unknown channel
+            {{/if}}
+            {{#if guild}}
+            <span style="color: #aaa">in guild</span>
+            {{guild.name}}
+            {{/if}}
+        </h2>
+		<table style="width: 100%;">
+            <tbody>
+                {{#if channel.data}}
+                <tr>
+                    <td width="25%" class="Item">data:</td>
+                    <td colspan="2">
+                        {{channel.data}}
+                    </td>
+                </tr>
+                {{/if}}
+                <tr>
+                    <td width="25%" class="Item">ID:</td>
+                    <td colspan="2">
+                        {{channel.id}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">Type:</td>
+                    <td colspan="2">
+                        {{channel.type}}
+                    </td>
+                </tr>
+            </tbody>
+		</table>
+	</div>
+    
+	<div class="container loading-effect" style="overflow-x: scroll;">
+        <h2>Messages</h2>
+        <table border="1" style="width: 100%;" cellspacing="0" cellpadding="0">
+            <tbody>
+                <tr>
+                    <td class="ListM"></td>
+                    <td class="ListM" style="width: 100%;"></td>
+                    <td class="ListM">
+                        <b>ID</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Created At</b>
+                    </td>
+                </tr>
+                <script>
+                    function ToggleAttachment(id) {
+                        const attachment = document.getElementById('msg-attachment-' + id)
+                        if (attachment.style.display === 'none') {
+                            attachment.style.display = 'block'
+                        } else {
+                            attachment.style.display = 'none'
+                        }
+                    }
+                </script>
+                {{#each messages}}
+                <tr>
+                    <td style="padding:0 2 0 2;word-break:break-all;vertical-align: top;">
+                        <div class="tooltip">
+                            <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar">
+                            <span class="tooltiptext">
+                                <img src="{{author.avatarUrlBig}}" width="32" height="32" style="transform: translateY(4px);">
+                                <h2 style="display: inline">{{author.username}}</h2><h2 style="display: inline; opacity: .7;">#{{author.discriminator}}</h2>
+                            </span>
+                        </div>
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all;">
+                        {{#each this.content}}
+                        {{#if this.text}}
+                        {{this.text}}
+                        {{/if}}
+
+                        {{#if this.user}}
+                        {{#if this.userData}}
+                        <span class="mention">@<img width="16" height="16" style="display: inline; transform: translate(2px, 3px); border-radius: 50%;" src="{{this.userData.avatarURL}}"> {{this.userData.username}}</span>
+                        {{else}}
+                        <span class="mention-clickable" onclick="event.target.classList.add('mention-spinner'); Post('/User/Fetch?id={{this.user}}',event,()=>{event.target.classList.remove('mention-spinner')})" title="Click to fetch user">User {{this.user}}</span>
+                        {{/if}}
+                        {{/if}}
+
+                        {{#if this.channel}}
+                        {{#if this.channelData}}
+                        <span class="mention">#{{this.channelData.name}}</span>
+                        {{else}}
+                        <span class="mention">Channel {{this.channel}}</span>
+                        {{/if}}
+                        {{/if}}
+
+                        {{#if this.emoji}}
+                        {{#if this.emoji.url}}
+                        <img width="16" height="16" style="display: inline-block;" src="{{this.emoji.url}}" alt="{{this.emoji.name}}">
+                        {{else}}
+                        <img width="16" height="16" style="display: inline-block;" src="https://cdn.discordapp.com/emojis/{{this.emoji.id}}.png" alt="{{this.emoji.id}}">
+                        {{/if}}
+                        {{/if}}
+
+                        {{#if this.ping}}
+                        <span class="mention">{{this.ping}}</span>
+                        {{/if}}
+
+                        {{#if this.url}}
+                        {{#if this.attachmentID}}
+                        <span class="message-attachment" onclick="ToggleAttachment('{{../id}}-{{this.attachmentID}}')"><i class="material-icons">link</i>Linked attachment</span>
+                        {{else}}
+                        <a href="{{this.url}}" target="_blank">{{this.url}}<i class="material-icons">open_in_new</i></a>
+                        {{/if}}
+                        {{/if}}
+
+                        {{#if this.img}}
+                        <div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:none;">
+                            <img src="{{this.img}}" style="display: block; max-height: 256px;">
+                            <a href="{{this.img}}" target="_blank"><i class="material-icons">open_in_new</i></a>
+                        </div>
+                        {{/if}}
+
+                        {{#if this.video}}
+                        <div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:none;">
+                            <video src="{{this.video}}" style="display: block; max-height: 256px;" controls>
+                            <a href="{{this.video}}" target="_blank"><i class="material-icons">open_in_new</i></a>
+                        </div>
+                        {{/if}}
+
+                        {{/each}}
+
+                        {{#if this.attachment}}
+                        <span class="message-attachment" onclick="ToggleAttachment('{{id}}')"><i class="material-icons">insert_drive_file</i>Attachment</span>
+                        <div id="msg-attachment-{{id}}" style="display:none;">
+                            <a href="{{this.attachment}}" target="_blank"><i class="material-icons">open_in_new</i></a>
+                        </div>
+                        {{/if}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all;vertical-align: top;">
+                        {{this.id}}
+                    </td>
+                    <td style="padding:0 2 0 2;word-break:break-all;vertical-align: top;">
+                        {{this.date}}
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+	</div>
+    
+    <script>
+        /** @param {Event} event */
+        function Post(url, event, callback, errorLabelID)
+        {
+            event.srcElement.classList.add('disabled')
+            const xmlHttp = new XMLHttpRequest()
+            xmlHttp.onreadystatechange = function() { 
+                if (xmlHttp.readyState == 4)
+                {
+                    event.srcElement.classList.remove('disabled')
+                    if (xmlHttp.status === 404) {
+                        if (callback !== undefined) {
+                            callback(xmlHttp.responseText)
+                        }
+                        return
+                    }
+                    const res = JSON.parse(xmlHttp.responseText)
+                    if (res.message === 'ok') {
+                        console.log('Success')
+                        if (callback !== undefined) {
+                            callback(xmlHttp.responseText)
+                        }
+                    } else if (res.rawError !== undefined) {
+                        console.warn(JSON.stringify(res, null, ' '))
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            if (res.rawError.errors !== undefined) {
+                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
+                            }
+                            errorLabel.innerHTML = 
+                            `
+                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
+                            ${res.rawError.message} (code: ${res.rawError.code})${details}
+                            `
+                        }
+                    } else {
+                        console.warn(res)
+                    }
+                }
+            }
+            xmlHttp.open('POST', url, true)
+            xmlHttp.send(null)
+        }
+
+        /** @param {HTMLFormElement} form */
+        function PostFormData(url, form, callback, errorLabelID) {
+            console.log('Post form data...')
+            const formData = new FormData(form)
+            
+            const xmlHttp = new XMLHttpRequest()
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4)
+                {
+                    if (xmlHttp.status === 404) {
+                        console.log('404')
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            errorLabel.innerHTML = 
+                            `
+                            <b>HTTP ${'POST'} <a href='${url}' target='_blank'>${url}</a>:</b><br>
+                            ${xmlHttp.status} ${xmlHttp.statusText}
+                            `
+                        }
+                        return
+                    }
+                    const res = JSON.parse(xmlHttp.responseText)
+                    if (res.message === 'ok') {
+                        console.log('Success')
+                        callback(xmlHttp.responseText)
+                    } else if (res.rawError !== undefined) {
+                        console.warn(JSON.stringify(res, null, ' '))
+                        if (errorLabelID !== undefined) {
+                            const errorLabel = document.getElementById(errorLabelID)
+                            var details = ''
+                            if (res.rawError.errors !== undefined) {
+                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
+                            }
+                            errorLabel.innerHTML = 
+                            `
+                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
+                            ${res.rawError.message} (code: ${res.rawError.code})${details}
+                            `
+                        }
+                    } else {
+                        console.warn(res)
+                    }
+                }
+            }
+            xmlHttp.onerror = function(ev) {
+                console.warn(ev)
+            }
+            xmlHttp.onabort = function(ev) {
+                console.warn(ev)
+            }
+            xmlHttp.open('POST', url, true)
+            xmlHttp.send(formData)
+        }
+    </script>
+    <script src="/scripts/loadEffect.js"></script>
+</body>
+
+</html>

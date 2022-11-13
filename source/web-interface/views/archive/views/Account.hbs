@@ -2,38 +2,107 @@
 <html>
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="pragma" content="no-cache">
-    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
 	<link href="/stylesNew/css-vars.css" rel="stylesheet" type="text/css">
-    <link href="/stylesNew/css_main.css" rel="stylesheet" type="text/css">
-    <script language="javascript" src="/scripts/commonNew.js" type="text/javascript"></script>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<link href="/stylesNew/css_main.css" rel="stylesheet" type="text/css">
+	<script language="javascript" src="/scripts/commonNew.js" type="text/javascript"></script>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
-<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0"
+	marginheight="0">
    	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
 
-	<h1>Cache</h1>
+    <h1>Account</h1>
 
 	<div class="container loading-effect">
-		<h2>Users</h2>
-        <table border="1" cellspacing="0">
+        <table style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td width="25%" class="Item">id:</td>
+                    <td colspan="2">
+                        {{userData.id}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">username:</td>
+                    <td colspan="2">
+                        {{userData.username}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">discriminator:</td>
+                    <td colspan="2">
+                        {{userData.discriminator}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">email:</td>
+                    <td colspan="2">
+                        {{userData.email}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">verified:</td>
+                    <td colspan="2">
+                        {{userData.verified}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">avatar_hash:</td>
+                    <td colspan="2">
+                        {{userData.avatar_hash}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">has_mobile:</td>
+                    <td colspan="2">
+                        {{userData.has_mobile}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">needs_email_verification:</td>
+                    <td colspan="2">
+                        {{userData.needs_email_verification}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">flags:</td>
+                    <td colspan="2">
+                        {{userData.flags}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+	</div>
+
+	<div class="container loading-effect">
+        <h2>Settings</h2>
+        <table style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td width="25%" class="Item">locale:</td>
+                    <td colspan="2">
+                        {{userData.settings.locale}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+	</div>
+
+	<div class="container loading-effect">
+        <h2>relationships</h2>
+        <table class="datas" border="1" align="center" width="100%" cellspacing="0" cellpadding="0">
             <tbody>
                 <tr>
                     <td class="ListM" style="width: 100%;"></td>
                     <td class="ListM">
                         <b>ID</b>
                     </td>
-                    <td class="ListM">
-                        <b>Created At</b>
-                    </td>
-                    <td></td>
-                    <td class="ListM">
-                        <b>Hash</b>
-                    </td>
                 </tr>
-                {{#each users}}
+                {{#each userData.relationships}}
                 <tr>
                     <td style="padding:0 4px 4px 4px;">
                         <div style="display: inline-block; transform: translate(-2px, 4px);">
@@ -43,13 +112,11 @@
                                 <span class="tooltiptext">
                                     <img src="{{this.avatarUrlBig}}">
                                 </span>
-                            </div>      
-                            {{else}}
-                            <img src="{{this.defaultAvatarUrl}}" width="16" height="16" title="Default avatar" style="border-radius: 8px;">
+                            </div>
                             {{/if}}
                         </div>
 
-                        <span title="Username">{{this.username}}</span><span style="color: #999;" title="Discriminator">#{{this.discriminator}}</span>
+                        <span title="Username">{{this.user.username}}</span><span style="color: #999;" title="Discriminator">#{{this.user.discriminator}}</span>
                         
                         {{#if bot}}<span class="tag">BOT</span>{{/if}}
                         {{#if system}}<span class="tag">System</span>{{/if}}
@@ -150,82 +217,13 @@
                     <td>
                         {{this.id}}
                     </td>
-                    <td>
-                        <span title="{{this.createdAt}}">{{this.createdAtText}}</span>
-                    </td>
-                    <td>
-                        <button class="btn-fetch" onclick="Post('/User/Fetch?id={{id}}', event, () => { window.location.reload() })"></button>
-                    </td>
-                    <td>
-                        <!--<img width="16" height="16" src="/imagesNew/bool-{{this.haveHash}}.png" style="transform: translateY(3px);">-->
-                        {{#if this.haveHash}}
-                        <input type="text" value="{{this.hash}}" readonly style="width: 100px;">
-                        {{else}}
-                        <form action="/userViews/GenerateHash" method="post"
-                            style="margin: 0; display: inline-block;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
-                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
-                            <input type="submit" value="Generate">
-                        </form>
-                        {{/if}}
-                    </td>
                 </tr>
                 {{/each}}
             </tbody>
         </table>
 	</div>
 
-    <div class="container loading-effect">
-        <h2>Fetch User</h2>
-        <form action="/User/Fetch" method="post" style="margin: 0; display: inline-block;"
-            onsubmit="
-                event.preventDefault()
-                Post('/User/Fetch?id=' + document.getElementById('fetch-user-id').value, event, () => {
-                    window.location.reload()
-                }, 'fetch-user-error')
-            ">
-            <input type="text" name="id" value="{{this.id}}" id="fetch-user-id">
-            <input type="submit" value="Fetch">
-        </form>
-        <p style="color: #b32d2d;" id="fetch-user-error"></p>
-    </div>
-
-    <script>
-        /** @param {Event} event */
-        function Post(url, event, callback, errorLabelID)
-        {
-            event.srcElement.classList.add('disabled')
-            var xmlHttp = new XMLHttpRequest()
-            xmlHttp.onreadystatechange = function() { 
-                if (xmlHttp.readyState == 4)
-                {
-                    event.srcElement.classList.remove('disabled')
-                    const res = JSON.parse(xmlHttp.responseText)
-                    if (res.message === 'ok') {
-                        console.log('Success')
-                        callback(xmlHttp.responseText)
-                    } else if (res.rawError !== undefined) {
-                        console.warn(JSON.stringify(res, null, ' '))
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            if (res.rawError.errors !== undefined) {
-                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
-                            }
-                            errorLabel.innerHTML = 
-                            `
-                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
-                            ${res.rawError.message} (code: ${res.rawError.code})${details}
-                            `
-                        }
-                    }
-                }
-            }
-            xmlHttp.open('POST', url, true)
-            xmlHttp.send(null)
-        }
-    </script>
-    <script src="../scripts/loadEffect.js"></script>
+    <script src="/scripts/loadEffect.js"></script>
 </body>
 
 </html>
