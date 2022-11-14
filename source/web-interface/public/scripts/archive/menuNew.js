@@ -90,7 +90,7 @@ function menuDisplay() {
             newOL.id = `hr${i}`
             document.getElementsByTagName('menu')[0].appendChild(newOL)
         } else {
-            const haveIcon = ['Application','CacheEmojis','Database','LogError','Moderating','Process','Status','Testing'].includes(menuList[n])
+            const haveIcon = ['Applications','Moderating','User','Startpage','Account'].includes(menuList[n])
 
             const newOL = document.createElement('ol')
             newOL.id = `ol${i}`

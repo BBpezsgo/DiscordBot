@@ -2286,6 +2286,8 @@ class WebInterfaceManager {
             }
         }
 
+        const userData = JSON.parse(fs.readFileSync(archivePath + 'account/' + 'user.json', { encoding: 'utf-8' }))
+
         const csv = require('csv')
 
         const messages = []
@@ -2296,7 +2298,19 @@ class WebInterfaceManager {
                 .pipe(csv.parse({ delimiter: ",", from_line: 2 }))
                 .on('data', function (row) {
                     if (row.length > 3) {
-                        messages.push({ id: row[0], date: row[1], content: self.ParseMessageContentToHandlebars(self.ParseMessageContent(row[2] + '')), attachment: row[3] })
+                        messages.push({
+                            id: row[0],
+                            date: row[1],
+                            content: self.ParseMessageContentToHandlebars(self.ParseMessageContent(row[2] + '')),
+                            attachment: row[3],
+                            author: {
+                                id: userData.id,
+                                username: userData.username,
+                                discriminator: userData.discriminator,
+                                avatarUrlSmall: `/archive/data/user/avatar.png`,
+                                avatarUrlBig: `/archive/data/user/avatar.png`
+                            }
+                        })
                     } else {
                         messages.push({  })
                     }
@@ -2323,6 +2337,19 @@ class WebInterfaceManager {
 
         this.app.get('/archive/views/MenuRpm', (req, res) => {
             res.render('archive/views/MenuRpm')
+        })
+        
+        this.app.get('/archive/data/user/avatar.png', (req, res) => {
+            const readStream = fs.createReadStream(archivePath + 'account/' + 'avatar.png')
+            const stream = require('stream')
+            const streamPassThrough = new stream.PassThrough()
+            stream.pipeline(readStream, streamPassThrough, (err) => {
+                if (err) {
+                    console.log(err)
+                    return res.status(404).send('Not Found')
+                }
+            })
+            streamPassThrough.pipe(res)
         })
 
         this.app.get('/archive/views/Startpage', (req, res) => {

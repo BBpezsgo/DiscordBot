@@ -18,28 +18,18 @@
     <h1>Account</h1>
 
 	<div class="container loading-effect">
+        <img src="/archive/data/user/avatar.png" width="64" height="64" title="Avatar" alt="Avatar" style="display: inline-block; transform: translateY(16px); border-radius: 50%;">
+        <span style="font-size: 32px; font-weight: bold;" title="Username"><span>{{userData.username}}</span>#<span style="opacity: 60%;" title="Discriminator">{{userData.discriminator}}</span></span>
         <table style="width: 100%;">
             <tbody>
                 <tr>
-                    <td width="25%" class="Item">id:</td>
+                    <td width="25%" class="Item">ID:</td>
                     <td colspan="2">
                         {{userData.id}}
                     </td>
                 </tr>
                 <tr>
-                    <td width="25%" class="Item">username:</td>
-                    <td colspan="2">
-                        {{userData.username}}
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">discriminator:</td>
-                    <td colspan="2">
-                        {{userData.discriminator}}
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">email:</td>
+                    <td width="25%" class="Item">Email:</td>
                     <td colspan="2">
                         {{userData.email}}
                     </td>
@@ -74,14 +64,6 @@
                         {{userData.flags}}
                     </td>
                 </tr>
-            </tbody>
-        </table>
-	</div>
-
-	<div class="container loading-effect">
-        <h2>Settings</h2>
-        <table style="width: 100%;">
-            <tbody>
                 <tr>
                     <td width="25%" class="Item">locale:</td>
                     <td colspan="2">
