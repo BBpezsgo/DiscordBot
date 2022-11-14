@@ -252,6 +252,9 @@ const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
 
 const {
     ImgExists,
+    unixToTime,
+    weatherSkytextImgName,
+    
     weatherSkytxt,
     weatherWindIcon,
     weatherTempIcon,
@@ -260,7 +263,6 @@ const {
     weatherHumidityIcon,
     weatherThumbnailUrl,
     DirectionNameToArrow,
-    unixToTime,
     weatherPressureIcon,
     Average,
     GetReadableNumber,
@@ -268,7 +270,6 @@ const {
     GetPollutionText,
     dayName,
     weatherSkytextIcon,
-    weatherSkytextImgName,
     MetAlert_DegreeIconNames,
     MetAlert_TypeIcons,
     MetAlert_TypeNames,

@@ -6,7 +6,8 @@ const { CityBekescsaba } = require('./weatherFunctions')
 const URLs = {
     OpenWeatherMap: {
         Weather: `http://api.openweathermap.org/data/2.5/weather?lat=${CityBekescsaba.Lat}&lon=${CityBekescsaba.Lon}&units=metric&appid=${tokens.openweathermap}`,
-        Pollution: `http://api.openweathermap.org/data/2.5/air_pollution?lat=${CityBekescsaba.Lat}&lon=${CityBekescsaba.Lon}&appid=${tokens.openweathermap}`
+        Pollution: `http://api.openweathermap.org/data/2.5/air_pollution?lat=${CityBekescsaba.Lat}&lon=${CityBekescsaba.Lon}&appid=${tokens.openweathermap}`,
+        Forecast: `https://api.openweathermap.org/data/2.5/forecast?lat=${CityBekescsaba.Lat}&lon=${CityBekescsaba.Lon}&appid=${tokens.openweathermap}&cnt=24&units=metric`
     },
     NASA: {
         Mars: {
@@ -132,6 +133,42 @@ const MsnWeather = function(callback) {
         fs.writeFileSync('./weather-cache/msn-weather.json', JSON.stringify(msnWeather), { encoding: 'utf-8' })
         callback(msnWeather)
     })
+}
+
+const OpenweathermapForecast = function(callback) {
+    if (ReadFromCache) {
+        if (fs.existsSync('./weather-cache/openweathermap-forecast.json')) {
+            callback(JSON.parse(fs.readFileSync('./weather-cache/openweathermap-forecast.json', { encoding: 'utf-8' })))
+            return
+        }
+    }
+
+    try {
+        request(URLs.OpenWeatherMap.Forecast, function (err, res, body) {
+            if (err) {
+                callback(undefined, '**HTTP Error:** ' + err)
+                return
+            }
+            if (res.statusCode !== 200) {
+                callback(undefined, `**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
+                return
+            }
+            if (body === undefined || body == null) {
+                callback(undefined, `**HTTP Error:** No body recived`)
+                return
+            }
+
+            var headersText = ''
+            for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
+            { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
+            fs.writeFileSync('./weather-cache/openweathermap-forecast-headers.txt', headersText, { encoding: 'utf-8' })
+
+            fs.writeFileSync('./weather-cache/openweathermap-forecast.json', body, { encoding: 'utf-8' })
+            callback(JSON.parse(body))
+        })
+    } catch (err) {
+        callback(undefined, '**HTTP Requiest Error:** ' + err)
+    }
 }
 
 /** @param {(result: {
@@ -439,4 +476,4 @@ const AccuWeather = function(callback) {
     }
 }
 
-module.exports = { NasaMarsWeather, NasaMarsWeeklyImage, OpenweathermapPollution, OpenweathermapWeather, MsnWeather }
+module.exports = { NasaMarsWeather, NasaMarsWeeklyImage, OpenweathermapPollution, OpenweathermapWeather, MsnWeather, AccuWeather, OpenweathermapForecast }

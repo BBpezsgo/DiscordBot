@@ -29,7 +29,7 @@ async function GetOldDailyWeatherReport(statesManager, channel) {
 }
 
 /** @param {StatesManager} statesManager @param {Client} client @param {string} channelID */
-async function TrySendWeatherReport(statesManager, client, channelID) {  
+async function TrySendWeatherReport(statesManager, client, channelID) {
     statesManager.WeatherReport.Text = 'Loading packages...'
     const CommandDailyWeatherReport = require('../commands/dailyWeatherReport')
 

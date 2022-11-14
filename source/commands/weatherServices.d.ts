@@ -175,3 +175,5 @@ export function OpenweathermapPollution(callback: ServiceCallback<OpenWeatherMap
 export function NasaMarsWeather(callback: ServiceCallback<NasaMars.WeatherResult>): void;
 export function NasaMarsWeeklyImage(callback: ServiceCallback<NasaMars.WeeklyImagesResult>): void;
 export function MsnWeather(callback: ServiceCallback<WeatherResult[]>): void;
+export function AccuWeather(callback: ServiceCallback<any>): void;
+export function OpenweathermapForecast(callback: ServiceCallback<any>): void;

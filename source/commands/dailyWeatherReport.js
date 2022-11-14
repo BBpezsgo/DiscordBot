@@ -1,21 +1,11 @@
 const Discord = require('discord.js')
-const fs = require('fs')
 const request = require("request");
 const { tokens } = require('../config.json')
 const { StatesManager } = require('../functions/statesManager')
 const SunCalc = require('suncalc')
+const WeatherServices = require('./weatherServices')
 
-let dataToAvoidErrors_SunDatasRaw, dataToAvoidErrors_Dawn, dataToAvoidErrors_Dusk
-if (fs.existsSync('./Helper/output.txt') == true) {
-    dataToAvoidErrors_SunDatasRaw = fs.readFileSync('./Helper/output.txt').toString().split("|")
-    dataToAvoidErrors_Dawn = sunDatasRaw[0]
-    dataToAvoidErrors_Dusk = sunDatasRaw[3]
-} else {
-    dataToAvoidErrors_Dawn = ''
-    dataToAvoidErrors_Dusk = ''
-}
-const Dawn = dataToAvoidErrors_Dawn
-const Dusk = dataToAvoidErrors_Dusk
+const EmojiPrefix = ''
 
 const {
     weatherSkytxt,
@@ -47,11 +37,11 @@ function GetEmbed(weatherData) {
     embed
         .setTitle(`Napi időjárás jelentés`)
         .setDescription(
-            `\\🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
-            `\\🌇 Napkelte: <t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:R>\n` +
-            `\\🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
-            `\\🌆 Napnyugta: <t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:R>\n` +
-            `\\🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>`
+            `${EmojiPrefix}🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
+            `${EmojiPrefix}🌇 Napkelte: <t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:R>\n` +
+            `${EmojiPrefix}🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
+            `${EmojiPrefix}🌆 Napnyugta: <t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:R>\n` +
+            `${EmojiPrefix}🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>`
             )
 
     for (let i = 0; i < 5; i++) {
@@ -59,26 +49,26 @@ function GetEmbed(weatherData) {
 
         var stringBuilder = ''
 
-        stringBuilder += `\\${weatherTempIcon(currentWeatherItem.main.temp)} ${currentWeatherItem.main.temp} C°\n`
-        stringBuilder += `\\${weatherHumidityIcon(currentWeatherItem.main.humidity)} ${currentWeatherItem.main.humidity}% páratartalom\n`
-        stringBuilder += `\\☁️ ${currentWeatherItem.clouds.all} %\n`
-        stringBuilder += `${DirectionToArrow(currentWeatherItem.wind.deg)} \\${weatherWindIcon(currentWeatherItem.wind.speed)} ${currentWeatherItem.wind.speed} km/h szél\n`
-        stringBuilder += `\\🌬️ ${currentWeatherItem.wind.gust} km/h széllökés\n`
+        stringBuilder += `${EmojiPrefix}${weatherTempIcon(currentWeatherItem.main.temp)} ${currentWeatherItem.main.temp} C°\n`
+        stringBuilder += `${EmojiPrefix}${weatherHumidityIcon(currentWeatherItem.main.humidity)} ${currentWeatherItem.main.humidity}% páratartalom\n`
+        stringBuilder += `${EmojiPrefix}☁️ ${currentWeatherItem.clouds.all} %\n`
+        stringBuilder += `${DirectionToArrow(currentWeatherItem.wind.deg)} ${EmojiPrefix}${weatherWindIcon(currentWeatherItem.wind.speed)} ${currentWeatherItem.wind.speed} km/h szél\n`
+        stringBuilder += `${EmojiPrefix}🌬️ ${currentWeatherItem.wind.gust} km/h széllökés\n`
         if (currentWeatherItem.visibility != 10000) {
-            stringBuilder += `\\👁️ ${currentWeatherItem.visibility / 1000} km látótávolság\n`
+            stringBuilder += `${EmojiPrefix}👁️ ${currentWeatherItem.visibility / 1000} km látótávolság\n`
         }
         if (currentWeatherItem.pop != 0) {
-            stringBuilder += `\\☔ ${currentWeatherItem.pop * 100} % csapadék\n`
+            stringBuilder += `${EmojiPrefix}☔ ${currentWeatherItem.pop * 100} % csapadék\n`
         }
         if (currentWeatherItem.rain != undefined) {
-            stringBuilder += `\\🌊 ${currentWeatherItem.rain['3h']} mm eső\n`
+            stringBuilder += `${EmojiPrefix}🌊 ${currentWeatherItem.rain['3h']} mm eső\n`
         }
         if (currentWeatherItem.snow != undefined) {
-            stringBuilder += `\\⛄ ${currentWeatherItem.snow['3h']} mm hó\n`
+            stringBuilder += `${EmojiPrefix}⛄ ${currentWeatherItem.snow['3h']} mm hó\n`
         }
 
         embed.addFields([{
-            name: unixToTime(currentWeatherItem.dt) + ` \\${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
+            name: unixToTime(currentWeatherItem.dt) + ` ${EmojiPrefix}${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
             value: stringBuilder.trimEnd(),
             inline: false
         }])
@@ -102,23 +92,20 @@ module.exports = async (channel, statesManager, isTest = false) => {
 
     const loadingMessage = await channel.send({ embeds: [loadingEmbed] })
 
-    const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=46.678889&lon=21.090833&appid=' + tokens.openweathermap + '&cnt=24&units=metric'
-
     statesManager.WeatherReport.Text = 'Get weather data...'
-    request(url, async function (err, res, body) {
-        if (err) {
+    WeatherServices.OpenweathermapForecast(async (result, error) => {
+        if (error) {
             statesManager.WeatherReport.Text = 'Get weather is fault!'
-            await loadingMessage.edit({ content: '> \\❌ **OpenWeatherMap Error:** ' + err.toString })
-        } else {
-            statesManager.WeatherReport.Text = 'Parse weather data...'
-            const weather = JSON.parse(body) // JSON.parse(fs.readFileSync('C:/Users/bazsi/Desktop/forecast.json'))
-            const embed = GetEmbed(weather)
-
-            statesManager.WeatherReport.Text = 'Delete loading message...'
-            await loadingMessage.delete()
-            statesManager.WeatherReport.Text = 'Send report message...'
-            await channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
-            statesManager.WeatherReport.Text = ''
+            await loadingMessage.edit({ content: '> \\❌ ' + error })
+            return
         }
+
+        const embed = GetEmbed(result)
+
+        statesManager.WeatherReport.Text = 'Delete loading message...'
+        await loadingMessage.delete()
+        statesManager.WeatherReport.Text = 'Send report message...'
+        await channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
+        statesManager.WeatherReport.Text = ''
     })
 }
