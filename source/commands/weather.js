@@ -4,6 +4,7 @@ const fs = require('fs')
 const SunCalc = require('suncalc')
 const WeatherServices = require('./weatherServices')
 const WeatherAlertsService = require('./weatherMet')
+const LogError = require('../functions/errorLog')
 
 const seasons = {
     'late autumn': { name: 'Késő ősz', icon: '🍂' },
@@ -383,7 +384,9 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
                 `${EmojiPrefix}🌆 Napnyugta: <t:${AverageUnix(OpenweatherWeather.sys.sunset, ToUnix(times.sunset))}:R>\n` +
                 `${EmojiPrefix}🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>\n` +
                 `${EmojiPrefix}🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>`            
-        } catch (error) { }
+        } catch (error) {
+            LogError(error)
+        }
 
         description +=
             '\n\n🌕 **Hold:**\n\n'
@@ -433,9 +436,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
 
         const dayNameText = dayName(new Date().getDay() + i - 1)
 
-        console.log(i)
         if (i > 1 && i < MetAlerts.length) {
-            console.log(MetAlerts[i-1])
             if (MetAlerts[i-1] !== null) {
                 if (MetAlerts[i-1].alerts.length > 0) {
                     
@@ -551,7 +552,9 @@ function getEmbedMars(data, weeklyImage) {
             }
         })
         averagePressure = averagePressure / n        
-    } catch (ex) { }
+    } catch (ex) {
+        LogError(ex)
+    }
 
     const latestSol = data.sols[data.sols.length - 1]
     
@@ -617,16 +620,19 @@ module.exports = async (command, privateCommand, earth = true) => {
 
         WeatherServices.MsnWeather((msnWeather, msnWeatherError) => {
             if (msnWeatherError) {
+                LogError(msnWeatherError)
                 command.editReply({ content: '> \\❌ **MSN Error:** ' + msnWeatherError })
                 return
             }
             WeatherServices.OpenweathermapWeather((openweathermapWeather, openweathermapWeatherError) => {
                 if (openweathermapWeatherError) {
+                    LogError(openweathermapWeatherError)
                     command.editReply({ content: '> \\❌ ' + openweathermapWeatherError })
                     return
                 }
                 WeatherServices.OpenweathermapPollution(async (openweathermapPollution, openweathermapPollutionError) => {
                     if (openweathermapPollutionError) {
+                        LogError(openweathermapPollutionError)
                         command.editReply({ content: '> \\❌ ' + openweathermapPollutionError })
                         return
                     }
@@ -672,6 +678,7 @@ module.exports = async (command, privateCommand, earth = true) => {
                             }]
                         })
                     } catch (error) {
+                        LogError(error)
                         command.editReply({ embeds: [embed] })
                     }
                 })
@@ -680,11 +687,16 @@ module.exports = async (command, privateCommand, earth = true) => {
     } else {
         WeatherServices.NasaMarsWeather((weatherData, weatherError) => {
             if (weatherError) {
+                LogError(weatherError)
                 command.editReply({ content: '> \\❌ ' + weatherError })
                 return
             }
 
             WeatherServices.NasaMarsWeeklyImage((bodyImage, imageError) => {
+                if (imageError) {
+                    LogError(imageError)
+                }
+
                 command.editReply({ embeds: [ getEmbedMars(weatherData, bodyImage)] })
             })
         })

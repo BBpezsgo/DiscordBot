@@ -2,6 +2,7 @@ const { StatesManager } = require('./statesManager')
 const { Client, BaseGuildTextChannel } = require('discord.js')
 const endOfMorning = 10
 const SendTest = false
+const LogError = require('./errorLog')
 
 const IsMorning = () => { return (new Date(Date.now()).getHours() < endOfMorning) }
 

@@ -4,6 +4,7 @@ const { tokens } = require('../config.json')
 const { StatesManager } = require('../functions/statesManager')
 const SunCalc = require('suncalc')
 const WeatherServices = require('./weatherServices')
+const LogError = require('../functions/errorLog')
 
 const EmojiPrefix = ''
 
@@ -95,6 +96,7 @@ module.exports = async (channel, statesManager, isTest = false) => {
     statesManager.WeatherReport.Text = 'Get weather data...'
     WeatherServices.OpenweathermapForecast(async (result, error) => {
         if (error) {
+            LogError(error)
             statesManager.WeatherReport.Text = 'Get weather is fault!'
             await loadingMessage.edit({ content: '> \\❌ ' + error })
             return
