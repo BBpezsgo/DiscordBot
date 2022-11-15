@@ -52,7 +52,7 @@ function GetEmbed(weatherData) {
 
         stringBuilder += `${EmojiPrefix}${weatherTempIcon(currentWeatherItem.main.temp)} ${currentWeatherItem.main.temp} C°\n`
         stringBuilder += `${EmojiPrefix}${weatherHumidityIcon(currentWeatherItem.main.humidity)} ${currentWeatherItem.main.humidity}% páratartalom\n`
-        stringBuilder += `${EmojiPrefix}☁️ ${currentWeatherItem.clouds.all} %\n`
+        stringBuilder += `${EmojiPrefix}☁️ ${currentWeatherItem.clouds.all} % felhősség\n`
         stringBuilder += `${DirectionToArrow(currentWeatherItem.wind.deg)} ${EmojiPrefix}${weatherWindIcon(currentWeatherItem.wind.speed)} ${currentWeatherItem.wind.speed} km/h szél\n`
         stringBuilder += `${EmojiPrefix}🌬️ ${currentWeatherItem.wind.gust} km/h széllökés\n`
         if (currentWeatherItem.visibility != 10000) {
