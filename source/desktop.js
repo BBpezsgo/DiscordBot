@@ -2410,6 +2410,12 @@ async function processApplicationCommand(command, privateCommand) {
         return
     }
 
+    if (command.commandName === `tesco`) {
+        const CommandTesco = require('./commands/tesco')
+        CommandTesco(command)
+        return
+    }
+
     if (command.commandName === `crossout`) {
         command.deferReply({ ephemeral: privateCommand }).then(() => {
             CrossoutTest(command, command.options.getString('search'), privateCommand)

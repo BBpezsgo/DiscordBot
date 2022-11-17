@@ -26,3 +26,7 @@ Properties
 source/weather-cache
 source/tests
 source/commands/graph.png
+search-res-chocolate.json
+search-res-bread.json
+search-data-chocolate.html
+search-data-bread.html

@@ -95,6 +95,16 @@ function GenerateGuildCommands() {
         generatedCommands.push(item)
     })
     
+    const commandTescoSub = new SlashCommandStringOption()
+        .setName('search')
+        .setDescription('Search')
+        .setRequired(true)
+    const commandTesco = new SlashCommandBuilder()
+        .setName('tesco')
+        .setDescription('Tesco')
+        .addStringOption(commandTescoSub)
+    generatedCommands.push(commandTesco.toJSON())
+    
     const commandCrateSub = new SlashCommandIntegerOption()
         .setName('darab')
         .setDescription('Ládák mennyisége')
