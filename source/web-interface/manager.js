@@ -140,7 +140,7 @@ class WebInterfaceManager {
                 return
             }
 
-            res.status(401).send()
+            res.status(401).send('Access denied: only accessible from LAN')
         })
         
         this.app.get('*', (req, res) => {
