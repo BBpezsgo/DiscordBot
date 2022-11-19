@@ -66,7 +66,7 @@
                 <tr>
                     <td style="padding-top: 20px; padding-bottom: 20px;">
                         <form action="/userViews/Log/Clear" method="post" style="margin: 0;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="submit" value="Clear log">
                         </form>
                     </td>
@@ -95,6 +95,7 @@
         </table>
 	</div>
     
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="../scripts/loadEffect.js"></script>
 </body>
 

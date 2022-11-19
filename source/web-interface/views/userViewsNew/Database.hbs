@@ -126,7 +126,7 @@
                     {{user.name}}'s database
                     <form action="/userViews/Database/Back" method="post"
                         style="display: inline-block; margin-left: 30px;"
-                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                         <input type="submit" value="Back">
                     </form>
                 </td>
@@ -139,7 +139,7 @@
                                 <form action="/userViews/Database/Modify/Basic" method="post" onsubmit="
                                     this.style.pointerEvents='none';
                                     this.style.opacity='20%';
-                                    setTimeout(() => {window.location.reload()}, 1000);
+                                    setTimeout(() => {Reload()}, 1000);
                                     ">
                                     <li>
                                         <span class="data-number">Score: </span>
@@ -181,7 +181,7 @@
                                 <form action="/userViews/Database/Modify/Backpack" method="post" onsubmit="
                                     this.style.pointerEvents='none';
                                     this.style.opacity='20%';
-                                    setTimeout(() => {window.location.reload()}, 1000);
+                                    setTimeout(() => {Reload()}, 1000);
                                     ">
                                     <li>
                                         <span class="data-number">Crates: </span>
@@ -234,7 +234,7 @@
                                 <form action="/userViews/Database/Modify/Business" method="post" onsubmit="
                                     this.style.pointerEvents='none';
                                     this.style.opacity='20%';
-                                    setTimeout(() => {window.location.reload()}, 1000);
+                                    setTimeout(() => {Reload()}, 1000);
                                     ">
                                     <li><span class="data-number">Index:
                                         </span><b>{{userDatabase.businessIndex}}</b></li>
@@ -255,7 +255,7 @@
                                 <form action="/userViews/Database/Modify/Stickers" method="post" onsubmit="
                                     this.style.pointerEvents='none';
                                     this.style.opacity='20%';
-                                    setTimeout(() => {window.location.reload()}, 1000);
+                                    setTimeout(() => {Reload()}, 1000);
                                     ">
                                     <li>
                                         <span class="data-number">Meme: </span>
@@ -304,6 +304,7 @@
         </tbody>
     </table>
     
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="../scripts/loadEffect.js"></script>
 </body>
 

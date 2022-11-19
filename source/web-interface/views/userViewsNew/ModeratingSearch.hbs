@@ -59,7 +59,7 @@
                     <td style="padding:0 2px">
                         <form action="/userViews/Moderating/FetchGuild" method="post"
                             style="margin: 0;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                             <input type="submit" value="" class="btn-fetch">
                         </form>
@@ -67,7 +67,7 @@
                     <td style="padding:0 2px; display: none;">
                         <form action="/userViews/Moderating/Search" method="post" id="view-guild-{{this.id}}"
                             style="display: none;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                             <input type="submit" value="View">
                         </form>
@@ -78,6 +78,7 @@
         </table>
     </div>
     
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="/scripts/loadEffect.js"></script>
 </body>
 

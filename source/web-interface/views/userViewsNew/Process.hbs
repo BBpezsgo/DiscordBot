@@ -37,7 +37,7 @@
 						panel.style.display = 'none'
 						clearInterval(id)
 						i = 0
-						window.location.reload()
+						Reload()
 					} else {
 						value++
 						elem.value = value
@@ -163,11 +163,11 @@
                     <td width="25%" class="Item"></td>
                     <td colspan="2">
                         <form action="/userViews/Process/Exit" method="post"
-                            style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
+                            style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
                             <input type="submit" value="Exit">
                         </form>
                         <form action="/userViews/Process/Abort" method="post"
-                            style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
+                            style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
                             <input type="submit" value="Abort">
                         </form>
                         <div style="display: inline-block;" id="restart-form">
@@ -218,7 +218,7 @@
                     <td colspan="2">
                         <img width="16" height="16" src="/imagesNew/bool-{{process.connected}}.png">
                         <form action="/userViews/Process/Disconnect" method="post"
-                            style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
+                            style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
                             <input type="submit" class="show-{{bot.connected}}" value="Disconnect">
                         </form>
                     </td>
@@ -257,6 +257,7 @@
         </table>
 	</div>
     
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="../scripts/loadEffect.js"></script>
 </body>
 

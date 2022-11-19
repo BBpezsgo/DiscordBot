@@ -43,7 +43,7 @@
     <div class="container loading-effect">
         <form action="/userViews/Moderating/Back" method="post"
             style="display: inline-block; margin-right: 10px;"
-            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
             <input type="submit" value="" class="btn-tool btn-tool-back">
         </form>
         <h2 style="display: inline-block; transform: translateY(4px);">
@@ -184,7 +184,7 @@
                     <td style="padding:0 2px;word-break:break-all;">
                         <form action="/userViews/Moderating/Server/Search" method="post" id="view-channel-{{this.id}}"
                             style="margin: 0;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                             <input type="submit" value="View">
                         </form>
@@ -217,7 +217,7 @@
                     <td style="padding:0 2px;word-break:break-all">
                         <form action="/userViews/Moderating/Server/Search" method="post"
                             style="margin: 0;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                             <input type="submit" value="View">
                         </form>
@@ -252,7 +252,7 @@
                     </td>
                     <td style="padding:0 2px;word-break:break-all">
                         <form action="/userViews/Moderating/Server/Search" method="post" style="margin: 0" id="view-channel-{{this.id}}"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                             <input type="submit" value="View">
                         </form>
@@ -327,97 +327,8 @@
         </table>
 	</div>
     
-    <script>
-        /** @param {Event} event */
-        function Post(url, event, callback, errorLabelID)
-        {
-            event.srcElement.classList.add('disabled')
-            const xmlHttp = new XMLHttpRequest()
-            xmlHttp.onreadystatechange = function() { 
-                if (xmlHttp.readyState == 4)
-                {
-                    event.srcElement.classList.remove('disabled')
-                    const res = JSON.parse(xmlHttp.responseText)
-                    if (res.message === 'ok') {
-                        console.log('Success')
-                        callback(xmlHttp.responseText)
-                    } else if (res.rawError !== undefined) {
-                        console.warn(JSON.stringify(res, null, ' '))
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            if (res.rawError.errors !== undefined) {
-                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
-                            }
-                            errorLabel.innerHTML = 
-                            `
-                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
-                            ${res.rawError.message} (code: ${res.rawError.code})${details}
-                            `
-                        }
-                    } else {
-                        console.warn(res)
-                    }
-                }
-            }
-            xmlHttp.open('POST', url, true)
-            xmlHttp.send(null)
-        }
-
-        /** @param {HTMLFormElement} form */
-        function PostFormData(url, form, callback, errorLabelID) {
-            const formData = new FormData(form)
-            
-            const xmlHttp = new XMLHttpRequest()
-            xmlHttp.onreadystatechange = function() {
-                if (xmlHttp.readyState == 4)
-                {
-                    if (xmlHttp.status === 404) {
-                        console.log('404')
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            errorLabel.innerHTML = 
-                            `
-                            <b>HTTP ${'POST'} <a href='${url}' target='_blank'>${url}</a>:</b><br>
-                            ${xmlHttp.status} ${xmlHttp.statusText}
-                            `
-                        }
-                        return
-                    }
-                    const res = JSON.parse(xmlHttp.responseText)
-                    if (res.message === 'ok') {
-                        console.log('Success')
-                        callback(xmlHttp.responseText)
-                    } else if (res.rawError !== undefined) {
-                        console.warn(JSON.stringify(res, null, ' '))
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            if (res.rawError.errors !== undefined) {
-                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
-                            }
-                            errorLabel.innerHTML = 
-                            `
-                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
-                            ${res.rawError.message} (code: ${res.rawError.code})${details}
-                            `
-                        }
-                    } else {
-                        console.warn(res)
-                    }
-                }
-            }
-            xmlHttp.onerror = function(ev) {
-                console.warn(ev)
-            }
-            xmlHttp.onabort = function(ev) {
-                console.warn(ev)
-            }
-            xmlHttp.open('POST', url, true)
-            xmlHttp.send(formData)
-        }
-    </script>
+    <script src="../scripts/functions.js"></script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="/scripts/loadEffect.js"></script>
 </body>
 

@@ -169,6 +169,7 @@ export namespace MSN {
 }
 
 export type ServiceCallback<T> = ( result: T | undefined, error: string | undefined ) => void
+export type ServiceCacheCallback<T> = ( isCache: boolean, result: T | undefined, error: string | undefined ) => void
 
 export function OpenweathermapWeather(callback: ServiceCallback<OpenWeatherMap.WeatherResult>): void;
 export function OpenweathermapPollution(callback: ServiceCallback<OpenWeatherMap.PollutionResult>): void;
@@ -176,4 +177,4 @@ export function NasaMarsWeather(callback: ServiceCallback<NasaMars.WeatherResult
 export function NasaMarsWeeklyImage(callback: ServiceCallback<NasaMars.WeeklyImagesResult>): void;
 export function MsnWeather(callback: ServiceCallback<WeatherResult[]>): void;
 export function AccuWeather(callback: ServiceCallback<any>): void;
-export function OpenweathermapForecast(callback: ServiceCallback<any>): void;
+export function OpenweathermapForecast(callback: ServiceCacheCallback<any>): void;

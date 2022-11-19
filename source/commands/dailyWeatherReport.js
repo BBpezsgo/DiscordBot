@@ -26,11 +26,12 @@ const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 /**
  * @param {any} weatherData
+ * @param {boolean} isCache
  * @returns {Discord.EmbedBuilder}
  */
-function GetEmbed(weatherData) {
+function GetEmbed(weatherData, isCache) {
     const embed = new Discord.EmbedBuilder()
-        .setColor(Color.Highlight)
+        .setColor('#00AE86')
         .setAuthor({ name: weatherData.city.name, url: 'https://openweathermap.org/city/' + weatherData.city.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
     const times = SunCalc.getTimes(new Date(Date.now()), 46.677227, 21.089993)
@@ -76,9 +77,12 @@ function GetEmbed(weatherData) {
         embed.setThumbnail('https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/commands/weatherImages/earth.gif')
     }
 
-    embed
-        .setTimestamp(Date.now())
-        .setFooter({ text: '• openweathermap.org', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+    embed.setTimestamp(Date.now())
+    if (isCache) {
+        embed.setFooter({ text: '• 📁 openweathermap.org', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+    } else {
+        embed.setFooter({ text: '• openweathermap.org', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+    }
     return embed
 }
 
@@ -94,7 +98,7 @@ module.exports = async (channel, statesManager, isTest = false) => {
     const loadingMessage = await channel.send({ embeds: [loadingEmbed] })
 
     statesManager.WeatherReport.Text = 'Get weather data...'
-    WeatherServices.OpenweathermapForecast(async (result, error) => {
+    WeatherServices.OpenweathermapForecast(async (isCache, result, error) => {
         if (error) {
             LogError(error)
             statesManager.WeatherReport.Text = 'Get weather is fault!'
@@ -102,7 +106,7 @@ module.exports = async (channel, statesManager, isTest = false) => {
             return
         }
 
-        const embed = GetEmbed(result)
+        const embed = GetEmbed(result, isCache)
 
         statesManager.WeatherReport.Text = 'Delete loading message...'
         await loadingMessage.delete()

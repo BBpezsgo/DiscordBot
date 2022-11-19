@@ -48,11 +48,12 @@ const ProcessData = function(data) {
     return result
 }
 
-/** @param {(result: string | undefined, error: string | undefined) => void} callback */
+/** @param {(isCache: boolean, result: string | undefined, error: string | undefined) => void} callback */
 const Download = function(search, callback) {
     if (ReadFromCache) {
         if (fs.existsSync('../tesco-cache/search-data-' + search + '.html')) {
-            return fs.readFileSync('../tesco-cache/search-data-' + search + '.html', { encoding: 'utf-8' })
+            callback(true, fs.readFileSync('../tesco-cache/search-data-' + search + '.html', { encoding: 'utf-8' }))
+            return
         }
     }
 
@@ -93,33 +94,33 @@ const Download = function(search, callback) {
             })
             res.on('end', () => {
                 fs.writeFileSync('../search-data-' + search + '.html', data, { encoding: 'utf-8' })
-                callback(data)
+                callback(false, data)
             })
             res.on('error', (error) => {
-                callback(undefined, '**HTTPS Response Error:** ' + error)
+                callback(false, undefined, '**HTTPS Response Error:** ' + error)
             })
         })
         req.on('error', (error) => {
-            callback(undefined, '**HTTPS Requiest Error:** ' + error)
+            callback(false, undefined, '**HTTPS Requiest Error:** ' + error)
         })
         req.end()
     } catch (err) {
-        callback(undefined, '**Error:** ' + err)
+        callback(false, undefined, '**Error:** ' + err)
     }
 }
 
 // ProcessData(fs.readFileSync('./tesco-cache/search-data-bread.html', { encoding: 'utf-8' }))
 // Download('bread', (result, error) => { if(error){return}; ProcessData(result); })
 
-/** @returns {Promise<{result: string|undefined; error: string|undefined}>} */
+/** @returns {Promise<{result: string|undefined; error: string|undefined; isCache: boolean}>} */
 const SearchFor = function(search) {
     return new Promise((callback) => {
-        Download(search, (result, error) => {
+        Download(search, (isCache, result, error) => {
             if (error) {
                 callback({ error: error })
                 return
             }
-            callback({ result: ProcessData(result) })
+            callback({ result: ProcessData(result), isCache: isCache })
         })
     })
 }

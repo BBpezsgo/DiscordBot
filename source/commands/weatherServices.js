@@ -138,7 +138,7 @@ const MsnWeather = function(callback) {
 const OpenweathermapForecast = function(callback) {
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/openweathermap-forecast.json')) {
-            callback(JSON.parse(fs.readFileSync('./weather-cache/openweathermap-forecast.json', { encoding: 'utf-8' })))
+            callback(true, JSON.parse(fs.readFileSync('./weather-cache/openweathermap-forecast.json', { encoding: 'utf-8' })))
             return
         }
     }
@@ -146,15 +146,15 @@ const OpenweathermapForecast = function(callback) {
     try {
         request(URLs.OpenWeatherMap.Forecast, function (err, res, body) {
             if (err) {
-                callback(undefined, '**HTTP Error:** ' + err)
+                callback(false, undefined, '**HTTP Error:** ' + err)
                 return
             }
             if (res.statusCode !== 200) {
-                callback(undefined, `**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
+                callback(false, undefined, `**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                 return
             }
             if (body === undefined || body == null) {
-                callback(undefined, `**HTTP Error:** No body recived`)
+                callback(false, undefined, `**HTTP Error:** No body recived`)
                 return
             }
 
@@ -164,10 +164,10 @@ const OpenweathermapForecast = function(callback) {
             fs.writeFileSync('./weather-cache/openweathermap-forecast-headers.txt', headersText, { encoding: 'utf-8' })
 
             fs.writeFileSync('./weather-cache/openweathermap-forecast.json', body, { encoding: 'utf-8' })
-            callback(JSON.parse(body))
+            callback(false, JSON.parse(body))
         })
     } catch (err) {
-        callback(undefined, '**HTTP Requiest Error:** ' + err)
+        callback(false, undefined, '**HTTP Requiest Error:** ' + err)
     }
 }
 

@@ -14,7 +14,7 @@
 		var autoReload = true
 		setInterval(() => {
 			if (autoReload == true) {
-				// window.location.reload()
+				// Reload()
 			}
 		}, 10000)
 	</script>
@@ -33,7 +33,7 @@
 					<td></td>
 					<td colspan="2">
 						<form action="/userViews/Process/Exit" method="post" style="display: inline-block;" id="exit-form"
-							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
+							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
 							<input type="submit" value="Terminate">
 						</form>
 						<div style="display: inline-block;" id="restart-form">
@@ -69,7 +69,7 @@
 								serverPingIcon.src = "/imagesNew/state-Ready.png"
 								sendPing = false
 								if (enableReloadOnPingSuccess) {
-									window.location.reload()
+									Reload()
 								}
 							}
 
@@ -160,11 +160,11 @@
 					<td class="Item"></td>
 					<td colspan="2">
 						<form action="/startBot" method="post" style="display: inline-block;"
-							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
+							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
 							<input type="submit" class="show-invert-{{bot.botStarted}}" value="Login">
 						</form>
 						<form action="/stopBot" method="post" style="display: inline-block;"
-							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
+							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
 							<input type="submit" class="show-{{bot.botStarted}}" value="Logout">
 						</form>
 					</td>
@@ -386,6 +386,7 @@
 			xmlHttp.send(null)
 		}, 500)
 	</script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="../scripts/loadEffect.js"></script>
 </body>
 

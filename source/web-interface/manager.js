@@ -910,6 +910,7 @@ class WebInterfaceManager {
             viewable: c.viewable,
         }
 
+        /** @type {{id:string;createdAtTimestamp:number}[]} */
         const messages = []
 
         if (c.type === Discord.ChannelType.GuildText) {
@@ -924,6 +925,7 @@ class WebInterfaceManager {
                     tts: message.tts,
                     content: message.content,
                     createdAt: GetDate(message.createdAt),
+                    createdAtTimestamp: message.createdAt.getTime(),
                     crosspostable: message.crosspostable,
                     deletable: message.deletable,
                     editable: message.editable,
@@ -961,7 +963,7 @@ class WebInterfaceManager {
                 })
             })
 
-            messages.sort(function(a, b) { return a.position - b.position })
+            messages.sort(function(a, b) { return a.createdAtTimestamp - b.createdAtTimestamp })
         }
 
         this.RenderPage(req, res, 'Moderating', { server: guild, channel: channel, messages: messages })
@@ -1359,6 +1361,58 @@ class WebInterfaceManager {
                 })
                 .finally(() => {                        
                     this.RenderPage_Moderating(req, res)
+                })
+        })
+
+        this.app.post('/Message/Fetch', (req, res) => {
+            var id = req.query.id
+            if (id === undefined || id === null) {
+                id = req.body.id
+            }
+            var count = req.query.count
+            if (count === undefined || count === null) {
+                count = req.body.count
+            }
+
+            var channel = req.query.channel
+            if (channel === undefined || channel === null) {
+                channel = req.body.channel
+            }
+
+            this.client.channels.fetch(channel)
+                .then((ch) => {
+                    if (ch.type === Discord.ChannelType.GuildText) {
+                        if (id) {
+                            ch.messages.fetch(id)
+                                .then(() => {
+                                    res.status(200).send({ message: 'ok' })
+                                })
+                                .catch((error) => {
+                                    res.status(200).send(error)
+                                })
+                        } else if (count) {
+                            res.status(200).send('ID is requied')
+                        }
+                    } else {
+                        res.status(200).send('Invalid channel type')
+                    }
+                })
+                .catch((error) => {
+                    res.status(200).send(error)
+                })
+        })
+
+        this.app.post('/Channel/Fetch', (req, res) => {
+            var id = req.query.id
+            if (id === undefined || id === null) {
+                id = req.body.id
+            }
+            this.client.channels.fetch(id)
+                .then(() => {
+                    res.status(200).send({ message: 'ok' })
+                })
+                .catch((error) => {
+                    res.status(200).send(error)
                 })
         })
 

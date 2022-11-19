@@ -7,9 +7,12 @@ const WeatherAlertsService = require('./weatherMet')
 const LogError = require('../functions/errorLog')
 
 const seasons = {
+    'early autumn': { name: 'Késő ősz', icon: '🍂' },
+    'mid autumn': { name: 'Késő ősz', icon: '🍂' },
     'late autumn': { name: 'Késő ősz', icon: '🍂' },
     'early winter': { name: 'Kora tél', icon: '❄️' },
     'mid winter': { name: 'Tél közepe', icon: '❄️' },
+    'late winter': { name: 'Tél közepe', icon: '❄️' },
 }
 /**
  * @returns {Promise<string>}

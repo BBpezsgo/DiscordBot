@@ -42,7 +42,7 @@
         <h2>
             <form action="/userViews/Moderating/Server/Back" method="post"
                 style="display: inline-block; margin-right: 20px;"
-                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                 <input type="submit" value="" class="btn-tool btn-tool-back">
             </form>
             <span style="color: #aaa">Channel</span>
@@ -99,12 +99,6 @@
                     <td width="25%" class="Item">Deletable:</td>
                     <td colspan="2">
                         <img width="16" height="16" src="/imagesNew/bool-{{channel.deletable}}.png">
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Editable:</td>
-                    <td colspan="2">
-                        <img width="16" height="16" src="/imagesNew/bool-{{channel.editable}}.png">
                     </td>
                 </tr>
                 <tr class="hide-null-{{channel.full}}">
@@ -196,7 +190,7 @@
 	</div>
     
 	<div class="container loading-effect">
-        <h2>Send message</h2>
+        <h2>Send Message</h2>
 		<table style="width: 100%;">
             <tbody>
                 <tr>
@@ -222,6 +216,30 @@
 	</div>
     
 	<div class="container loading-effect">
+        <h2>Fetch Message</h2>
+        <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Message/Fetch?id=' + document.getElementById('fetch-msg-id').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
+            ">
+            <input type="text" name="id" value="" id="fetch-msg-id">
+            <input type="submit" value="Fetch">
+        </form>
+        <!--
+        <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Message/Fetch?count=' + document.getElementById('fetch-msg-count').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
+            ">
+            <h4>By Count</h4>
+            <input type="number" min="1" max="15" name="count" value="15" id="fetch-msg-count">
+            <input type="submit" value="Fetch">
+        </form>
+        -->
+        <p style="color: #b32d2d;" id="fetch-msg-error"></p>
+	</div>
+    
+	<div class="container loading-effect">
         <h2>Messages</h2>
 		<table style="width: 100%;">
             <tbody>
@@ -239,12 +257,6 @@
                                         <b>Created At</b>
                                     </td>
                                     <td class="ListM">
-                                        <b>Delb.</b>
-                                    </td>
-                                    <td class="ListM">
-                                        <b>Cross.</b>
-                                    </td>
-                                    <td class="ListM">
                                         <b>Type</b>
                                     </td>
                                     <td class="ListM" colspan="2"></td>
@@ -252,10 +264,9 @@
                                 {{#each messages}}
                                 <tr>
                                     {{#if types.ChannelPinnedMessage}}
-                                    <td style="padding:0 2 0 2;word-break:break-all"></td>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                    <td style="padding:0 2 0 2;word-break:break-all" colspan="2">
                                         <div class="tooltip">
-                                            <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar">
+                                            <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 50%;">
                                             <span class="tooltiptext">
                                                 <img src="{{author.avatarUrlBig}}" style="transform: translateY(4px);">
                                             </span>
@@ -277,7 +288,7 @@
                                     {{else}}
                                     <td style="padding:0 2 0 2;word-break:break-all">
                                         <div class="tooltip">
-                                            <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar">
+                                            <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 50%;">
                                             <span class="tooltiptext">
                                                 <img src="{{author.avatarUrlBig}}" width="32" height="32" style="transform: translateY(4px);">
                                                 <h2 style="display: inline">{{author.username}}</h2><h2 style="display: inline; opacity: .7;">#{{author.discriminator}}</h2>
@@ -312,29 +323,23 @@
                                         {{this.createdAt}}
                                     </td>
                                     <td style="padding:0 2 0 2;word-break:break-all">
-                                        <img width="16" height="16" src="/imagesNew/bool-{{this.deletable}}.png">
-                                    </td>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
-                                        <img width="16" height="16" src="/imagesNew/bool-{{this.crosspostable}}.png">
-                                    </td>
-                                    <td style="padding:0 2 0 2;word-break:break-all">
                                         {{this.type}}
                                     </td>
                                     <td style="padding:0 2 0 2;word-break:break-all">
                                         {{#if deletable}}
-                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Delete?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { window.location.reload() }, 200) })">
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Delete?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
                                             <img src="/imagesNew/delete.png" title="Delete">
                                         </button>
                                         {{/if}}
                                     </td>
                                     <td style="padding:0 2 0 2;word-break:break-all">
                                         {{#if pinned}}
-                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Unpin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { window.location.reload() }, 200) })">
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Unpin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
                                             <img src="/imagesNew/pinned.png" title="Unpin">
                                         </button>
                                         {{else}}
                                         {{#if pinnable}}
-                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Pin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { window.location.reload() }, 200) })">
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Pin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
                                             <img src="/imagesNew/pin.png" title="Pin">
                                         </button>
                                         {{/if}}
@@ -350,98 +355,8 @@
 		</table>
 	</div>
     
-    <script>
-        /** @param {Event} event */
-        function Post(url, event, callback, errorLabelID)
-        {
-            event.srcElement.classList.add('disabled')
-            const xmlHttp = new XMLHttpRequest()
-            xmlHttp.onreadystatechange = function() { 
-                if (xmlHttp.readyState == 4)
-                {
-                    event.srcElement.classList.remove('disabled')
-                    const res = JSON.parse(xmlHttp.responseText)
-                    if (res.message === 'ok') {
-                        console.log('Success')
-                        callback(xmlHttp.responseText)
-                    } else if (res.rawError !== undefined) {
-                        console.warn(JSON.stringify(res, null, ' '))
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            if (res.rawError.errors !== undefined) {
-                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
-                            }
-                            errorLabel.innerHTML = 
-                            `
-                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
-                            ${res.rawError.message} (code: ${res.rawError.code})${details}
-                            `
-                        }
-                    } else {
-                        console.warn(res)
-                    }
-                }
-            }
-            xmlHttp.open('POST', url, true)
-            xmlHttp.send(null)
-        }
-
-        /** @param {HTMLFormElement} form */
-        function PostFormData(url, form, callback, errorLabelID) {
-            console.log('Post form data...')
-            const formData = new FormData(form)
-            
-            const xmlHttp = new XMLHttpRequest()
-            xmlHttp.onreadystatechange = function() {
-                if (xmlHttp.readyState == 4)
-                {
-                    if (xmlHttp.status === 404) {
-                        console.log('404')
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            errorLabel.innerHTML = 
-                            `
-                            <b>HTTP ${'POST'} <a href='${url}' target='_blank'>${url}</a>:</b><br>
-                            ${xmlHttp.status} ${xmlHttp.statusText}
-                            `
-                        }
-                        return
-                    }
-                    const res = JSON.parse(xmlHttp.responseText)
-                    if (res.message === 'ok') {
-                        console.log('Success')
-                        callback(xmlHttp.responseText)
-                    } else if (res.rawError !== undefined) {
-                        console.warn(JSON.stringify(res, null, ' '))
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            if (res.rawError.errors !== undefined) {
-                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
-                            }
-                            errorLabel.innerHTML = 
-                            `
-                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
-                            ${res.rawError.message} (code: ${res.rawError.code})${details}
-                            `
-                        }
-                    } else {
-                        console.warn(res)
-                    }
-                }
-            }
-            xmlHttp.onerror = function(ev) {
-                console.warn(ev)
-            }
-            xmlHttp.onabort = function(ev) {
-                console.warn(ev)
-            }
-            xmlHttp.open('POST', url, true)
-            xmlHttp.send(formData)
-        }
-    </script>
+    <script src="/scripts/functions.js"></script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="/scripts/loadEffect.js"></script>
 </body>
 

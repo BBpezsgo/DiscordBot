@@ -57,7 +57,7 @@
                         <img width="16" height="16" src="/imagesNew/bool-{{available}}.png">
                     </td>
                     <td>
-                        <button title="Fetch" class="btn-fetch" onclick="Post('/FetchGuild?id={{id}}', event, () => { window.location.reload() })"></button>
+                        <button title="Fetch" class="btn-fetch" onclick="Post('/FetchGuild?id={{id}}', event, () => {Reload()})"></button>
                     </td>
                 </tr>
                 <tr class="info info-hidden" id="guild-info-{{id}}">
@@ -148,9 +148,7 @@
         <form action="/FetchGuild" method="post" style="margin: 0; display: inline-block;"
             onsubmit="
                 event.preventDefault()
-                Post('/FetchGuild?id=' + document.getElementById('fetch-guild-id').value, event, () => {
-                    window.location.reload()
-                }, 'fetch-guild-error')
+                Post('/FetchGuild?id=' + document.getElementById('fetch-guild-id').value, event, () => {Reload()}, 'fetch-guild-error')
             ">
             <input type="text" name="id" value="{{this.id}}" id="fetch-guild-id">
             <input type="submit" value="Fetch">
@@ -205,42 +203,9 @@
         }
     </script>
 
-    <script>
-        /** @param {Event} event */
-        function Post(url, event, callback, errorLabelID)
-        {
-            event.srcElement.classList.add('disabled')
-            var xmlHttp = new XMLHttpRequest()
-            xmlHttp.onreadystatechange = function() { 
-                if (xmlHttp.readyState == 4)
-                {
-                    event.srcElement.classList.remove('disabled')
-                    const res = JSON.parse(xmlHttp.responseText)
-                    if (res.message === 'ok') {
-                        console.log('Success')
-                        callback(xmlHttp.responseText)
-                    } else if (res.rawError !== undefined) {
-                        console.warn(JSON.stringify(res, null, ' '))
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            if (res.rawError.errors !== undefined) {
-                                details = `: ${res.rawError.errors.guild_id._errors[0].message}`
-                            }
-                            errorLabel.innerHTML = 
-                            `
-                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
-                            ${res.rawError.message} (code: ${res.rawError.code})${details}
-                            `
-                        }
-                    }
-                }
-            }
-            xmlHttp.open('POST', url, true)
-            xmlHttp.send(null)
-        }
-    </script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="../scripts/loadEffect.js"></script>
+    <script src="../scripts/functions.js"></script>
 </body>
 
 </html>

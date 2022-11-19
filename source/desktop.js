@@ -2350,19 +2350,13 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `handlebars` || command.commandName === `webpage`) {
-        await command.deferReply({ ephemeral: true })
-        var http = require('http')
-        http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
-            resp.on('data', function(ip) {
-                const row = new ActionRowBuilder()
-                const button = new ButtonBuilder()
-                    .setLabel('Weboldal')
-                    .setStyle(Discord.ButtonStyle.Link)
-                    .setURL('http://' + ip + ':5665/public?user=' + GetHash(command.user.id))
-                row.addComponents(button)
-                command.editReply({ components: [row], ephemeral: true })
-            })
-        })
+        const row = new ActionRowBuilder()
+        const button = new ButtonBuilder()
+            .setLabel('Weboldal')
+            .setStyle(Discord.ButtonStyle.Link)
+            .setURL('http://bbpezsgo.ddns.net:5665/public?user=' + GetHash(command.user.id))
+        row.addComponents(button)
+        command.reply({ components: [row], ephemeral: true })
         return
     }
 

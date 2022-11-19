@@ -154,7 +154,7 @@
                         <span title="{{this.createdAt}}">{{this.createdAtText}}</span>
                     </td>
                     <td>
-                        <button class="btn-fetch" onclick="Post('/User/Fetch?id={{id}}', event, () => { window.location.reload() })"></button>
+                        <button class="btn-fetch" onclick="Post('/User/Fetch?id={{id}}', event, () => { Reload() })"></button>
                     </td>
                     <td>
                         <!--<img width="16" height="16" src="/imagesNew/bool-{{this.haveHash}}.png" style="transform: translateY(3px);">-->
@@ -163,7 +163,7 @@
                         {{else}}
                         <form action="/userViews/GenerateHash" method="post"
                             style="margin: 0; display: inline-block;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                             <input type="submit" value="Generate">
                         </form>
@@ -181,7 +181,7 @@
             onsubmit="
                 event.preventDefault()
                 Post('/User/Fetch?id=' + document.getElementById('fetch-user-id').value, event, () => {
-                    window.location.reload()
+                    Reload()
                 }, 'fetch-user-error')
             ">
             <input type="text" name="id" value="{{this.id}}" id="fetch-user-id">
@@ -190,41 +190,8 @@
         <p style="color: #b32d2d;" id="fetch-user-error"></p>
     </div>
 
-    <script>
-        /** @param {Event} event */
-        function Post(url, event, callback, errorLabelID)
-        {
-            event.srcElement.classList.add('disabled')
-            var xmlHttp = new XMLHttpRequest()
-            xmlHttp.onreadystatechange = function() { 
-                if (xmlHttp.readyState == 4)
-                {
-                    event.srcElement.classList.remove('disabled')
-                    const res = JSON.parse(xmlHttp.responseText)
-                    if (res.message === 'ok') {
-                        console.log('Success')
-                        callback(xmlHttp.responseText)
-                    } else if (res.rawError !== undefined) {
-                        console.warn(JSON.stringify(res, null, ' '))
-                        if (errorLabelID !== undefined) {
-                            const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
-                            if (res.rawError.errors !== undefined) {
-                                details = `: ${res.rawError.errors.user_id._errors[0].message}`
-                            }
-                            errorLabel.innerHTML = 
-                            `
-                            <b><a href='${res.url}' target='_blank'>HTTP ${res.method}</a>: ${res.status}</b><br>
-                            ${res.rawError.message} (code: ${res.rawError.code})${details}
-                            `
-                        }
-                    }
-                }
-            }
-            xmlHttp.open('POST', url, true)
-            xmlHttp.send(null)
-        }
-    </script>
+    <script src="../scripts/functions.js"></script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="../scripts/loadEffect.js"></script>
 </body>
 

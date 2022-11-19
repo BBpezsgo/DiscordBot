@@ -153,7 +153,22 @@
             </tbody>
         </table>
 	</div>
+
+    <div class="container loading-effect">
+        <h2>Fetch Channel</h2>
+        <form action="/Channel/Fetch" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Channel/Fetch?id=' + document.getElementById('fetch-channel-id').value, event, () => {Reload()}, 'fetch-channel-error')
+            ">
+            <input type="text" name="id" value="{{this.id}}" id="fetch-channel-id">
+            <input type="submit" value="Fetch">
+        </form>
+        <p style="color: #b32d2d;" id="fetch-channel-error"></p>
+    </div>
     
+    <script src="../scripts/functions.js"></script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="../scripts/loadEffect.js"></script>
 </body>
 

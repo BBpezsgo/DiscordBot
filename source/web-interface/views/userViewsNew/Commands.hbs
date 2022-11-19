@@ -109,13 +109,13 @@
                                     <td style="padding:0 2 0 2;word-break:break-all">
                                         <form action="/userViews/Commands/Update" method="post"
                                             style="margin: 0; display: inline-block;"
-                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                                             <input type="submit" value="Update">
                                         </form>
                                         <form action="/userViews/Commands/Delete" method="post"
                                             style="margin: 0; display: inline-block;"
-                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                                             <input type="submit" value="Delete">
                                         </form>
@@ -182,6 +182,7 @@
             }
         }, 2000)
     </script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="../scripts/loadEffect.js"></script>
 </body>
 
