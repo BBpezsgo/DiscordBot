@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
 const LogManager = require('../functions/log')
+const CacheManager = require('../functions/offline-cache')
 const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../functions/userHashManager')
 const fs = require('fs')
 const os = require('os')
@@ -223,28 +224,28 @@ class WebInterfaceManager {
 
     /** @param {Discord.User} user */
     Get_UserJson(user) {
-        return {
+        const userJson = {
             defaultAvatarUrl: user.defaultAvatarURL,
             avatarUrlSmall: user.avatarURL({ size: 16 }),
             avatarUrlBig: user.avatarURL({ size: 128 }),
             id: user.id,
             flags: {
-                BotHTTPInteractions: user.flags.has('BotHTTPInteractions'),
-                BugHunterLevel1: user.flags.has('BugHunterLevel1'),
-                BugHunterLevel2: user.flags.has('BugHunterLevel2'),
-                CertifiedModerator: user.flags.has('CertifiedModerator'),
-                HypeSquadOnlineHouse1: user.flags.has('HypeSquadOnlineHouse1'),
-                HypeSquadOnlineHouse2: user.flags.has('HypeSquadOnlineHouse2'),
-                HypeSquadOnlineHouse3: user.flags.has('HypeSquadOnlineHouse3'),
-                Hypesquad: user.flags.has('Hypesquad'),
-                Partner: user.flags.has('Partner'),
-                PremiumEarlySupporter: user.flags.has('PremiumEarlySupporter'),
-                Quarantined: user.flags.has('Quarantined'),
-                Spammer: user.flags.has('Spammer'),
-                Staff: user.flags.has('Staff'),
-                TeamPseudoUser: user.flags.has('TeamPseudoUser'),
-                VerifiedBot: user.flags.has('VerifiedBot'),
-                VerifiedDeveloper: user.flags.has('VerifiedDeveloper'),
+                BotHTTPInteractions: false,
+                BugHunterLevel1: false,
+                BugHunterLevel2: false,
+                CertifiedModerator: false,
+                HypeSquadOnlineHouse1: false,
+                HypeSquadOnlineHouse2: false,
+                HypeSquadOnlineHouse3: false,
+                Hypesquad: false,
+                Partner: false,
+                PremiumEarlySupporter: false,
+                Quarantined: false,
+                Spammer: false,
+                Staff: false,
+                TeamPseudoUser: false,
+                VerifiedBot: false,
+                VerifiedDeveloper: false,
             },
             partial: user.partial,
             hexAccentColor: user.hexAccentColor,
@@ -257,15 +258,57 @@ class WebInterfaceManager {
             hash: '' + GetHash(user.id),
             createdAtText: user.createdAt.getFullYear() + '. ' + user.createdAt.getMonth() + '. ' + user.createdAt.getDate() + '.'
         }
+        if (user.flags !== undefined && user.flags !== null) {            
+            userJson.flags.BotHTTPInteractions = user.flags.has('BotHTTPInteractions')
+            userJson.flags.BugHunterLevel1 = user.flags.has('BugHunterLevel1')
+            userJson.flags.BugHunterLevel2 = user.flags.has('BugHunterLevel2')
+            userJson.flags.CertifiedModerator = user.flags.has('CertifiedModerator')
+            userJson.flags.HypeSquadOnlineHouse1 = user.flags.has('HypeSquadOnlineHouse1')
+            userJson.flags.HypeSquadOnlineHouse2 = user.flags.has('HypeSquadOnlineHouse2')
+            userJson.flags.HypeSquadOnlineHouse3 = user.flags.has('HypeSquadOnlineHouse3')
+            userJson.flags.Hypesquad = user.flags.has('Hypesquad')
+            userJson.flags.Partner = user.flags.has('Partner')
+            userJson.flags.PremiumEarlySupporter = user.flags.has('PremiumEarlySupporter')
+            userJson.flags.Quarantined = user.flags.has('Quarantined')
+            userJson.flags.Spammer = user.flags.has('Spammer')
+            userJson.flags.Staff = user.flags.has('Staff')
+            userJson.flags.TeamPseudoUser = user.flags.has('TeamPseudoUser')
+            userJson.flags.VerifiedBot = user.flags.has('VerifiedBot')
+            userJson.flags.VerifiedDeveloper = user.flags.has('VerifiedDeveloper')
+        }
+        user.presence
+        return userJson
     }
 
     Get_UsersCache() {
-        /** @type {{ defaultAvatarUrl: string; avatarUrlSmall: string | null; avatarUrlBig: string | null; id: string; hexAccentColor: `#${string}` | null | undefined; bot: boolean; createdAt: string; discriminator: string; system: boolean; username: string;}[]} */
+        /** @type {{ defaultAvatarUrl: string; avatarUrlSmall: string | null; avatarUrlBig: string | null; id: string; hexAccentColor: `#${string}` | null | undefined; bot: boolean; createdAt: string; discriminator: string; system: boolean; username: string; cache: boolean}[]} */
         const users = []
 
         this.client.users.cache.forEach(user => {
-            users.push(this.Get_UserJson(user))
+            const userJson = this.Get_UserJson(user)
+            userJson['cache'] = false
+            users.push(userJson)
         })
+
+        const usersSaved = CacheManager.GetUsers(this.client)
+
+        for (let i = 0; i < usersSaved.length; i++) {
+            const userSaved = usersSaved[i]
+            var found = false
+            for (let j = 0; j < users.length; j++) {
+                const user = users[j]
+                if (user.id == userSaved.id) {
+                    found = true
+                    break
+                }
+            }
+            if (!found) {
+                const userJson = this.Get_UserJson(userSaved)
+                userJson['cache'] = true
+                users.push(userJson)
+            }
+        }
+
         return users
     }
 
@@ -1239,6 +1282,7 @@ class WebInterfaceManager {
             this.client.users.fetch(req.query.id)
             .then(() => {
                 res.status(200).send({ message: 'ok' })
+                CacheManager.SaveUsers(this.client)
             })
             .catch((error) => {
                 res.status(200).send(error)
@@ -1416,7 +1460,7 @@ class WebInterfaceManager {
                 })
         })
 
-        this.app.post('/FetchGuild', (req, res) => {
+        this.app.post('/Guild/Fetch', (req, res) => {
             var id = req.query.id
             if (id == undefined || id == null) {
                 id = req.body.id
@@ -1430,38 +1474,14 @@ class WebInterfaceManager {
                 })
         })
 
-        this.app.post('/userViews/Moderating/FetchGuild', (req, res) => {
-            this.client.guilds.fetch(req.body.id)
-                .then(() => {
-                    this.RenderPage_ModeratingSearch(req, res)
-                })
-                .catch((error) => {
-                    this.RenderPage_ModeratingSearch(req, res, JSON.stringify(error))
-                })
-        })
-
-        this.app.post('/userViews/CacheChannels/Fetch', (req, res) => {
-            const channel = this.client.channels.cache.get(req.body.id)
-            channel.fetch()
-
-            this.RenderPage_CacheChannels(req, res)
-        })
-
-        this.app.post('/userViews/CacheChannels/Join', (req, res) => {
-            const voiceChannel = this.client.channels.cache.get(req.body.id)
-            voiceChannel.join()
-
-            this.RenderPage_CacheChannels(req, res)
-        })
-
-        this.app.post('/userViews/Process/Exit', (req, res) => {
+        this.app.post('/Process/Exit', (req, res) => {
             if (this.ClientType != 'MOBILE') {
                 SystemLog('Exit by user (handlebars)')
             }
             setTimeout(() => { process.exit() }, 500)
         })
 
-        this.app.post('/userViews/Process/Restart', (req, res) => {
+        this.app.post('/Process/Restart', (req, res) => {
             if (this.ClientType == 'MOBILE') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.writeFileSync('./exitdata.txt', 'restart', { encoding: 'ascii' })
@@ -1470,19 +1490,19 @@ class WebInterfaceManager {
             }, 500)
         })
 
-        this.app.post('/userViews/Process/Abort', (req, res) => {
+        this.app.post('/Process/Abort', (req, res) => {
             process.abort()
         })
 
-        this.app.post('/userViews/Process/Disconnect', (req, res) => {
+        this.app.post('/Process/Disconnect', (req, res) => {
             process.disconnect()
         })
 
-        this.app.post('/startBot', (req, res) => {
+        this.app.post('/DiscordClient/Start', (req, res) => {
             this.StartBot()
         })
 
-        this.app.post('/stopBot', (req, res) => {
+        this.app.post('/DiscordClient/Stop', (req, res) => {
             if (this.ClientType != 'MOBILE') {
                 SystemLog('Destroy bot by user (handlebars)')
             }

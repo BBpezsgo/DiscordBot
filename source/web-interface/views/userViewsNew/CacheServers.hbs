@@ -57,7 +57,7 @@
                         <img width="16" height="16" src="/imagesNew/bool-{{available}}.png">
                     </td>
                     <td>
-                        <button title="Fetch" class="btn-fetch" onclick="Post('/FetchGuild?id={{id}}', event, () => {Reload()})"></button>
+                        <button title="Fetch" class="btn-fetch" onclick="Post('/Guild/Fetch?id={{id}}', event, () => {Reload()})"></button>
                     </td>
                 </tr>
                 <tr class="info info-hidden" id="guild-info-{{id}}">
@@ -145,10 +145,10 @@
 
     <div class="container loading-effect">
         <h2>Fetch Guild</h2>
-        <form action="/FetchGuild" method="post" style="margin: 0; display: inline-block;"
+        <form action="/Guild/Fetch" method="post" style="margin: 0; display: inline-block;"
             onsubmit="
                 event.preventDefault()
-                Post('/FetchGuild?id=' + document.getElementById('fetch-guild-id').value, event, () => {Reload()}, 'fetch-guild-error')
+                Post('/Guild/Fetch?id=' + document.getElementById('fetch-guild-id').value, event, () => {Reload()}, 'fetch-guild-error')
             ">
             <input type="text" name="id" value="{{this.id}}" id="fetch-guild-id">
             <input type="submit" value="Fetch">

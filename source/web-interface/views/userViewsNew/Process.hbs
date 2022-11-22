@@ -19,7 +19,7 @@
 			form.style.opacity='20%'
 			
 			var xhr = new XMLHttpRequest();
-			xhr.open("POST", '/userViews/Process/Restart', true);
+			xhr.open("POST", '/Process/Restart', true);
 			xhr.setRequestHeader('Content-Type', 'application/json');
 			xhr.send()
 
@@ -162,11 +162,11 @@
                 <tr>
                     <td width="25%" class="Item"></td>
                     <td colspan="2">
-                        <form action="/userViews/Process/Exit" method="post"
+                        <form action="/Process/Exit" method="post"
                             style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
                             <input type="submit" value="Exit">
                         </form>
-                        <form action="/userViews/Process/Abort" method="post"
+                        <form action="/Process/Abort" method="post"
                             style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
                             <input type="submit" value="Abort">
                         </form>
@@ -217,7 +217,7 @@
                     <td width="25%" class="Item">Connected:</td>
                     <td colspan="2">
                         <img width="16" height="16" src="/imagesNew/bool-{{process.connected}}.png">
-                        <form action="/userViews/Process/Disconnect" method="post"
+                        <form action="/Process/Disconnect" method="post"
                             style="display: inline-block;" onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
                             <input type="submit" class="show-{{bot.connected}}" value="Disconnect">
                         </form>

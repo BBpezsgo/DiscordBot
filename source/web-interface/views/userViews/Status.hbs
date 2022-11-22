@@ -38,7 +38,7 @@
 			<tr>
 				<td></td>
 				<td colspan="2">
-					<form action="/userViews/Process/Exit" method="post" style="display: inline-block;"
+					<form action="/Process/Exit" method="post" style="display: inline-block;"
 						onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
 						<input type="submit" value="Exit">
 					</form>
@@ -103,7 +103,7 @@
 						form.style.opacity='20%'
 						
 						var xhr = new XMLHttpRequest();
-						xhr.open("POST", '/userViews/Process/Restart', true);
+						xhr.open("POST", '/Process/Restart', true);
 						xhr.setRequestHeader('Content-Type', 'application/json');
 						xhr.send()
 
@@ -282,11 +282,11 @@
 			<tr>
 				<td class="Item"></td>
 				<td colspan="2">
-					<form action="/startBot" method="post" style="display: inline-block;"
+					<form action="/DiscordClient/Start" method="post" style="display: inline-block;"
 						onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
 						<input type="submit" class="show-invert-{{bot.botStarted}}" value="StartBot">
 					</form>
-					<form action="/stopBot" method="post" style="display: inline-block;"
+					<form action="/DiscordClient/Stop" method="post" style="display: inline-block;"
 						onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000)">
 						<input type="submit" class="show-{{bot.botStarted}}" value="StopBot">
 					</form>

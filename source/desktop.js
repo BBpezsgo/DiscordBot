@@ -209,6 +209,8 @@ let listOfHelpRequiestUsers = []
 const bot = new Discord.Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ], partials: [ Discord.Partials.Channel ], presence: { activities: [{ name: 'Starting up...', type: ActivityType.Custom }] } })
 logManager.Destroy()
 
+const CacheManager = require('./functions/offline-cache')
+
 const statesManager = new StatesManager()
 
 const musicPlayer = new MusicPlayer(statesManager, bot)
@@ -1918,6 +1920,8 @@ bot.once('ready', async () => {
     const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
     const { activitiesDesktop } = require('./functions/enums.js')
 
+    CacheManager.SaveUsers(bot)
+
     const lastDay = database.dataBot.day
 
     try {
@@ -1971,6 +1975,8 @@ bot.once('ready', async () => {
 })
 
 bot.on('messageCreate', async msg => {
+    CacheManager.SaveUsers(bot)
+
     const message = await msg.fetch()
 
     const thisIsPrivateMessage = (message.channel.type === Discord.ChannelType.DM)
@@ -2636,6 +2642,4 @@ const endDateTime = new Date(Date.now())
 const ellapsedMilliseconds = endDateTime - startDateTime
 SystemLog('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
 
-if (autoStartBot) {
-    StartBot()
-}
+if (autoStartBot) { StartBot() }

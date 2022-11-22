@@ -137,15 +137,21 @@
                         </span>
                         {{/if}}
 
+                        {{#if cache}}
+                        <img src="/imagesNew/offline.png" width="12" height="12" title="Cache" alt="Cache" style="transform: translateY(2px); opacity: 50%;">
+                        {{/if}}
+
+                        {{#if hexAccentColor}}
                         <div style="
                             width: 16px;
                             height: 16px;
                             border: 1px solid black;
                             border-radius: 3px;
-                            background-color: {{this.hexAccentColor}};
+                            background-color: {{hexAccentColor}};
                             float: right;
                             transform: translateY(4px);
                         " title="Accent color">
+                        {{/if}}
                     </td>
                     <td>
                         {{this.id}}
@@ -154,7 +160,7 @@
                         <span title="{{this.createdAt}}">{{this.createdAtText}}</span>
                     </td>
                     <td>
-                        <button class="btn-fetch" onclick="Post('/User/Fetch?id={{id}}', event, () => { Reload() })"></button>
+                        <button class="btn-fetch" onclick="Post('/User/Fetch?id={{id}}', event, () => { Reload() })" title="Fetch"></button>
                     </td>
                     <td>
                         <!--<img width="16" height="16" src="/imagesNew/bool-{{this.haveHash}}.png" style="transform: translateY(3px);">-->
