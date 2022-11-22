@@ -198,6 +198,9 @@ const request = https.get(url, function (res) {
 
     res.on('end', function () {
         Log(`  Downloaded ${cur} bytes`)
+        if (fs.existsSync('./full-bytes.json')) {
+            fs.writeFileSync('./full-bytes.json', cur.toString(), { encoding: 'utf-8' })
+        }
         Log('%TASK% Waiting 1s before unzip')
 
         setTimeout(async () => {
