@@ -94,8 +94,8 @@ process.on('exit', function (code) {
 
 //#region NPM Packages and variables
 
-logManager.Loading("Loading commands", 'weather')
-const CommandWeather = require('./commands/weather')
+
+
 
 
 logManager.Loading("Loading commands", 'help')
@@ -117,21 +117,21 @@ const CommandHelp = require('./commands/help')
 
 
 
-logManager.Loading("Loading commands", 'crossout')
-const { CrossoutTest } = require('./commands/crossout')
-logManager.Loading("Loading commands", 'redditsave')
-const CommandRedditsave = require('./commands/redditsave')
-logManager.Loading("Loading commands", 'fonts')
-const { CommandFont } = require('./commands/fonts')
 
 
 
 
-logManager.Loading("Loading extensions", 'commands')
-const { CreateCommands, DeleteCommands } = require('./functions/commands')
-logManager.Loading("Loading extensions", 'translator')
+
+
+
+
+
+
+
+
+logManager.Loading("Loading extensions", 'Debug translator')
 const { TranslateMessage } = require('./functions/translator.js')
-logManager.Loading("Loading extensions", 'statesManager')
+logManager.Loading("Loading extensions", 'StatesManager')
 const { StatesManager } = require('./functions/statesManager.js')
 
 
@@ -147,15 +147,16 @@ const WebInterface = require('./web-interface/manager')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
-const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits } = require('discord.js')
+const { GatewayIntentBits } = require('discord.js')
 
+logManager.Loading('Loading packet', "config.json")
 const { perfix, tokens } = require('./config.json')
 
-logManager.Loading('Loading packet', "other functions")
-
-
-const { DateToString } = require('./functions/dateToString')
+logManager.Loading('Loading packet', "NewsManager")
 const NewsManager = require('./functions/news')
+
+logManager.Loading('Loading packet', "Other functions")
+const { DateToString } = require('./functions/dateToString')
 const GetAddress = require('./functions/getAddress')
 const {
     INFO,
@@ -669,7 +670,7 @@ bot.on('interactionCreate', interaction => {
                 interaction.channel.messages.cache.get(interaction.component.customId.split('.')[1]).delete()
                 const button1 = interaction.message.components[0].components[0]
                 const button2 = interaction.message.components[0].components[1]
-                const row = new ActionRowBuilder()
+                const row = new Discord.ActionRowBuilder()
                     .addComponents(button1, button2)
                 interaction.update({embeds: [interaction.message.embeds[0]], components: [row]})
                 return
@@ -722,6 +723,7 @@ bot.once('ready', async () => {
 
     const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
 
+    const { CreateCommands, DeleteCommands } = require('./functions/commands')
     try {
         //DeleteCommands(bot)
         //CreateCommands(bot, statesManager)
@@ -752,6 +754,7 @@ bot.on('messageCreate', async message => { //Message
 
     message.fetch().then(async (msg) => {
         if (msg.content.startsWith('https://www.reddit.com/r/')) {
+            const CommandRedditsave = require('./commands/redditsave')
             CommandRedditsave(msg)
         }
 
@@ -871,6 +874,7 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `crossout`) {
+        const { CrossoutTest } = require('./commands/crossout')
         command.deferReply().then(() => {
             CrossoutTest(command, command.options.getString('search'))
         })
@@ -939,6 +943,7 @@ async function processApplicationCommand(command) {
 
 
     if (command.commandName === `weather`) {
+        const CommandWeather = require('./commands/weather')
         if (command.options.getSubcommand() == 'mars') {
             CommandWeather(command, privateCommand, false)
         } else {
@@ -1001,6 +1006,7 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `font`) {
+        const { CommandFont } = require('./commands/fonts')
         CommandFont(command)
         return
     }

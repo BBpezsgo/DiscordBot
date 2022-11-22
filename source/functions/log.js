@@ -213,6 +213,8 @@ class LogManager {
         /** @type {string} */
         this.promtPressedButton = ''
 
+        this.scriptLoadingText = ''
+
         if (bot != null && statesManager != null) {
             if (enabled == false) { return }
             this.timer = setInterval(async () => {
@@ -360,9 +362,13 @@ class LogManager {
 
         var txt = ''
 
+        if (this.scriptLoadingText !== null && this.scriptLoadingText !== undefined && this.scriptLoadingText !== '' && this.scriptLoadingText.length > 0) {
+            txt += FixedWidth(this.scriptLoadingText, window.width) + '\n'
+        }
+
         if (this.loadingOverride == '') {
-            if (this.bot != undefined) {
-                txt += FixedWidth('┌──── BOT', window.width)
+            if (this.bot !== undefined) {
+                txt += FixedWidth('┌──── Client', window.width)
                 txt += FixedWidth('│' + FixedWidth('Ready at:', 20) + GetTime(this.bot.readyAt), window.width) + '\n'
                 var dfdfdf = new Date(0)
                 dfdfdf.setSeconds(this.bot.uptime / 1000)
@@ -377,8 +383,8 @@ class LogManager {
                 }   
             }
             
-            if (this.statesManager != undefined) {
-                txt += FixedWidth('│' + FixedWidth('BOT State:', 20) + StateTextBot(this.statesManager.botLoadingState), window.width) + '\n'
+            if (this.statesManager !== undefined) {
+                txt += FixedWidth('│' + FixedWidth('Client State:', 20) + StateTextBot(this.statesManager.botLoadingState), window.width) + '\n'
                 txt += FixedWidth('│' + FixedWidth('Timeouts:', 20) + timeout[this.statesManager.heartbeat] + ' ' + timeout[this.statesManager.hello], window.width) + '\n'
                 if (this.statesManager.Shard.IsLoading == true) {
                     txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading Shard:', 20) + this.statesManager.Shard.LoadingText, window.width) + '\n'
@@ -389,18 +395,18 @@ class LogManager {
                 txt += FixedWidth('', window.width) + '\n'
                 txt += FixedWidth('┌──── Web Interface', window.width)
                 txt += FixedWidth('│' + FixedWidth('HB State:', 20) + StateText_HB(this.statesManager.WebInterface.Error, this.statesManager.WebInterface.IsDone, this.statesManager.WebInterface.URL), window.width) + '\n'
-                txt += FixedWidth('│' + FixedWidth('HB Requiests:', 20) + this.statesManager.WebInterface.Requests.length, window.width) + '\n'
-                for (let i = 0; i < this.statesManager.WebInterface.Clients.length; i++) {
-                    const socket = this.statesManager.WebInterface.Clients[i]
-                    if (i == 0) {
-                        txt += FixedWidth('│' + FixedWidth('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
-                    } else {
-                        txt += FixedWidth('│' + FixedWidth('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
+                if (this.statesManager.WebInterface.Clients.length > 0) {
+                    txt += FixedWidth('│' + FixedWidth('HB Requiests:', 20) + this.statesManager.WebInterface.Requests.length, window.width) + '\n'
+                    for (let i = 0; i < this.statesManager.WebInterface.Clients.length; i++) {
+                        const socket = this.statesManager.WebInterface.Clients[i]
+                        if (i == 0) {
+                            txt += FixedWidth('│' + FixedWidth('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
+                        } else {
+                            txt += FixedWidth('│' + FixedWidth('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
+                        }
                     }
                 }
-            }
-
-            if (this.statesManager != undefined) {
+                
                 const needPrintThis =
                     (this.dailyWeatherReportLoadingTextTimeout < 30) ||
                     (this.statesManager.Commands.All != this.statesManager.Commands.Created) ||
@@ -418,10 +424,14 @@ class LogManager {
                         txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading commands:', 20) + Math.round(this.statesManager.Commands.Created / this.statesManager.Commands.All * 100) + "%", window.width) + '\n'
                     }
                     if (this.dailyWeatherReportLoadingTextTimeout < 30) {
-                        if (this.statesManager.WeatherReport.Text.length > 0) {
+                        if (this.statesManager.WeatherReport.Text.length > 0 && this.statesManager.WeatherReport.Text !== 'I don\'t need to send a new report') {
                             txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Weather report:', 20) + this.statesManager.WeatherReport.Text, window.width) + '\n'
                         } else {
-                            txt += FixedWidth('│' + FixedWidth('Weather report:', 20) + 'Done', window.width) + '\n'
+                            if (this.statesManager.WeatherReport.Text.length > 0) {
+                                txt += FixedWidth('│' + FixedWidth('Weather report:', 20) + this.statesManager.WeatherReport.Text, window.width) + '\n'
+                            } else {
+                                txt += FixedWidth('│' + FixedWidth('Weather report:', 20) + 'Done', window.width) + '\n'
+                            }
                         }
                     }
                     if (this.newsLoadingTextTimeout < 30) {
@@ -440,7 +450,7 @@ class LogManager {
                 }
             }
         } else {
-            txt += FixedWidth(FixedWidth('Delta time:', 20) + FixedWidth(Math.round((this.deltaTime-0.1)*1000)/1000, 5) + ' sec', window.width) + '\n'
+            txt += FixedWidth(FixedWidth('Delta time:', 20) + FixedWidth(Math.max(0, Math.round((this.deltaTime-0.1)*1000)/1000), 5) + ' sec', window.width) + '\n'
             txt += FixedWidth(FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width) + '\n'
         }
         if (this.statesManager != undefined) {

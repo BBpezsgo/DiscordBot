@@ -5,6 +5,7 @@ chcp 65001 >nul
 
 Rem Start the script
 title Running - Discord BOT
+echo Execute node script...
 node desktop.js visible user
 
 title Stopped - Discord BOT

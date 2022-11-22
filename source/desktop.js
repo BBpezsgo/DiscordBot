@@ -1,3 +1,5 @@
+console.log('The script is executing!')
+
 const LogError = require('./functions/errorLog')
 const fs = require('fs')
 process.on('uncaughtException', function (err) {
@@ -25,6 +27,7 @@ const startDateTime = new Date(Date.now())
 
 const LogManager = require('./functions/log')
 var logManager = new LogManager(null, null)
+logManager.scriptLoadingText = 'Loading script... (set process things)'
 
 process.__defineGetter__('stderr', function() { return fs.createWriteStream(__dirname + '\\node.error.log', { flags: 'a' }) })
 
@@ -107,21 +110,23 @@ process.on('exit', function (code) {
     SystemStop()
 })
 
+logManager.scriptLoadingText = 'Loading script... (loading npm packages)'
+
 //#region NPM Packages and variables
 
-logManager.Loading("Loading commands", 'profil')
-const CommandProfil = require('./commands/profil')
-logManager.Loading("Loading commands", 'help')
-const CommandHelp = require('./commands/help')
+
+
+
+
 
 logManager.Loading("Loading commands", 'poll')
 const { addNewPoll, savePollDefaults } = require('./commands/poll')
-logManager.Loading("Loading commands", 'database/xp')
-const CommandXp = require('./commands/database/xp')
+
+
 logManager.Loading("Loading commands", 'database/shop')
 const { CommandShop, removeAllColorRoles } = require('./commands/database/shop')
-logManager.Loading("Loading commands", 'database/businees')
-const CommandBusiness = require('./commands/database/businees')
+
+
 logManager.Loading("Loading commands", 'database/market')
 const CommandMarket = require('./commands/database/market')
 logManager.Loading("Loading commands", 'database/settings')
@@ -130,12 +135,12 @@ const CommandSettings = require('./commands/settings')
 logManager.Loading("Loading extensions", 'database/xpFunctions')
 const { xpRankIcon, xpRankText, calculateAddXp } = require('./commands/database/xpFunctions')
 
-logManager.Loading("Loading commands", 'crossout')
-const { CrossoutTest } = require('./commands/crossout')
-logManager.Loading("Loading commands", 'redditsave')
-const CommandRedditsave = require('./commands/redditsave')
-logManager.Loading("Loading commands", 'fonts')
-const { CommandFont } = require('./commands/fonts')
+
+
+
+
+
+
 logManager.Loading("Loading commands", 'game')
 const {
     playerCanMoveToHere,
@@ -178,7 +183,7 @@ const MusicPlayer = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
 const WebInterface = require('./web-interface/manager')
-const { GetHash } = require('./functions/userHashManager')
+
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
@@ -188,7 +193,7 @@ const { perfix, tokens } = require('./config.json')
 const { AutoReact } = require('./functions/autoReact')
 
 logManager.Loading('Loading packet', "other functions")
-const { abbrev } = require('./functions/abbrev')
+
 const { DateToString } = require('./functions/dateToString')
 const NewsManager = require('./functions/news')
 const { MailManager, Mail, MailUser, CurrentlyWritingMail } = require('./commands/mail')
@@ -199,15 +204,17 @@ const {
 } = require('./functions/enums.js')
 const { CommandHangman, HangmanManager } = require('./commands/hangman.js')
 
+logManager.scriptLoadingText = 'Loading script... (create Discord client instance)'
+
 logManager.BlankScreen()
+
+const bot = new Discord.Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ], partials: [ Discord.Partials.Channel ], presence: { activities: [{ name: 'Starting up...', type: ActivityType.Custom }] } })
+logManager.Destroy()
 
 const selfId = '738030244367433770'
 
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
-
-const bot = new Discord.Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ], partials: [ Discord.Partials.Channel ], presence: { activities: [{ name: 'Starting up...', type: ActivityType.Custom }] } })
-logManager.Destroy()
 
 const CacheManager = require('./functions/offline-cache')
 
@@ -216,9 +223,13 @@ const statesManager = new StatesManager()
 const musicPlayer = new MusicPlayer(statesManager, bot)
 
 logManager = new LogManager(bot, statesManager)
+
+logManager.scriptLoadingText = 'Loading script... (create NewsManager instance)'
 const newsManager = new NewsManager(statesManager, true)
 
 statesManager.botLoaded = true
+
+logManager.scriptLoadingText = 'Loading script... (loading database)'
 
 logManager.Loading('Loading database', 'Manager')
 const database = new DatabaseManager('./database/', './database-copy/', statesManager)
@@ -244,20 +255,26 @@ if (!databaseIsSuccesfullyLoaded) {
     })
 }
 
+logManager.scriptLoadingText = 'Loading script... (create WebInterface instance)'
+
 const ws = new WebInterface('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager, 'DESKTOP')
 logManager.BlankScreen()
 
 const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
 
+logManager.scriptLoadingText = 'Loading script... (create HangmanManager instance)'
 const hangmanManager = new HangmanManager()
 
+logManager.scriptLoadingText = 'Loading script... (create MailManager instance)'
 const mailManager = new MailManager(database)
 
+logManager.scriptLoadingText = 'Loading script... (create Game instance)'
 const game = new Game()
 
 //#endregion
 
-//#region Functions 
+logManager.scriptLoadingText = 'Loading script... (define some functions)'
+//#region Functions
 
 /**
 * @param {Discord.User} user
@@ -333,6 +350,7 @@ function addXp(user, channel, ammount) {
 //#endregion
 
 //#region Listener-ek
+logManager.scriptLoadingText = 'Loading script... (setup basic listeners)'
 
 bot.on('reconnecting', () => {
     statesManager.botLoadingState = 'Reconnecting'
@@ -434,7 +452,7 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
 //#endregion
 
 //#region Commands
-
+logManager.scriptLoadingText = 'Loading script... (define some command functions)'
 //#region Command Functions
 
 /**
@@ -475,6 +493,7 @@ function openDayCrate(userId) {
  */
 function commandStore(sender, privateCommand) {
     const GetUserColor = require('./functions/userColor')
+    const { abbrev } = require('./functions/abbrev')
     
     var dayCrates = (database.dataBot.day - database.dataBasic[sender.id].day) / 7
     var crates = database.dataBackpacks[sender.id].crates
@@ -839,6 +858,7 @@ async function quizDone(quizMessageId, correctIndex) {
 }
 //#endregion
 
+logManager.scriptLoadingText = 'Loading script... (setup client listeners)'
 bot.on('interactionCreate', async interaction => {
     if (interaction.member == undefined) {
         database.SaveUserToMemoryAll(interaction.user, interaction.user.username)        
@@ -2039,6 +2059,7 @@ bot.on('messageCreate', async msg => {
     //#endregion
 
     if (message.content.startsWith('https://www.reddit.com/r/')) {
+        const CommandRedditsave = require('./commands/redditsave')
         CommandRedditsave(message)
     }
 
@@ -2076,6 +2097,8 @@ bot.on('messageCreate', async msg => {
     }
 })
 
+logManager.scriptLoadingText = 'Loading script... (define "processCommand" functions)'
+
 /**
  * @param {Discord.Message} message
  * @param {boolean} thisIsPrivateMessage
@@ -2087,6 +2110,7 @@ async function processCommand(message, thisIsPrivateMessage, sender, command) {
     //#region Enabled in dm
 
     if (command === `pms`) {
+        const CommandBusiness = require('./commands/database/businees')
         CommandBusiness(message.channel, sender, thisIsPrivateMessage, database)
         database.UserstatsSendCommand(sender)
         return
@@ -2356,6 +2380,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `handlebars` || command.commandName === `webpage`) {
+        const { GetHash } = require('./functions/userHashManager')
         const row = new ActionRowBuilder()
         const button = new ButtonBuilder()
             .setLabel('Weboldal')
@@ -2417,6 +2442,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `crossout`) {
+        const { CrossoutTest } = require('./commands/crossout')
         command.deferReply({ ephemeral: privateCommand }).then(() => {
             CrossoutTest(command, command.options.getString('search'), privateCommand)
         })
@@ -2430,6 +2456,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `xp` || command.commandName === `score`) {
+        const CommandXp = require('./commands/database/xp')
         CommandXp(command, database, privateCommand)
         database.UserstatsSendCommand(command.user)
         return
@@ -2521,6 +2548,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `help`) {
+        const CommandHelp = require('./commands/help')
         command.reply({ embeds: [CommandHelp(isDm)], ephemeral: privateCommand })
         database.UserstatsSendCommand(command.user)
         return
@@ -2545,6 +2573,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `profil` || command.commandName === `profile`) {
+        const CommandProfil = require('./commands/profil')
         CommandProfil(database, command, privateCommand)
         database.UserstatsSendCommand(command.user)
         return
@@ -2586,6 +2615,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `font`) {
+        const { CommandFont } = require('./commands/fonts')
         CommandFont(command, privateCommand)
         database.UserstatsSendCommand(command.user)
         return
@@ -2620,6 +2650,7 @@ async function processApplicationCommand(command, privateCommand) {
     command.reply("> \\❌ **Ismeretlen parancs `" + command.commandName + "`! **`/help`** a parancsok listájához!**")
 }
 
+logManager.scriptLoadingText = 'Loading script... (define some functions)'
 function StartBot() {
     SystemLog('Start bot...')
     bot.login(tokens.discord)
@@ -2638,8 +2669,11 @@ function StopBot() {
     botStopped = true
 }
 
+logManager.scriptLoadingText = 'Loading script... (Finishing up)'
 const endDateTime = new Date(Date.now())
 const ellapsedMilliseconds = endDateTime - startDateTime
 SystemLog('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
+
+logManager.scriptLoadingText = ''
 
 if (autoStartBot) { StartBot() }
