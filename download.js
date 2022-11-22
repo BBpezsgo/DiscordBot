@@ -178,6 +178,7 @@ const request = https.get(url, function (res) {
     Log(`  Got a response: ${res.statusCode} ${res.statusMessage}`)
 
     var cur = 0
+    if (fs.existsSync('./DiscordBot-Main/full-bytes.json')) { fs.writeFileSync('./full-bytes.json', fs.readFileSync('./DiscordBot-Main/full-bytes.json', { encoding: 'utf-8' }), { encoding: 'utf-8' }) }
     /** @type {number} */
     const full = JSON.parse(fs.readFileSync('./full-bytes.json'))
 
