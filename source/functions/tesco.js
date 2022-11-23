@@ -50,6 +50,7 @@ const ProcessData = function(data) {
 
 /** @param {(isCache: boolean, result: string | undefined, error: string | undefined) => void} callback */
 const Download = function(search, callback) {
+    if (!fs.existsSync('../tesco-cache/')) { fs.mkdirSync('../tesco-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('../tesco-cache/search-data-' + search + '.html')) {
             callback(true, fs.readFileSync('../tesco-cache/search-data-' + search + '.html', { encoding: 'utf-8' }))

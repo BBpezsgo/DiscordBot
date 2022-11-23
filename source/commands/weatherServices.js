@@ -117,6 +117,7 @@ const ReadFromCache = false
  * }
  * )[] | undefined, error: any | undefined) => void} callback */
 const MsnWeather = function(callback) {
+    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/msn-weather.json')) {
             callback(JSON.parse(fs.readFileSync('./weather-cache/msn-weather.json', { encoding: 'utf-8' })))
@@ -136,6 +137,7 @@ const MsnWeather = function(callback) {
 }
 
 const OpenweathermapForecast = function(callback) {
+    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/openweathermap-forecast.json')) {
             callback(true, JSON.parse(fs.readFileSync('./weather-cache/openweathermap-forecast.json', { encoding: 'utf-8' })))
@@ -214,6 +216,7 @@ const OpenweathermapForecast = function(callback) {
  *   cod: number;
  * } | undefined, error: string | undefined) => void} callback */
 const OpenweathermapWeather = function(callback) {
+    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/openweathermap-weather.json')) {
             callback(JSON.parse(fs.readFileSync('./weather-cache/openweathermap-weather.json', { encoding: 'utf-8' })))
@@ -272,6 +275,7 @@ const OpenweathermapWeather = function(callback) {
  *   }[];
  * } | undefined, error: string | undefined) => void} callback */
 const OpenweathermapPollution = function(callback) {
+    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/openweathermap-pollution.json')) {
             callback(JSON.parse(fs.readFileSync('./weather-cache/openweathermap-pollution.json', { encoding: 'utf-8' })))
@@ -321,6 +325,7 @@ const OpenweathermapPollution = function(callback) {
   *   }[];
   * } | undefined, error: string | undefined) => void} callback */
 const NasaMarsWeather = function(callback) {
+    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/nasa-mars-weather.json')) {
             callback(JSON.parse(fs.readFileSync('./weather-cache/nasa-mars-weather.json', { encoding: 'utf-8' })))
@@ -403,6 +408,7 @@ const NasaMarsWeather = function(callback) {
  *   total_images: number;
  * } | undefined, error: string | undefined) => void} callback */
 const NasaMarsWeeklyImage = function(callback) {
+    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/nasa-mars-image.json')) {
             callback(JSON.parse(fs.readFileSync('./weather-cache/nasa-mars-image.json', { encoding: 'utf-8' })))
@@ -439,6 +445,7 @@ const NasaMarsWeeklyImage = function(callback) {
 }
 
 const AccuWeather = function(callback) {
+    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/accu-weather.json')) {
             callback(JSON.parse(fs.readFileSync('./weather-cache/accu-weather.json', { encoding: 'utf-8' })))

@@ -14,15 +14,18 @@ async function Sleep(ms) {
 }
 
 function SaveCache(cacheName, data) {
+    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath) }
     fs.writeFileSync(basePath + `${cacheName}.json`, JSON.stringify({ date: Date.now(), data: data }, undefined, ' '), { encoding: 'utf-8' })
 }
 
 /** @returns {{date: number, data: any}} */
 function LoadCache(cacheName) {
+    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath) }
     return JSON.parse(fs.readFileSync(basePath + `${cacheName}.json`, { encoding: 'utf-8' }))
 }
 
 function SaveCacheRaw(cacheName, rawData) {
+    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath) }
     fs.writeFileSync(basePath + `${cacheName}.json`, rawData)
 }
 
