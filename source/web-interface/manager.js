@@ -130,18 +130,22 @@ class WebInterfaceManager {
         })
         
         this.app.get('/config.json', (req, res) => {
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-
-            if (ip.startsWith('127.') || ip.startsWith('192.168.1.')) {
-                const Config = require('../config.json')
-                res.status(200).send({
-                    config: Config
-                })
-
+            if (req.headers['this-is-forwarded'] === 'bruh') {
+                res.status(401).send('Access denied: only accessible from LAN<br><br>You are trying to access it through my forwarder >:(')
                 return
             }
 
-            res.status(401).send('Access denied: only accessible from LAN')
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+
+            if (ip.startsWith('127.') || ip.startsWith('192.168.1.')) {} else {
+                res.status(401).send('Access denied: only accessible from LAN<br><br>The address ' + ip + ' is not private')
+                return
+            }
+
+            const Config = require('../config.json')
+            res.status(200).send({
+                config: Config
+            })
         })
         
         this.app.get('*', (req, res) => {
