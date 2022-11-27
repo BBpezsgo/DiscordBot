@@ -129,15 +129,29 @@ const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
                 }
             }
         }
+        
+        /** @param {number} i Data index @param {number[]} dataList */
+        const GetPoint = function(i, dataList) {
+            const min = Math.min(smallest, 0)
+            const max = largest
+            var dataPercent = (dataList[i] - min) / (max - min)
+
+            const p = {
+                x: graph.Right / dataList.length * i + graph.Left + GraphOffsetX,
+                y: graph.Height - (dataPercent * graph.Height) + graph.Top
+            }
+            return p
+        }
+
         const DrawDataLines = function() {
             if (currentDataType === 'LINE') {
                 context.beginPath()
                 context.lineJoin = "round"
                 // add first point in the graph
-                context.moveTo(graph.Left + GraphOffsetX, (graph.Height - currentData[0] / largest * graph.Height) + graph.Top)
+                context.moveTo(GetPoint(0, currentData).x, GetPoint(0, currentData).y)
                 // loop over data and add points starting from the 2nd index in the array as the first has been added already  
                 for (var i = 1; i < dataSize; i++) {
-                    context.lineTo(graph.Right / dataSize * i + graph.Left + GraphOffsetX, (graph.Height - currentData[i] / largest * graph.Height) + graph.Top)
+                    context.lineTo(GetPoint(i, currentData).x, GetPoint(i, currentData).y)
                 }
                 context.stroke()
             } else if (currentDataType === 'FILL') {
@@ -157,14 +171,14 @@ const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
         }
         const DrawDataPoints = function(radius) {
             context.beginPath()
-            context.arc(graph.Left + GraphOffsetX, (graph.Height - currentData[0] / largest * graph.Height) + graph.Top, radius, 0, 2 * Math.PI, false)
+            context.arc(GetPoint(0, currentData).x, GetPoint(0, currentData).y, radius, 0, 2 * Math.PI, false)
             context.fill()
             context.closePath()
 
             // loop over data and add points starting from the 2nd index in the array as the first has been added already  
             for (var i = 1; i < dataSize; i++) {
                 context.beginPath()
-                context.arc(graph.Right / dataSize * i + graph.Left + GraphOffsetX, (graph.Height - currentData[i] / largest * graph.Height) + graph.Top, radius, 0, 2 * Math.PI, false)
+                context.arc(GetPoint(i, currentData).x, GetPoint(i, currentData).y, radius, 0, 2 * Math.PI, false)
                 context.fill()
                 context.closePath()
             }
@@ -173,13 +187,12 @@ const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
             context.font = "bold 12px Arial"
 
             for (var i = 0; i < dataSize; i++) {
-                const x = graph.Right / dataSize * i + graph.Left + GraphOffsetX
-                const y = (graph.Height - currentData[i] / largest * graph.Height) + graph.Top
+                const p = GetPoint(i, currentData)
 
-                if (y < graph.Height/2) {
-                    context.fillText(currentData[i] + currentDataLabelSuffix, x, y+12+8)
+                if (p.y < graph.Height/2) {
+                    context.fillText(currentData[i] + currentDataLabelSuffix, p.x, p.y+12+8)
                 } else {
-                    context.fillText(currentData[i] + currentDataLabelSuffix, x, y-12)
+                    context.fillText(currentData[i] + currentDataLabelSuffix, p.x, p.y-12)
                 }
             }
 
@@ -292,7 +305,7 @@ const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
  * @param {WeatherServices.OpenWeatherMap.PollutionResult} OpenweatherPollution Openweather pollution data
  * @param {WeatherAlertsService.MET.ResultCounty[]} MetAlerts
  */
-function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution, MetAlerts) {
+function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution, MetAlerts, msnIsCache, openweathermapWeatherIsCache) {
     const current = MsnWeather.current
     const embed = new Discord.EmbedBuilder()
         .setColor('#00AE86')
@@ -487,7 +500,9 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
     embed.setTimestamp(Date.parse(current.date + 'T' + current.observationtime))    
     // embed.setThumbnail('attachment://graph.png')
     embed.setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(current.skytext, true)))
-    embed.setFooter({ text: '• weather.service.msn.com • openweathermap.org' })
+    const MsnFooter = ((msnIsCache === true) ? '📁' : '') + 'weather.service.msn.com'
+    const OpenweathermapFooter = ((openweathermapWeatherIsCache === true) ? '📁' : '') + 'openweathermap.org'
+    embed.setFooter({ text: `• ${MsnFooter} • ${OpenweathermapFooter}` })
     embed.setImage('attachment://graph.png')
     return embed
 }
@@ -621,13 +636,13 @@ module.exports = async (command, privateCommand, earth = true) => {
         const month = new Date().getMonth() + 1
         const day = new Date().getDate()
 
-        WeatherServices.MsnWeather((msnWeather, msnWeatherError) => {
+        WeatherServices.MsnWeather((msnIsCache, msnWeather, msnWeatherError) => {
             if (msnWeatherError) {
                 LogError(msnWeatherError)
                 command.editReply({ content: '> \\❌ **MSN Error:** ' + msnWeatherError })
                 return
             }
-            WeatherServices.OpenweathermapWeather((openweathermapWeather, openweathermapWeatherError) => {
+            WeatherServices.OpenweathermapWeather((openweathermapWeatherIsCache, openweathermapWeather, openweathermapWeatherError) => {
                 if (openweathermapWeatherError) {
                     LogError(openweathermapWeatherError)
                     command.editReply({ content: '> \\❌ ' + openweathermapWeatherError })
@@ -671,7 +686,7 @@ module.exports = async (command, privateCommand, earth = true) => {
                     catch (e)
                     { alerts.push(null) }
 
-                    const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts)
+                    const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts, msnIsCache, openweathermapWeatherIsCache)
                     try {
                         const attachmentPath = await CreateGraph(msnWeather[0], openweathermapWeather, MoonPhases)
                         command.editReply({ embeds: [embed],

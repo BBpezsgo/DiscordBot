@@ -2,6 +2,7 @@ const tokens = require('../config.json').tokens
 const weather1 = require('weather-js')
 const fs = require('fs')
 const { CityBekescsaba } = require('./weatherFunctions')
+const WeatherServices = require('./weatherServices')
 
 const URLs = {
     OpenWeatherMap: {
@@ -39,6 +40,7 @@ const URLs = {
 const request = require("request");
 
 const ReadFromCache = false
+const MaxTimeDifference = 1000
 
 /** @param {(result: ({
  *   location: {
@@ -115,24 +117,29 @@ const ReadFromCache = false
  *     precip: string;
  *   }[];
  * }
- * )[] | undefined, error: any | undefined) => void} callback */
+ * )[] | undefined, error: any | undefined, isCache: boolean) => void} callback */
 const MsnWeather = function(callback) {
     if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
-    if (ReadFromCache) {
-        if (fs.existsSync('./weather-cache/msn-weather.json')) {
-            callback(JSON.parse(fs.readFileSync('./weather-cache/msn-weather.json', { encoding: 'utf-8' })))
+    if (fs.existsSync('./weather-cache/msn-weather.json')) {
+        /** @type {WeatherServices.Msn_WeatherResult} */
+        const cacheData = JSON.parse(fs.readFileSync('./weather-cache/msn-weather.json', { encoding: 'utf-8' }))
+        const date = Date.parse(cacheData[0].current.date + ' ' + cacheData[0].current.observationtime)
+        const diff = Date.now() - (date - (Number.parseInt(cacheData[0].location.timezone) * 3600000))
+        fs.writeFileSync('./weather-cache/msn-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
+        if (diff >= MaxTimeDifference || ReadFromCache) {
+            callback(true, cacheData)
             return
         }
     }
 
     weather1.find({ search: 'Békéscsaba, HU', degreeType: 'C' }, function (error, msnWeather) {
         if (error) {
-            callback(undefined, error)
+            callback(false, undefined, error)
             return
         }
 
         fs.writeFileSync('./weather-cache/msn-weather.json', JSON.stringify(msnWeather), { encoding: 'utf-8' })
-        callback(msnWeather)
+        callback(false, msnWeather)
     })
 }
 
@@ -219,23 +226,29 @@ const OpenweathermapWeather = function(callback) {
     if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
     if (ReadFromCache) {
         if (fs.existsSync('./weather-cache/openweathermap-weather.json')) {
-            callback(JSON.parse(fs.readFileSync('./weather-cache/openweathermap-weather.json', { encoding: 'utf-8' })))
-            return
+            const cacheData = JSON.parse(fs.readFileSync('./weather-cache/openweathermap-weather.json', { encoding: 'utf-8' }))
+            const date = cacheData.dt
+            const diff = Date.now() - (date * 1000)
+            fs.writeFileSync('./weather-cache/openweathermap-weather-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
+            if (diff >= MaxTimeDifference || ReadFromCache) {
+                callback(true, cacheData)
+                return
+            }
         }
     }
 
     try {
         request(URLs.OpenWeatherMap.Weather, function (err, res, body) {
             if (err) {
-                callback(undefined, '**HTTP Error:** ' + err)
+                callback(false, undefined, '**HTTP Error:** ' + err)
                 return
             }
             if (res.statusCode !== 200) {
-                callback(undefined, `**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
+                callback(false, undefined, `**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                 return
             }
             if (body === undefined || body == null) {
-                callback(undefined, `**HTTP Error:** No body recived`)
+                callback(false, undefined, `**HTTP Error:** No body recived`)
                 return
             }
 
@@ -245,10 +258,10 @@ const OpenweathermapWeather = function(callback) {
             fs.writeFileSync('./weather-cache/openweathermap-weather-headers.txt', headersText, { encoding: 'utf-8' })
 
             fs.writeFileSync('./weather-cache/openweathermap-weather.json', body, { encoding: 'utf-8' })
-            callback(JSON.parse(body))
+            callback(false, JSON.parse(body))
         })
     } catch (err) {
-        callback(undefined, '**HTTP Requiest Error:** ' + err)
+        callback(false, undefined, '**HTTP Requiest Error:** ' + err)
     }
 }
 
