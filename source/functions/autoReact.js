@@ -5,11 +5,12 @@ const fs = require('fs')
  function AutoReact(message) {
     try {
         var isHaveMusic = false
-        if (message.content.includes('https://youtu.be/') == true) { isHaveMusic = true }
-        if (message.content.includes('https://www.youtube.com/watch') == true) { isHaveMusic = true }
-        if (message.content.includes('https://open.spotify.com/') == true) { isHaveMusic = true }
+        if (message.content.includes('https://youtu.be/') === true) { isHaveMusic = true }
+        if (message.content.includes('https://www.youtube.com/watch') === true) { isHaveMusic = true }
+        if (message.content.includes('https://open.spotify.com/') === true) { isHaveMusic = true }
+        if (message.content.includes('https://soundcloud.com/') === true) { isHaveMusic = true }
 
-        if (isHaveMusic == false) { return }
+        if (isHaveMusic === false) { return }
 
         const settingsRaw = fs.readFileSync('./settings.json')
         const settings = JSON.parse(settingsRaw)
