@@ -126,7 +126,7 @@ const MsnWeather = function(callback) {
         const date = Date.parse(cacheData[0].current.date + ' ' + cacheData[0].current.observationtime)
         const diff = Date.now() - (date - (Number.parseInt(cacheData[0].location.timezone) * 3600000))
         fs.writeFileSync('./weather-cache/msn-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
-        if (diff >= MaxTimeDifference || ReadFromCache) {
+        if (diff < MaxTimeDifference || ReadFromCache) {
             callback(true, cacheData)
             return
         }
@@ -230,7 +230,7 @@ const OpenweathermapWeather = function(callback) {
             const date = cacheData.dt
             const diff = Date.now() - (date * 1000)
             fs.writeFileSync('./weather-cache/openweathermap-weather-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
-            if (diff >= MaxTimeDifference || ReadFromCache) {
+            if (diff < MaxTimeDifference || ReadFromCache) {
                 callback(true, cacheData)
                 return
             }
