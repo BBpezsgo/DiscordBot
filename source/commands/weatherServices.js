@@ -40,7 +40,7 @@ const URLs = {
 const request = require("request");
 
 const ReadFromCache = false
-const MaxTimeDifference = 1000
+const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
 
 /** @param {(result: ({
  *   location: {
