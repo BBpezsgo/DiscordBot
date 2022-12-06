@@ -85,19 +85,29 @@ async function CreateNews(message) {
             NewsContent = NewsContent.substring(0, NewsContent.length - 9).trim()
         }
 
-        if (NewsContent.substring(NewsContent.split('\n')[0].length).trim().length > 0) {
-            try {
+        try {
+            if (NewsContent.substring(NewsContent.split('\n')[0].length).trim().length > 0) {
                 embed.setTitle(NewsContent.split('\n')[0].trim())
                 NewsContent = NewsContent.substring(NewsContent.split('\n')[0].length).trim()
-            } catch (e) { }
-        }
+            }
+        } catch (e) { }
 
         embed.setURL('https://crossout.net/en/news/')
         if (message.attachments.size > 0) {
             embed.setImage(message.attachments.first().url)
+        } else if (message.embeds.length > 0) {
+            if (message.embeds[0].image !== null) {
+                embed.setImage(message.embeds[0].image.url)
+            } else if (message.embeds[0].thumbnail !== null) {
+                embed.setThumbnail(message.embeds[0].thumbnail.url)
+            }
+        } else if (message.embeds[0].thumbnail !== null) {
+            embed.setThumbnail(message.embeds[0].thumbnail.url)
         }
 
-        embed.setDescription(NewsContent)
+        if (NewsContent.trim().length > 0) {
+            embed.setDescription(NewsContent)
+        }
         embed.setFooter({ text: '• ' + NewsType })
     } else if (message.author.id == '813398275305898014') { // Warzone 2100
         embed.setAuthor({ name: 'Warzone 2100', iconURL: 'https://wz2100.net/img/warzone2100.large.png', url: 'https://wz2100.net/' })
