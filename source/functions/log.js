@@ -215,6 +215,9 @@ class LogManager {
 
         this.scriptLoadingText = ''
 
+        /** @type {{ message: string, type: 'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR', timestamp: number }[]} */
+        this.logs = []
+
         if (bot != null && statesManager != null) {
             if (enabled == false) { return }
             this.timer = setInterval(async () => {
@@ -484,10 +487,22 @@ class LogManager {
             }
             txt += FixedWidth(buttonsText, window.width) + '\n'
         } else {
+            if (this.logs.length > 0) {
+                txt += '\n'
+                txt += FixedWidth('───── Logs', window.width) + '\n'
+            }
+
+            this.logs.reverse()
             const remaingHeight = terminalSize.height - txt.split('\n').length - 4
             for (let i = 0; i < remaingHeight; i++) {
-                txt += FixedWidth('', window.width) + '\n'
+                const currentLogI = this.logs.length - i - 1
+                if (currentLogI < this.logs.length && currentLogI >= 0) {
+                    txt += FixedWidth(this.logs[currentLogI].message, window.width) + '\n'
+                } else {
+                    txt += FixedWidth('', window.width) + '\n'
+                }
             }
+            this.logs.reverse()
         }
 
         reprint(txt)
@@ -531,21 +546,46 @@ class LogManager {
      * @param {string} key
      */
     OnKeyDown(key) {
-        if (key == 'a') {
-            if (this.promtSelectedButton > 0) {
-                this.promtSelectedButton -= 1
+        if (this.CurrentlyPromt()) {
+            if (key == 'a') {
+                if (this.promtSelectedButton > 0) {
+                    this.promtSelectedButton -= 1
+                }
+            } else if (key == 'd') {
+                if (this.promtSelectedButton < this.promtButtons.length-1) {
+                    this.promtSelectedButton += 1
+                }
+            } else if (key == '\r') {
+                this.promtPressedButton = (this.promtButtons[this.promtSelectedButton])
             }
-        } else if (key == 'd') {
-            if (this.promtSelectedButton < this.promtButtons.length-1) {
-                this.promtSelectedButton += 1
+        } else {
+            if (key === '\u001b[A') { //  /\
+                
+            } else if (key === '\u001b[C') { //  >
+                
+            } else if (key === '\u001b[B') { //  \/
+                
+            } else if (key === '\u001b[D') { //  <
+                
             }
-        } else if (key == '\r') {
-            this.promtPressedButton = (this.promtButtons[this.promtSelectedButton])
         }
     }
 
     CurrentlyPromt() {
         return (this.promtMessage.length > 0)
+    }
+
+    /** @param {{ message: string, type: 'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR' }} message */
+    LogMessage(message) {
+        const trimmedMessage = message.message.trim()
+        if (trimmedMessage.includes('\n')) {
+            const lines = trimmedMessage.split('\n')
+            lines.forEach(line => {
+                this.logs.push({ message: line, type: message.type, timestamp: Date.now() })
+            })
+        } else {
+            this.logs.push({ message: trimmedMessage, type: message.type, timestamp: Date.now() })
+        }
     }
 }
 

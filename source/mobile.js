@@ -26,6 +26,11 @@ process.on('uncaughtException', function (err) {
 const LogManager = require('./functions/log')
 var logManager = new LogManager(null, null)
 
+/** @param {string} message @param {'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR'} messageType */
+function Log(message, messageType = 'NORMAL') {
+    logManager.LogMessage({ message: message, messageType })
+}
+
 process.__defineGetter__('stderr', function() { return fs.createWriteStream(__dirname + '\\node.error.log', {flags:'a'}) })
 
 
@@ -36,6 +41,9 @@ process.stdin.resume()
 
 process.stdin.on('data', function (b) {
     var s = b.toString('utf8')
+    
+    logManager.OnKeyDown(s)
+
     if (s === '\u0003') {
         process.stdin.pause()
         StopBot()
@@ -261,6 +269,8 @@ bot.on('error', error => {
 })
 
 bot.on('debug', debug => {
+    Log(debug, 'DEBUG')
+
     statesManager.ProcessDebugMessage(debug)
     const translatedDebug = TranslateMessage(debug)
 
@@ -272,6 +282,7 @@ bot.on('debug', debug => {
 })
 
 bot.on('warn', warn => {
+    Log(warn, 'WARNING')
     log(WARNING + ': ' + warn)
     statesManager.botLoadingState = 'Warning'
 })

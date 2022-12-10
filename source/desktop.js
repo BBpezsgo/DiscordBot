@@ -27,6 +27,12 @@ const startDateTime = new Date(Date.now())
 
 const LogManager = require('./functions/log')
 var logManager = new LogManager(null, null)
+
+/** @param {string} message @param {'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR'} messageType */
+function Log(message, messageType = 'NORMAL') {
+    logManager.LogMessage({ message: message, messageType })
+}
+
 logManager.scriptLoadingText = 'Loading script... (set process things)'
 
 process.__defineGetter__('stderr', function() { return fs.createWriteStream(__dirname + '\\node.error.log', { flags: 'a' }) })
@@ -40,9 +46,7 @@ process.stdin.resume()
 process.stdin.on('data', function (b) {
     var s = b.toString('utf8')
     
-    if (logManager.CurrentlyPromt()) {
-        logManager.OnKeyDown(s)
-    }
+    logManager.OnKeyDown(s)
 
     if (s === '\u0003') {
         if (botStopped == true) {
@@ -68,6 +72,7 @@ process.stdin.on('data', function (b) {
         key.button = null
         key.sequence = s
         key.buf = Buffer(key.sequence)
+
         if ((modifier & 96) === 96) {
             key.name = 'scroll'
             key.button = modifier & 1 ? 'down' : 'up'
@@ -238,6 +243,7 @@ const databaseIsSuccesfullyLoaded = database.LoadDatabase()
 
 if (!databaseIsSuccesfullyLoaded) {
     SystemLog('Error: Database not found')
+    Log("Can't read database!", 'ERROR')
     console.log(CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
     autoStartBot = false
 
@@ -374,6 +380,8 @@ bot.on('error', error => {
 })
 
 bot.on('debug', debug => {
+    Log(debug, 'DEBUG')
+    
     statesManager.ProcessDebugMessage(debug)
     const translatedDebug = TranslateMessage(debug)
 
@@ -385,6 +393,7 @@ bot.on('debug', debug => {
 })
 
 bot.on('warn', warn => {
+    Log(warn, 'WARNING')
     statesManager.botLoadingState = 'Warning'
 })
 
