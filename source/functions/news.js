@@ -101,8 +101,6 @@ async function CreateNews(message) {
             } else if (message.embeds[0].thumbnail !== null) {
                 embed.setThumbnail(message.embeds[0].thumbnail.url)
             }
-        } else if (message.embeds[0].thumbnail !== null) {
-            embed.setThumbnail(message.embeds[0].thumbnail.url)
         }
 
         if (NewsContent.trim().length > 0) {
@@ -234,7 +232,7 @@ class NewsManager {
     }
 
     /** @param {Discord.Client} client */
-    async OnStart(client,) {
+    async OnStart(client) {
         if (this.enableLogs) SystemLog('[NEWS]: Fetch processed news channel...')
         const fetchedProcessedNewsChannel = await client.channels.fetch(NewsProcessedChannel)
         if (fetchedProcessedNewsChannel == null) {
@@ -285,7 +283,7 @@ class NewsManager {
     }
     
     /** @param {Discord.Client} client */
-    TryProcessNext(client) {        
+    TryProcessNext(client) {
         const DeleteRawNewsMessages = true
 
         if (this.listOfNews.length > 0) {
@@ -311,8 +309,9 @@ class NewsManager {
                     if (this.enableLogs) SystemLog(`[NEWS]: Send processed news message...`)
                     if (newsMessage.NotifyRoleId.length == 0) {
                         newsChannel.send({ embeds: [embed] })
-                            .then(() => {
+                            .then((sendedMessage) => {
                                 if (DeleteRawNewsMessages) {
+                                    NewsManager.SaveRawNewsMessage(newsMessage.message, sendedMessage.id)
                                     if (this.enableLogs) SystemLog(`[NEWS]: Delete raw message...`)
                                     this.statesManager.News.LoadingText2 = 'Delete raw message...'
                                     newsMessage.message.delete()
@@ -331,8 +330,9 @@ class NewsManager {
                             })
                     } else {
                         newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
-                            .then(() => {
+                            .then((sendedMessage) => {
                                 if (DeleteRawNewsMessages) {
+                                    NewsManager.SaveRawNewsMessage(newsMessage.message, sendedMessage.id)
                                     if (this.enableLogs) SystemLog(`[NEWS]: Delete raw message...`)
                                     this.statesManager.News.LoadingText2 = 'Delete raw message...'
                                     newsMessage.message.delete()
@@ -377,6 +377,40 @@ class NewsManager {
         if (message.channel.id == NewsIncomingChannel) {
             await this.ProcessMessage(message)
         }
+    }
+
+    /** @param {Discord.Message} message */
+    static SaveRawNewsMessage(message, sendedMessageID) {
+        var data = {
+            applicationId: message.applicationId,
+            activity: message.activity,
+            attachments: message.attachments.toJSON()[0],
+            author: {
+                bot: message.author.bot,
+                discriminator: message.author.discriminator,
+                id: message.author.id,
+                system: message.author.system,
+                username: message.author.username,
+            },
+            channelId: message.channelId,
+            cleanContent: message.cleanContent,
+            content: message.content,
+            components: message.components,
+            embeds: message.embeds,
+            id: message.id,
+            interaction: message.interaction,
+            system: message.system,
+            type: message.type,
+            url: message.url,
+            sendedMessageID: sendedMessageID,
+        }
+    
+        const d = new Date(Date.now())
+        var id = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${message.id}`
+        if (fs.existsSync('./news-archive/') !== true) {
+            fs.mkdirSync('./news-archive/')
+        }
+        fs.writeFileSync('./news-archive/' + id + '.json', JSON.stringify(data, null, ' '), 'utf-8')
     }
 }
 

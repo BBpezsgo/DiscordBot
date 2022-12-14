@@ -1,0 +1,47 @@
+.secondary {
+    color: #595959;
+}
+
+body a,
+.fakelink {
+    color: #005ae2;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+body a:hover,
+body a:active,
+body a:focus,
+.fakelink:hover,
+.fakelink:active,
+.fakelink:focus {
+    text-decoration: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        color: #e8eaed;
+        background: #202124;
+    }
+
+    body a,
+    .fakelink {
+        color: #8ab4f8;
+    }
+
+    .secondary {
+        color: #a9abaf;
+    }
+}
+
+.miniicon {
+    display: inline-block;
+    margin: 0 4px;
+    transform: translate(1px, 1px);
+}
+
+.logo {
+    display: inline-block;
+    margin-right: 8px;
+    transform: translate(0px, 8px);
+}

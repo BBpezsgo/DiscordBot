@@ -577,7 +577,7 @@ class LogManager {
 
     /** @param {{ message: string, type: 'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR' }} message */
     LogMessage(message) {
-        const trimmedMessage = message.message.trim()
+        const trimmedMessage = (message.message === undefined) ? 'undefined' : message.message.trim()
         if (trimmedMessage.includes('\n')) {
             const lines = trimmedMessage.split('\n')
             lines.forEach(line => {

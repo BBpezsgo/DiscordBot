@@ -8,8 +8,14 @@ module.exports = async (command) => {
     const searchResult = await Tesco.SearchFor(command.options.get('search').value)
     if (searchResult.error) {
         await command.editReply({ content: `> \\❌ ${searchResult.error}` })
+        return
     }
 
+    if (searchResult.result === undefined) {
+        await command.editReply({ content: `> \\❌ Recived nothing` })
+        return
+    }
+    
     /** @type {(Discord.APIEmbed | Discord.JSONEncodable<Discord.APIEmbed>)[]} */
     const embeds = []
     searchResult.result.forEach(item => {
