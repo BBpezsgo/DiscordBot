@@ -29,6 +29,11 @@ export namespace MET {
         humidity: number
         precipitation: number
     }
+
+    type ResultSnowReport = {
+        location: string
+        depth: number | 'patches'
+    }[]
 }
 
 export type Page =
@@ -68,3 +73,4 @@ export type CountyID  =
 export function GetMainAlerts(page: Page): Promise<ResultMain[]>
 export function GetCountyAlerts(countyID: CountyID, day: CountyDays): Promise<ResultCounty>
 export function GetMainWeather(forceDownload = false): Promise<ResultMainWeather>
+export function GetSnowReport(forceDownload = false): Promise<ResultSnowReport>

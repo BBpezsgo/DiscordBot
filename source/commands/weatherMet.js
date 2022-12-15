@@ -21,6 +21,10 @@ function SaveCache(cacheName, data) {
 /** @returns {{date: number, data: any}} */
 function LoadCache(cacheName) {
     if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath) }
+    if (!fs.existsSync(basePath + `${cacheName}.json`)) {
+        fs.writeFileSync(basePath + `${cacheName}.json`, JSON.stringify({ date: 0, data: null }, undefined, ' '), { encoding: 'utf-8' })
+        return { date: 0, data: null }
+    }
     return JSON.parse(fs.readFileSync(basePath + `${cacheName}.json`, { encoding: 'utf-8' }))
 }
 
@@ -267,40 +271,30 @@ async function GetMainWeather(forceDownload = false) {
 
 async function GetSnowReport(forceDownload = false) {
     const cache = LoadCache('snow-report')
-
     if (forceDownload) { }
     else if (Date.now() - cache.date < 5 * 60 * 1000)
     { return cache.data }
-
     const dataRaw = await DownloadAsync(UrlPaths.SnowReport)
-    const doc_tbody = new JSDOM(dataRaw).window.document.body.querySelector('table.tbl-def1>tbody')
-    const rows = doc_tbody.querySelectorAll('tr')
+    const tables = new JSDOM(dataRaw).window.document.body.querySelectorAll('.def-tbl.au, .def-tbl.mo')
     var data = []
-    rows.forEach((row, i) => {
-        data[i] = {}
-        data[i]['time'] = row.querySelector('th>a').textContent.trim()
-        data[i]['time_stamp'] = new Date(data[i]['time']).getTime()
-        row.querySelectorAll('td').forEach((c_, j) => {
-            const cell = c_
-            if (j === 0) {
-                data[i]['temp'] = Number.parseInt(cell.textContent.trim())
-            } else if (j === 2) {
-                data[i]['wind_dir'] = cell.textContent.trim()
-            } else if (j === 3) {
-                data[i]['wind_sp'] = Number.parseInt(cell.textContent.trim())
-            } else if (j === 4) {
-                data[i]['gust'] = Number.parseInt(cell.textContent.trim())
-            } else if (j === 5) {
-                data[i]['pressure'] = Number.parseInt(cell.textContent.trim())
-            } else if (j === 6) {
-                data[i]['humidity'] = Number.parseInt(cell.textContent.trim())
-            } else if (j === 7) {
-                data[i]['precipitation'] = Number.parseFloat(cell.textContent.trim())
+    tables.forEach(table => {
+        const rows = table.querySelectorAll('tr')
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i]
+            const cols = row.querySelectorAll('td')
+            data[i-1] = {}
+            data[i-1]['location'] = cols[0].textContent
+            const depthInt = parseInt(cols[1].textContent)
+
+            if(!isNaN(depthInt) && cols[1].textContent === '' + depthInt) {
+                data[i-1]['depth'] = depthInt
+            } else {
+                data[i-1]['depth'] = cols[1].textContent
             }
-        })
+        }
     })
     SaveCache(`snow-report`, data)
     return data
 }
 
-module.exports = { CountyIDs, Pages, CountyDays, GetMainAlerts, GetCountyAlerts, GetMainWeather }
+module.exports = { CountyIDs, Pages, CountyDays, GetMainAlerts, GetCountyAlerts, GetMainWeather, GetSnowReport }

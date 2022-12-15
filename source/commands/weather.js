@@ -299,13 +299,14 @@ const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
 const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 /**
- * @param {WeatherServices.MSN.WeatherResult} MsnWeather Msn weather data
- * @param {WeatherServices.OpenWeatherMap.WeatherResult} OpenweatherWeather Openweather weather data
- * @param {MoonPhase[]} data2 Moon data
- * @param {WeatherServices.OpenWeatherMap.PollutionResult} OpenweatherPollution Openweather pollution data
- * @param {WeatherAlertsService.MET.ResultCounty[]} MetAlerts
+ @param {WeatherServices.MSN.WeatherResult} MsnWeather Msn weather data
+ @param {WeatherServices.OpenWeatherMap.WeatherResult} OpenweatherWeather Openweather weather data
+ @param {MoonPhase[]} data2 Moon data
+ @param {WeatherServices.OpenWeatherMap.PollutionResult} OpenweatherPollution Openweather pollution data
+ @param {WeatherAlertsService.MET.ResultCounty[]} MetAlerts
+ @param {WeatherAlertsService.MET.ResultSnowReport} MetSnowReport
  */
-function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution, MetAlerts, msnIsCache, openweathermapWeatherIsCache) {
+function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution, MetAlerts, msnIsCache, openweathermapWeatherIsCache, MetSnowReport) {
     const current = MsnWeather.current
     const embed = new Discord.EmbedBuilder()
         .setColor('#00AE86')
@@ -345,6 +346,22 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         
         if (visibilityValue !== 10)
         { description += '\n' + `${EmojiPrefix}👁️ ${visibilityValue} km látótávolság` }
+
+        var snowDepth = null
+        for (let i = 0; i < MetSnowReport.length; i++) {
+            if (MetSnowReport[i].location === 'Békéscsaba') {
+                snowDepth = MetSnowReport[i].depth
+                break
+            }           
+        }
+
+        if (snowDepth !== null) {
+            if (snowDepth === 'patches') {
+                description += '\n' + `${EmojiPrefix}⛄ Helyenként hófoltok`
+            } else if (snowDepth !== 0) {
+                description += '\n' + `${EmojiPrefix}⛄ ${snowDepth} cm hó`
+            }
+        }
 
         console.log(MetAlerts[0])
         if (MetAlerts[0] !== null) {
@@ -492,7 +509,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
     }
 
     embed.addFields({
-        name: '📈 Grafikon:',
+        name: '\n📈 Grafikon:',
         value: 'Minimum-, maximum hőmérséklet és csapadék',
         inline: false
     })
@@ -686,7 +703,7 @@ module.exports = async (command, privateCommand, earth = true) => {
                     catch (e)
                     { alerts.push(null) }
 
-                    const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts, msnIsCache, openweathermapWeatherIsCache)
+                    const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts, msnIsCache, openweathermapWeatherIsCache, await WeatherAlertsService.GetSnowReport())
                     try {
                         const attachmentPath = await CreateGraph(msnWeather[0], openweathermapWeather, MoonPhases)
                         command.editReply({ embeds: [embed],

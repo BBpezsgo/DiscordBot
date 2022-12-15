@@ -67,6 +67,8 @@ function weatherSkytxt(skyTxt) {
     } else if (skyTxt === 'Mostly Sunny') {
         return 'Nagy részben derült'
     } else if (skyTxt === 'Light Rain and Snow') {
+        return 'Könnyű havaseső'
+    } else if (skyTxt === 'Rain and Snow') {
         return 'Havaseső'
     } else if (skyTxt === 'Mostly Clear') {
         return 'Nagy részben derült'
@@ -467,6 +469,8 @@ function weatherSkytextIcon(skyTxt, useMoon) {
         return '🌨️'
     } else if (skyTxt === 'Light Snow') {
         return '🌨️'
+    } else if (skyTxt === 'Rain and Snow') {
+        return '🌨️'
     } else if (skyTxt === 'Mostly Sunny') {
         return '🌤️'
     } else if (skyTxt === 'Light Rain and Snow') {
@@ -655,6 +659,7 @@ function MetAlert_DegreeIconNameToText(IconName) {
 
 const MetAlert_TypeIcons = {
     'fog1.gif': '🌫️',
+    'ts1.gif': '⚡',
 }
 
 const MetAlert_DegreeIconNames = {
@@ -663,6 +668,7 @@ const MetAlert_DegreeIconNames = {
 
 const MetAlert_TypeNames = {
     'dense fog': 'Sűrű köd',
+    'thunderstorm': 'Zivatar',
 }
 
 module.exports = {

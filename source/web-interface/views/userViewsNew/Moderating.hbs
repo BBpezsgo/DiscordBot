@@ -161,24 +161,30 @@
                         {{channel.type}}
                     </td>
                 </tr>
-                <tr class="hide-null-{{channel.unarchivable}}">
+                {{#if channel.unarchivable includeZero=true}}
+                <tr>
                     <td width="25%" class="Item">Unarchivable:</td>
                     <td colspan="2">
                         <img width="16" height="16" src="/imagesNew/bool-{{channel.unarchivable}}.png">
                     </td>
                 </tr>
+                {{/if}}
+                {{#if channel.userLimit includeZero=true}}
                 <tr>
                     <td width="25%" class="Item">User limit:</td>
                     <td colspan="2">
                         {{channel.userLimit}}
                     </td>
                 </tr>
-                <tr class="hide-null-{{channel.videoQualityMode}}">
+                {{/if}}
+                {{#if channel.videoQualityMode includeZero=true}}
+                <tr>
                     <td width="25%" class="Item">Video quality mode:</td>
                     <td colspan="2">
                         {{channel.videoQualityMode}}
                     </td>
                 </tr>
+                {{/if}}
                 <tr>
                     <td width="25%" class="Item">Viewable:</td>
                     <td colspan="2">
