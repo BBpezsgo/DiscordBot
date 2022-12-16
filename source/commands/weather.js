@@ -372,8 +372,8 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
                     const alert = MetAlerts[0].alerts[i]
                     var result = ''
                     
-                    if (MetAlert_TypeIcons[alert.degreeIcon] !== undefined) {
-                        result += `${EmojiPrefix}${MetAlert_TypeIcons[alert.degreeIcon]} `
+                    if (MetAlert_TypeIcons[alert.typeIcon] !== undefined) {
+                        result += `${EmojiPrefix}${MetAlert_TypeIcons[alert.typeIcon]} `
                     } else {
                         result += `||${alert.typeIcon}|| `
                     }
