@@ -384,7 +384,11 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
                         result += `||${alert.degreeIcon}|| `
                     }
 
-                    result += alert.Name.toLowerCase()
+                    if (MetAlert_TypeNames[alert.Name.toLowerCase()] !== undefined) {
+                        result += MetAlert_TypeNames[alert.Name.toLowerCase()].toLowerCase()
+                    } else {
+                        result += alert.Name.toLowerCase()
+                    }
 
                     description += '\n' + result
                 }
