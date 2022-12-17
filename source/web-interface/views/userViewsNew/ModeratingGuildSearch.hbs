@@ -231,6 +231,7 @@
                     <td style="padding:0 2px;word-break:break-all">
                         <span class="fake-link" onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">{{this.name}}</span>
                         {{#if nsfw}}<span class="tag">NSFW</span>{{/if}}
+                        {{#if isAfk}}<span class="tag">AFK</span>{{/if}}
                     </td>
                     <td style="padding:0 2px;word-break:break-all">
                         {{this.id}}
@@ -263,6 +264,234 @@
             </tbody>
         </table>
     </div>
+
+	<div class="container loading-effect">
+		<h2>Members</h2>
+        <table border="1" cellspacing="0">
+            <tbody>
+                <tr>
+                    <td class="ListM" style="width: 100%;"></td>
+                    <td class="ListM">
+                        <b>ID</b>
+                    </td>
+                    <td class="ListM">
+                        <b>Created At</b>
+                    </td>
+                    <td>
+                        
+                    </td>
+                    <td class="ListM">
+                        <b>Hash</b>
+                    </td>
+                </tr>
+                {{#each members}}
+                <tr>
+                    <td style="padding:0 4px 4px 4px;">
+                        <div style="display: inline-block; transform: translate(-2px, 4px);">
+                            {{#if avatarUrlSmall}}
+                            <div class="tooltip">
+                                <img src="{{avatarUrlSmall}}" width="16" height="16" title="Display Avatar" style="border-radius: 8px;">
+                                <span class="tooltiptext">
+                                    <img src="{{avatarUrlBig}}">
+                                </span>
+                            </div>      
+                            {{else}}
+                            {{#if user.avatarUrlSmall}}
+                            <div class="tooltip">
+                                <img src="{{user.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 8px;">
+                                <span class="tooltiptext">
+                                    <img src="{{user.avatarUrlBig}}">
+                                </span>
+                            </div>
+                            {{else}}
+                            {{#if user.defaultAvatarUrl}}
+                            <img src="{{user.defaultAvatarUrl}}" width="16" height="16" title="Default avatar" style="border-radius: 8px;">
+                            {{else}}
+                            <img src="/imagesNew/default-avatar.png" width="16" height="16" title="Avatar can't be loaded" style="border-radius: 8px; background-color: #fff3; opacity: .7;">
+                            {{/if}}
+                            {{/if}}
+                            {{/if}}
+                        </div>
+
+                        <span title="{{#if nickname}}Nickname{{else}}Username{{/if}}">{{#if nickname}}{{nickname}}{{else}}{{user.username}}{{/if}}</span>{{#if user.discriminator}}<span style="color: #999;" title="Discriminator">#{{user.discriminator}}</span>{{/if}}
+                        
+                        {{#if user.bot}}<span class="tag">BOT</span>{{/if}}
+                        {{#if user.system}}<span class="tag">System</span>{{/if}}
+                        
+                        {{#if isOwner}}
+                        <span class="user-badge" title="Owner">
+                            <img src="../imagesNew/userBadges/Server_Crown_badge.png">
+                        </span>
+                        {{/if}}
+
+                        {{#if user.flags.HypeSquadOnlineHouse1}}
+                        <span class="user-badge">
+                            <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">
+                        </span>
+                        {{/if}}
+
+                        {{#if user.flags.HypeSquadOnlineHouse2}}
+                        <span class="user-badge">
+                            <img src="https://static.wikia.nocookie.net/discord/images/2/27/Hypesquad_brilliance_badge.png">
+                        </span>
+                        {{/if}}
+
+                        {{#if user.flags.HypeSquadOnlineHouse3}}
+                        <span class="user-badge">
+                            <img src="https://static.wikia.nocookie.net/discord/images/c/ca/Hypesquad_balance_badge.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if user.flags.Staff}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/Discord-staff.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if user.flags.BugHunterLevel1}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/Bug_hunter_badge.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if user.flags.BugHunterLevel2}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/Bug_buster_badge.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if user.flags.CertifiedModerator}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/Discord_Certified_Moderator.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if user.flags.Partner}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/DiscordPartnerBadge.svg">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if false}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/Early_supporter_badge.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if false}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/HypeSquad_Event_Badge.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if false}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/New_badge.svg">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if false}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/Nitro_badge.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if false}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/SupportsCommandsBadge.png">
+                        </span>
+                        {{/if}}
+                        
+                        {{#if VerifiedDeveloper}}
+                        <span class="user-badge">
+                            <img src="../imagesNew/userBadges/Verified_developer_badge.png">
+                        </span>
+                        {{/if}}
+
+                        {{#if cache}}
+                        <img src="/imagesNew/offline.png" width="12" height="12" title="From Cache" alt="Cache Icon" style="transform: translateY(2px); opacity: 50%;">
+                        {{/if}}
+
+                        {{#if user.haveDatabase}}
+                        <img src="/imagesNew/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
+                        {{/if}}
+
+                        {{#if user.hexAccentColor}}
+                        <div style="
+                            width: 16px;
+                            height: 16px;
+                            border: 1px solid black;
+                            border-radius: 3px;
+                            background-color: {{hexAccentColor}};
+                            float: right;
+                            transform: translateY(4px);
+                        " title="Accent color">
+                        {{/if}}
+                    </td>
+                    <td>
+                        {{id}}
+                    </td>
+                    <td>
+                        <span title="{{user.createdAt}}">{{user.createdAtText}}</span>
+                    </td>
+                    <td>
+                        <button class="btn-fetch" onclick="Post('/Guild/Member/Fetch?guild={{../server.id}}&id={{id}}', event, () => { Reload() })" title="Fetch"></button>
+                    </td>
+                    <td>
+                        <!--<img width="16" height="16" src="/imagesNew/bool-{{user.haveHash}}.png" style="transform: translateY(3px);">-->
+                        {{#if user.haveHash}}
+                        <input type="text" value="{{user.hash}}" readonly style="width: 100px;">
+                        {{else}}
+                        <form action="/userViews/GenerateHash" method="post"
+                            style="margin: 0; display: inline-block;"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                            <input type="submit" value="Generate">
+                        </form>
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+                {{#if server.membersNotFetched}}
+                <tr>
+                    <td colspan="5">{{server.membersNotFetched}} members are not fetched</td>
+                </tr>
+                {{/if}}
+                {{#if server.membersNotVisible}}
+                <tr>
+                    <td colspan="5">{{server.membersNotVisible}} members are not visible</td>
+                </tr>
+                {{/if}}
+            </tbody>
+        </table>
+        
+		<h2>Fetch Member</h2>
+
+        <form action="/Guild/Member/Fetch" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Guild/Member/Fetch?guild={{server.id}}&id=' + document.getElementById('fetch-member-id').value, event, () => {
+                    Reload()
+                }, 'fetch-member-error')
+            ">
+            <input type="text" name="id" id="fetch-member-id" minlength="18" maxlength="18" required>
+            <input type="submit" value="Fetch Member">
+        </form>
+        <p style="color: #b32d2d;" id="fetch-member-error"></p>
+        
+		<h2>Fetch All Members</h2>
+
+        <form action="/Guild/Member/FetchAll" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Guild/Member/FetchAll?guild={{server.id}}', event, () => {
+                    Reload()
+                }, 'fetch-member-all-error')
+            ">
+            <input type="submit" value="Fetch All Members">
+        </form>
+        <p style="color: #b32d2d;" id="fetch-member-all-error"></p>
+	</div>
     
 	<div class="container loading-effect">
 		<h2>Emojis</h2>

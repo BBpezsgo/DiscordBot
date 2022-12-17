@@ -149,6 +149,10 @@
                             </div>
                         </div>
                         <span title="Username">{{name}}</span>
+                        
+                        {{#if haveDatabase}}
+                        <img src="/imagesNew/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
+                        {{/if}}
                     </td>
                     <td style="padding:0 4px">
                         {{id}}

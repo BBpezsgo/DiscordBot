@@ -227,7 +227,7 @@ class WebInterfaceManager {
     }
 
     /** @param {Discord.User} user */
-    Get_UserJson(user) {
+    Get_UserJson(user) {        
         const userJson = {
             defaultAvatarUrl: user.defaultAvatarURL,
             avatarUrlSmall: user.avatarURL({ size: 16 }),
@@ -258,9 +258,10 @@ class WebInterfaceManager {
             discriminator: user.discriminator,
             system: user.system,
             username: user.username,
-            haveHash: (GetHash(user.id) != null && GetHash(user.id) != undefined),
+            haveHash: (GetHash(user.id) !== null && GetHash(user.id) !== undefined),
             hash: '' + GetHash(user.id),
-            createdAtText: user.createdAt.getFullYear() + '. ' + user.createdAt.getMonth() + '. ' + user.createdAt.getDate() + '.'
+            createdAtText: user.createdAt.getFullYear() + '. ' + user.createdAt.getMonth() + '. ' + user.createdAt.getDate() + '.',
+            haveDatabase: this.database.dataBasic[user.id] !== undefined,        
         }
         if (user.flags !== undefined && user.flags !== null) {            
             userJson.flags.BotHTTPInteractions = user.flags.has('BotHTTPInteractions')
@@ -520,6 +521,7 @@ class WebInterfaceManager {
                         typeText: GetTypeText(child.type),
                         typeUrl: GetTypeUrl(child.type),
                         position: child.position,
+                        isAfk: guild.afkChannelId === child.id,
                         commands: ['Fetch'],
                     }
 
@@ -564,6 +566,7 @@ class WebInterfaceManager {
                     parentId: channel.parentId,
                     typeText: GetTypeText(channel.type),
                     typeUrl: GetTypeUrl(channel.type),
+                    isAfk: guild.afkChannelId === channel.id,
                     commands: ['Fetch'],
                 }
 
@@ -870,7 +873,11 @@ class WebInterfaceManager {
             splash: g.splash,
 
             available: g.available,
-            large: g.large
+            large: g.large,
+
+            membersNotFetched: g.memberCount - g.members.cache.size,
+            membersNotVisible: null,
+
             // partnered: g.partnered,
             // verified: g.verified,
         }
@@ -892,8 +899,57 @@ class WebInterfaceManager {
                 createdAt: GetDate(emoji.createdAt)
             })
         })
+        
+        const members = []
+        g.members.cache.forEach((member) => {
+            members.push({
+                id: member.id,
+                nickname: member.nickname,
+                displayName: member.displayName,
+                avatarUrlSmall: member.displayAvatarURL({ size: 16 }),
+                avatarUrlBig: member.displayAvatarURL({ size: 128 }),
+                bannable: member.bannable,
+                kickable: member.kickable,
+                manageable: member.manageable,
+                moderatable: member.moderatable,
+                isOwner: member.id === g.ownerId,
+                user: this.Get_UserJson(member.user),
+            })
+        })
 
-        this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError, emojis: emojis })
+        const membersSaved = CacheManager.GetMembers(this.client, guild.id)
+        
+        for (let i = 0; i < membersSaved.length; i++) {
+            const memberSaved = membersSaved[i]
+            var found = false
+            for (let j = 0; j < members.length; j++) {
+                const member = members[j]
+                if (member.id == memberSaved.id) {
+                    found = true
+                    break
+                }
+            }
+            if (!found) {
+                members.push({
+                    id: memberSaved.id,
+                    nickname: memberSaved.nickname,
+                    /*displayName: memberSaved.displayName,
+                    avatarUrlSmall: memberSaved.displayAvatarURL({ size: 16 }),
+                    avatarUrlBig: memberSaved.displayAvatarURL({ size: 128 }),
+                    bannable: memberSaved.bannable,
+                    kickable: memberSaved.kickable,
+                    manageable: memberSaved.manageable,
+                    moderatable: memberSaved.moderatable,*/
+                    isOwner: memberSaved.id === g.ownerId,
+                    // user: this.Get_UserJson(memberSaved.user),
+                    cache: true
+                })
+            }
+        }
+
+        guild.membersNotVisible = g.memberCount - members.length
+
+        this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, members: members, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError, emojis: emojis })
     }
 
     RenderPage_Moderating(req, res) {
@@ -1287,6 +1343,40 @@ class WebInterfaceManager {
             .then(() => {
                 res.status(200).send({ message: 'ok' })
                 CacheManager.SaveUsers(this.client)
+            })
+            .catch((error) => {
+                res.status(200).send(error)
+            })
+        })
+
+        this.app.post('/Guild/Member/FetchAll', (req, res) => {
+            const guild = this.client.guilds.cache.get(req.query.guild)
+            if (guild === undefined || guild === null) {
+                res.status(200).send({ message: 'Guild not found' })
+                return
+            }
+
+            guild.members.list()
+            .then(() => {
+                res.status(200).send({ message: 'ok' })
+                CacheManager.SaveMembers(this.client, guild)
+            })
+            .catch(async (error) => {
+                res.status(200).send(error)
+            })
+        })
+
+        this.app.post('/Guild/Member/Fetch', (req, res) => {
+            const guild = this.client.guilds.cache.get(req.query.guild)
+            if (guild === undefined || guild === null) {
+                res.status(200).send({ message: 'Guild not found' })
+                return
+            }
+
+            guild.members.fetch(req.query.id)
+            .then(() => {
+                res.status(200).send({ message: 'ok' })
+                CacheManager.SaveMembers(this.client, guild)
             })
             .catch((error) => {
                 res.status(200).send(error)

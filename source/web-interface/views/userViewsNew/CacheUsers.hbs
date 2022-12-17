@@ -138,7 +138,11 @@
                         {{/if}}
 
                         {{#if cache}}
-                        <img src="/imagesNew/offline.png" width="12" height="12" title="Cache" alt="Cache" style="transform: translateY(2px); opacity: 50%;">
+                        <img src="/imagesNew/offline.png" width="12" height="12" title="From Cache" alt="Cache Icon" style="transform: translateY(2px); opacity: 50%;">
+                        {{/if}}
+
+                        {{#if haveDatabase}}
+                        <img src="/imagesNew/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
                         {{/if}}
 
                         {{#if hexAccentColor}}

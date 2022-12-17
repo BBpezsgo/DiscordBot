@@ -20,7 +20,7 @@ function Post(url, event, callback, errorLabelID) {
             }
             try {
                 const res = JSON.parse(xmlHttp.responseText)
-                if (res.message === 'ok') {
+                if (res.message === 'ok' || res.message === 'kind of okay') {
                     console.log('Success')
                     if (callback !== undefined) {
                         callback(xmlHttp.responseText)

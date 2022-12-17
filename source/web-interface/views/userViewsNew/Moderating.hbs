@@ -195,40 +195,15 @@
 		</table>
 	</div>
     
-	<div class="container loading-effect">
-        <h2>Send Message</h2>
-		<table style="width: 100%;">
-            <tbody>
-                <tr>
-                    <td colspan="3">
-                        <form action="/Message/Send" method="post"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
-                            <input type="text" name="channel" value="{{channel.id}}" style="display: none;">
+	<div class="container loading-effect">        
+        <h2>Messages</h2>
 
-                            <textarea name="content" rows="2" cols="60" maxlength="2000" placeholder="Content" required></textarea><br>
-                        
-                            <input type="checkbox" id="tts" name="tts" value="tts">
-                            <label for="tts">Tts</label><br>
-
-                            <input type="reset" value="Reset">
-                            <input type="submit" value="Send">
-
-                            <p style="color: #f00" id="send-message-error"></p>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-		</table>
-	</div>
-    
-	<div class="container loading-effect">
-        <h2>Fetch Message</h2>
         <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
             onsubmit="
                 event.preventDefault()
                 Post('/Message/Fetch?id=' + document.getElementById('fetch-msg-id').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
             ">
-            <input type="text" name="id" value="" id="fetch-msg-id">
+            <input type="text" name="id" value="" id="fetch-msg-id" required minlength="18" maxlength="18">
             <input type="submit" value="Fetch">
         </form>
         <!--
@@ -243,10 +218,7 @@
         </form>
         -->
         <p style="color: #b32d2d;" id="fetch-msg-error"></p>
-	</div>
-    
-	<div class="container loading-effect">
-        <h2>Messages</h2>
+
 		<table style="width: 100%;">
             <tbody>
                 <tr>
@@ -355,6 +327,30 @@
                                 {{/each}}
                             </tbody>
                         </table>
+                    </td>
+                </tr>
+            </tbody>
+		</table>
+        
+        <h2>Send Message</h2>
+		<table style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td colspan="3">
+                        <form action="/Message/Send" method="post"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
+                            <input type="text" name="channel" value="{{channel.id}}" style="display: none;">
+
+                            <textarea name="content" rows="2" cols="60" maxlength="2000" placeholder="Content" required></textarea><br>
+                        
+                            <input type="checkbox" id="tts" name="tts" value="tts">
+                            <label for="tts">Tts</label><br>
+
+                            <input type="reset" value="Reset">
+                            <input type="submit" value="Send">
+
+                            <p style="color: #f00" id="send-message-error"></p>
+                        </form>
                     </td>
                 </tr>
             </tbody>
