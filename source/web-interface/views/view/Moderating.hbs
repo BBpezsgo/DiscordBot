@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <link href="/styles/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/styles/css_main.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/scripts/commonNew.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        .material-icons {
+            font-size: 1.2em;
+            transform: translate(0px, 3px);
+            user-select: none;
+        }
+
+        a:hover .material-icons::after {
+            content: '';
+            display: block;
+            width: 1em;
+            height: 1px;
+            background-color: currentColor;
+            transform: translateY(-2px);
+        }
+
+        img.badge {
+            display: inline-block;
+            transform: translateY(4px);
+        }
+    </style>
+</head>
+
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
+   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+    
+	<h1>Moderating</h1>
+    
+	<div class="container loading-effect">
+        <h2>
+            <form action="/dcbot/view/Moderating.html/Server/Back" method="post"
+                style="display: inline-block; margin-right: 20px;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                <input type="submit" value="" class="btn-tool btn-tool-back">
+            </form>
+            <span style="color: #aaa">Channel</span>
+            {{channel.name}}
+            <span style="color: #aaa">in guild</span>
+            <div class="tooltip" style="transform: translateY(10px);">
+                <img class="server-icon circle-32" src="{{server.iconUrlSmall}}" width="32" height="32" title="{{server.nameAcronym}}">
+                <span class="tooltiptext" style="font-weight: normal;">
+                    <img src="{{server.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
+                </span>
+            </div>
+            {{server.name}}
+        </h2>
+		<table style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td width="25%" class="Item">ID:</td>
+                    <td colspan="2">
+                        {{channel.id}}
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.topic}}">
+                    <td width="25%" class="Item">Topic:</td>
+                    <td colspan="2">
+                        <p style="word-wrap: break-word; max-width: 300px; overflow: auto; line-break: anywhere;">
+                            {{channel.topic}}</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">Created at:</td>
+                    <td colspan="2">
+                        {{channel.createdAt}}
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.memberCount}}">
+                    <td width="25%" class="Item">Member count:</td>
+                    <td colspan="2">
+                        {{channel.memberCount}}
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.archived}}">
+                    <td width="25%" class="Item">Archived:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.archived}}.png">
+                    </td>
+                </tr>
+                <tr class="show-{{channel.archived}}">
+                    <td width="25%" class="Item">Archived at:</td>
+                    <td colspan="2">
+                        {{channel.archivedAt}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">Deletable:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.deletable}}.png">
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.full}}">
+                    <td width="25%" class="Item">Full:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.full}}.png">
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.invitable}}">
+                    <td width="25%" class="Item">Invitable:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.invitable}}.png">
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.joinable}}">
+                    <td width="25%" class="Item">Joinable:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.joinable}}.png">
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.locked}}">
+                    <td width="25%" class="Item">Locked:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.locked}}.png">
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">Manageable:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.manageable}}.png">
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.messageCount}}">
+                    <td width="25%" class="Item">Message count:</td>
+                    <td colspan="2">
+                        {{channel.messageCount}}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">Nsfw:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.nsfw}}.png">
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.sendable}}">
+                    <td width="25%" class="Item">Sendable:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.sendable}}.png">
+                    </td>
+                </tr>
+                <tr class="hide-null-{{channel.speakable}}">
+                    <td width="25%" class="Item">Speakable:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.speakable}}.png">
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" class="Item">Type:</td>
+                    <td colspan="2">
+                        {{channel.type}}
+                    </td>
+                </tr>
+                {{#if channel.unarchivable includeZero=true}}
+                <tr>
+                    <td width="25%" class="Item">Unarchivable:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.unarchivable}}.png">
+                    </td>
+                </tr>
+                {{/if}}
+                {{#if channel.userLimit includeZero=true}}
+                <tr>
+                    <td width="25%" class="Item">User limit:</td>
+                    <td colspan="2">
+                        {{channel.userLimit}}
+                    </td>
+                </tr>
+                {{/if}}
+                {{#if channel.videoQualityMode includeZero=true}}
+                <tr>
+                    <td width="25%" class="Item">Video quality mode:</td>
+                    <td colspan="2">
+                        {{channel.videoQualityMode}}
+                    </td>
+                </tr>
+                {{/if}}
+                <tr>
+                    <td width="25%" class="Item">Viewable:</td>
+                    <td colspan="2">
+                        <img width="16" height="16" src="/images/bool-{{channel.viewable}}.png">
+                    </td>
+                </tr>
+            </tbody>
+		</table>
+	</div>
+    
+	<div class="container loading-effect">        
+        <h2>Messages</h2>
+
+        <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Message/Fetch?id=' + document.getElementById('fetch-msg-id').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
+            ">
+            <input type="text" name="id" value="" id="fetch-msg-id" required minlength="18" maxlength="18">
+            <input type="submit" value="Fetch">
+        </form>
+        <!--
+        <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Message/Fetch?count=' + document.getElementById('fetch-msg-count').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
+            ">
+            <h4>By Count</h4>
+            <input type="number" min="1" max="15" name="count" value="15" id="fetch-msg-count">
+            <input type="submit" value="Fetch">
+        </form>
+        -->
+        <p style="color: #b32d2d;" id="fetch-msg-error"></p>
+
+		<table style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td width="698" align="center" colspan="2">
+                        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td class="ListM"></td>
+                                    <td class="ListM" style="width: 100%;"></td>
+                                    <td class="ListM">
+                                        <b>ID</b>
+                                    </td>
+                                    <td class="ListM">
+                                        <b>Created At</b>
+                                    </td>
+                                    <td class="ListM">
+                                        <b>Type</b>
+                                    </td>
+                                    <td class="ListM" colspan="2"></td>
+                                </tr>
+                                {{#each messages}}
+                                <tr>
+                                    {{#if types.ChannelPinnedMessage}}
+                                    <td style="padding:0 2 0 2;word-break:break-all" colspan="2">
+                                        <div class="tooltip">
+                                            <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 50%;">
+                                            <span class="tooltiptext">
+                                                <img src="{{author.avatarUrlBig}}" style="transform: translateY(4px);">
+                                            </span>
+                                        </div>
+                                        <span>{{author.username}}</span><span style="opacity: .7;">#{{author.discriminator}}</span>
+
+                                        <span>pinned a message</span>
+
+                                        <a href="{{url}}" target="_blank" title="Message Link"><i class="material-icons" style="margin-left: 4px;">link</i></a>
+                                        
+                                        {{#if crosspostable}}<span class="tag" style="float: right;">Crosspostable</span>{{/if}}
+                                        {{#if system}}<span class="tag" style="float: right;">System</span>{{/if}}
+                                        {{#if pinned}}
+                                        <span class="user-badge" style="float: right;">
+                                            <img src="/images/pinned.png" title="Pinned">
+                                        </span>
+                                        {{/if}}
+                                    </td>
+                                    {{else}}
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        <div class="tooltip">
+                                            <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 50%;">
+                                            <span class="tooltiptext">
+                                                <img src="{{author.avatarUrlBig}}" width="32" height="32" style="transform: translateY(4px);">
+                                                <h2 style="display: inline">{{author.username}}</h2><h2 style="display: inline; opacity: .7;">#{{author.discriminator}}</h2>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{this.cleanContent}}
+
+                                        <a href="{{url}}" target="_blank" title="Message Link"><i class="material-icons" style="margin-left: 4px;">link</i></a>
+
+                                        {{#if crosspostable}}<span class="tag" style="float: right;">Crosspostable</span>{{/if}}
+                                        <!--
+                                        {{#if editable}}
+                                        <span class="user-badge" style="float: right;">
+                                            <img src="/images/edit.png" title="Editable">
+                                        </span>
+                                        {{/if}}
+                                        -->
+                                        {{#if system}}<span class="tag" style="float: right;">System</span>{{/if}}
+                                        {{#if pinned}}
+                                        <span class="user-badge" style="float: right;">
+                                            <img src="/images/pinned.png" title="Pinned">
+                                        </span>
+                                        {{/if}}
+                                    </td>
+                                    {{/if}}
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{this.id}}
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{this.createdAt}}
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{this.type}}
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{#if deletable}}
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Delete?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
+                                            <img src="/images/delete.png" title="Delete">
+                                        </button>
+                                        {{/if}}
+                                    </td>
+                                    <td style="padding:0 2 0 2;word-break:break-all">
+                                        {{#if pinned}}
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Unpin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
+                                            <img src="/images/pinned.png" title="Unpin">
+                                        </button>
+                                        {{else}}
+                                        {{#if pinnable}}
+                                        <button style="float: right;" class="btn-custom" onclick="Post('/Message/Pin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
+                                            <img src="/images/pin.png" title="Pin">
+                                        </button>
+                                        {{/if}}
+                                        {{/if}}
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+		</table>
+        
+        <h2>Send Message</h2>
+		<table style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td colspan="3">
+                        <form action="/Message/Send" method="post"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
+                            <input type="text" name="channel" value="{{channel.id}}" style="display: none;">
+
+                            <textarea name="content" rows="2" cols="60" maxlength="2000" placeholder="Content" required></textarea><br>
+                        
+                            <input type="checkbox" id="tts" name="tts" value="tts">
+                            <label for="tts">Tts</label><br>
+
+                            <input type="reset" value="Reset">
+                            <input type="submit" value="Send">
+
+                            <p style="color: #f00" id="send-message-error"></p>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+		</table>
+	</div>
+    
+    <script src="/scripts/functions.js"></script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
+    <script src="/scripts/loadEffect.js"></script>
+</body>
+
+</html>

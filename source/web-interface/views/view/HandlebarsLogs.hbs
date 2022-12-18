@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
+    <link href="/styles/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/styles/css_main.css" rel="stylesheet" type="text/css">
+    <link href="/styles/tree-logs.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/scripts/commonNew.js" type="text/javascript"></script>
+    <script language="javascript" src="/scripts/tree-default.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
+   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+
+    <table id="autoWidth" style="width: 598px;">
+        <tbody>
+            <tr>
+                <td class="h1" colspan="3">Handlebars Log</td>
+            </tr>
+            <tr>
+                <td class="blue" colspan="3"></td>
+            </tr>
+            <tr>
+                <td>
+                    <ul id="myUL">
+                        {{#each logs}}
+                        <li style="margin-bottom: 10px;">
+                            <span class="caret log-file" style="font-weight: bold;">{{dateText}} <img class="miniicon show-{{seriousLogs}}" src="/images/serious.png"></span>
+                            <ul class="nested">
+                                {{#each groups}}
+                                <li>
+                                    <span class="caret" style="font-weight: bold;">
+                                        {{startTime}}
+                                        -
+                                        <span class="show-{{this.running}}">
+                                            <img class="miniicon" src="/images/running.png">
+                                        </span>
+                                        <span class="show-invert-{{this.running}}">
+                                            {{endTime}}
+                                        </span>
+                                        <img class="miniicon show-{{this.seriousLogs}}" src="/images/serious.png">
+                                    </span>
+                                    <ul class="nested">
+                                        <li>
+                                            <img class="miniicon" src="/images/log.png">
+                                            <b>Logs:</b>
+                                        </li>
+                                        {{#each logs}}
+                                        <li>
+                                            {{#if haveDetails}}
+                                            <span class="caret">
+                                                <span class="show-{{sameTime}}">
+                                                    <b style="margin-left: 55px;"><span
+                                                            style="opacity: .3; margin: 0px 5px;">• • •</span>:</b>
+                                                </span>
+                                                <span class="show-invert-{{sameTime}}">
+                                                    <b style="margin-left: 36px;">{{time}}:</b>
+                                                </span>
+                                                <span style="user-select: text;">
+                                                    {{#if helperMessage}}
+                                                    {{helperMessage}}
+                                                    {{^}}
+                                                    {{message}}
+                                                    {{/if}}
+                                                </span>
+                                            </span>
+                                            <ul class="nested">
+                                                {{#if IP}}
+                                                <li>
+                                                    <img class="miniicon" src="/images/ip.png">
+                                                    <b>Ip: {{IP}}</b>
+                                                </li>
+                                                {{/if}}
+                                                {{#if url}}
+                                                <li>
+                                                    <img class="miniicon" src="/images/url.png">
+                                                    <b>Url: <a href="{{url}}">{{url}}</a></b>
+                                                </li>
+                                                {{/if}}
+                                                {{#if method}}
+                                                <li>
+                                                    <img class="miniicon" src="/images/event.png">
+                                                    <b>Method: {{method}}</b>
+                                                </li>
+                                                {{/if}}
+                                            </ul>
+                                            {{^}}
+                                            <span class="show-{{sameTime}}">
+                                                <b style="margin-left: 92px;"></b>
+                                            </span>
+                                            <span class="show-invert-{{sameTime}}" style="user-select: none;">
+                                                <b style="margin-left: 36px;">{{time}}:</b>
+                                            </span>
+                                            <span style="user-select: text;">
+                                                {{#if helperMessage}}
+                                                {{helperMessage}}
+                                                {{^}}
+                                                {{message}}
+                                                {{/if}}
+                                            </span>
+                                            {{/if}}
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                    {{/each}}
+                                </li>
+                            </ul>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

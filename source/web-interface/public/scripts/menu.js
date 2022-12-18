@@ -1,3 +1,108 @@
+const MenuList = [
+    {
+        url: "Status",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.status,
+    },
+    {
+        url: "Process",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.process,
+    },
+    {
+        url: "LogError",
+        displayLevel: 0,
+        directoryLevel: 1,
+        name: str_menu.log,
+    },
+    {
+        url: "LogError",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.logErrors,
+    },
+    {
+        url: "LogSystem",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.logSystem,
+    },
+    {
+        url: "LogHandlebars",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.logHandlebars,
+    },
+    {
+        url: "CacheEmojis",
+        displayLevel: 0,
+        directoryLevel: 1,
+        name: str_menu.cache,
+    },
+    {
+        url: "CacheEmojis",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.cacheEmojis,
+    },
+    {
+        url: "CacheUsers",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.cacheUsers,
+    },
+    {
+        url: "CacheChannels",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.cacheChannels,
+    },
+    {
+        url: "CacheServers",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.cacheServers,
+    },
+    {
+        url: "Application",
+        displayLevel: 0,
+        directoryLevel: 1,
+        name: str_menu.application,
+    },
+    {
+        url: "Application",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.application,
+    },
+    {
+        url: "ApplicationCommands",
+        displayLevel: 0,
+        directoryLevel: 2,
+        name: str_menu.commands,
+    },
+    {
+        url: "Moderating",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.moderating,
+    },
+    {
+        url: "Database",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.database,
+    },
+    {
+        url: "Testing",
+        displayLevel: 0,
+        directoryLevel: 0,
+        name: str_menu.testing,
+    }
+]
+
 var menuList = new Array(
     //	url							display	level			string
     //	url:	url to visite when click on this menu item. it's not full path, but only filename.
@@ -6,46 +111,47 @@ var menuList = new Array(
     //	directory level: 0: directory has no branches;  1: directory level 1;  2:level 2;   and so on
     
     // Status
-    "Status", 0, 0, str_menu.status,
-    // Cache
-    "CacheEmojis", 0, 1, str_menu.cache,
-    "CacheEmojis", 0, 2, str_menu.cacheEmojis,
-    "CacheUsers", 0, 2, str_menu.cacheUsers,
-    "CacheChannels", 0, 2, str_menu.cacheChannels,
-    "CacheServers", 0, 2, str_menu.cacheServers,
-    // Application
-    "Application", 0, 1, str_menu.application,
-    "Application", 0, 2, str_menu.application,
-    "ApplicationCommands", 0, 2, str_menu.commands,
+    "status", 0, 0, str_menu.status,
     // Process
-    "Process", 0, 0, str_menu.process,
-    // Database
-    "Database", 0, 0, str_menu.database,
-    // Moderating
-    "Moderating", 0, 0, str_menu.moderating,
+    "process", 0, 0, str_menu.process,
     // Logs
-    "LogError", 0, 1, str_menu.log,
-    "LogError", 0, 2, str_menu.logErrors,
-    "LogSystem", 0, 2, str_menu.logSystem,
-    "LogHandlebars", 0, 2, str_menu.logHandlebars,
+    "log-error", 0, 1, str_menu.log,
+    "log-error", 0, 2, str_menu.logErrors,
+    "log-system", 0, 2, str_menu.logSystem,
+    "log-handlebars", 0, 2, str_menu.logHandlebars,
+    "---", 0, 0, "---",
+
+    // Cache
+    "cache-emojis", 0, 1, str_menu.cache,
+    "cache-emojis", 0, 2, str_menu.cacheEmojis,
+    "cache-users", 0, 2, str_menu.cacheUsers,
+    "cache-channels", 0, 2, str_menu.cacheChannels,
+    "cache-servers", 0, 2, str_menu.cacheServers,
+    // Application
+    "application", 0, 1, str_menu.application,
+    "application", 0, 2, str_menu.application,
+    "application-commands", 0, 2, str_menu.commands,
+    // Moderating
+    "moderating", 0, 0, str_menu.moderating,
+
+    "---", 0, 0, "---",
+
+    // Database
+    "database", 0, 0, str_menu.database,
+
+    // "---", 0, 0, "---",
 
     // Testing
-    "Testing", 0, 0, str_menu.testing,
+    // "testing", 0, 0, str_menu.testing,
 );
 
 var map = new Array();
 
-function menuInit(option) {
-    for (var i = 0; i < option.length; i++) {
-        if (option[i] == 0) {
-            continue;
-        }
-        for (var n = 0; n < menuList.length; n += 4) {
-            if (true) { //if (menuList[n] == option[i]) {
-                menuList[n + 1] = 1;
-            }
-        }
+function menuInit() {
+    for (var n = 0; n < menuList.length; n += 4) {
+        menuList[n + 1] = 1
     }
+        
     n = menuList.length - 4;
     var url = "";
     var level = 0;
@@ -88,7 +194,51 @@ function menuDisplay() {
             display = "none";
         }
         var power = (menuList[n + 2] > 0) ? (menuList[n + 2] - 1) : 0;
-        document.write('<ol id=ol' + i + ' class=' + className + ' style="user-select: none; display:' + display + '; background-position:2px;PADDING-LEFT:2px;"><A id=a' + i + ' href="/userViews/' + menuList[n] + '" target=mainFrame class=L1 onClick="doClick(' + i + ');">' + menuList[n + 3] + '</a></ol>');
+        
+        if (menuList[n] === '---') {
+            const newOL = document.createElement('hr')
+            newOL.id = `hr${i}`
+            document.getElementsByTagName('menu')[0].appendChild(newOL)
+        } else {
+            const haveIcon = ['application','cache-emojis','database','log-error','moderating','process','status','testing'].includes(menuList[n])
+
+            const newOL = document.createElement('ol')
+            newOL.id = `ol${i}`
+            newOL.className = className
+            newOL.style.display = display
+            newOL.onclick = (e) => {
+                newA.click()
+            }
+            document.getElementsByTagName('menu')[0].appendChild(newOL)
+
+            if (haveIcon) {
+                const newIMG = document.createElement('img')
+                newIMG.src = `/images/menu-icons/${menuList[n]}.svg`
+                newOL.appendChild(newIMG)
+            }
+
+            const newA = document.createElement('a')
+            newA.id = `a${i}`
+            newA.href = `/dcbot/view/${menuList[n]}.html`
+            newA.target = 'mainFrame'
+            newA.className = 'L1'
+            newA.setAttribute('data', `${i}-${n}`)
+            newA.onclick = (e) => {
+                /** @type {HTMLAnchorElement} */
+                const target = e.target
+                doClick(Number.parseInt(target.getAttribute('data').split('-')[0]), Number.parseInt(menuList[target.getAttribute('data').split('-')[1]]))
+            }
+            newA.innerText = menuList[n + 3]
+            newOL.appendChild(newA)
+
+            if (menuList[n] === 'log-error') {
+                const newIMG = document.createElement('div')
+                newIMG.id = 'status-icon-error'
+                newIMG.className = 'status-icon'
+                newOL.appendChild(newIMG)
+            }
+        }
+
         //added by zqq,07.11.1
         //map.push(menuList[n+2]);
         map[map.length] = menuList[n + 2];
@@ -98,17 +248,30 @@ function menuDisplay() {
 
 }
 
+
+function UnselectAll() {
+    const l = menuList.length / 4 // document.getElementsByTagName('ol').length
+    for (var i = 0; i < l; i++) {
+        try {
+            document.getElementById('ol' + i).classList.remove('selected')
+        } catch (ex) {
+            continue
+        }
+    }
+}
+
 function collapseAll() {
-    for (var i = 0; ; i++) {
+    const l = menuList.length / 4 //document.getElementsByTagName('ol').length
+    for (var i = 0; i < l; i++) {
         try {
             if (map[i] > 1) {
                 document.getElementById('ol' + i).style.display = "none";
             }
-            if (document.getElementById('ol' + i).className == "minus") {
+            if (document.getElementById('ol' + i).classList.contains("minus")) {
                 document.getElementById('ol' + i).className = "plus";
             }
         } catch (ex) {
-            break
+            continue
         }
     }
     for (var i = 0; i < document.links.length; i++) {
@@ -124,7 +287,7 @@ function expandBranch(n) {
         branch = document.getElementById('ol' + n);
         l = map[n];
         index = n;
-        if (branch.className == "plus") {
+        if (branch.classList.contains("plus")) {
             branch.className = "minus";
         }
         else {
@@ -155,11 +318,13 @@ function expandBranch(n) {
     }
 }
 
-/** @param {number} n */
-function doClick(n) {
+/** @param {number} n @param {string} menuName */
+function doClick(n, menuName) {
     collapseAll();
-    obj = document.getElementById('ol' + n);
-    if (obj.className == "plus") {
+    UnselectAll();
+    
+    const obj = document.getElementById('ol' + n);
+    if (obj.classList.contains("plus")) {
         document.getElementById('a' + (n + 1)).className = "L2";
     }
     else {
@@ -169,10 +334,15 @@ function doClick(n) {
         expandBranch(n);
     }
 
-
     if (!UrlExists(document.getElementById('a' + n).href)) {
         parent.window.frames["mainFrame"].src = ""
         parent.window.frames["mainFrame"].document.body.innerHTML = Page404
+    }
+
+    if (map[n] == 1) {
+        document.getElementById('ol' + (n + 1)).classList.add('selected')
+    } else {
+        document.getElementById('ol' + n).classList.add('selected')
     }
 }
 

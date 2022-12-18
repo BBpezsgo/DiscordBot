@@ -107,15 +107,15 @@ const WsStatusText = [
 ]
 
 const NsfwLevel = {
-    DEFAULT: 'Default',
-    EXPLICIT: 'Explicit',
-    SAFE: 'Safe',
-    AGE_RESTRICTED: 'Age restricted',
+    0: 'Default',
+    1: 'Explicit',
+    2: 'Safe',
+    3: 'Age restricted',
 }
 
 const MFALevel = {
-    NONE: 'None',
-    ELEVATED: 'Elevated',
+    0: 'None',
+    1: 'Elevated',
 }
 
 const VerificationLevel = {

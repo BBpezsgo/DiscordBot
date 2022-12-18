@@ -1,5 +1,5 @@
 const express = require('express')
-const { engine } = require('express-handlebars')
+const ExpressHandlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
@@ -20,7 +20,7 @@ const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
 const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
-const { MessageType } = require('discord.js')
+const { MessageType, GuildVerificationLevel } = require('discord.js')
 const process = require('process')
 const archivePath = 'D:/Mappa/Discord/DiscordOldData/'
 
@@ -52,7 +52,7 @@ class WebInterfaceManager {
         if (clientType != 'MOBILE') { HbStart() }
 
         this.app = express()
-        this.app.engine('hbs', engine({
+        this.app.engine('hbs', ExpressHandlebars.engine({
             extname: '.hbs',
             defaultLayout: 'layout',
             layoutsDir: __dirname + '/layouts'
@@ -98,7 +98,7 @@ class WebInterfaceManager {
             }
 
             res.set('WWW-Authenticate', 'Basic realm="401"')
-            res.status(401).render('userViews/401')
+            res.status(401).render('view/401')
         })
 
         setInterval(() => {
@@ -325,8 +325,8 @@ class WebInterfaceManager {
          * createdAt: string;
          * joinedAt: string;
          * memberCount: number;
-         * nsfwLevel: Discord.GuildMFALevel;
-         * verificationLevel: Discord.GuildVerificationLevel;
+         * nsfwLevel: string;
+         * verificationLevel: GuildVerificationLevel;
          * splash: string | null;
          * available: boolean;
          * large: boolean;
@@ -347,8 +347,8 @@ class WebInterfaceManager {
                 joinedAtText: server.joinedAt.getFullYear() + '. ' + server.joinedAt.getMonth() + '. ' + server.joinedAt.getDate() + '.',
 
                 memberCount: server.memberCount,
-                nsfwLevel: server.nsfwLevel,
-                mfaLevel: server.mfaLevel,
+                nsfwLevel: NsfwLevel[server.nsfwLevel],
+                mfaLevel: MFALevel[server.mfaLevel],
                 verificationLevel: server.verificationLevel,
                 splash: server.splash,
 
@@ -598,11 +598,7 @@ class WebInterfaceManager {
      * @param {object | undefined} options
      */
     RenderPage(req, res, viewName, options = undefined) {
-        if (req.url.includes('?new') || true) {
-            res.render(`userViewsNew/${viewName}`, options)
-        } else {
-            res.render(`userViews/${viewName}`, options)
-        }
+        res.render(`view/${viewName}`, options)
     }
 
     RenderPage_Status(req, res) {
@@ -1125,6 +1121,7 @@ class WebInterfaceManager {
     }
 
     RegisterHandlebarsRoots() {
+        /*
         this.app.get('/hb', (req, res) => {
             const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
@@ -1145,100 +1142,40 @@ class WebInterfaceManager {
             } else {
                 res.status(404).send("Not found")
             }
-        })
-        
-        this.app.get('/hbnew', (req, res) => {
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-
-            const view = req.query.view
-
-            if (view == 'default' || view == null || view == undefined) {
-                res.render('defaultNew', { title: GetTitle() })
-            } else {
-                res.status(404).send("Not found")
-            }
-        })
-
-        const GetTitle = () => {
-            var icon = ''
-
-            if (this.ClientType == 'DESKTOP') {
-                icon = '🖥️'
-            } else if (this.ClientType == 'MOBILE') {
-                icon = '📱'
-            } else if (this.ClientType == 'RASPBERRY') {
-                icon = '🍓'
-            }
-
-            var statusIcon = ' - ❌'
-            if (this.client.ws.shards.size > 0) {
-                if (this.client.ws.shards.first().status == 0) {
-                    statusIcon = ''
-                }
-            }
-
-            return 'Discord BOT' + statusIcon + ' - ' + icon
-        }
-
-        this.app.get('/title', (req, res) => {
-            res.status(200).send(GetTitle())
-        })
-
-        this.app.get('/json/status', (req, res) => {
-            this.ipToRate[req.ip] -= 1
-
-            var uptime = new Date(0)
-            uptime.setSeconds(this.client.uptime / 1000)
-            uptime.setHours(uptime.getHours() - 1)
-
-            var shardState = 'none'
-            if (this.client.ws.shards.size > 0) {
-                shardState = WsStatusText[this.client.ws.shards.first().status]
-            }
-
-            res.status(200).send({
-                heartbeat: this.statesManager.heartbeat,
-                hello: this.statesManager.hello,
-                loadingProgressText: this.statesManager.loadingProgressText,
-                botLoadingState: this.statesManager.botLoadingState,
-                botLoaded: this.statesManager.botLoaded,
-                botReady: this.statesManager.botReady,
-                Shard_IsLoading: this.statesManager.Shard.IsLoading,
-                Shard_LoadingText: this.statesManager.Shard.LoadingText,
-                Shard_Error: this.statesManager.Shard.Error,
-                uptime: GetTime(uptime),
-                shardState: shardState,
-                ws: {
-                    ping: this.client.ws.ping.toString().replace('NaN', '-'),
-                    status: WsStatusText[this.client.ws.status],
-                },
-                systemUptime: GetTime(new Date(os.uptime() * 1000)),
-            })
-        })
-
-        this.app.get('/json/ping', (req, res) => {
-            this.ipToRate[req.ip] -= 1
-            
-            res.status(200).send()
-        })
+        })        
 
         this.app.get('/frames/top', (req, res) => {
             res.render('frames/top')
         })
 
-        this.app.get('/userViews/MenuRpm', (req, res) => {
-            res.render('userViews/MenuRpm')
+        this.app.get('/view/MenuRpm', (req, res) => {
+            res.render('view/MenuRpm')
+        })
+        */
+
+        //#region GET HTML
+
+        this.app.get('/dcbot/view/menu.html', (req, res) => {
+            res.render('view/Menu')
         })
 
-        this.app.get('/userViewsNew/MenuRpm', (req, res) => {
-            res.render('userViewsNew/MenuRpm')
-        })
-
-        this.app.get('/userViews/Status', (req, res) => {
+        this.app.get('/dcbot/view/status.html', (req, res) => {
             this.RenderPage_Status(req, res)
         })
 
-        this.app.get('/userViews/CacheEmojis', (req, res) => {
+        this.app.get('/dcbot/view/cache-users.html', (req, res) => {
+            this.RenderPage(req, res, 'CacheUsers', { users: this.Get_UsersCache() })
+        })
+
+        this.app.get('/dcbot/view/cache-channels.html', (req, res) => {
+            this.RenderPage_CacheChannels(req, res)
+        })
+
+        this.app.get('/dcbot/view/cache-servers.html', (req, res) => {
+            this.RenderPage(req, res, 'CacheServers', { servers: this.Get_ServersCache() })
+        })
+
+        this.app.get('/dcbot/view/cache-emojis.html', (req, res) => {
             var emojis = []
 
             this.client.emojis.cache.forEach(emoji => {
@@ -1259,19 +1196,7 @@ class WebInterfaceManager {
             this.RenderPage(req, res, 'CacheEmojis', { emojis: emojis })
         })
 
-        this.app.get('/userViews/CacheUsers', (req, res) => {
-            this.RenderPage(req, res, 'CacheUsers', { users: this.Get_UsersCache() })
-        })
-
-        this.app.get('/userViews/CacheChannels', (req, res) => {
-            this.RenderPage_CacheChannels(req, res)
-        })
-
-        this.app.get('/userViews/CacheServers', (req, res) => {
-            this.RenderPage(req, res, 'CacheServers', { servers: this.Get_ServersCache() })
-        })
-
-        this.app.get('/userViews/Application', (req, res) => {
+        this.app.get('/dcbot/view/application.html', (req, res) => {
             const app = this.client.application
 
             if (app == undefined || app == null) {
@@ -1296,12 +1221,11 @@ class WebInterfaceManager {
             this.RenderPage(req, res, 'Application', { app: newApp })
         })
 
-        this.app.get('/userViews/Process', (req, res) => {
+        this.app.get('/dcbot/view/process.html', (req, res) => {
             const uptime = new Date()
             uptime.setSeconds(Math.floor(process.uptime()))
 
             const proc = {
-
                 argv: process.argv,
                 connected: process.connected,
                 debugPort: process.debugPort,
@@ -1334,9 +1258,363 @@ class WebInterfaceManager {
             this.RenderPage(req, res, 'Process', { process: proc })
         })
 
-        this.app.get('/userViews/Testing', (req, res) => {
+        this.app.get('/dcbot/view/testing.html', (req, res) => {
             this.RenderPage(req, res, 'Testing')
         })
+
+        this.app.get('/dcbot/view/moderating.html', (req, res) => {
+            this.RenderPage_ModeratingSearch(req, res, '')
+        })
+
+        this.app.get('/dcbot/view/database.html', (req, res) => {
+            if (this.database == null || this.database == undefined) {
+                this.RenderPage(req, res, 'DatabaseNotSupported')
+            } else {
+                this.RenderPage_DatabaseSearch(req, res, '')
+            }
+        })
+
+        this.app.get('/dcbot/view/log-error.html', (req, res) => {
+            const data = fs.readFileSync('./node.error.log', 'utf8')
+            const lines = data.split('\n')
+
+            var linesProcessed = []
+
+            var isCrash = false
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i]
+                if (line.length < 2) { continue }
+                
+                /** @type {'none' | 'error' | 'crash' | 'warning'} */
+                var icon = 'none'
+                var type = 'none'
+                var title = 'none'
+                var isHeader = true
+
+                if (line == 'CRASH') {
+                    isCrash = true
+                    continue
+                }
+
+                if (isCrash === true) {
+                    icon = 'crash'
+                } else {
+                    icon = 'error'
+                }
+                
+                if (line.startsWith('Error: ')) {
+                    type = 'Error'
+                    title = line.replace('Error: ', '')
+                } else if (line.startsWith('AbortError: ')) {
+                    type = 'AbortError'
+                    title = line.replace('AbortError: ', '')
+                } else if (line.startsWith('DiscordAPIError[')) {
+                    type = 'DiscordAPIError'
+                    title = line.replace('DiscordAPIError', '')
+                } else if (line.startsWith('Error [')) {
+                    type = 'Error'
+                    title = line.replace('Error ', '')
+                } else if (line.startsWith('TypeError: ')) {
+                    type = 'TypeError'
+                    title = line.replace('TypeError: ', '')
+                } else if (line.startsWith('ReferenceError: ')) {
+                    type = 'ReferenceError'
+                    title = line.replace('ReferenceError: ', '')
+                } else if (line.startsWith('DiscordAPIError: ')) {
+                    type = 'DiscordAPIError'
+                    title = line.replace('DiscordAPIError: ', '')
+                } else if (line.startsWith('    at ')) {
+                    icon = 'none'
+                    type = 'none'
+                    isHeader = false
+
+                    const stactItem = line.replace('    at ', '')
+                    var filePath = ''
+                    const isFile = (stactItem.startsWith('C:\\'))
+                    if (isFile && stactItem.includes(':')) {
+                        filePath = stactItem.replace(':' + stactItem.split(':')[2], '')
+                        filePath = filePath.replace(':' + filePath.split(':')[2], '')
+                    }            
+
+                    title = 'at ' + stactItem
+                } else if (line.includes(' DeprecationWarning:')) {
+                    icon = 'warning'
+                    type = 'DeprecationWarning'
+
+                    var xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(':', '')
+                    xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(': ', '')
+
+                    title = xd
+                } else if (line.includes(' ExperimentalWarning:')) {
+                    icon = 'warning'
+                    type = 'ExperimentalWarning'
+
+                    var xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(':', '')
+                    xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(': ', '')
+
+                    title = xd
+                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
+                    icon = 'none'
+                    type = 'none'
+                    isHeader = false
+                    title = line
+                } else {
+                    icon = 'none'
+                    type = 'none'
+                    isHeader = false
+                    title = line
+                }
+                
+                linesProcessed.push({ icon: icon, type: type, title: title, id: i, isCrash: isCrash, isHeader: isHeader })
+
+                isCrash = false
+            }
+
+            /*
+
+            const errors = []
+            const warnings = []
+
+            var isCrash = false
+            var lastLine = ''
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i]
+                if (line.length < 2) { continue }
+                if (line == lastLine) { continue }
+                lastLine = ''
+
+                if (line == 'CRASH') {
+                    isCrash = true
+                } else if (line.startsWith('Error: ')) {
+                    errors.push({ type: 'Error', title: line.replace('Error: ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
+                    lastLine = line
+                } else if (line.startsWith('Error [')) {
+                    errors.push({ type: 'Error', title: line.replace('Error ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
+                    lastLine = line
+                } else if (line.startsWith('TypeError: ')) {
+                    errors.push({ type: 'TypeError', title: line.replace('TypeError: ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
+                    lastLine = line
+                } else if (line.startsWith('ReferenceError: ')) {
+                    errors.push({ type: 'ReferenceError', title: line.replace('ReferenceError: ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
+                    lastLine = line
+                } else if (line.startsWith('DiscordAPIError: ')) {
+                    errors.push({ type: 'DiscordAPIError', title: line.replace('DiscordAPIError: ', ''), id: i, isCrash: isCrash })
+                    isCrash = false
+                    lastLine = line
+                } else if (line.startsWith('    at ')) {
+                    if (errors[errors.length - 1].stack == undefined) {
+                        errors[errors.length - 1].stack = []
+                    }
+                    const stactItem = line.replace('    at ', '')
+                    var filePath = ''
+                    const isFile = (stactItem.startsWith('C:\\'))
+                    if (isFile && stactItem.includes(':')) {
+                        filePath = stactItem.replace(':' + stactItem.split(':')[2], '')
+                        filePath = filePath.replace(':' + filePath.split(':')[2], '')
+                    }
+                    errors[errors.length - 1].stack.push({
+                        raw: stactItem,
+                        isFile: isFile,
+                        filePath: filePath
+                    })
+                    isCrash = false
+                } else if (line.includes(' DeprecationWarning:')) {
+                    var xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(':', '')
+                    xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(': ', '')
+                    warnings.push({ type: 'DeprecationWarning', title: xd, id: i })
+                    isCrash = false
+                } else if (line.includes(' ExperimentalWarning:')) {
+                    var xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(':', '')
+                    xd = line.replace(line.replace(':'[0]), '')
+                    xd = xd.replace(': ', '')
+                    warnings.push({ type: 'ExperimentalWarning', title: xd, id: i })
+                    isCrash = false
+                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
+                    warnings[warnings.length - 1].info = 'Use `node --trace-deprecation ...` to show where the warning was created'
+                    isCrash = false
+                } else {
+                    if (errors.length > 0) {
+                        if (errors[errors.length - 1].info == undefined) {
+                            errors[errors.length - 1].info = [line]
+                        } else {
+                            errors[errors.length - 1].info.push(line)
+                        }
+                    }
+                    isCrash = false
+                }
+            }
+
+            this.RenderPage(req, res, 'ErrorLogs', { errors: errors, warnings: warnings })
+            
+            */
+
+            this.RenderPage(req, res, 'ErrorLogs', { logs: linesProcessed })
+        })
+
+        this.app.get('/dcbot/view/log-system.html', (req, res) => {
+            if (this.ClientType == 'MOBILE') {
+                this.RenderPage(req, res, 'SystemLogsNotSupported', {})
+            } else {
+                this.RenderPage(req, res, 'SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
+            }
+        })
+
+        this.app.get('/dcbot/view/log-handlebars.html', (req, res) => {
+            if (this.ClientType == 'MOBILE') {
+                this.RenderPage(req, res, 'HandlebarsLogsNotSupported', {})
+            } else {
+                this.RenderPage(req, res, 'HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
+            }
+        })
+
+        this.app.get('/dcbot/view/application-commands.html', (req, res) => {
+            if (this.client.guilds.cache.get('737954264386764812') == null) {
+                this.RenderPage(req, res, 'ApplicationUnavaliable')
+                return
+            }
+
+            this.RenderPage_Commands(req, res)
+        })
+
+        //#endregion
+
+        //#region GET JSON/TXT
+
+        this.app.get('/dcbot/application-commands-status.json', (req, res) => {
+            res.status(200).send(JSON.stringify({ creatingPercent: this.commandsCreatingPercent }))
+        })
+
+        const GetTitle = () => {
+            var icon = ''
+
+            if (this.ClientType == 'DESKTOP') {
+                icon = '🖥️'
+            } else if (this.ClientType == 'MOBILE') {
+                icon = '📱'
+            } else if (this.ClientType == 'RASPBERRY') {
+                icon = '🍓'
+            }
+
+            var statusIcon = ' - ❌'
+            if (this.client.ws.shards.size > 0) {
+                if (this.client.ws.shards.first().status == 0) {
+                    statusIcon = ''
+                }
+            }
+
+            return 'Discord BOT' + statusIcon + ' - ' + icon
+        }
+
+        this.app.get('/dcbot/title.txt', (req, res) => {
+            res.status(200).send(GetTitle())
+        })
+
+        this.app.get('/dcbot/status.json', (req, res) => {
+            this.ipToRate[req.ip] -= 1
+
+            var uptime = new Date(0)
+            uptime.setSeconds(this.client.uptime / 1000)
+            uptime.setHours(uptime.getHours() - 1)
+
+            var shardState = 'none'
+            if (this.client.ws.shards.size > 0) {
+                shardState = WsStatusText[this.client.ws.shards.first().status]
+            }
+
+            res.status(200).send({
+                heartbeat: this.statesManager.heartbeat,
+                hello: this.statesManager.hello,
+                loadingProgressText: this.statesManager.loadingProgressText,
+                botLoadingState: this.statesManager.botLoadingState,
+                botLoaded: this.statesManager.botLoaded,
+                botReady: this.statesManager.botReady,
+                Shard_IsLoading: this.statesManager.Shard.IsLoading,
+                Shard_LoadingText: this.statesManager.Shard.LoadingText,
+                Shard_Error: this.statesManager.Shard.Error,
+                uptime: GetTime(uptime),
+                shardState: shardState,
+                ws: {
+                    ping: this.client.ws.ping.toString().replace('NaN', '-'),
+                    status: WsStatusText[this.client.ws.status],
+                },
+                systemUptime: GetTime(new Date(os.uptime() * 1000)),
+            })
+        })
+
+        this.app.get('/dcbot/ping.json', (req, res) => {
+            this.ipToRate[req.ip] -= 1
+            
+            res.status(200).send()
+        })
+
+        this.app.get('/errors.json', (req, res) => {
+            const data = fs.readFileSync('./node.error.log', 'utf8')
+            const lines = data.split('\n')
+
+            var notificationIcon = 0
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i]
+                if (line.length < 2) { continue }
+                
+                if (line == 'CRASH') {
+                    if (notificationIcon < 4)
+                    { notificationIcon = 4 }
+                    break
+                } else if (line.startsWith('Error: ')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('DiscordAPIError[')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('Error [')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('TypeError: ')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('ReferenceError: ')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('DiscordAPIError: ')) {
+                    if (notificationIcon < 3)
+                    { notificationIcon = 3 }
+                } else if (line.startsWith('    at ')) {
+                    if (notificationIcon < 1)
+                    { notificationIcon = 1 }
+                } else if (line.includes(' DeprecationWarning:')) {
+                    if (notificationIcon < 2)
+                    { notificationIcon = 2 }
+                } else if (line.includes(' ExperimentalWarning:')) {
+                    if (notificationIcon < 2)
+                    { notificationIcon = 2 }
+                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
+                    if (notificationIcon < 1)
+                    { notificationIcon = 1 }    
+                } else {
+                    if (notificationIcon < 1)
+                    { notificationIcon = 1 }
+                }
+            }
+
+            res.status(200).send(JSON.stringify(notificationIcon))
+        })
+
+        //#endregion
+
+        //#region POST to Discord
 
         this.app.post('/User/Fetch', (req, res) => {
             this.client.users.fetch(req.query.id)
@@ -1568,6 +1846,83 @@ class WebInterfaceManager {
                 })
         })
 
+        this.app.post('/DiscordClient/Start', (req, res) => {
+            this.StartBot()
+        })
+
+        this.app.post('/DiscordClient/Stop', (req, res) => {
+            if (this.ClientType != 'MOBILE') {
+                SystemLog('Destroy bot by user (handlebars)')
+            }
+
+            this.StopBot()
+        })
+
+        this.app.post('/view/Commands/Delete', (req, res) => {
+            const commandID = req.body.id
+            DeleteCommand(this.client, commandID, () => {
+                this.RenderPage_Commands(req, res)
+            })
+        })
+
+        this.app.post('/view/Commands/Update', (req, res) => {
+            const commandID = req.body.id
+            Updatecommand(this.client, commandID, () => {
+                this.RenderPage_Commands(req, res)
+            })
+        })
+
+        this.app.post('/dcbot/view/Moderating.html/SendMessage', (req, res) => {
+            const channel = this.client.channels.cache.get(req.body.id)
+
+            if (channel !== undefined) {
+                if (channel.type === Discord.ChannelType.GuildText) {
+                    channel.send({ content: req.body.content, tts: req.body.tts })
+                        .then(() => {
+                            this.RenderPage_ModeratingSearch(req, res, '')
+                        })
+                        .catch((err) => {
+                            this.RenderPage_ModeratingSearch(req, res, '')
+                        })
+                    return
+                }
+            }
+
+            this.RenderPage_ModeratingSearch(req, res, '')
+        })
+
+        this.app.post('/dcbot/view/ApplicationCommands.html/Fetch', (req, res) => {
+            this.client.application.commands.fetch().finally(()=> {
+                this.client.guilds.cache.get('737954264386764812').commands.fetch().finally(() => {
+                    this.RenderPage_Commands(req, res)
+                })
+            })
+        })
+
+        this.app.post('/dcbot/view/ApplicationCommands.html/DeleteAll', (req, res) => {
+            this.commandsDeleting = true
+            DeleteCommandsSync(this.client, this.statesManager, (percent) => {
+                this.commandsDeletingPercent = percent
+            }, () => {
+                this.commandsDeleting = false
+            })
+            this.RenderPage_Commands(req, res)
+        })
+
+        this.app.post('/dcbot/view/ApplicationCommands.html/Createall', (req, res) => {
+            this.commandsCreating = true
+            CreateCommandsSync(this.client, this.statesManager, (percent) => {
+                this.commandsCreatingPercent = percent
+            }, () => {
+                this.commandsCreating = false
+            })
+            this.RenderPage_Commands(req, res)
+        })
+
+        //#endregion
+
+        //#region POST to Web Interface
+
         this.app.post('/Process/Exit', (req, res) => {
             if (this.ClientType != 'MOBILE') {
                 SystemLog('Exit by user (handlebars)')
@@ -1592,23 +1947,7 @@ class WebInterfaceManager {
             process.disconnect()
         })
 
-        this.app.post('/DiscordClient/Start', (req, res) => {
-            this.StartBot()
-        })
-
-        this.app.post('/DiscordClient/Stop', (req, res) => {
-            if (this.ClientType != 'MOBILE') {
-                SystemLog('Destroy bot by user (handlebars)')
-            }
-
-            this.StopBot()
-        })
-
-        this.app.get('/userViews/Moderating', (req, res) => {
-            this.RenderPage_ModeratingSearch(req, res, '')
-        })
-
-        this.app.post('/userViews/Moderating/Search', (req, res) => {
+        this.app.post('/dcbot/view/Moderating.html/Search', (req, res) => {
             const serverId = req.body.id
 
             if (this.client.guilds.cache.has(serverId)) {
@@ -1620,19 +1959,19 @@ class WebInterfaceManager {
             }
         })
 
-        this.app.post('/userViews/Moderating/Back', (req, res) => {
+        this.app.post('/dcbot/view/Moderating.html/Back', (req, res) => {
             this.moderatingSearchedServerId = ''
 
             this.RenderPage_ModeratingSearch(req, res, '')
         })
 
-        this.app.post('/userViews/Moderating/Server/Back', (req, res) => {
+        this.app.post('/dcbot/view/Moderating.html/Server/Back', (req, res) => {
             this.moderatingSearchedChannelId = ''
 
             this.RenderPage_ModeratingGuildSearch(req, res, '')
         })
 
-        this.app.post('/userViews/Moderating/Server/Search', (req, res) => {
+        this.app.post('/dcbot/view/Moderating.html/Server/Search', (req, res) => {
             const channelId = req.body.id
 
             if (this.client.channels.cache.has(channelId)) {
@@ -1644,15 +1983,7 @@ class WebInterfaceManager {
             }
         })
 
-        this.app.get('/userViews/Database', (req, res) => {
-            if (this.database == null || this.database == undefined) {
-                this.RenderPage(req, res, 'DatabaseNotSupported')
-            } else {
-                this.RenderPage_DatabaseSearch(req, res, '')
-            }
-        })
-
-        this.app.post('/userViews/Database/Search', (req, res) => {
+        this.app.post('/dcbot/view/Database.html/Search', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             const userId = req.body.id
@@ -1666,7 +1997,7 @@ class WebInterfaceManager {
             }
         })
 
-        this.app.post('/userViews/Database/Backup/All', (req, res) => {
+        this.app.post('/dcbot/view/Database.html/Backup/All', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             fs.readdir(this.database.backupFolderPath, (err, files) => {
@@ -1681,7 +2012,7 @@ class WebInterfaceManager {
             })
         })
 
-        this.app.post('/userViews/Database/Backup/One', (req, res) => {
+        this.app.post('/dcbot/view/Database.html/Backup/One', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             const file = req.body.filename
@@ -1694,7 +2025,7 @@ class WebInterfaceManager {
             }
         })
 
-        this.app.post('/userViews/Database/Back', (req, res) => {
+        this.app.post('/dcbot/view/Database.html/Back', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             this.databaseSearchedUserId = ''
@@ -1702,7 +2033,7 @@ class WebInterfaceManager {
             this.RenderPage_DatabaseSearch(req, res, '')
         })
 
-        this.app.post('/userViews/Database/Modify/Stickers', (req, res) => {
+        this.app.post('/dcbot/view/Database.html/Modify/Stickers', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataStickers[this.databaseSearchedUserId] != undefined) {
@@ -1721,7 +2052,7 @@ class WebInterfaceManager {
             }
         })
 
-        this.app.post('/userViews/Database/Modify/Backpack', (req, res) => {
+        this.app.post('/dcbot/view/Database.html/Modify/Backpack', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataBackpacks[this.databaseSearchedUserId] != undefined) {
@@ -1742,7 +2073,7 @@ class WebInterfaceManager {
             }
         })
 
-        this.app.post('/userViews/Database/Modify/Basic', (req, res) => {
+        this.app.post('/dcbot/view/Database.html/Modify/Basic', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
             if (this.databaseSearchedUserId.length > 0 && this.database.dataBasic[this.databaseSearchedUserId] != undefined) {
@@ -1758,349 +2089,31 @@ class WebInterfaceManager {
             }
         })
 
-        this.app.get('/userViews/LogError', (req, res) => {
-            const data = fs.readFileSync('./node.error.log', 'utf8')
-            const lines = data.split('\n')
-
-            var linesProcessed = []
-
-            var isCrash = false
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i]
-                if (line.length < 2) { continue }
-                
-                /** @type {'none' | 'error' | 'crash' | 'warning'} */
-                var icon = 'none'
-                var type = 'none'
-                var title = 'none'
-                var isHeader = true
-
-                if (line == 'CRASH') {
-                    isCrash = true
-                    continue
-                }
-
-                if (isCrash === true) {
-                    icon = 'crash'
-                } else {
-                    icon = 'error'
-                }
-                
-                if (line.startsWith('Error: ')) {
-                    type = 'Error'
-                    title = line.replace('Error: ', '')
-                } else if (line.startsWith('AbortError: ')) {
-                    type = 'AbortError'
-                    title = line.replace('AbortError: ', '')
-                } else if (line.startsWith('DiscordAPIError[')) {
-                    type = 'DiscordAPIError'
-                    title = line.replace('DiscordAPIError', '')
-                } else if (line.startsWith('Error [')) {
-                    type = 'Error'
-                    title = line.replace('Error ', '')
-                } else if (line.startsWith('TypeError: ')) {
-                    type = 'TypeError'
-                    title = line.replace('TypeError: ', '')
-                } else if (line.startsWith('ReferenceError: ')) {
-                    type = 'ReferenceError'
-                    title = line.replace('ReferenceError: ', '')
-                } else if (line.startsWith('DiscordAPIError: ')) {
-                    type = 'DiscordAPIError'
-                    title = line.replace('DiscordAPIError: ', '')
-                } else if (line.startsWith('    at ')) {
-                    icon = 'none'
-                    type = 'none'
-                    isHeader = false
-
-                    const stactItem = line.replace('    at ', '')
-                    var filePath = ''
-                    const isFile = (stactItem.startsWith('C:\\'))
-                    if (isFile && stactItem.includes(':')) {
-                        filePath = stactItem.replace(':' + stactItem.split(':')[2], '')
-                        filePath = filePath.replace(':' + filePath.split(':')[2], '')
-                    }            
-
-                    title = 'at ' + stactItem
-                } else if (line.includes(' DeprecationWarning:')) {
-                    icon = 'warning'
-                    type = 'DeprecationWarning'
-
-                    var xd = line.replace(line.replace(':'[0]), '')
-                    xd = xd.replace(':', '')
-                    xd = line.replace(line.replace(':'[0]), '')
-                    xd = xd.replace(': ', '')
-
-                    title = xd
-                } else if (line.includes(' ExperimentalWarning:')) {
-                    icon = 'warning'
-                    type = 'ExperimentalWarning'
-
-                    var xd = line.replace(line.replace(':'[0]), '')
-                    xd = xd.replace(':', '')
-                    xd = line.replace(line.replace(':'[0]), '')
-                    xd = xd.replace(': ', '')
-
-                    title = xd
-                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
-                    icon = 'none'
-                    type = 'none'
-                    isHeader = false
-                    title = line
-                } else {
-                    icon = 'none'
-                    type = 'none'
-                    isHeader = false
-                    title = line
-                }
-                
-                linesProcessed.push({ icon: icon, type: type, title: title, id: i, isCrash: isCrash, isHeader: isHeader })
-
-                isCrash = false
-            }
-
-            /*
-
-            const errors = []
-            const warnings = []
-
-            var isCrash = false
-            var lastLine = ''
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i]
-                if (line.length < 2) { continue }
-                if (line == lastLine) { continue }
-                lastLine = ''
-
-                if (line == 'CRASH') {
-                    isCrash = true
-                } else if (line.startsWith('Error: ')) {
-                    errors.push({ type: 'Error', title: line.replace('Error: ', ''), id: i, isCrash: isCrash })
-                    isCrash = false
-                    lastLine = line
-                } else if (line.startsWith('Error [')) {
-                    errors.push({ type: 'Error', title: line.replace('Error ', ''), id: i, isCrash: isCrash })
-                    isCrash = false
-                    lastLine = line
-                } else if (line.startsWith('TypeError: ')) {
-                    errors.push({ type: 'TypeError', title: line.replace('TypeError: ', ''), id: i, isCrash: isCrash })
-                    isCrash = false
-                    lastLine = line
-                } else if (line.startsWith('ReferenceError: ')) {
-                    errors.push({ type: 'ReferenceError', title: line.replace('ReferenceError: ', ''), id: i, isCrash: isCrash })
-                    isCrash = false
-                    lastLine = line
-                } else if (line.startsWith('DiscordAPIError: ')) {
-                    errors.push({ type: 'DiscordAPIError', title: line.replace('DiscordAPIError: ', ''), id: i, isCrash: isCrash })
-                    isCrash = false
-                    lastLine = line
-                } else if (line.startsWith('    at ')) {
-                    if (errors[errors.length - 1].stack == undefined) {
-                        errors[errors.length - 1].stack = []
-                    }
-                    const stactItem = line.replace('    at ', '')
-                    var filePath = ''
-                    const isFile = (stactItem.startsWith('C:\\'))
-                    if (isFile && stactItem.includes(':')) {
-                        filePath = stactItem.replace(':' + stactItem.split(':')[2], '')
-                        filePath = filePath.replace(':' + filePath.split(':')[2], '')
-                    }
-                    errors[errors.length - 1].stack.push({
-                        raw: stactItem,
-                        isFile: isFile,
-                        filePath: filePath
-                    })
-                    isCrash = false
-                } else if (line.includes(' DeprecationWarning:')) {
-                    var xd = line.replace(line.replace(':'[0]), '')
-                    xd = xd.replace(':', '')
-                    xd = line.replace(line.replace(':'[0]), '')
-                    xd = xd.replace(': ', '')
-                    warnings.push({ type: 'DeprecationWarning', title: xd, id: i })
-                    isCrash = false
-                } else if (line.includes(' ExperimentalWarning:')) {
-                    var xd = line.replace(line.replace(':'[0]), '')
-                    xd = xd.replace(':', '')
-                    xd = line.replace(line.replace(':'[0]), '')
-                    xd = xd.replace(': ', '')
-                    warnings.push({ type: 'ExperimentalWarning', title: xd, id: i })
-                    isCrash = false
-                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
-                    warnings[warnings.length - 1].info = 'Use `node --trace-deprecation ...` to show where the warning was created'
-                    isCrash = false
-                } else {
-                    if (errors.length > 0) {
-                        if (errors[errors.length - 1].info == undefined) {
-                            errors[errors.length - 1].info = [line]
-                        } else {
-                            errors[errors.length - 1].info.push(line)
-                        }
-                    }
-                    isCrash = false
-                }
-            }
-
-            this.RenderPage(req, res, 'ErrorLogs', { errors: errors, warnings: warnings })
-            
-            */
-
-            this.RenderPage(req, res, 'ErrorLogs', { logs: linesProcessed })
-        })
-
-        this.app.get('/json/errors', (req, res) => {
-            const data = fs.readFileSync('./node.error.log', 'utf8')
-            const lines = data.split('\n')
-
-            var notificationIcon = 0
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i]
-                if (line.length < 2) { continue }
-                
-                if (line == 'CRASH') {
-                    if (notificationIcon < 4)
-                    { notificationIcon = 4 }
-                    break
-                } else if (line.startsWith('Error: ')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
-                } else if (line.startsWith('DiscordAPIError[')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
-                } else if (line.startsWith('Error [')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
-                } else if (line.startsWith('TypeError: ')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
-                } else if (line.startsWith('ReferenceError: ')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
-                } else if (line.startsWith('DiscordAPIError: ')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
-                } else if (line.startsWith('    at ')) {
-                    if (notificationIcon < 1)
-                    { notificationIcon = 1 }
-                } else if (line.includes(' DeprecationWarning:')) {
-                    if (notificationIcon < 2)
-                    { notificationIcon = 2 }
-                } else if (line.includes(' ExperimentalWarning:')) {
-                    if (notificationIcon < 2)
-                    { notificationIcon = 2 }
-                } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
-                    if (notificationIcon < 1)
-                    { notificationIcon = 1 }    
-                } else {
-                    if (notificationIcon < 1)
-                    { notificationIcon = 1 }
-                }
-            }
-
-            res.status(200).send(JSON.stringify(notificationIcon))
-        })
-
-        this.app.get('/userViews/LogSystem', (req, res) => {
-            if (this.ClientType == 'MOBILE') {
-                this.RenderPage(req, res, 'SystemLogsNotSupported', {})
-            } else {
-                this.RenderPage(req, res, 'SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
-            }
-        })
-
-        this.app.get('/userViews/LogHandlebars', (req, res) => {
-            if (this.ClientType == 'MOBILE') {
-                this.RenderPage(req, res, 'HandlebarsLogsNotSupported', {})
-            } else {
-                this.RenderPage(req, res, 'HandlebarsLogs', { logs: HbGetLogs('192.168.1.100') })
-            }
-        })
-
-        this.app.post('/userViews/Log/Clear', (req, res) => {
+        this.app.post('/view/Log/Clear', (req, res) => {
             fs.writeFileSync('./node.error.log', '')
         })
 
-        this.app.post('/userViews/Moderating/SendMessage', (req, res) => {
-            const channel = this.client.channels.cache.get(req.body.id)
-
-            if (channel !== undefined) {
-                if (channel.type === Discord.ChannelType.GuildText) {
-                    channel.send({ content: req.body.content, tts: req.body.tts })
-                        .then(() => {
-                            this.RenderPage_ModeratingSearch(req, res, '')
-                        })
-                        .catch((err) => {
-                            this.RenderPage_ModeratingSearch(req, res, '')
-                        })
-                    return
-                }
-            }
-
-            this.RenderPage_ModeratingSearch(req, res, '')
-        })
-
-        this.app.post('/userViews/ApplicationCommands/Fetch', (req, res) => {
-            this.client.application.commands.fetch().finally(()=> {
-                this.client.guilds.cache.get('737954264386764812').commands.fetch().finally(() => {
-                    this.RenderPage_Commands(req, res)
-                })
-            })
-        })
-
-        this.app.post('/userViews/ApplicationCommands/DeleteAll', (req, res) => {
-            this.commandsDeleting = true
-            DeleteCommandsSync(this.client, this.statesManager, (percent) => {
-                this.commandsDeletingPercent = percent
-            }, () => {
-                this.commandsDeleting = false
-            })
-            this.RenderPage_Commands(req, res)
-        })
-
-        this.app.post('/userViews/ApplicationCommands/Createall', (req, res) => {
-            this.commandsCreating = true
-            CreateCommandsSync(this.client, this.statesManager, (percent) => {
-                this.commandsCreatingPercent = percent
-            }, () => {
-                this.commandsCreating = false
-            })
-            this.RenderPage_Commands(req, res)
-        })
-
-        this.app.get('/userViews/ApplicationCommands/Status', (req, res) => {
-            res.status(200).send(JSON.stringify({ creatingPercent: this.commandsCreatingPercent }))
-        })
-
-        this.app.get('/userViews/ApplicationCommands', (req, res) => {
-            if (this.client.guilds.cache.get('737954264386764812') == null) {
-                this.RenderPage(req, res, 'ApplicationUnavaliable')
-                return
-            }
-
-            this.RenderPage_Commands(req, res)
-        })
-
-        this.app.post('/userViews/GenerateHash', (req, res) => {
+        this.app.post('/view/GenerateHash', (req, res) => {
             const userID = req.body.id
             RemoveAllUser(userID)
             AddNewUser(userID)
         })
 
-        this.app.post('/userViews/Commands/Delete', (req, res) => {
-            const commandID = req.body.id
-            DeleteCommand(this.client, commandID, () => {
-                this.RenderPage_Commands(req, res)
-            })
+        //#endregion
+
+        this.app.get('/dcbot', (req, res) => {
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+
+            const view = req.query.view
+
+            if (view == 'default' || view == null || view == undefined) {
+                res.render('default', { title: GetTitle() })
+            } else {
+                res.status(404).send("Not found")
+            }
         })
 
-        this.app.post('/userViews/Commands/Update', (req, res) => {
-            const commandID = req.body.id
-            Updatecommand(this.client, commandID, () => {
-                this.RenderPage_Commands(req, res)
-            })
-        })
-
-        this.app.get('/userViews/*', (req, res) => {
+        this.app.get('/dcbot/view/*', (req, res) => {
             this.RenderPage(req, res, '404', { message: req.path })
         })
     }
