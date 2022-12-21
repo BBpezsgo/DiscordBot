@@ -1712,7 +1712,8 @@ bot.on('interactionCreate', async interaction => {
                 ingyenesJatek: '902878798956093510',
                 warzone: '902878851938517043',
                 minecraft: '902878964438143026',
-                napiIdojaras: '978665941753806888'
+                napiIdojaras: '978665941753806888',
+                electricityReport: '1055067472123940944'
             }
 
             const selectedIndex = interaction.values[0]
@@ -1780,6 +1781,12 @@ bot.on('interactionCreate', async interaction => {
                         await interaction.member.roles.remove(roles.napiIdojaras)
                     } else {
                         await interaction.member.roles.add(roles.napiIdojaras)
+                    }
+                } else if (selectedIndex == 'electricityReport') {
+                    if (interaction.member.roles.cache.some(role => role.id === roles.electricityReport) == true) {
+                        await interaction.member.roles.remove(roles.electricityReport)
+                    } else {
+                        await interaction.member.roles.add(roles.electricityReport)
                     }
                 } else if (selectedIndex == 'privateCommands') {
                     if (privateCommand == true) {
@@ -1947,6 +1954,7 @@ bot.once('ready', async () => {
     const { Taxation } = require('./functions/tax')
     const { MarketOnStart } = require('./functions/market')
     const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
+    const { TrySendMVMReport } = require('./functions/dailyElectricityReport.js')
     const { activitiesDesktop } = require('./functions/enums.js')
 
     CacheManager.SaveUsers(bot)
@@ -1967,6 +1975,7 @@ bot.once('ready', async () => {
     }, 10000)
 
     TrySendWeatherReport(statesManager, bot, ChannelId.ProcessedNews)
+    TrySendMVMReport(statesManager, bot, ChannelId.ProcessedNews)
 
     MarketOnStart(database)
 

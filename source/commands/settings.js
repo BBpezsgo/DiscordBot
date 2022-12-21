@@ -14,7 +14,8 @@ const roles = {
     ingyenesJatek: '902878798956093510',
     warzone: '902878851938517043',
     minecraft: '902878964438143026',
-    napiIdojaras: '978665941753806888'
+    napiIdojaras: '978665941753806888',
+    electricityReport: '1055067472123940944'
 }
 
 /** @param {boolean} bool */
@@ -46,6 +47,7 @@ module.exports = (database, member, privateCommand) => {
                     '> 📊 Szavazás: ' + BoolToIcon(userRoles.some(role => role.id === roles.szavazas)) + '\n' +
                     '> ❔ Quiz: ' + BoolToIcon(userRoles.some(role => role.id === roles.quiz)) + '\n' +
                     '> 🌦️ Napi időjárás: ' + BoolToIcon(userRoles.some(role => role.id === roles.napiIdojaras)) + '\n' +
+                    '> 🔌 Tervezett áramszünetek: ' + BoolToIcon(userRoles.some(role => role.id === roles.electricityReport)) + '\n' +
                     '> 🧱 Minecraft: ' + BoolToIcon(userRoles.some(role => role.id === roles.minecraft)) + '\n' +
                     '> 🚸 Crossout: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentes)) + '\n' +
                     '> 🚸 Crossout bejelentés [PC]: ' + BoolToIcon(userRoles.some(role => role.id === roles.crossoutBejelentesPC)) + '\n' +
@@ -88,6 +90,11 @@ module.exports = (database, member, privateCommand) => {
                 label: 'Napi időjárás',
                 value: 'napiIdojaras',
                 emoji: '🌦️'
+            },
+            {
+                label: 'Tervezett áramszünetek',
+                value: 'electricityReport',
+                emoji: '🔌'
             },
             {
                 label: 'Minecraft',

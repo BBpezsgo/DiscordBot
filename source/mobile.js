@@ -733,6 +733,7 @@ bot.once('ready', async () => {
     statesManager.botLoadingState = 'Ready'
 
     const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
+    const { TrySendMVMReport } = require('./functions/dailyElectricityReport')
 
     const { CreateCommands, DeleteCommands } = require('./functions/commands')
     try {
@@ -748,6 +749,7 @@ bot.once('ready', async () => {
     }, 10000)
 
     TrySendWeatherReport(statesManager, bot, '746266528508411935')
+    TrySendMVMReport(statesManager, bot, '746266528508411935')
 
     log(DONE + ': A BOT kész!')
 

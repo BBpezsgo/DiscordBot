@@ -64,6 +64,11 @@ class StatesManager {
             Text: ''
         }
 
+        /** @type {{Text: string}} */
+        this.MVMReport = {
+            Text: ''
+        }
+
         /** @type {{SaveText: string, LoadText: string, ParsingText: string, BackupText: string}} */
         this.Database = {
             SaveText: '',
