@@ -2,14 +2,12 @@ const Discord = require('discord.js')
 const { StatesManager } = require('../functions/statesManager')
 const MVM = require('../functions/mvm')
 const LogError = require('../functions/errorLog')
+const roadsInInterest = require('../mvm-roads-in-interest.json')
 
 const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
 const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 const icon = 'https://media.glassdoor.com/sqll/1303067/mvm-group-squarelogo-1636624757422.png'
-
-/** @type {string[]} */
-const roadsInInterest = []
 
 /** @param {MVM.Result[]} data */
 function HasInterestingData(data) {
