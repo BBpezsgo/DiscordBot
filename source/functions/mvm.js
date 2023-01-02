@@ -99,9 +99,9 @@ function Get(authValues = null) {
                 data += chunk.toString()
             })
             res.on('end', async () => {
-                fs.writeFileSync('./cache/mvm/raw.html', data, 'utf-8')
-                fs.writeFileSync('./cache/mvm/raw.json', JSON.stringify(data), 'utf-8')
-                fs.writeFileSync('./cache/mvm/res.json', JSON.stringify(res.headers), 'utf-8')
+                // fs.writeFileSync('./cache/mvm/raw.html', data, 'utf-8')
+                // fs.writeFileSync('./cache/mvm/raw.json', JSON.stringify(data), 'utf-8')
+                // fs.writeFileSync('./cache/mvm/res.json', JSON.stringify(res.headers), 'utf-8')
 
                 if (data === authRequiredRes) {
                     if (authValues !== null) {
@@ -126,7 +126,9 @@ function Get(authValues = null) {
                 }
                 const dom = new jsdom.JSDOM(data)
                 const a = dom.window.document.body.firstElementChild.firstElementChild.childNodes[2].innerHTML
-                callback(ParseData(a))
+                const parsedData = ParseData(a)
+                fs.writeFileSync('./cache/mvm/data.json', JSON.stringify(parsedData, null, ' '), 'utf-8')
+                callback(parsedData)
             })
         })
 
@@ -157,9 +159,9 @@ function Authorize() {
                 data += chunk.toString()
             })
             res.on('end', () => {
-                fs.writeFileSync('./cache/mvm/auth-raw.html', data, 'utf-8')
-                fs.writeFileSync('./cache/mvm/auth-raw.json', JSON.stringify(data), 'utf-8')
-                fs.writeFileSync('./cache/mvm/auth-cookies.json', JSON.stringify(res.headers['set-cookie']), 'utf-8')
+                // fs.writeFileSync('./cache/mvm/auth-raw.html', data, 'utf-8')
+                // fs.writeFileSync('./cache/mvm/auth-raw.json', JSON.stringify(data), 'utf-8')
+                // fs.writeFileSync('./cache/mvm/auth-cookies.json', JSON.stringify(res.headers['set-cookie']), 'utf-8')
                 const dom = new jsdom.JSDOM(data)
                 const viewState = dom.window.document.getElementById('j_id1:javax.faces.ViewState:0').value
                 const setCookie = res.headers['set-cookie']

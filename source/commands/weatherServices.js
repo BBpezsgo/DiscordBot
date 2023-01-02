@@ -119,13 +119,13 @@ const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
  * }
  * )[] | undefined, error: any | undefined, isCache: boolean) => void} callback */
 const MsnWeather = function(callback) {
-    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
-    if (fs.existsSync('./weather-cache/msn-weather.json')) {
+    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
+    if (fs.existsSync('./cache/weather/msn-weather.json')) {
         /** @type {WeatherServices.Msn_WeatherResult} */
-        const cacheData = JSON.parse(fs.readFileSync('./weather-cache/msn-weather.json', { encoding: 'utf-8' }))
+        const cacheData = JSON.parse(fs.readFileSync('./cache/weather/msn-weather.json', { encoding: 'utf-8' }))
         const date = Date.parse(cacheData[0].current.date + ' ' + cacheData[0].current.observationtime)
         const diff = Date.now() - (date - (Number.parseInt(cacheData[0].location.timezone) * 3600000))
-        fs.writeFileSync('./weather-cache/msn-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
+        fs.writeFileSync('./cache/weather/msn-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
         if (diff < MaxTimeDifference || ReadFromCache) {
             callback(true, cacheData)
             return
@@ -138,16 +138,16 @@ const MsnWeather = function(callback) {
             return
         }
 
-        fs.writeFileSync('./weather-cache/msn-weather.json', JSON.stringify(msnWeather), { encoding: 'utf-8' })
+        fs.writeFileSync('./cache/weather/msn-weather.json', JSON.stringify(msnWeather), { encoding: 'utf-8' })
         callback(false, msnWeather)
     })
 }
 
 const OpenweathermapForecast = function(callback) {
-    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
+    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
     if (ReadFromCache) {
-        if (fs.existsSync('./weather-cache/openweathermap-forecast.json')) {
-            callback(true, JSON.parse(fs.readFileSync('./weather-cache/openweathermap-forecast.json', { encoding: 'utf-8' })))
+        if (fs.existsSync('./cache/weather/openweathermap-forecast.json')) {
+            callback(true, JSON.parse(fs.readFileSync('./cache/weather/openweathermap-forecast.json', { encoding: 'utf-8' })))
             return
         }
     }
@@ -170,9 +170,9 @@ const OpenweathermapForecast = function(callback) {
             var headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync('./weather-cache/openweathermap-forecast-headers.txt', headersText, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/openweathermap-forecast-headers.txt', headersText, { encoding: 'utf-8' })
 
-            fs.writeFileSync('./weather-cache/openweathermap-forecast.json', body, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/openweathermap-forecast.json', body, { encoding: 'utf-8' })
             callback(false, JSON.parse(body))
         })
     } catch (err) {
@@ -223,13 +223,13 @@ const OpenweathermapForecast = function(callback) {
  *   cod: number;
  * } | undefined, error: string | undefined) => void} callback */
 const OpenweathermapWeather = function(callback) {
-    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
+    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
     if (ReadFromCache) {
-        if (fs.existsSync('./weather-cache/openweathermap-weather.json')) {
-            const cacheData = JSON.parse(fs.readFileSync('./weather-cache/openweathermap-weather.json', { encoding: 'utf-8' }))
+        if (fs.existsSync('./cache/weather/openweathermap-weather.json')) {
+            const cacheData = JSON.parse(fs.readFileSync('./cache/weather/openweathermap-weather.json', { encoding: 'utf-8' }))
             const date = cacheData.dt
             const diff = Date.now() - (date * 1000)
-            fs.writeFileSync('./weather-cache/openweathermap-weather-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
+            fs.writeFileSync('./cache/weather/openweathermap-weather-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
             if (diff < MaxTimeDifference || ReadFromCache) {
                 callback(true, cacheData)
                 return
@@ -255,9 +255,9 @@ const OpenweathermapWeather = function(callback) {
             var headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync('./weather-cache/openweathermap-weather-headers.txt', headersText, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/openweathermap-weather-headers.txt', headersText, { encoding: 'utf-8' })
 
-            fs.writeFileSync('./weather-cache/openweathermap-weather.json', body, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/openweathermap-weather.json', body, { encoding: 'utf-8' })
             callback(false, JSON.parse(body))
         })
     } catch (err) {
@@ -288,10 +288,10 @@ const OpenweathermapWeather = function(callback) {
  *   }[];
  * } | undefined, error: string | undefined) => void} callback */
 const OpenweathermapPollution = function(callback) {
-    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
+    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
     if (ReadFromCache) {
-        if (fs.existsSync('./weather-cache/openweathermap-pollution.json')) {
-            callback(JSON.parse(fs.readFileSync('./weather-cache/openweathermap-pollution.json', { encoding: 'utf-8' })))
+        if (fs.existsSync('./cache/weather/openweathermap-pollution.json')) {
+            callback(JSON.parse(fs.readFileSync('./cache/weather/openweathermap-pollution.json', { encoding: 'utf-8' })))
             return
         }
     }
@@ -314,9 +314,9 @@ const OpenweathermapPollution = function(callback) {
             var headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync('./weather-cache/openweathermap-pollution-headers.txt', headersText, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/openweathermap-pollution-headers.txt', headersText, { encoding: 'utf-8' })
 
-            fs.writeFileSync('./weather-cache/openweathermap-pollution.json', body, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/openweathermap-pollution.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
     } catch (err) {
@@ -338,10 +338,10 @@ const OpenweathermapPollution = function(callback) {
   *   }[];
   * } | undefined, error: string | undefined) => void} callback */
 const NasaMarsWeather = function(callback) {
-    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
+    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
     if (ReadFromCache) {
-        if (fs.existsSync('./weather-cache/nasa-mars-weather.json')) {
-            callback(JSON.parse(fs.readFileSync('./weather-cache/nasa-mars-weather.json', { encoding: 'utf-8' })))
+        if (fs.existsSync('./cache/weather/nasa-mars-weather.json')) {
+            callback(JSON.parse(fs.readFileSync('./cache/weather/nasa-mars-weather.json', { encoding: 'utf-8' })))
             return
         }
     }
@@ -364,9 +364,9 @@ const NasaMarsWeather = function(callback) {
             var headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync('./weather-cache/nasa-mars-weather-headers.txt', headersText, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/nasa-mars-weather-headers.txt', headersText, { encoding: 'utf-8' })
 
-            fs.writeFileSync('./weather-cache/nasa-mars-weather.json', body, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/nasa-mars-weather.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
     } catch (err) {
@@ -421,10 +421,10 @@ const NasaMarsWeather = function(callback) {
  *   total_images: number;
  * } | undefined, error: string | undefined) => void} callback */
 const NasaMarsWeeklyImage = function(callback) {
-    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
+    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
     if (ReadFromCache) {
-        if (fs.existsSync('./weather-cache/nasa-mars-image.json')) {
-            callback(JSON.parse(fs.readFileSync('./weather-cache/nasa-mars-image.json', { encoding: 'utf-8' })))
+        if (fs.existsSync('./cache/weather/nasa-mars-image.json')) {
+            callback(JSON.parse(fs.readFileSync('./cache/weather/nasa-mars-image.json', { encoding: 'utf-8' })))
             return
         }
     }
@@ -447,9 +447,9 @@ const NasaMarsWeeklyImage = function(callback) {
             var headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync('./weather-cache/nasa-mars-image-headers.txt', headersText, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/nasa-mars-image-headers.txt', headersText, { encoding: 'utf-8' })
 
-            fs.writeFileSync('./weather-cache/nasa-mars-image.json', body, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/nasa-mars-image.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
     } catch (err) {
@@ -458,10 +458,10 @@ const NasaMarsWeeklyImage = function(callback) {
 }
 
 const AccuWeather = function(callback) {
-    if (!fs.existsSync('./weather-cache/')) { fs.mkdirSync('./weather-cache/') }
+    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
     if (ReadFromCache) {
-        if (fs.existsSync('./weather-cache/accu-weather.json')) {
-            callback(JSON.parse(fs.readFileSync('./weather-cache/accu-weather.json', { encoding: 'utf-8' })))
+        if (fs.existsSync('./cache/weather/accu-weather.json')) {
+            callback(JSON.parse(fs.readFileSync('./cache/weather/accu-weather.json', { encoding: 'utf-8' })))
             return
         }
     }
@@ -484,11 +484,11 @@ const AccuWeather = function(callback) {
             var headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync('./weather-cache/accu-weather-headers.txt', headersText, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/accu-weather-headers.txt', headersText, { encoding: 'utf-8' })
 
             // const RateLimitRemaining = res.headers["RateLimit-Remaining"]
 
-            fs.writeFileSync('./weather-cache/accu-weather.json', body, { encoding: 'utf-8' })
+            fs.writeFileSync('./cache/weather/accu-weather.json', body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
     } catch (err) {

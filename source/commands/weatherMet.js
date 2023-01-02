@@ -3,7 +3,7 @@ const fs = require('fs')
 const { JSDOM } = require('jsdom')
 
 const baseUrl = 'https://www.met.hu'
-const basePath = './weather-cache/'
+const basePath = './cache/weather/'
 
 async function Sleep(ms) {
     return new Promise((callback) => {

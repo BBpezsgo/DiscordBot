@@ -24,7 +24,6 @@ DiscordBot.njsproj.user
 OldDCVer
 Properties
 .vscode
-source/weather-cache
 source/tests
 source/commands/graph.png
 search-res-chocolate.json
