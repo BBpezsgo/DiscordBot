@@ -1,0 +1,29 @@
+{
+  "name": "Discord BOT",
+  "description": "Discord BOT quick status",
+  "version": "0.1",
+  "manifest_version": 3,
+  "permissions": [
+    
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Discord BOT",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "/images/icon16.png",
+      "32": "/images/icon32.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "host_permissions": [
+    "http://192.168.1.100:5665/"
+  ]
+}

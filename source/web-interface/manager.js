@@ -645,8 +645,7 @@ class WebInterfaceManager {
             botStarted: (this.client.ws.shards.size > 0) ? (this.client.ws.shards.first().status == 0) : false,
             ws: {
                 ping: this.client.ws.ping.toString().replace('NaN', '-'),
-                status: WsStatusText[this.client.ws.status],
-                readyAt: this.client.ws.client.readyAt
+                status: WsStatusText[this.client.ws.status]
             },
             statesManager: this.statesManager,
             shard: {
@@ -1534,6 +1533,7 @@ class WebInterfaceManager {
             }
 
             res.status(200).send({
+                readyTime: GetTime(this.client.readyAt),
                 heartbeat: this.statesManager.heartbeat,
                 hello: this.statesManager.hello,
                 loadingProgressText: this.statesManager.loadingProgressText,
@@ -1548,6 +1548,7 @@ class WebInterfaceManager {
                 ws: {
                     ping: this.client.ws.ping.toString().replace('NaN', '-'),
                     status: WsStatusText[this.client.ws.status],
+                    readyAt: this.client.ws.client.readyAt
                 },
                 systemUptime: GetTime(new Date(os.uptime() * 1000)),
             })
