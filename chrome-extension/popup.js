@@ -1,5 +1,19 @@
 'use strict'
 
+let key = null
+function GetKey() {
+  return new Promise((resolve, reject) => {
+    fetch('/key.json')
+      .then((res) => {
+        res.json()
+          .then(resolve)
+          .catch(reject)
+      })
+      .catch(reject)
+  })
+}
+GetKey().then(k => key = k)
+
 function SetLabelText(id, text) {
   document.getElementById('lbl-' + id).innerText = text
 }
@@ -67,7 +81,7 @@ OnButtonClick('restart', () => {
   StopRefreshing()
   DisableButton('restart')
   DisableButton('terminate')
-  Post('http://192.168.1.100:5665/Process/Restart')
+  Post('http://192.168.1.100:5665/Process/Restart?key=' + key)
     .finally(Refreshing)
 })
 
@@ -75,7 +89,7 @@ OnButtonClick('terminate', () => {
   StopRefreshing()
   DisableButton('restart')
   DisableButton('terminate')
-  Post('http://192.168.1.100:5665/Process/Exit')
+  Post('http://192.168.1.100:5665/Process/Exit?key=' + key)
     .finally(Refreshing)
 })
 
@@ -95,7 +109,7 @@ function Refreshing() {
   return setInterval(() => {
     if (GetDataPending) { return }
     GetDataPending = true
-    Get('http://192.168.1.100:5665/dcbot/status.json')
+    Get('http://192.168.1.100:5665/dcbot/status.json?key=' + key)
       .then(status_ => {
         const status = JSON.parse(status_)
         // const x = {"heartbeat":1,"hello":0,"loadingProgressText":"Betöltés...","botLoadingState":"Ready","botLoaded":true,"botReady":false,"Shard_IsLoading":false,"Shard_LoadingText":"'Heartbeat' küldése","Shard_Error":"","uptime":"0:02:45","shardState":"Ready","ws":{"ping":"127","status":"Ready"},"systemUptime":"2:34:37"}

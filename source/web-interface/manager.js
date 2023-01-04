@@ -23,6 +23,7 @@ const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } =
 const { MessageType, GuildVerificationLevel } = require('discord.js')
 const process = require('process')
 const archivePath = 'D:/Mappa/Discord/DiscordOldData/'
+const Key = require('../key')
 
 class WebInterfaceManager {
     /**
@@ -82,6 +83,18 @@ class WebInterfaceManager {
 
             if (req.path.startsWith('/public')) {
                 return next()
+            }
+
+            const url = new URL(req.url, `http://${req.headers.host}`)
+            const authKey = url.searchParams.get('key')
+            if (authKey) {
+                if (authKey === Key.Get()) {
+                    return next()
+                } else {
+                    res.status(401).statusMessage = 'Invalid Key'
+                    res.end()
+                    return
+                }
             }
 
             const auth = { login: 'bb', password: 'bb' }

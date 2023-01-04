@@ -1,5 +1,19 @@
 'use strict'
 
+let key = null
+function GetKey() {
+  return new Promise((resolve, reject) => {
+    fetch('/key.json')
+      .then((res) => {
+        res.json()
+          .then(resolve)
+          .catch(reject)
+      })
+      .catch(reject)
+  })
+}
+GetKey().then(k => key = k)
+
 function Get(url) {
   return new Promise((resolve, reject) => {
     fetch(url)
@@ -28,7 +42,7 @@ function Refreshing() {
   return setInterval(() => {
     if (GetDataPending) { return }
     GetDataPending = true
-    Get('http://192.168.1.100:5665/dcbot/status.json')
+    Get('http://192.168.1.100:5665/dcbot/status.json?key=' + key)
       .then(status_ => {
         const status = JSON.parse(status_)
         // SetLabelText('status-bot', status.botLoadingState)
