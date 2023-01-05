@@ -39,6 +39,7 @@ async function CreateNews(message) {
             .setAuthor({ name: info.videoDetails.author.name, url: info.videoDetails.author.channel_url, iconURL: channelIconUrl })
             .setTitle(vidInfo.title)
             .setURL(vidInfo.video_url)
+            .setDescription((vidInfo.description.length>150)?(vidInfo.description.substring(0, 150 - 3) + '...'):(vidInfo.description))
             .setImage(`https://i.ytimg.com/vi/${vidInfo.videoId}/maxresdefault.jpg`)
             .setColor('#ff0000')
             .setTimestamp(Date.parse(vidInfo.uploadDate))
@@ -92,7 +93,6 @@ async function CreateNews(message) {
             }
         } catch (e) { }
 
-        embed.setURL('https://crossout.net/en/news/')
         if (message.attachments.size > 0) {
             embed.setImage(message.attachments.first().url)
         } else if (message.embeds.length > 0) {
