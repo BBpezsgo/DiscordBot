@@ -70,7 +70,7 @@ function GetEmbed(weatherData, isCache) {
         }
 
         embed.addFields([{
-            name: unixToTime(currentWeatherItem.dt) + ` ${EmojiPrefix}${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
+            name: `<t:${ToUnix(new Date(currentWeatherItem.dt * 1000))}:t>` + ` ${EmojiPrefix}${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
             value: stringBuilder.trimEnd(),
             inline: false
         }])
@@ -87,7 +87,7 @@ function GetEmbed(weatherData, isCache) {
 }
 
 /** @param {Discord.TextChannel} channel @param {StatesManager} statesManager */
-module.exports = async (channel, statesManager, isTest = false) => {
+module.exports = async (channel, statesManager) => {
     statesManager.WeatherReport.Text = 'Send loading message...'
 
     const loadingEmbed = new Discord.EmbedBuilder()
