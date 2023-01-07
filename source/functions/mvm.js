@@ -51,7 +51,7 @@ function Get(authValues = null) {
     ]*/
     console.log('MVM Get')
     return new Promise(((callback) => {
-        if (!fs.existsSync('./cache/mvm/')) { fs.mkdirSync('./cache/mvm/') }
+        if (!fs.existsSync('./cache/mvm/')) { fs.mkdirSync('./cache/mvm/', { recursive: true }) }
         if (false) {
             if (fs.existsSync('./cache/mvm/mvm.json')) {
                 callback(JSON.parse(fs.readFileSync('./cache/mvm/mvm.json', { encoding: 'utf-8' })))

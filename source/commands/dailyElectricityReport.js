@@ -3,6 +3,7 @@ const { StatesManager } = require('../functions/statesManager')
 const MVM = require('../functions/mvm')
 const LogError = require('../functions/errorLog')
 const roadsInInterest = require('../mvm-roads-in-interest.json')
+const { FormatError } = require('../functions/formatError')
 
 const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
 const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
@@ -71,7 +72,7 @@ module.exports = async (channel, statesManager) => {
                 statesManager.MVMReport.Text = ''
             }
         })
-        .catch(async error => {            
+        .catch(async error => {
             LogError(error)
             statesManager.MVMReport.Text = 'Get MVM data is fault!'
 
@@ -79,7 +80,7 @@ module.exports = async (channel, statesManager) => {
                 .setColor('#FFC658')
                 .setAuthor({ name: 'Békéscsaba', url: 'https://www.mvmnext.hu/aram/pages/online/aramszunet.jsf', iconURL: icon })
                 .setTitle('Tervezett áramszünetek betöltése sikertelen')
-                .setDescription('> \\❌ ' + error)
+                .setDescription('> \\❌ ' + FormatError(error))
         
             await channel.send({ embeds: [errorEmbed] })
         })
