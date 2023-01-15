@@ -302,9 +302,11 @@ const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
  @param {WeatherServices.MSN.WeatherResult} MsnWeather Msn weather data
  @param {WeatherServices.OpenWeatherMap.WeatherResult} OpenweatherWeather Openweather weather data
  @param {MoonPhase[]} data2 Moon data
- @param {WeatherServices.OpenWeatherMap.PollutionResult} OpenweatherPollution Openweather pollution data
+ @param {{main:{aqi:number;};components:{co:number;no:number;no2:number;o3:number;so2:number;pm2_5:number;pm10:number;nh3:number;};dt: number;} | undefined} OpenweatherPollution Openweather pollution data
  @param {WeatherAlertsService.MET.ResultCounty[]} MetAlerts
  @param {WeatherAlertsService.MET.ResultSnowReport} MetSnowReport
+ @param {boolean} msnIsCache
+ @param {boolean} openweathermapWeatherIsCache
  */
 function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution, MetAlerts, msnIsCache, openweathermapWeatherIsCache, MetSnowReport) {
     const current = MsnWeather.current
@@ -396,7 +398,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         }
 
         if (OpenweatherPollution !== undefined) {
-            description += '\n' + '\n😷 **Levegőminőség:**\n'
+            description += '\n' + `\n😷 **Levegőminőség:**\n||<t:${OpenweatherPollution.dt}:f>||\n`
 
             description += '\n' + `Levőminőség: ${EmojiPrefix}${GetPollutionIndex(8, OpenweatherPollution.main.aqi)} ${GetPollutionText(OpenweatherPollution.main.aqi)}`
         
@@ -426,13 +428,13 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         }
 
         description +=
-            '\n\n🌕 **Hold:**\n\n'
+            '\n\n🌙 **Hold:**\n\n'
         description += `${EmojiPrefix}${weatherMoonIcon(data2[1].phaseName())} ${weatherMoonText(data2[1].phaseName())} (${Math.floor(data2[1].illum * 100)} %-a látható)\n`
         
         if (moonTimes.rise !== undefined)
-        { description += `Holdkelte: <t:${ToUnix(moonTimes.rise)}:R>\n` }
+        { description += `${EmojiPrefix}⬆️ Holdkelte: <t:${ToUnix(moonTimes.rise)}:R>\n` }
         if (moonTimes.set !== undefined)
-        { description += `Holdnyugta: <t:${ToUnix(moonTimes.set)}:R>\n` }
+        { description += `${EmojiPrefix}⬇️ Holdnyugta: <t:${ToUnix(moonTimes.set)}:R>\n` }
 
         if (moonTimes.alwaysUp)
         { description += `A Hold ma mindig a **horizont felett lesz**\n` }
