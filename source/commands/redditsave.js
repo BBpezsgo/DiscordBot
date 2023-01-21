@@ -10,10 +10,6 @@ const SPINNER = 'https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif'
 const DONE = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/check-mark-button_2705.png'
 const WARNING = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/322/warning_26a0-fe0f.png'
 
-function showProgress(cur) {
-    //stateDetails = 'Downloading ' + (cur / 1048576).toFixed(2) + ' MB'
-}
-
 /**@param {string} redditLink */
 function ConvertToRedditsaveLink(redditLink) {
     var newStr = "https://redditsave.com/info?url="
@@ -67,7 +63,6 @@ async function DownloadVideo(message, url, replymessage, postInfo) {
 
         response.on('data', function (chunk) {
             cur += chunk.length
-            showProgress(cur)
         })
 
         response.on('end', async function () {
@@ -156,7 +151,6 @@ module.exports = async (message) => {
 
         response.on('data', function (chunk) {
             cur += chunk.length
-            showProgress(cur)
         })
 
         response.on('end', async function () {

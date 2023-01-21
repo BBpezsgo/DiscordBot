@@ -1,9 +1,7 @@
 const Discord = require('discord.js')
-const request = require("request");
-const { tokens } = require('../config.json')
 const { StatesManager } = require('../functions/statesManager')
 const SunCalc = require('suncalc')
-const WeatherServices = require('./weatherServices')
+const Openweathermap = require('../services/Openweathermap')
 const LogError = require('../functions/errorLog')
 
 const EmojiPrefix = ''
@@ -25,7 +23,7 @@ const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
 const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 /**
- * @param {any} weatherData
+ * @param {Openweathermap.OpenWeatherMap.Forecast} weatherData
  * @param {boolean} isCache
  * @returns {Discord.EmbedBuilder}
  */
@@ -57,15 +55,19 @@ function GetEmbed(weatherData, isCache) {
         stringBuilder += `${DirectionToArrow(currentWeatherItem.wind.deg)} ${EmojiPrefix}${weatherWindIcon(currentWeatherItem.wind.speed)} ${currentWeatherItem.wind.speed} km/h szél\n`
         stringBuilder += `${EmojiPrefix}🌬️ ${currentWeatherItem.wind.gust} km/h széllökés\n`
         if (currentWeatherItem.visibility != 10000) {
-            stringBuilder += `${EmojiPrefix}👁️ ${currentWeatherItem.visibility / 1000} km látótávolság\n`
+            if (currentWeatherItem.visibility < 1000) {
+                stringBuilder += `${EmojiPrefix}👁️ ${currentWeatherItem.visibility} m látótávolság\n`
+            } else {
+                stringBuilder += `${EmojiPrefix}👁️ ${Math.round(currentWeatherItem.visibility / 1000)} km látótávolság\n`
+            }
         }
-        if (currentWeatherItem.pop != 0) {
-            stringBuilder += `${EmojiPrefix}☔ ${currentWeatherItem.pop * 100} % csapadék\n`
+        if (currentWeatherItem.pop !== 0) {
+            stringBuilder += `${EmojiPrefix}☔ ${Math.round(currentWeatherItem.pop * 100)} % csapadék\n`
         }
-        if (currentWeatherItem.rain != undefined) {
+        if (currentWeatherItem.rain) {
             stringBuilder += `${EmojiPrefix}🌊 ${currentWeatherItem.rain['3h']} mm eső\n`
         }
-        if (currentWeatherItem.snow != undefined) {
+        if (currentWeatherItem.snow) {
             stringBuilder += `${EmojiPrefix}⛄ ${currentWeatherItem.snow['3h']} mm hó\n`
         }
 
@@ -79,9 +81,9 @@ function GetEmbed(weatherData, isCache) {
 
     embed.setTimestamp(Date.now())
     if (isCache) {
-        embed.setFooter({ text: '• 📁 openweathermap.org', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        embed.setFooter({ text: '📁 openweathermap.org' })
     } else {
-        embed.setFooter({ text: '• openweathermap.org', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        embed.setFooter({ text: 'openweathermap.org' })
     }
     return embed
 }
@@ -98,20 +100,18 @@ module.exports = async (channel, statesManager) => {
     const loadingMessage = await channel.send({ embeds: [loadingEmbed] })
 
     statesManager.WeatherReport.Text = 'Get weather data...'
-    WeatherServices.OpenweathermapForecast(async (isCache, result, error) => {
-        if (error) {
+    Openweathermap.OpenweathermapForecast()
+        .then(async result => {
+            const embed = GetEmbed(result, result.fromCache)    
+            statesManager.WeatherReport.Text = 'Delete loading message...'
+            await loadingMessage.delete()
+            statesManager.WeatherReport.Text = 'Send report message...'
+            await channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
+            statesManager.WeatherReport.Text = ''
+        })
+        .catch(async error => {
             LogError(error)
-            statesManager.WeatherReport.Text = 'Get weather is fault!'
+            statesManager.WeatherReport.Text = 'Get weather is failed!'
             await loadingMessage.edit({ content: '> \\❌ ' + error })
-            return
-        }
-
-        const embed = GetEmbed(result, isCache)
-
-        statesManager.WeatherReport.Text = 'Delete loading message...'
-        await loadingMessage.delete()
-        statesManager.WeatherReport.Text = 'Send report message...'
-        await channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
-        statesManager.WeatherReport.Text = ''
-    })
+        })
 }

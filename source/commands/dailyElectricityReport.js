@@ -1,12 +1,9 @@
 const Discord = require('discord.js')
 const { StatesManager } = require('../functions/statesManager')
-const MVM = require('../functions/mvm')
+const MVM = require('../services/mvm')
 const LogError = require('../functions/errorLog')
 const roadsInInterest = require('../mvm-roads-in-interest.json')
 const { FormatError } = require('../functions/formatError')
-
-const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
-const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 const icon = 'https://media.glassdoor.com/sqll/1303067/mvm-group-squarelogo-1636624757422.png'
 
@@ -52,9 +49,9 @@ function GetEmbed(data, isCache) {
     }
 
     if (isCache) {
-        embed.setFooter({ text: '• 📁 www.mvmnext.hu', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        embed.setFooter({ text: '📁 www.mvmnext.hu' })
     } else {
-        embed.setFooter({ text: '• www.mvmnext.hu', iconURL: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/information_2139-fe0f.png' })
+        embed.setFooter({ text: 'www.mvmnext.hu' })
     }
     return embed
 }

@@ -35,6 +35,7 @@ function ImgExists(name) {
         return false
     }
 }
+/** @param {string} skyTxt */
 function weatherSkytxt(skyTxt) {
     if (skyTxt === 'Mostly Cloudy') {
         return 'Többnyire felhős'
@@ -52,10 +53,12 @@ function weatherSkytxt(skyTxt) {
         return 'Köd'
     } else if (skyTxt === 'Rain Showers') {
         return 'Zápor'
-    } else if (skyTxt === 'Light Rain') {
+    } else if (skyTxt === 'Light Rain' || skyTxt === 'light rain') {
         return 'Könnyű eső'
     } else if (skyTxt === 'Clear') {
         return 'Derült'
+    } else if (skyTxt === 'overcast clouds') {
+        return 'Borult Felhők'
     } else if (skyTxt === 'T-Storms') {
         return 'Zivatar'
     } else if (skyTxt === 'Heavy T-Storms') {
@@ -92,15 +95,13 @@ function weatherWindIcon(windValue) {
 function weatherTempIcon(tempValue) {
     if (tempValue < 0) {
         return '❄️'
-    } else if (tempValue < 10) {
+    } else if (tempValue < 5) {
         return '🥶'
-    } else if (tempValue < 15) {
+    } else if (tempValue < 18) {
         return '😐'
-    } else if (tempValue < 20) {
-        return '😐'
-    } else if (tempValue < 25) {
+    } else if (tempValue < 23) {
         return '🙂'
-    } else if (tempValue < 30) {
+    } else if (tempValue < 27) {
         return '🥵'
     } else {
         return '🔥'
@@ -158,8 +159,7 @@ function weatherHumidityIcon(humidityValue) {
     }
 }
 /**
- * @param {string} icon Emoji 
- * @returns {string}
+ * @param {string} icon Emoji
  */
 function weatherThumbnailUrl(icon) {
     let thumbnailUrl = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/globe-showing-europe-africa_1f30d.png'
@@ -242,7 +242,7 @@ function unixToTime(unixValue) {
     let date = new Date(unixValue * 1000)
     let hours = date.getHours()
     let minutes = "0" + date.getMinutes()
-    var formattedTime = hours + ':' + minutes.substr(-2)
+    var formattedTime = hours + ':' + minutes.substring(-2)
     return formattedTime
 }
 function weatherPressureIcon(pressureValue) {
@@ -261,7 +261,6 @@ function weatherPressureIcon(pressureValue) {
 
 /**
  * @param {number[]} values 
- * @returns {number}
  */
 function Average(values) {
     let returnValue = 0
@@ -272,8 +271,7 @@ function Average(values) {
     return returnValue
 }
 /**
- * @param {number} value 
- * @returns {number}
+ * @param {number} value
  */
 function GetReadableNumber(value) {
     return Math.floor(value * 10) / 10
@@ -296,28 +294,7 @@ function GetPollutionText(value) {
 
 function GetPollutionIndex(type, value) {
     if (type == 0) { //CO
-        return '⚫'
-        if (value < 0) {
-            return '🟢'
-        } else if (value < 0) {
-            return '🟡'
-        } else if (value < 0) {
-            return '🟠'
-        } else {
-            return '🔴'
-        }
     } else if (type == 1) { //NO
-        return '⚫'
-
-        if (value < 0) {
-            return '🟢'
-        } else if (value < 0) {
-            return '🟡'
-        } else if (value < 0) {
-            return '🟠'
-        } else {
-            return '🔴'
-        }
     } else if (type == 2) { //NO2
         if (value < 0) {
             return '🟢'
@@ -357,29 +334,7 @@ function GetPollutionIndex(type, value) {
             return '🔴'
         }
     } else if (type == 6) { //PM10
-        return '⚫'
-
-        if (value < 0) {
-            return '🟢'
-        } else if (value < 0) {
-            return '🟡'
-        } else if (value < 0) {
-            return '🟠'
-        } else {
-            return '🔴'
-        }
     } else if (type == 7) { //NH3
-        return '⚫'
-
-        if (value < 0) {
-            return '🟢'
-        } else if (value < 0) {
-            return '🟡'
-        } else if (value < 0) {
-            return '🟠'
-        } else {
-            return '🔴'
-        }
     } else if (type == 8) { //Index
         if (value == 1) {
             return '🟢'
@@ -392,11 +347,10 @@ function GetPollutionIndex(type, value) {
         } else if (value == 5) {
             return '⚠️'
         }
-        return '⚫'
     }
     return '⚫'
 }
-/**@param {string} dayOfWeek @returns {string} */
+/** @param {number} dayOfWeek */
 function dayName(dayOfWeek) {
     while (dayOfWeek > 6) {
         dayOfWeek -= 7
@@ -404,64 +358,33 @@ function dayName(dayOfWeek) {
     while (dayOfWeek < 0) {
         dayOfWeek += 7
     }
-    let dayName = '???'
+    
     try {
-        let days = ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat']
-        dayName = days[dayOfWeek]
+        return ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'][dayOfWeek]
     } catch { }
-    return dayName
+    return '???'
 }
 /**
- * @param {string} skyTxt 
- * @param {boolean} useMoon 
- * @returns {string} Emoji
+ * @param {string | number} skyTxt 
  */
-function weatherSkytextIcon(skyTxt, useMoon) {
+function weatherSkytextIcon(skyTxt) {
     if (skyTxt === 'Mostly Cloudy') {
         return '☁️'
-    } else if (skyTxt === 'Cloudy') {
-        return '☁️'
-    } else if (skyTxt === 'Clouds') {
+    } else if (skyTxt === 'Cloudy' || skyTxt === 'Clouds' || skyTxt === 804) {
         return '☁️'
     } else if (skyTxt === 'Partly Sunny') {
         return '⛅'
     } else if (skyTxt === 'Sunny') {
         return '☀️'
-    } else if (skyTxt === 'Rain') {
-        return '🌧️'
     } else if (skyTxt === 'Fog') {
         return '🌫️'
-    } else if (skyTxt === 'Rain Showers') {
+    } else if (skyTxt === 'Rain Showers' || skyTxt === 'Rain') {
         return '🌧️'
-    } else if (skyTxt === 'Light Rain') {
+    } else if (skyTxt === 'Light Rain' || skyTxt === 500) {
         return '🌦️'
     } else if (skyTxt === 'Clear') {
-        if (useMoon === true) {
-            var hour = new Date().getHours()
-            if (hour > 0 && hour < 6) {
-                return '🌙'
-            } else if (hour < 15) {
-                return '☀️'
-            } else if (hour < 16) {
-                return '🌙'
-            } else {
-                return '🌙'
-            } 
-        }
         return '☀️'
     } else if (skyTxt === 'Mostly Clear') {
-        if (useMoon === true) {
-            var hour = new Date().getHours()
-            if (hour > 0 && hour < 6) {
-                return '🌙'
-            } else if (hour < 15) {
-                return '🌤️'
-            } else if (hour < 16) {
-                return '🌙'
-            } else {
-                return '🌙'
-            }
-        }
         return '🌤️'
     } else if (skyTxt === 'T-Storms') {
         return '⛈️'
@@ -581,58 +504,58 @@ const CityBekescsaba = {
     Lat: 46.677227,
     Lon: 21.089993,
     AccuWeatherData: {
-        "Version": 1,
-        "Key": "187162",
-        "Type": "City",
-        "Rank": 51,
-        "LocalizedName": "Békéscsaba",
-        "EnglishName": "Békéscsaba",
-        "PrimaryPostalCode": "",
-        "Region": {
-            "ID": "EUR",
-            "LocalizedName": "Europe",
-            "EnglishName": "Europe"
+        Version: 1,
+        Key: "187162",
+        Type: "City",
+        Rank: 51,
+        LocalizedName: "Békéscsaba",
+        EnglishName: "Békéscsaba",
+        PrimaryPostalCode: "",
+        Region: {
+            ID: "EUR",
+            LocalizedName: "Europe",
+            EnglishName: "Europe"
         },
-        "Country": {
-            "ID": "HU",
-            "LocalizedName": "Hungary",
-            "EnglishName": "Hungary"
+        Country: {
+            ID: "HU",
+             LocalizedName: "Hungary",
+             EnglishName: "Hungary"
         },
-        "AdministrativeArea": {
-            "ID": "BC",
-            "LocalizedName": "Békéscsaba",
-            "EnglishName": "Békéscsaba",
-            "Level": 1,
-            "LocalizedType": "City with county rights",
-            "EnglishType": "City with county rights",
-            "CountryID": "HU"
+         AdministrativeArea: {
+             ID: "BC",
+             LocalizedName: "Békéscsaba",
+             EnglishName: "Békéscsaba",
+             Level: 1,
+             LocalizedType: "City with county rights",
+             EnglishType: "City with county rights",
+             CountryID: "HU"
         },
-        "TimeZone": {
-            "Code": "CEST",
-            "Name": "Europe/Budapest",
-            "GmtOffset": 2,
-            "IsDaylightSaving": true,
-            "NextOffsetChange": "2022-10-30T01:00:00Z"
+         TimeZone: {
+             Code: "CEST",
+             Name: "Europe/Budapest",
+             GmtOffset: 2,
+             IsDaylightSaving: true,
+             NextOffsetChange: "2022-10-30T01:00:00Z"
         },
-        "GeoPosition": {
-            "Latitude": 46.684,
-            "Longitude": 21.088,
-            "Elevation": {
-                "Metric": {
-                    "Value": 90,
-                    "Unit": "m",
-                    "UnitType": 5
+         GeoPosition: {
+             Latitude: 46.684,
+             Longitude: 21.088,
+             Elevation: {
+                 Metric: {
+                     Value: 90,
+                     Unit: "m",
+                     UnitType: 5
                 },
-                "Imperial": {
-                    "Value": 295,
-                    "Unit": "ft",
-                    "UnitType": 0
+                 Imperial: {
+                     Value: 295,
+                     Unit: "ft",
+                     UnitType: 0
                 }
             }
         },
-        "IsAlias": false,
-        "SupplementalAdminAreas": [],
-        "DataSets": [
+        IsAlias: false,
+        SupplementalAdminAreas: [],
+        DataSets: [
             "AirQualityCurrentConditions",
             "AirQualityForecasts",
             "Alerts",
@@ -660,6 +583,7 @@ function MetAlert_DegreeIconNameToText(IconName) {
 const MetAlert_TypeIcons = {
     'fog1.gif': '🌫️',
     'ts1.gif': '⚡',
+    'snow1.gif': '🌨️',
 }
 
 const MetAlert_DegreeIconNames = {

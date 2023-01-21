@@ -2,24 +2,25 @@ const Discord = require('discord.js')
 const MoonPhase = require('moonphase-js')
 const fs = require('fs')
 const SunCalc = require('suncalc')
-const WeatherServices = require('./weatherServices')
-const WeatherAlertsService = require('./weatherMet')
+const Openweathermap = require('../services/Openweathermap')
+const NASA = require('../services/NASA')
+const WeatherAlertsService = require('../services/weatherMet')
 const LogError = require('../functions/errorLog')
 
 const seasons = {
-    'early autumn': { name: 'Késő ősz', icon: '🍂' },
-    'mid autumn': { name: 'Késő ősz', icon: '🍂' },
+    'early autumn': { name: 'Kora ősz', icon: '🍂' },
+    'mid autumn': { name: 'Ősz', icon: '🍂' },
     'late autumn': { name: 'Késő ősz', icon: '🍂' },
+
     'early winter': { name: 'Kora tél', icon: '❄️' },
-    'mid winter': { name: 'Tél közepe', icon: '❄️' },
-    'late winter': { name: 'Tél közepe', icon: '❄️' },
+    'mid winter': { name: 'Tél', icon: '❄️' },
+    'late winter': { name: 'Késő tél', icon: '❄️' },
+
+    'early spring': { name: 'Kora tavasz', icon: '🌱' },
+    'mid spring': { name: 'Tavasz', icon: '🌱' },
+    'late spring': { name: 'Késő tavasz', icon: '🌱' },
 }
-/**
- * @returns {Promise<string>}
- * @param {WeatherServices.MSN.WeatherResult} MsnWeather Msn weather data
- * @param {WeatherServices.OpenWeatherMap.WeatherResult} OpenweatherWeather Openweather weather data
- * @param {MoonPhase[]} data2 Moon data
- */
+
 const CreateGraph = async function(MsnWeather, OpenweatherWeather, data2) {
     const { Canvas } = require('canvas')
 
@@ -299,55 +300,56 @@ const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
 const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 /**
- @param {WeatherServices.MSN.WeatherResult} MsnWeather Msn weather data
- @param {WeatherServices.OpenWeatherMap.WeatherResult} OpenweatherWeather Openweather weather data
- @param {MoonPhase[]} data2 Moon data
- @param {{main:{aqi:number;};components:{co:number;no:number;no2:number;o3:number;so2:number;pm2_5:number;pm10:number;nh3:number;};dt: number;} | undefined} OpenweatherPollution Openweather pollution data
+ @param {Openweathermap.OpenWeatherMap.WeatherResult} OpenweatherWeather
+ @param {MoonPhase[]} Moon
+ @param {Openweathermap.OpenWeatherMap.PollutionItem | undefined} OpenweatherPollution
  @param {WeatherAlertsService.MET.ResultCounty[]} MetAlerts
  @param {WeatherAlertsService.MET.ResultSnowReport} MetSnowReport
  @param {boolean} msnIsCache
  @param {boolean} openweathermapWeatherIsCache
  */
-function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPollution, MetAlerts, msnIsCache, openweathermapWeatherIsCache, MetSnowReport) {
-    const current = MsnWeather.current
+function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts, msnIsCache, openweathermapWeatherIsCache, MetSnowReport) {
     const embed = new Discord.EmbedBuilder()
         .setColor('#00AE86')
-        .setAuthor({ name: current.observationpoint.replace(', Hungary', ''), url: 'https://openweathermap.org/city/' + OpenweatherWeather.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
+        .setAuthor({ name: 'Békéscsaba', url: 'https://openweathermap.org/city/' + OpenweatherWeather.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
     {
-        const skyTxt = weatherSkytxt(current.skytext)
-        embed.setTitle(`**${skyTxt}** ||(${OpenweatherWeather.weather[0].description})|||| (${OpenweatherWeather.weather[0].id})||`)
+        embed.setTitle(`**${weatherSkytxt(OpenweatherWeather.weather[0].description)}** ||${OpenweatherWeather.weather[0].id}||`)
 
-        const humidityValue = Average([current.humidity, OpenweatherWeather.main.humidity])
+        const humidityValue = OpenweatherWeather.main.humidity
 
-        const windValue = GetReadableNumber(Average([OpenweatherWeather.wind.speed * 3.6, parseInt(current.windspeed.replace(' km/h', ''))]))
+        const windValue = GetReadableNumber(OpenweatherWeather.wind.speed * 3.6)
 
-        const tempValue = GetReadableNumber(Average([current.temperature, OpenweatherWeather.main.temp]))
+        const tempValue = GetReadableNumber(OpenweatherWeather.main.temp)
 
-        const tempMinValue = GetReadableNumber(Average([MsnWeather.forecast[1].low, OpenweatherWeather.main.temp_min]))
-        const tempMaxValue = GetReadableNumber(Average([MsnWeather.forecast[1].high, OpenweatherWeather.main.temp_max]))
+        const tempMinValue = GetReadableNumber(OpenweatherWeather.main.temp_min)
+        const tempMaxValue = GetReadableNumber(OpenweatherWeather.main.temp_max)
 
-        const tempFeelslikeValue = Math.floor(Average([current.feelslike, OpenweatherWeather.main.feels_like]))
+        const pressure = (OpenweatherWeather.main.grnd_level) ? OpenweatherWeather.main.grnd_level : OpenweatherWeather.main.pressure
 
-        const windDirection = DirectionNameToArrow(current.winddisplay.toString().split(' ')[2])
+        const tempFeelslikeValue = Math.floor(OpenweatherWeather.main.feels_like)
 
-        const visibilityValue = Math.floor(OpenweatherWeather.visibility / 1000)
+        // const windDirection = DirectionNameToArrow(current.winddisplay.toString().split(' ')[2])
 
         const times = SunCalc.getTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
         const moonTimes = SunCalc.getMoonTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
-                
+
         var description = ''
         description += '\n' + `${EmojiPrefix}☁️ ${OpenweatherWeather.clouds.all} % felhősség`
-        if (MsnWeather.forecast[1].precip !== '0')
-        { description += '\n' + `${EmojiPrefix}☔ ${MsnWeather.forecast[1].precip} % csapadék` }
+        
         description += '\n' + `${EmojiPrefix}${weatherHumidityIcon(humidityValue)} ${humidityValue} % páratartalom`
         description += '\n' + `${EmojiPrefix}${weatherTempIcon(tempFeelslikeValue)} ${tempMinValue} - ${tempValue} - ${tempMaxValue} °C (Hőérzet: ${tempFeelslikeValue} °C)`
-        description += '\n' + `${EmojiPrefix}${weatherWindIcon(windValue)} ${windDirection} (${OpenweatherWeather.wind.deg}°) ${windValue} km/h szél`
+        description += '\n' + `${EmojiPrefix}${weatherWindIcon(windValue)} ${windValue} km/h szél`
         description += '\n' + `${EmojiPrefix}🌬️ ${GetReadableNumber(OpenweatherWeather.wind.gust * 3.6)} km/h széllökés`
-        description += '\n' + `${EmojiPrefix}${weatherPressureIcon(OpenweatherWeather.main.pressure)} ${OpenweatherWeather.main.pressure} pHa légnyomás`
+        description += '\n' + `${EmojiPrefix}${weatherPressureIcon(pressure)} ${pressure} pHa légnyomás`
         
-        if (visibilityValue !== 10)
-        { description += '\n' + `${EmojiPrefix}👁️ ${visibilityValue} km látótávolság` }
+        if (OpenweatherWeather.visibility !== 10000) {
+            if (OpenweatherWeather.visibility < 1000) {
+                description += '\n' + `${EmojiPrefix}👁️ ${OpenweatherWeather.visibility} m látótávolság`
+            } else {
+                description += '\n' + `${EmojiPrefix}👁️ ${Math.round(OpenweatherWeather.visibility / 1000)} km látótávolság`
+            }
+        }
 
         var snowDepth = null
         for (let i = 0; i < MetSnowReport.length; i++) {
@@ -356,12 +358,29 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
                 break
             }           
         }
+        if (OpenweatherWeather.rain) {
+            if (OpenweatherWeather.rain['1h']) {
+                description += '\n' + `${EmojiPrefix}🌊 ${OpenweatherWeather.rain['1h']} mm eső az elmúlt 1 órában`
+            }
+            if (OpenweatherWeather.rain['3h']) {
+                description += '\n' + `${EmojiPrefix}🌊 ${OpenweatherWeather.rain['3h']} mm eső az elmúlt 3 órában`
+            }
+        }
 
         if (snowDepth !== null) {
             if (snowDepth === 'patches') {
                 description += '\n' + `${EmojiPrefix}⛄ Helyenként hófoltok`
             } else if (snowDepth !== 0) {
                 description += '\n' + `${EmojiPrefix}⛄ ${snowDepth} cm hó`
+            }
+        }
+
+        if (OpenweatherWeather.snow) {
+            if (OpenweatherWeather.snow['1h']) {
+                description += '\n' + `${EmojiPrefix}⛄ ${OpenweatherWeather.snow['1h']} mm hó az elmúlt 1 órában`
+            }
+            if (OpenweatherWeather.snow['3h']) {
+                description += '\n' + `${EmojiPrefix}⛄ ${OpenweatherWeather.snow['3h']} mm hó az elmúlt 3 órában`
             }
         }
 
@@ -397,8 +416,8 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
             }
         }
 
-        if (OpenweatherPollution !== undefined) {
-            description += '\n' + `\n😷 **Levegőminőség:**\n||<t:${OpenweatherPollution.dt}:f>||\n`
+        if (OpenweatherPollution) {
+            description += '\n' + `\n😷 **Levegőminőség:**\n`
 
             description += '\n' + `Levőminőség: ${EmojiPrefix}${GetPollutionIndex(8, OpenweatherPollution.main.aqi)} ${GetPollutionText(OpenweatherPollution.main.aqi)}`
         
@@ -429,7 +448,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
 
         description +=
             '\n\n🌙 **Hold:**\n\n'
-        description += `${EmojiPrefix}${weatherMoonIcon(data2[1].phaseName())} ${weatherMoonText(data2[1].phaseName())} (${Math.floor(data2[1].illum * 100)} %-a látható)\n`
+        description += `${EmojiPrefix}${weatherMoonIcon(Moon[1].phaseName())} ${weatherMoonText(Moon[1].phaseName())} (${Math.floor(Moon[1].illum * 100)} %-a látható)\n`
         
         if (moonTimes.rise !== undefined)
         { description += `${EmojiPrefix}⬆️ Holdkelte: <t:${ToUnix(moonTimes.rise)}:R>\n` }
@@ -440,7 +459,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         { description += `A Hold ma mindig a **horizont felett lesz**\n` }
         if (moonTimes.alwaysDown)
         { description += `A Hold ma mindig a **horizont alatt lesz**\n` }
-        description += '\n🗓️ **Előrejelzés:**'
+        // description += '\n🗓️ **Előrejelzés:**'
         embed.setDescription(description)
         
         /*
@@ -453,6 +472,7 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
         */
     }
 
+    /*
     for (let i = 0; i < MsnWeather.forecast.length; i++) {
         const Element = MsnWeather.forecast[i]
         
@@ -513,19 +533,22 @@ function getEmbedEarth(MsnWeather, OpenweatherWeather, data2, OpenweatherPolluti
             inline: true
         }])
     }
+    */
 
+    /*
     embed.addFields({
         name: '\n📈 Grafikon:',
         value: 'Minimum-, maximum hőmérséklet és csapadék',
         inline: false
     })
+    */
 
-    embed.setTimestamp(Date.parse(current.date + 'T' + current.observationtime))    
+    embed.setTimestamp(Date.parse(OpenweatherWeather.dt))    
     // embed.setThumbnail('attachment://graph.png')
-    embed.setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(current.skytext, true)))
+    embed.setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(OpenweatherWeather.weather[0].id, true)))
     const MsnFooter = ((msnIsCache === true) ? '📁' : '') + 'weather.service.msn.com'
     const OpenweathermapFooter = ((openweathermapWeatherIsCache === true) ? '📁' : '') + 'openweathermap.org'
-    embed.setFooter({ text: `• ${MsnFooter} • ${OpenweathermapFooter}` })
+    embed.setFooter({ text: `${OpenweathermapFooter}` })
     embed.setImage('attachment://graph.png')
     return embed
 }
@@ -558,7 +581,7 @@ function DateToDate(date) {
     return newDate
 }
 
-/** @param {WeatherServices.NasaMars.WeatherResult} data @param {WeatherServices.NasaMars.WeeklyImagesResult} weeklyImage */
+/** @param {NASA.NasaMars.WeatherResult} data @param {NASA.NasaMars.WeeklyImagesResult} weeklyImage */
 function getEmbedMars(data, weeklyImage) {
     const embed = new Discord.EmbedBuilder()
         .setColor('#fd875f')
@@ -605,7 +628,7 @@ function getEmbedMars(data, weeklyImage) {
             `${EmojiPrefix}🌡️ ${latestSol.min_temp} - ${latestSol.max_temp} °C\n` +
             `${GetMarsPressureIcon(latestSol.pressure, averagePressure)} ${latestSol.pressure} pHa légnyomás\n` +
             `${GetSeason(latestSol.season)}\n` +
-            `${EmojiPrefix}🌍 Földi dátum: ${latestSol.terrestrial_date}` +
+            `${EmojiPrefix}🌍 Földi dátum: <t:${ToUnix(DateToDate(latestSol.terrestrial_date))}:d> ||${latestSol.terrestrial_date}||` +
 
             '\n\n☀️ **Nap:**\n\n' +
 
@@ -627,7 +650,7 @@ function getEmbedMars(data, weeklyImage) {
 
     embed
         .setTimestamp(DateToDate(latestSol.terrestrial_date))
-        .setFooter({ text: '• Mars 2020' })
+        .setFooter({ text: 'Mars 2020' })
         .setImage('https://i.cdn29.hu/apix_collect_c/primary/1311/mars131114_20131114_122345_original_1150x645_cover.jpg')
     
     if (weeklyImage != null) {
@@ -659,87 +682,82 @@ module.exports = async (command, privateCommand, earth = true) => {
         const month = new Date().getMonth() + 1
         const day = new Date().getDate()
 
-        WeatherServices.MsnWeather((msnIsCache, msnWeather, msnWeatherError) => {
-            if (msnWeatherError) {
-                LogError(msnWeatherError)
-                command.editReply({ content: '> \\❌ **MSN Error:** ' + msnWeatherError })
-                return
-            }
-            WeatherServices.OpenweathermapWeather((openweathermapWeatherIsCache, openweathermapWeather, openweathermapWeatherError) => {
-                if (openweathermapWeatherError) {
-                    LogError(openweathermapWeatherError)
-                    command.editReply({ content: '> \\❌ ' + openweathermapWeatherError })
-                    return
-                }
-                WeatherServices.OpenweathermapPollution(async (openweathermapPollution, openweathermapPollutionError) => {
-                    if (openweathermapPollutionError) {
+        Openweathermap.OpenweathermapWeather()
+            .then(openweathermapWeather => {
+                Openweathermap.OpenweathermapPollution()
+                    .then(async openweathermapPollution => {
+                        const MoonPhases = [
+                            new MoonPhase(addDays(new Date(year, month, day), -1)),
+                            new MoonPhase(new Date(year, month, day)),
+                            new MoonPhase(addDays(new Date(year, month, day), 1)),
+                            new MoonPhase(addDays(new Date(year, month, day), 2)),
+                            new MoonPhase(addDays(new Date(year, month, day), 3))
+                        ]
+    
+                        /** @type {WeatherAlertsService.MET.ResultCounty[]} */
+                        var alerts = []
+    
+                        try
+                        { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Today')) }
+                        catch (e)
+                        { alerts.push(null) }
+    
+                        try
+                        { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Tomorrow')) }
+                        catch (e)
+                        { alerts.push(null) }
+    
+                        try
+                        { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'ThirdDay')) }
+                        catch (e)
+                        { alerts.push(null) }
+    
+                        try
+                        { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'FourthDay')) }
+                        catch (e)
+                        { alerts.push(null) }
+    
+                        const embed = getEmbedEarth(openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts, false, openweathermapWeather.fromCache, await WeatherAlertsService.GetSnowReport())
+                        /*
+                        try {
+                            const attachmentPath = await CreateGraph(msnWeather[0], openweathermapWeather, MoonPhases)
+                            command.editReply({ embeds: [embed],
+                                files: [{
+                                    attachment: attachmentPath,
+                                    name: 'graph.png'
+                                }]
+                            })
+                        } catch (error) {
+                            LogError(error)
+                            command.editReply({ embeds: [embed] })
+                        }
+                        */
+                        command.editReply({ embeds: [embed] })
+                    })
+                    .catch(openweathermapPollutionError => {
                         LogError(openweathermapPollutionError)
                         command.editReply({ content: '> \\❌ ' + openweathermapPollutionError })
-                        return
-                    }
-
-                    const MoonPhases = [
-                        new MoonPhase(addDays(new Date(year, month, day), -1)),
-                        new MoonPhase(new Date(year, month, day)),
-                        new MoonPhase(addDays(new Date(year, month, day), 1)),
-                        new MoonPhase(addDays(new Date(year, month, day), 2)),
-                        new MoonPhase(addDays(new Date(year, month, day), 3))
-                    ]
-
-                    /** @type {WeatherAlertsService.MET.ResultCounty[]} */
-                    var alerts = []
-
-                    try
-                    { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Today')) }
-                    catch (e)
-                    { alerts.push(null) }
-
-                    try
-                    { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Tomorrow')) }
-                    catch (e)
-                    { alerts.push(null) }
-
-                    try
-                    { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'ThirdDay')) }
-                    catch (e)
-                    { alerts.push(null) }
-
-                    try
-                    { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'FourthDay')) }
-                    catch (e)
-                    { alerts.push(null) }
-
-                    const embed = getEmbedEarth(msnWeather[0], openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts, msnIsCache, openweathermapWeatherIsCache, await WeatherAlertsService.GetSnowReport())
-                    try {
-                        const attachmentPath = await CreateGraph(msnWeather[0], openweathermapWeather, MoonPhases)
-                        command.editReply({ embeds: [embed],
-                            files: [{
-                                attachment: attachmentPath,
-                                name: 'graph.png'
-                            }]
-                        })
-                    } catch (error) {
-                        LogError(error)
-                        command.editReply({ embeds: [embed] })
-                    }
-                })
+                    })
             })
-        })
+            .catch(openweathermapWeatherError => {
+                LogError(openweathermapWeatherError)
+                command.editReply({ content: '> \\❌ ' + openweathermapWeatherError })
+            })
     } else {
-        WeatherServices.NasaMarsWeather((weatherData, weatherError) => {
-            if (weatherError) {
-                LogError(weatherError)
-                command.editReply({ content: '> \\❌ ' + weatherError })
-                return
-            }
-
-            WeatherServices.NasaMarsWeeklyImage((bodyImage, imageError) => {
-                if (imageError) {
-                    LogError(imageError)
-                }
-
-                command.editReply({ embeds: [ getEmbedMars(weatherData, bodyImage)] })
+        NASA.NasaMarsWeather()
+            .then(weatherData => {
+                NASA.NasaMarsWeeklyImage()
+                    .then(bodyImage => {
+                        command.editReply({ embeds: [ getEmbedMars(weatherData, bodyImage)] })
+                    })
+                    .catch(error => {
+                        LogError(error)
+                        command.editReply({ content: '> \\❌ ' + error })
+                    })
             })
-        })
+            .catch(error => {
+                LogError(error)
+                command.editReply({ content: '> \\❌ ' + error })
+            })
     }
 }

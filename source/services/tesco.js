@@ -1,13 +1,16 @@
 const https = require('https')
 const DOM = require('jsdom')
 const fs = require('fs')
-const LogError = require('./errorLog')
+const LogError = require('../functions/errorLog')
+const Types = require('./tesco')
 
 const ReadFromCache = false
 
 const cookies = "consumer=default; trkid=8a2bbdbd-3239-46a2-94a2-04701a324c26; atrc=62da1feb-5cd0-4dbc-8f57-4c023dd212fb; DCO=sdc; _csrf=wR30HpKPE7ITgOORpQ3FWTV4; cookiePreferences=%7B%22experience%22%3Atrue%2C%22advertising%22%3Atrue%7D; PHPSESSID=baqk6jfll93cvh16vlmurncg31; _abck=8AE7B45E970A055617BA8922B922F2C8~0~YAAQCU4SAhPxE5SEAQAAcjfblAhZyWqso3p07IzPezN6si3w+FOYTrou9dEYnlfD+wIWISign9Zpz3wmCQkaLHL7c8S2H3qsVodR2/3lUgtiALlvuqEKr1g0qTLQUWEZj02x7TevOf2D7LYTRZLeyoBIg8mmalRNrMzrPuDWDH6d+4LUiLbuLNDTrPed17TzYjdD0JH6+hygrmcwVfivFOXBrVBUW+1RDVtWqbpGrlqj1lpEeZAu8ymGrRakoEdnmzAH9iNEfVWTBdAO2RZsS/lt9MEralL1K0WYfcBWGPIaiaZW/8DRin8a+Y/3hrv6A2q0eGSgLNzKX2DoK6nol5nZ/e4ngbRszDFypiDlwA8iv76HSgtdEynVuQppwh0I5PLqXIw0IOQ95pJ8hxwX6lK5fA==~-1~-1~-1; akavpau_hungary_vp=1668953596~id=f7cc8d82cab72630ff6686aa4a170cc1"
 
+/** @param {string} data */
 const ProcessData = function(data) {
+    /** @type {Types.SearchResult[]} */
     var result = []
 
     const dom = new DOM.JSDOM(data)
@@ -61,18 +64,20 @@ const ProcessData = function(data) {
             errorOccured = true
         }
 
-        var discount = undefined
+        var discount = null
 
         if (item !== null) {
             const discountElement = item.querySelector('div:nth-child(2)')
             if (discountElement !== null) {
                 try {
-                    var validUntil = discountElement.querySelector('div > div > a > div > span').textContent
-                    var desc = discountElement.querySelector('div > div > a > div > div > span').textContent
+                    var validUntil = discountElement.querySelector('div > div > a > div > span')?.textContent
+                    var desc = discountElement.querySelector('div > div > a > div > div > span')?.textContent
         
-                    discount = {
-                        validUntil: validUntil,
-                        desc: desc
+                    if (validUntil && desc) {
+                        discount = {
+                            validUntil: validUntil,
+                            desc: desc
+                        }
                     }
                 } catch (error) {
                     errorOccured = true
@@ -90,7 +95,7 @@ const ProcessData = function(data) {
             name: name,
             price: price,
             price2: price2,
-            discount: discount
+            discount: discount,
         })
     })
 
@@ -168,15 +173,15 @@ const Download = function(search, callback) {
 // ProcessData(fs.readFileSync('./tesco-cache/search-data-bread.html', { encoding: 'utf-8' }))
 // Download('bread', (result, error) => { if(error){return}; ProcessData(result); })
 
-/** @returns {Promise<{result: string|undefined; error: string|undefined; isCache: boolean|undefined}>} */
+/** @returns {Types.SearchForPromise} */
 const SearchFor = function(search) {
-    return new Promise((callback) => {
+    return new Promise((resolve, reject) => {
         Download(search, (isCache, result, error) => {
             if (error) {
-                callback({ error: error })
+                reject(error)
                 return
             }
-            callback({ result: ProcessData(result), isCache: isCache })
+            resolve({ result: ProcessData(result), fromCache: isCache })
         })
     })
 }

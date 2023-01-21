@@ -5,6 +5,9 @@ const { JSDOM } = require('jsdom')
 const baseUrl = 'https://www.met.hu'
 const basePath = './cache/weather/'
 
+const MaxTimeDifference = 1000 * 60
+    * 10 // 10 minutes
+
 async function Sleep(ms) {
     return new Promise((callback) => {
         setTimeout(() => {
@@ -14,22 +17,22 @@ async function Sleep(ms) {
 }
 
 function SaveCache(cacheName, data) {
-    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath) }
-    fs.writeFileSync(basePath + `${cacheName}.json`, JSON.stringify({ date: Date.now(), data: data }, undefined, ' '), { encoding: 'utf-8' })
+    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath, { recursive: true }) }
+    SaveCacheRaw(cacheName, JSON.stringify({ date: Date.now(), data: data }, null, ' '))
 }
 
 /** @returns {{date: number, data: any}} */
 function LoadCache(cacheName) {
-    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath) }
+    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath, { recursive: true }) }
     if (!fs.existsSync(basePath + `${cacheName}.json`)) {
-        fs.writeFileSync(basePath + `${cacheName}.json`, JSON.stringify({ date: 0, data: null }, undefined, ' '), { encoding: 'utf-8' })
+        fs.writeFileSync(basePath + `${cacheName}.json`, JSON.stringify({ date: 0, data: null }, null, ' '), { encoding: 'utf-8' })
         return { date: 0, data: null }
     }
     return JSON.parse(fs.readFileSync(basePath + `${cacheName}.json`, { encoding: 'utf-8' }))
 }
 
 function SaveCacheRaw(cacheName, rawData) {
-    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath) }
+    if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath, { recursive: true }) }
     fs.writeFileSync(basePath + `${cacheName}.json`, rawData)
 }
 
@@ -235,7 +238,7 @@ async function GetMainWeather(forceDownload = false) {
     const cache = LoadCache('main-weather')
 
     if (forceDownload) { }
-    else if (Date.now() - cache.date < 5 * 60 * 1000)
+    else if (Date.now() - cache.date < MaxTimeDifference)
     { return cache.data }
 
     const dataRaw = await DownloadAsync(UrlPaths.MainWeather)
@@ -272,7 +275,7 @@ async function GetMainWeather(forceDownload = false) {
 async function GetSnowReport(forceDownload = false) {
     const cache = LoadCache('snow-report')
     if (forceDownload) { }
-    else if (Date.now() - cache.date < 5 * 60 * 1000)
+    else if (Date.now() - cache.date < MaxTimeDifference)
     { return cache.data }
     const dataRaw = await DownloadAsync(UrlPaths.SnowReport)
     const tables = new JSDOM(dataRaw).window.document.body.querySelectorAll('.def-tbl.au, .def-tbl.mo')
@@ -293,7 +296,7 @@ async function GetSnowReport(forceDownload = false) {
             }
         }
     })
-    SaveCache(`snow-report`, data)
+    SaveCache('snow-report', data)
     return data
 }
 
