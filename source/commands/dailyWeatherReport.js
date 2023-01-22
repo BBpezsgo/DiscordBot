@@ -32,17 +32,56 @@ function GetEmbed(weatherData, isCache) {
         .setColor('#00AE86')
         .setAuthor({ name: weatherData.city.name, url: 'https://openweathermap.org/city/' + weatherData.city.id, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
 
-    const times = SunCalc.getTimes(new Date(Date.now()), 46.677227, 21.089993)
+    const times = SunCalc.getTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
+    const moonTimes = SunCalc.getMoonTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
 
-    embed
-        .setTitle(`Napi időjárás jelentés`)
-        .setDescription(
-            `${EmojiPrefix}🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
-            `${EmojiPrefix}🌇 Napkelte: <t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:R>\n` +
-            `${EmojiPrefix}🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
-            `${EmojiPrefix}🌆 Napnyugta: <t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:R>\n` +
-            `${EmojiPrefix}🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>`
-            )
+    const fields = []
+
+    fields.push({
+        time: ToUnix(moonTimes.rise),
+        title: `<t:${ToUnix(moonTimes.rise)}:t> ${EmojiPrefix}🌙 Holdkelte`,
+        description: '\u200b'
+    })
+    fields.push({
+        time: ToUnix(moonTimes.set),
+        title: `<t:${ToUnix(moonTimes.set)}:t> ${EmojiPrefix}🌙 Holdnyugta`,
+        description: '\u200b'
+    })
+
+    fields.push({
+        time: ToUnix(times.dawn),
+        title: `<t:${ToUnix(times.dawn)}:t> ${EmojiPrefix}🌇 Hajnal`,
+        description: '\u200b'
+    })
+    fields.push({
+        time: AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise)),
+        title: `<t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:t> ${EmojiPrefix}🌇 Napkelte`,
+        description: '\u200b'
+    })
+    fields.push({
+        time: ToUnix(times.solarNoon),
+        title: `<t:${ToUnix(times.solarNoon)}:t> ${EmojiPrefix}🌞 Dél`,
+        description: '\u200b'
+    })
+    fields.push({
+        time: AverageUnix(weatherData.city.sunset, ToUnix(times.sunset)),
+        title: `<t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:t> ${EmojiPrefix}🌆 Napnyugta`,
+        description: '\u200b'
+    })
+    fields.push({
+        time: ToUnix(times.dusk),
+        title: `<t:${ToUnix(times.dusk)}:t> ${EmojiPrefix}🌆 Szürkület`,
+        description: '\u200b'
+    })
+
+    embed.setTitle(`Napi időjárás jelentés`)
+        /*.setDescription(
+            `${EmojiPrefix}🌇 Hajnal: <t:${ToUnix(times.dawn)}:t>\n` +
+            `${EmojiPrefix}🌇 Napkelte: <t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:t>\n` +
+            `${EmojiPrefix}🌞 Dél: <t:${ToUnix(times.solarNoon)}:t>\n` +
+            `${EmojiPrefix}🌆 Napnyugta: <t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:t>\n` +
+            `${EmojiPrefix}🌆 Szürkület: <t:${ToUnix(times.dusk)}:t>`
+            )*/
 
     for (let i = 0; i < 5; i++) {
         const currentWeatherItem = weatherData.list[i]
@@ -71,14 +110,25 @@ function GetEmbed(weatherData, isCache) {
             stringBuilder += `${EmojiPrefix}⛄ ${currentWeatherItem.snow['3h']} mm hó\n`
         }
 
-        embed.addFields([{
-            name: `<t:${ToUnix(new Date(currentWeatherItem.dt * 1000))}:t>` + ` ${EmojiPrefix}${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
-            value: stringBuilder.trimEnd(),
-            inline: false
-        }])
-        embed.setThumbnail('https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/commands/weatherImages/earth.gif')
+        fields.push({
+            time: ToUnix(new Date(currentWeatherItem.dt * 1000)),
+            title: `<t:${ToUnix(new Date(currentWeatherItem.dt * 1000))}:t>` + ` ${EmojiPrefix}${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
+            description: stringBuilder.trimEnd() + '\n'
+        })
     }
 
+    fields.sort((a, b) => a.time - b.time)
+
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i]
+        embed.addFields([{
+            name: field.title,
+            value: field.description,
+            inline: false
+        }])
+    }
+
+    // embed.setThumbnail('https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/commands/weatherImages/earth.gif')
     embed.setTimestamp(Date.now())
     if (isCache) {
         embed.setFooter({ text: '📁 openweathermap.org' })
