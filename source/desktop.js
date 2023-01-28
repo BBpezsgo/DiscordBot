@@ -2017,7 +2017,13 @@ bot.once('ready', async () => {
 bot.on('messageCreate', async msg => {
     CacheManager.SaveUsers(bot)
 
-    const message = await msg.fetch()
+    let message
+    try {
+        message = await msg.fetch()
+    } catch (error) {
+        LogError(error)
+        return
+    }
 
     const thisIsPrivateMessage = (message.channel.type === Discord.ChannelType.DM)
 
