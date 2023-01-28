@@ -37,16 +37,20 @@ function GetEmbed(weatherData, isCache) {
 
     const fields = []
 
-    fields.push({
-        time: ToUnix(moonTimes.rise),
-        title: `<t:${ToUnix(moonTimes.rise)}:t> ${EmojiPrefix}🌙 Holdkelte`,
-        description: '\u200b'
-    })
-    fields.push({
-        time: ToUnix(moonTimes.set),
-        title: `<t:${ToUnix(moonTimes.set)}:t> ${EmojiPrefix}🌙 Holdnyugta`,
-        description: '\u200b'
-    })
+    if (moonTimes.rise) {
+        fields.push({
+            time: ToUnix(moonTimes.rise),
+            title: `<t:${ToUnix(moonTimes.rise)}:t> ${EmojiPrefix}🌙 Holdkelte`,
+            description: '\u200b'
+        })
+    }
+    if (moonTimes.set) {
+        fields.push({
+            time: ToUnix(moonTimes.set),
+            title: `<t:${ToUnix(moonTimes.set)}:t> ${EmojiPrefix}🌙 Holdnyugta`,
+            description: '\u200b'
+        })
+    }
 
     fields.push({
         time: ToUnix(times.dawn),

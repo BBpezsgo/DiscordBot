@@ -1,5 +1,7 @@
 console.log('The script is executing!')
 
+process.title = "Discord BOT"
+
 const LogError = require('./functions/errorLog')
 const fs = require('fs')
 process.on('uncaughtException', function (err) {
