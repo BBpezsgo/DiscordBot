@@ -35,3 +35,9 @@ source/news-archive/
 source/tesco-cache/
 source/mvm-roads-in-interest.json
 chrome-extension/key.json
+source/Release/
+source/DiscordBotManager.dll
+source/DiscordBotManager.exe
+source/DiscordBotManager.pdb
+source/DiscordBotManager.deps.json
+source/DiscordBotManager.runtimeconfig.json
