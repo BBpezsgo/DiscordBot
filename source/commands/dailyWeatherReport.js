@@ -59,7 +59,7 @@ function GetEmbed(weatherData, isCache) {
     })
     fields.push({
         time: AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise)),
-        title: `<t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:t> ${EmojiPrefix}🌇 Napkelte`,
+        title: `<t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:t> - <t:${ToUnix(times.sunriseEnd)}:t> ${EmojiPrefix}🌇 Napkelte`,
         description: '\u200b'
     })
     fields.push({
@@ -69,7 +69,7 @@ function GetEmbed(weatherData, isCache) {
     })
     fields.push({
         time: AverageUnix(weatherData.city.sunset, ToUnix(times.sunset)),
-        title: `<t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:t> ${EmojiPrefix}🌆 Napnyugta`,
+        title: `<t:${ToUnix(times.sunsetStart)}:t> - <t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:t> ${EmojiPrefix}🌆 Napnyugta`,
         description: '\u200b'
     })
     fields.push({
