@@ -435,13 +435,13 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
             description +=
                 '\n\n☀️ **Nap:**\n\n' +
 
-                `${EmojiPrefix}🌇 Hajnal: <t:${ToUnix(times.dawn)}:R>\n` +
-                `${EmojiPrefix}🌇 Napkelte: <t:${AverageUnix(OpenweatherWeather.sys.sunrise, ToUnix(times.sunrise))}:R>\n` +
-                `${EmojiPrefix}🌞 Dél: <t:${ToUnix(times.solarNoon)}:R>\n` +
-                `${EmojiPrefix}📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:R>\n` +
-                `${EmojiPrefix}🌆 Napnyugta: <t:${AverageUnix(OpenweatherWeather.sys.sunset, ToUnix(times.sunset))}:R>\n` +
-                `${EmojiPrefix}🌆 Szürkület: <t:${ToUnix(times.dusk)}:R>\n` +
-                `${EmojiPrefix}🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:R>`            
+                `${EmojiPrefix}🌇 Hajnal: <t:${ToUnix(times.dawn)}:t>\n` +
+                `${EmojiPrefix}🌇 Napkelte: <t:${AverageUnix(OpenweatherWeather.sys.sunrise, ToUnix(times.sunrise))}:t> - <t:${ToUnix(times.sunriseEnd)}:t>\n` +
+                `${EmojiPrefix}🌞 Dél: <t:${ToUnix(times.solarNoon)}:t>\n` +
+                `${EmojiPrefix}📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:t>\n` +
+                `${EmojiPrefix}🌆 Napnyugta: <t:${ToUnix(times.sunsetStart)}:t> - <t:${AverageUnix(OpenweatherWeather.sys.sunset, ToUnix(times.sunset))}:t>\n` +
+                `${EmojiPrefix}🌆 Szürkület: <t:${ToUnix(times.dusk)}:t>\n` +
+                `${EmojiPrefix}🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:t>`            
         } catch (error) {
             LogError(error)
         }
@@ -451,9 +451,9 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
         description += `${EmojiPrefix}${weatherMoonIcon(Moon[1].phaseName())} ${weatherMoonText(Moon[1].phaseName())} (${Math.floor(Moon[1].illum * 100)} %-a látható)\n`
         
         if (moonTimes.rise !== undefined)
-        { description += `${EmojiPrefix}⬆️ Holdkelte: <t:${ToUnix(moonTimes.rise)}:R>\n` }
+        { description += `${EmojiPrefix}⬆️ Holdkelte: <t:${ToUnix(moonTimes.rise)}:t>\n` }
         if (moonTimes.set !== undefined)
-        { description += `${EmojiPrefix}⬇️ Holdnyugta: <t:${ToUnix(moonTimes.set)}:R>\n` }
+        { description += `${EmojiPrefix}⬇️ Holdnyugta: <t:${ToUnix(moonTimes.set)}:t>\n` }
 
         if (moonTimes.alwaysUp)
         { description += `A Hold ma mindig a **horizont felett lesz**\n` }
@@ -628,7 +628,7 @@ function getEmbedMars(data, weeklyImage) {
             `${EmojiPrefix}🌡️ ${latestSol.min_temp} - ${latestSol.max_temp} °C\n` +
             `${GetMarsPressureIcon(latestSol.pressure, averagePressure)} ${latestSol.pressure} pHa légnyomás\n` +
             `${GetSeason(latestSol.season)}\n` +
-            `${EmojiPrefix}🌍 Földi dátum: <t:${ToUnix(DateToDate(latestSol.terrestrial_date))}:d> ||${latestSol.terrestrial_date}||` +
+            `${EmojiPrefix}🌍 Földi dátum: <t:${ToUnix(DateToDate(latestSol.terrestrial_date))}:d>` +
 
             '\n\n☀️ **Nap:**\n\n' +
 
