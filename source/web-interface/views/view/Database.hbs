@@ -13,296 +13,354 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
-<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
-   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+	<div style="width: 250px;" id="context-menubar">
+		<div id="context-menubar-content">
+            <h1>Users</h1>
+            {{#each users}}
+            <table class="user-menuitem" onclick="document.getElementById('view-user-{{id}}').click()">
+                <tr>
+                    <td>
+                        <div class="user-menuitem-avatar">
+                            <div class="tooltip">
+                                <img src="{{avatarUrlSmall}}" width="32" height="32" title="Avatar" style="border-radius: 16px;">
+                                <span class="tooltiptext">
+                                    <img src="{{avatarUrlLarge}}">
+                                </span>
+                            </div>
+                        </div>
+                        <span class="user-menuitem-name" title="Username">{{name}}</span>
+                        
+                        {{#if haveDatabase}}
+                        <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(-6px); opacity: 50%;">
+                        {{/if}}
+                    </td>
+                    <td>
+                        <img class="show-invert-{{haveDatabase}} miniicon" src="/images/err2.png" width="16" height="16">
+                        <form action="/dcbot/view/Database.html/Search" method="post" style="margin: 0; display: inline-block;"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                            <input type="text" name="id" value="{{id}}" style="display: none;">
+                            <input id="view-user-{{id}}" style="display: none" type="submit" value="View">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            {{/each}}
+            <table class="user-menuitem user-menuitem-selected">
+                <tr>
+                    <td>
+                        <div class="user-menuitem-avatar">
+                            <div class="tooltip">
+                                <img src="{{user.avatarUrlSmall}}" width="32" height="32" title="Avatar" style="border-radius: 16px;">
+                                <span class="tooltiptext">
+                                    <img src="{{user.avatarUrlLarge}}">
+                                </span>
+                            </div>
+                        </div>
+                        <span class="user-menuitem-name" title="Username">{{user.name}}</span>
+                        
+                        {{#if haveDatabase}}
+                        <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(-6px); opacity: 50%;">
+                        {{/if}}
+                    </td>
+                </tr>
+            </table>
+		</div>
+    	<div id="bot-status-panel">
+			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
+		</div>
+	</div>
+	<div id="content">
 
-    <table id="autoWidth" style="width: 598px;">
-        <tbody>
-            <tr>
-                <td class="h1" colspan="3">Database</td>
-            </tr>
-            <tr>
-                <td class="blue" colspan="3"></td>
-            </tr>
-            <tr>
-                <td></td>
-				<td colspan="2">
-                    <ul id="myUL">
-                        <li>
-                            <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
-                            <ul class="nested">
-                                {{#each info.backupFolder.files}}
-                                <li class="data-file">
-                                    <span>{{filename}}</span>
-                                    <b>{{size}}</b>
-                                </li>
-                                {{/each}}
-                            </ul>
-                        </li>
-                    </ul>
-				</td>
-            </tr>
-            <tr>
-				<td class="Item"></td>
-				<td colspan="2">
-                    <ul id="myUL">
-                        <li>
-                            <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
-                            <ul class="nested">
-                                {{#each info.folder.files}}
-                                <li class="data-file">
-                                    <span>{{filename}}</span>
-                                    <b>{{size}}</b>
-                                </li>
-                                {{/each}}
-                            </ul>
-                        </li>
-                    </ul>
-				</td>
-            </tr>
-            <tr>
-                <td class="blue" colspan="3"></td>
-            </tr>
-            <tr>
-                <td class="h2" colspan="3">
-                    BOT's database
-                </td>
-            </tr>
-            <tr>
-                <td width="698" align="center">
-                    <ul id="myUL">
-                        <li>
-                            <span class="data-number">Day: </span>
-                            <b>{{bot.day}}</b>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-            <tr>
-                <td class="blue" colspan="3"></td>
-            </tr>
-            <tr>
-                <td class="h2" colspan="3">
-                    Market
-                </td>
-            </tr>
-            <tr>
-                <td width="698" align="center">
-                    <ul id="myUL">
-                        <li>
-                            <span class="data-number">Day: </span>
-                            <b>{{market.day}}</b>
-                        </li>
-                        <li><span class="caret caret-down">Prices</span>
-                            <ul class="nested active">
-                                <li>
-                                    <span class="data-number">Token: </span>
-                                    <b>{{market.prices.token}}</b>
-                                </li>
-                                <li>
-                                    <span class="data-number">Coupon: </span>
-                                    <b>{{market.prices.coupon}}</b>
-                                </li>
-                                <li>
-                                    <span class="data-number">Jewel: </span>
-                                    <b>{{market.prices.jewel}}</b>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-            <tr>
-                <td class="blue" colspan="3"></td>
-            </tr>
-            <tr>
-                <td class="h2" colspan="3">
-                    <div class="tooltip" style="transform: translateY(5px);">
-                        <img src="{{user.avatarUrlSmall}}" width="32" height="32" title="Avatar" style="border-radius: 16px;">
-                        <span class="tooltiptext">
-                            <img src="{{user.avatarUrlLarge}}">
-                        </span>
-                    </div>
-                    {{user.name}}'s database
-                    <form action="/dcbot/view/Database.html/Back" method="post"
-                        style="display: inline-block; margin-left: 30px;"
-                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                        <input type="submit" value="Back">
-                    </form>
-                </td>
-            </tr>
-            <tr>
-                <td width="698" align="center">
-                    <ul id="myUL">
-                        <li><span class="caret caret-down">Basic</span>
-                            <ul class="nested active">
-                                <form action="/dcbot/view/Database.html/Modify/Basic" method="post" onsubmit="
-                                    this.style.pointerEvents='none';
-                                    this.style.opacity='20%';
-                                    setTimeout(() => {Reload()}, 1000);
-                                    ">
+        <table id="autoWidth" style="width: 598px;">
+            <tbody>
+                <tr>
+                    <td class="h1" colspan="3">Database</td>
+                </tr>
+                <tr>
+                    <td class="blue" colspan="3"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td colspan="2">
+                        <ul id="myUL">
+                            <li>
+                                <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
+                                <ul class="nested">
+                                    {{#each info.backupFolder.files}}
+                                    <li class="data-file">
+                                        <span>{{filename}}</span>
+                                        <b>{{size}}</b>
+                                    </li>
+                                    {{/each}}
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Item"></td>
+                    <td colspan="2">
+                        <ul id="myUL">
+                            <li>
+                                <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
+                                <ul class="nested">
+                                    {{#each info.folder.files}}
+                                    <li class="data-file">
+                                        <span>{{filename}}</span>
+                                        <b>{{size}}</b>
+                                    </li>
+                                    {{/each}}
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="blue" colspan="3"></td>
+                </tr>
+                <tr>
+                    <td class="h2" colspan="3">
+                        BOT's database
+                    </td>
+                </tr>
+                <tr>
+                    <td width="698" align="center">
+                        <ul id="myUL">
+                            <li>
+                                <span class="data-number">Day: </span>
+                                <b>{{bot.day}}</b>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="blue" colspan="3"></td>
+                </tr>
+                <tr>
+                    <td class="h2" colspan="3">
+                        Market
+                    </td>
+                </tr>
+                <tr>
+                    <td width="698" align="center">
+                        <ul id="myUL">
+                            <li>
+                                <span class="data-number">Day: </span>
+                                <b>{{market.day}}</b>
+                            </li>
+                            <li><span class="caret caret-down">Prices</span>
+                                <ul class="nested active">
                                     <li>
-                                        <span class="data-number">Score: </span>
-                                        <input name="score" type="number" value="{{userDatabase.score}}" required>
+                                        <span class="data-number">Token: </span>
+                                        <b>{{market.prices.token}}</b>
                                     </li>
                                     <li>
-                                        <span class="data-number"> Money: </span>
-                                        <input name="money" type="number" value="{{userDatabase.money}}" required>
+                                        <span class="data-number">Coupon: </span>
+                                        <b>{{market.prices.coupon}}</b>
                                     </li>
                                     <li>
-                                        <span class="data-number"> Day: </span>
-                                        <input name="day" type="number" value="{{userDatabase.day}}" required>
+                                        <span class="data-number">Jewel: </span>
+                                        <b>{{market.prices.jewel}}</b>
                                     </li>
-                                    <li>
-                                        <span class="data-string"> Color: </span>
-                                        <div style="
-                                            display: inline-block;
-                                            transform: translateY(5px);
-                                            width: 16px;
-                                            height: 16px;
-                                            border: 1px solid black;
-                                            border-radius: 3px;
-                                            background-color: {{userDatabase.color}};                                            
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="blue" colspan="3"></td>
+                </tr>
+                <tr>
+                    <td class="h2" colspan="3">
+                        <div class="tooltip" style="transform: translateY(5px);">
+                            <img src="{{user.avatarUrlSmall}}" width="32" height="32" title="Avatar" style="border-radius: 16px;">
+                            <span class="tooltiptext">
+                                <img src="{{user.avatarUrlLarge}}">
+                            </span>
+                        </div>
+                        {{user.name}}'s database
+                        <form action="/dcbot/view/Database.html/Back" method="post"
+                            style="display: inline-block; margin-left: 30px;"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                            <input type="submit" value="Back">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="698" align="center">
+                        <ul id="myUL">
+                            <li><span class="caret caret-down">Basic</span>
+                                <ul class="nested active">
+                                    <form action="/dcbot/view/Database.html/Modify/Basic" method="post" onsubmit="
+                                        this.style.pointerEvents='none';
+                                        this.style.opacity='20%';
+                                        setTimeout(() => {Reload()}, 1000);
                                         ">
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <span class="data-bool">Private commands: </span>
-                                        <b>{{userDatabase.privateCommands}}</b>
-                                    </li>
-                                    <div style="height: 7px;"></div>
-                                    <input type="submit" value="Modify">
-                                    <input type="reset" value="Reset">
-                                </form>
-                            </ul>
-                        </li>
-                        <li><span class="caret caret-down">Backpack</span>
-                            <ul class="nested active">
-                                <form action="/dcbot/view/Database.html/Modify/Backpack" method="post" onsubmit="
-                                    this.style.pointerEvents='none';
-                                    this.style.opacity='20%';
-                                    setTimeout(() => {Reload()}, 1000);
-                                    ">
-                                    <li>
-                                        <span class="data-number">Crates: </span>
-                                        <input name="crates" type="number" value="{{userDatabase.crates}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Gifts: </span>
-                                        <input name="gifts" type="number" value="{{userDatabase.gifts}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Get gift: </span>
-                                        <input name="getGift" type="number" value="{{userDatabase.getGift}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Tickets: </span>
-                                        <input name="tickets" type="number" value="{{userDatabase.tickets}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Quiz tokens: </span>
-                                        <input name="quizTokens" type="number" value="{{userDatabase.quizTokens}}"
-                                            required>
-                                    </li>
-                                    <li><span class="caret">Lucky cards</span>
-                                        <ul class="nested">
-                                            <li>
-                                                <span class="data-number">Small: </span>
-                                                <input name="luckyCardsSmall" type="number"
-                                                    value="{{userDatabase.luckyCards.small}}" required>
-                                            </li>
-                                            <li>
-                                                <span class="data-number">Medium: </span>
-                                                <input name="luckyCardsMedium" type="number"
-                                                    value="{{userDatabase.luckyCards.medium}}" required>
-                                            </li>
-                                            <li>
-                                                <span class="data-number">Large: </span>
-                                                <input name="luckyCardsLarge" type="number"
-                                                    value="{{userDatabase.luckyCards.large}}" required>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <div style="height: 7px;"></div>
-                                    <input type="submit" value="Modify">
-                                    <input type="reset" value="Reset">
-                                </form>
-                            </ul>
-                        </li>
-                        <li><span class="caret">Business</span>
-                            <ul class="nested">
-                                <form action="/dcbot/view/Database.html/Modify/Business" method="post" onsubmit="
-                                    this.style.pointerEvents='none';
-                                    this.style.opacity='20%';
-                                    setTimeout(() => {Reload()}, 1000);
-                                    ">
-                                    <li><span class="data-number">Index:
-                                        </span><b>{{userDatabase.businessIndex}}</b></li>
-                                    <li><span class="data-string">Name:
-                                        </span><b>{{userDatabase.businessName}}</b>
-                                    </li>
-                                    <li><span class="data-number">Level:
-                                        </span><b>{{userDatabase.businessLevel}}</b></li>
-                                    <!--
-                                    <input type="submit" value="Modify">
-                                    <input type="reset" value="Reset">
-                                    -->
-                                </form>
-                            </ul>
-                        </li>
-                        <li><span class="caret">Stickers</span>
-                            <ul class="nested">
-                                <form action="/dcbot/view/Database.html/Modify/Stickers" method="post" onsubmit="
-                                    this.style.pointerEvents='none';
-                                    this.style.opacity='20%';
-                                    setTimeout(() => {Reload()}, 1000);
-                                    ">
-                                    <li>
-                                        <span class="data-number">Meme: </span>
-                                        <input name="stickersMeme" type="number" value="{{userDatabase.stickersMeme}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Music: </span>
-                                        <input name="stickersMusic" type="number" value="{{userDatabase.stickersMusic}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Youtube: </span>
-                                        <input name="stickersYoutube" type="number" value="{{userDatabase.stickersYoutube}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Message: </span>
-                                        <input name="stickersMessage" type="number" value="{{userDatabase.stickersMessage}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Command: </span>
-                                        <input name="stickersCommand" type="number" value="{{userDatabase.stickersCommand}}" required>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Tip: </span>
-                                        <input name="stickersTip" type="number" value="{{userDatabase.stickersTip}}" required>
-                                    </li>
-                                    <div style="height: 7px;"></div>
-                                    <input type="submit" value="Modify">
-                                    <input type="reset" value="Reset">
-                                </form>
-                            </ul>
-                        </li>
-                        <li><span class="caret">Statistics</span>
-                            <ul class="nested">
-                                <li><span class="data-number">Memes: </span><b>{{userDatabase.memes}}</b></li>
-                                <li><span class="data-number">Musics: </span><b>{{userDatabase.musics}}</b></li>
-                                <li><span class="data-number">Youtube Videos:
-                                    </span><b>{{userDatabase.youtubevideos}}</b></li>
-                                <li><span class="data-number">Messages: </span><b>{{userDatabase.messages}}</b></li>
-                                <li><span class="data-number">Chars: </span><b>{{userDatabase.chars}}</b></li>
-                                <li><span class="data-number">Commands: </span><b>{{userDatabase.commands}}</b></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                                        <li>
+                                            <span class="data-number">Score: </span>
+                                            <input name="score" type="number" value="{{userDatabase.score}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number"> Money: </span>
+                                            <input name="money" type="number" value="{{userDatabase.money}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number"> Day: </span>
+                                            <input name="day" type="number" value="{{userDatabase.day}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-string"> Color: </span>
+                                            <div style="
+                                                display: inline-block;
+                                                transform: translateY(5px);
+                                                width: 16px;
+                                                height: 16px;
+                                                border: 1px solid black;
+                                                border-radius: 3px;
+                                                background-color: {{userDatabase.color}};                                            
+                                            ">
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <span class="data-bool">Private commands: </span>
+                                            <b>{{userDatabase.privateCommands}}</b>
+                                        </li>
+                                        <div style="height: 7px;"></div>
+                                        <input type="submit" value="Modify">
+                                        <input type="reset" value="Reset">
+                                    </form>
+                                </ul>
+                            </li>
+                            <li><span class="caret caret-down">Backpack</span>
+                                <ul class="nested active">
+                                    <form action="/dcbot/view/Database.html/Modify/Backpack" method="post" onsubmit="
+                                        this.style.pointerEvents='none';
+                                        this.style.opacity='20%';
+                                        setTimeout(() => {Reload()}, 1000);
+                                        ">
+                                        <li>
+                                            <span class="data-number">Crates: </span>
+                                            <input name="crates" type="number" value="{{userDatabase.crates}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Gifts: </span>
+                                            <input name="gifts" type="number" value="{{userDatabase.gifts}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Get gift: </span>
+                                            <input name="getGift" type="number" value="{{userDatabase.getGift}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Tickets: </span>
+                                            <input name="tickets" type="number" value="{{userDatabase.tickets}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Quiz tokens: </span>
+                                            <input name="quizTokens" type="number" value="{{userDatabase.quizTokens}}"
+                                                required>
+                                        </li>
+                                        <li><span class="caret">Lucky cards</span>
+                                            <ul class="nested">
+                                                <li>
+                                                    <span class="data-number">Small: </span>
+                                                    <input name="luckyCardsSmall" type="number"
+                                                        value="{{userDatabase.luckyCards.small}}" required>
+                                                </li>
+                                                <li>
+                                                    <span class="data-number">Medium: </span>
+                                                    <input name="luckyCardsMedium" type="number"
+                                                        value="{{userDatabase.luckyCards.medium}}" required>
+                                                </li>
+                                                <li>
+                                                    <span class="data-number">Large: </span>
+                                                    <input name="luckyCardsLarge" type="number"
+                                                        value="{{userDatabase.luckyCards.large}}" required>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <div style="height: 7px;"></div>
+                                        <input type="submit" value="Modify">
+                                        <input type="reset" value="Reset">
+                                    </form>
+                                </ul>
+                            </li>
+                            <li><span class="caret">Business</span>
+                                <ul class="nested">
+                                    <form action="/dcbot/view/Database.html/Modify/Business" method="post" onsubmit="
+                                        this.style.pointerEvents='none';
+                                        this.style.opacity='20%';
+                                        setTimeout(() => {Reload()}, 1000);
+                                        ">
+                                        <li><span class="data-number">Index:
+                                            </span><b>{{userDatabase.businessIndex}}</b></li>
+                                        <li><span class="data-string">Name:
+                                            </span><b>{{userDatabase.businessName}}</b>
+                                        </li>
+                                        <li><span class="data-number">Level:
+                                            </span><b>{{userDatabase.businessLevel}}</b></li>
+                                        <!--
+                                        <input type="submit" value="Modify">
+                                        <input type="reset" value="Reset">
+                                        -->
+                                    </form>
+                                </ul>
+                            </li>
+                            <li><span class="caret">Stickers</span>
+                                <ul class="nested">
+                                    <form action="/dcbot/view/Database.html/Modify/Stickers" method="post" onsubmit="
+                                        this.style.pointerEvents='none';
+                                        this.style.opacity='20%';
+                                        setTimeout(() => {Reload()}, 1000);
+                                        ">
+                                        <li>
+                                            <span class="data-number">Meme: </span>
+                                            <input name="stickersMeme" type="number" value="{{userDatabase.stickersMeme}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Music: </span>
+                                            <input name="stickersMusic" type="number" value="{{userDatabase.stickersMusic}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Youtube: </span>
+                                            <input name="stickersYoutube" type="number" value="{{userDatabase.stickersYoutube}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Message: </span>
+                                            <input name="stickersMessage" type="number" value="{{userDatabase.stickersMessage}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Command: </span>
+                                            <input name="stickersCommand" type="number" value="{{userDatabase.stickersCommand}}" required>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Tip: </span>
+                                            <input name="stickersTip" type="number" value="{{userDatabase.stickersTip}}" required>
+                                        </li>
+                                        <div style="height: 7px;"></div>
+                                        <input type="submit" value="Modify">
+                                        <input type="reset" value="Reset">
+                                    </form>
+                                </ul>
+                            </li>
+                            <li><span class="caret">Statistics</span>
+                                <ul class="nested">
+                                    <li><span class="data-number">Memes: </span><b>{{userDatabase.memes}}</b></li>
+                                    <li><span class="data-number">Musics: </span><b>{{userDatabase.musics}}</b></li>
+                                    <li><span class="data-number">Youtube Videos:
+                                        </span><b>{{userDatabase.youtubevideos}}</b></li>
+                                    <li><span class="data-number">Messages: </span><b>{{userDatabase.messages}}</b></li>
+                                    <li><span class="data-number">Chars: </span><b>{{userDatabase.chars}}</b></li>
+                                    <li><span class="data-number">Commands: </span><b>{{userDatabase.commands}}</b></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
     
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="/scripts/loadEffect.js"></script>

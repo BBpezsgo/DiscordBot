@@ -7,8 +7,8 @@ setTimeout(() => {
         toggler[i].addEventListener("click", (e) => {
             e.target.classList.toggle("caret-down")
 
-            togglerAll.classList.remove("caret-up")
-            togglerAll.classList.remove("caret-down")
+            togglerAll?.classList.remove("caret-up")
+            togglerAll?.classList.remove("caret-down")
 
             const childs = document.getElementsByClassName(e.target.id)
             for (let i = 0; i < childs.length; i++) {
@@ -18,7 +18,7 @@ setTimeout(() => {
         });
     }
 
-    togglerAll.addEventListener("click", (e) => {
+    togglerAll?.addEventListener("click", (e) => {
         if (togglerAll.classList.contains("caret-down")) {
             togglerAll.classList.remove("caret-down")
             togglerAll.classList.add("caret-up")

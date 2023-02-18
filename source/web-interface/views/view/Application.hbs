@@ -11,122 +11,132 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
-<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
-   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+	<div style="width: 250px;" id="context-menubar">
+		<div id="context-menubar-content">
 
-    <h1>Application</h1>
-
-	<div class="container loading-effect">
-        <table border="0" width="100%">
-            <tbody>
-				<tr>
-					<td width="25%" class="Item"></td>
-					<td colspan="2">
-						<a href="https://discord.com/developers/applications/{{app.id}}/information" target="_blank"><img width="16" height="16" src="https://www.svgrepo.com/show/353655/discord-icon.svg" class="miniicon">Manage application</a>
-					</td>
-				</tr>
-				<tr>
-					<td width="25%" class="Item">ID:</td>
-					<td colspan="2">
-						{{app.id}}
-					</td>
-				</tr>
-				{{#if app.name}}
-				<tr>
-					<td width="25%" class="Item">Name:</td>
-					<td colspan="2">
-						{{app.name}}
-					</td>
-				</tr>
-				{{/if}}
-				<tr>
-					<td width="25%" class="Item">Created At:</td>
-					<td colspan="2">
-						{{app.createdAt}}
-					</td>
-				</tr>
-				{{#if app.coverUrl}}
-				<tr>
-					<td width="25%" class="Item">Cover:</td>
-					<td colspan="2">
-						<img src="{{app.coverUrl}}" width="32" height="32">
-					</td>
-				</tr>
-				{{/if}}
-				{{#if app.iconUrl}}
-				<tr>
-					<td width="25%" class="Item">Icon:</td>
-					<td colspan="2">
-						<img src="{{app.iconUrl}}" width="32" height="32">
-					</td>
-				</tr>
-				{{/if}}
-				{{#if app.customInstallURL}}
-				<tr>
-					<td width="25%" class="Item">Custom Install URL:</td>
-					<td colspan="2">
-						{{app.customInstallURL}}
-					</td>
-				</tr>
-				{{/if}}
-				{{#if app.description}}
-				<tr>
-					<td width="25%" class="Item">Description:</td>
-					<td colspan="2">
-						{{app.description}}
-					</td>
-				</tr>
-				{{/if}}
-				<tr>
-					<td width="25%" class="Item">Partial:</td>
-					<td colspan="2">
-						<img width="16" height="16" src="/images/bool-{{channel.partial}}.png">
-					</td>
-				</tr>
-				{{#if app.rpcOrigins}}
-				<tr>
-					<td width="25%" class="Item">Rpc Origins:</td>
-					<td colspan="2">
-						{{app.rpcOrigins}}
-					</td>
-				</tr>
-				{{#if app.tags}}
-				{{/if}}
-				<tr>
-					<td width="25%" class="Item">Tags:</td>
-					<td colspan="2">
-						{{app.tags}}
-					</td>
-				</tr>
-				{{/if}}
-            </tbody>
-        </table>
+		</div>
+		<div id="bot-status-panel">
+			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
+		</div>
 	</div>
-	
-	<div class="container loading-effect">
-		<h2>BOT</h2>
-        <table border="0" width="100%">
-            <tbody>
-				<tr>
-					<td width="25%" class="Item"></td>
-					<td colspan="2">
-						<a href="https://discord.com/developers/applications/{{app.id}}/bot" target="_blank"><img width="16" height="16" src="https://www.svgrepo.com/show/353655/discord-icon.svg" class="miniicon">Manage bot</a>
-					</td>
-				</tr>
-				<tr>
-					<td width="25%" class="Item">Require Code Grant:</td>
-					<td colspan="2">
-						{{app.botRequireCodeGrant}}
-					</td>
-				</tr>
-				<tr>
-					<td width="25%" class="Item">Is Public:</td>
-					<td colspan="2">
-						<img width="16" height="16" src="/images/bool-{{channel.botPublic}}.png">
-					</td>
-				</tr>
-            </tbody>
-        </table>
+	<div id="content">
+			
+		<h1>Application</h1>
+
+		<div class="container loading-effect">
+			<table border="0" width="100%">
+				<tbody>
+					<tr>
+						<td width="25%" class="Item"></td>
+						<td colspan="2">
+							<a href="https://discord.com/developers/applications/{{app.id}}/information" target="_blank"><img width="16" height="16" src="https://www.svgrepo.com/show/353655/discord-icon.svg" class="miniicon">Manage application</a>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%" class="Item">ID:</td>
+						<td colspan="2">
+							{{app.id}}
+						</td>
+					</tr>
+					{{#if app.name}}
+					<tr>
+						<td width="25%" class="Item">Name:</td>
+						<td colspan="2">
+							{{app.name}}
+						</td>
+					</tr>
+					{{/if}}
+					<tr>
+						<td width="25%" class="Item">Created At:</td>
+						<td colspan="2">
+							{{app.createdAt}}
+						</td>
+					</tr>
+					{{#if app.coverUrl}}
+					<tr>
+						<td width="25%" class="Item">Cover:</td>
+						<td colspan="2">
+							<img src="{{app.coverUrl}}" width="32" height="32">
+						</td>
+					</tr>
+					{{/if}}
+					{{#if app.iconUrl}}
+					<tr>
+						<td width="25%" class="Item">Icon:</td>
+						<td colspan="2">
+							<img src="{{app.iconUrl}}" width="32" height="32">
+						</td>
+					</tr>
+					{{/if}}
+					{{#if app.customInstallURL}}
+					<tr>
+						<td width="25%" class="Item">Custom Install URL:</td>
+						<td colspan="2">
+							{{app.customInstallURL}}
+						</td>
+					</tr>
+					{{/if}}
+					{{#if app.description}}
+					<tr>
+						<td width="25%" class="Item">Description:</td>
+						<td colspan="2">
+							{{app.description}}
+						</td>
+					</tr>
+					{{/if}}
+					<tr>
+						<td width="25%" class="Item">Partial:</td>
+						<td colspan="2">
+							<img width="16" height="16" src="/images/bool-{{channel.partial}}.png">
+						</td>
+					</tr>
+					{{#if app.rpcOrigins}}
+					<tr>
+						<td width="25%" class="Item">Rpc Origins:</td>
+						<td colspan="2">
+							{{app.rpcOrigins}}
+						</td>
+					</tr>
+					{{#if app.tags}}
+					{{/if}}
+					<tr>
+						<td width="25%" class="Item">Tags:</td>
+						<td colspan="2">
+							{{app.tags}}
+						</td>
+					</tr>
+					{{/if}}
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="container loading-effect">
+			<h2>BOT</h2>
+			<table border="0" width="100%">
+				<tbody>
+					<tr>
+						<td width="25%" class="Item"></td>
+						<td colspan="2">
+							<a href="https://discord.com/developers/applications/{{app.id}}/bot" target="_blank"><img width="16" height="16" src="https://www.svgrepo.com/show/353655/discord-icon.svg" class="miniicon">Manage bot</a>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%" class="Item">Require Code Grant:</td>
+						<td colspan="2">
+							{{app.botRequireCodeGrant}}
+						</td>
+					</tr>
+					<tr>
+						<td width="25%" class="Item">Is Public:</td>
+						<td colspan="2">
+							<img width="16" height="16" src="/images/bool-{{channel.botPublic}}.png">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
 	</div>
 	
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>

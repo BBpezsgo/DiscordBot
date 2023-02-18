@@ -36,5 +36,5 @@
 }
 
 .nested-show {
-	display: table-row !important;
+	display: table-row;
 }

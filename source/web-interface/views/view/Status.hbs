@@ -20,340 +20,349 @@
 	</script>
 </head>
 
-<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
-	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
+<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+	<div style="width: 250px;" id="context-menubar">
+		<div id="context-menubar-content">
 
-	<h1>Status</h1>
+		</div>
+		<div id="bot-status-panel">
+			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
+		</div>
+	</div>
+	<div id="content">
 
-	<div class="container loading-effect">
-		<h2>Process</h2>
-		<table style="width: 100%;">
-			<tbody>
-				<tr>
-					<td></td>
-					<td colspan="2">
-						<form action="/Process/Exit" method="post" style="display: inline-block;" id="exit-form"
-							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
-							<input type="submit" value="Terminate">
-						</form>
-						<div style="display: inline-block;" id="restart-form">
-							<button style="transform: translateY(1px);" onclick="Restart(6000)">Restart</button>
-						</div>
-						<div style="display: none;" id="restartProgressPanel">
-							Restarting...
-							<div>
-								<img src="/images/state-.png" class="miniicon" id="server-ping-icon">
-								<span id="server-ping-label"></span>
+		<h1>Status</h1>
+
+		<div class="container loading-effect">
+			<h2>Process</h2>
+			<table style="width: 100%;">
+				<tbody>
+					<tr>
+						<td></td>
+						<td colspan="2">
+							<form action="/Process/Exit" method="post" style="display: inline-block;" id="exit-form"
+								onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
+								<input type="submit" value="Terminate">
+							</form>
+							<div style="display: inline-block;" id="restart-form">
+								<button style="transform: translateY(1px);" onclick="Restart(6000)">Restart</button>
 							</div>
-						</div>
-					</td>
-					<script>
-						var sendPing = true
-						var currentlyReloading = false
-						var enableReloadOnPingSuccess = false
-						const serverPingLabel = document.getElementById('server-ping-label')
-						const serverPingIcon = document.getElementById('server-ping-icon')
-						var pingInterval = setInterval(() => {
-							if (!sendPing) {
-								if (!currentlyReloading) {
-									return
+							<div style="display: none;" id="restartProgressPanel">
+								Restarting...
+								<div>
+									<img src="/images/state-.png" class="miniicon" id="server-ping-icon">
+									<span id="server-ping-label"></span>
+								</div>
+							</div>
+						</td>
+						<script>
+							var sendPing = true
+							var currentlyReloading = false
+							var enableReloadOnPingSuccess = false
+							const serverPingLabel = document.getElementById('server-ping-label')
+							const serverPingIcon = document.getElementById('server-ping-icon')
+							var pingInterval = setInterval(() => {
+								if (!sendPing) {
+									if (!currentlyReloading) {
+										return
+									}
 								}
-							}
+								
+								const xhr = new XMLHttpRequest()
+								xhr.open('GET', '/dcbot/ping.json')
+								xhr.timeout = 50
+
+								xhr.onload = () => {
+									serverPingLabel.innerText = 'Server is up'
+									serverPingIcon.src = "/images/state-Ready.png"
+									sendPing = false
+									if (enableReloadOnPingSuccess) {
+										Reload()
+									}
+								}
+
+								xhr.ontimeout = (e) => {
+									serverPingLabel.innerText = 'Server is down'
+									serverPingIcon.src = "/images/state-.png"
+								}
+
+								xhr.send(null)
+							}, 100)
 							
-							const xhr = new XMLHttpRequest()
-							xhr.open('GET', '/dcbot/ping.json')
-							xhr.timeout = 50
+							var i = 0
+							/** @param {numner} ms */
+							function Restart(ms) {
+								currentlyReloading = true
+								enableReloadOnPingSuccess = false
 
-							xhr.onload = () => {
-								serverPingLabel.innerText = 'Server is up'
-								serverPingIcon.src = "/images/state-Ready.png"
-								sendPing = false
-								if (enableReloadOnPingSuccess) {
-									Reload()
-								}
-							}
+								setTimeout(() => {
+									enableReloadOnPingSuccess = true
+								}, 2000)
 
-							xhr.ontimeout = (e) => {
-								serverPingLabel.innerText = 'Server is down'
-								serverPingIcon.src = "/images/state-.png"
-							}
+								const form = document.getElementById("restart-form")
+								form.style.pointerEvents = 'none'
+								form.style.opacity = '20%'
 
-							xhr.send(null)
-						}, 100)
-						
-						var i = 0
-						/** @param {numner} ms */
-						function Restart(ms) {
-							currentlyReloading = true
-							enableReloadOnPingSuccess = false
+								const form2 = document.getElementById("exit-form")
+								form2.style.pointerEvents = 'none'
+								form2.style.opacity = '20%'
+								
+								var xhr = new XMLHttpRequest();
+								xhr.open("POST", '/Process/Restart', true);
+								xhr.setRequestHeader('Content-Type', 'application/json');
+								xhr.send()
 
-							setTimeout(() => {
-								enableReloadOnPingSuccess = true
-							}, 2000)
+								if (i == 0) {
+									autoReload = false
+									refreshing = false
+									const panel = document.getElementById('restartProgressPanel')
+									panel.style.display = 'block'
 
-							const form = document.getElementById("restart-form")
-							form.style.pointerEvents = 'none'
-							form.style.opacity = '20%'
+									i = 1
+									//const elem = document.getElementById('restartProgress')
+									var value = 0
+									//var id = setInterval(Tick, ms / 100)
 
-							const form2 = document.getElementById("exit-form")
-							form2.style.pointerEvents = 'none'
-							form2.style.opacity = '20%'
-							
-							var xhr = new XMLHttpRequest();
-							xhr.open("POST", '/Process/Restart', true);
-							xhr.setRequestHeader('Content-Type', 'application/json');
-							xhr.send()
-
-							if (i == 0) {
-								autoReload = false
-								refreshing = false
-								const panel = document.getElementById('restartProgressPanel')
-								panel.style.display = 'block'
-
-								i = 1
-								//const elem = document.getElementById('restartProgress')
-								var value = 0
-								//var id = setInterval(Tick, ms / 100)
-
-								function Tick() {
-									if (value >= 100) {
-										panel.style.display = 'none'
-										clearInterval(id)
-										i = 0
-									} else {
-										value++
-										//elem.value = value
+									function Tick() {
+										if (value >= 100) {
+											panel.style.display = 'none'
+											clearInterval(id)
+											i = 0
+										} else {
+											value++
+											//elem.value = value
+										}
 									}
 								}
 							}
-						}
-					</script>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+						</script>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 
-	<div class="container loading-effect">
-		<h2>BOT</h2>
-		<table style="width: 100%;">
-			<tbody>
-				<tr>
-					<td width="25%" class="Item">Ready time:</td>
-					<td colspan="2">
-						{{bot.readyTime}}
-					</td>
-				</tr>
-				<tr>
-					<td width="25%" class="Item">Uptime:</td>
-					<td colspan="2">
-						<span id="uptime-label">{{bot.uptime}}</span>
-					</td>
-				</tr>
-				<tr>
-					<td class="Item">Status:</td>
-					<td colspan="2">
-						<img src="/images/state-{{bot.statesManager.botLoadingState}}.png" class="miniicon" id="bot-loading-state-icon">
-						<span id="bot-loading-state-label">{{bot.statesManager.botLoadingState}}</span>
-					</td>
-				</tr>
-				<tr>
-					<td class="Item"></td>
-					<td colspan="2">
-						<form action="/DiscordClient/Start" method="post" style="display: inline-block;"
-							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
-							<input type="submit" class="show-invert-{{bot.botStarted}}" value="Login">
-						</form>
-						<form action="/DiscordClient/Stop" method="post" style="display: inline-block;"
-							onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
-							<input type="submit" class="show-{{bot.botStarted}}" value="Logout">
-						</form>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+		<div class="container loading-effect">
+			<h2>BOT</h2>
+			<table style="width: 100%;">
+				<tbody>
+					<tr>
+						<td width="25%" class="Item">Ready time:</td>
+						<td colspan="2">
+							{{bot.readyTime}}
+						</td>
+					</tr>
+					<tr>
+						<td width="25%" class="Item">Uptime:</td>
+						<td colspan="2">
+							<span id="uptime-label">{{bot.uptime}}</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="Item">Status:</td>
+						<td colspan="2">
+							<img src="/images/state-{{bot.statesManager.botLoadingState}}.png" class="miniicon" id="bot-loading-state-icon">
+							<span id="bot-loading-state-label">{{bot.statesManager.botLoadingState}}</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="Item"></td>
+						<td colspan="2">
+							<form action="/DiscordClient/Start" method="post" style="display: inline-block;"
+								onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
+								<input type="submit" class="show-invert-{{bot.botStarted}}" value="Login">
+							</form>
+							<form action="/DiscordClient/Stop" method="post" style="display: inline-block;"
+								onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000)">
+								<input type="submit" class="show-{{bot.botStarted}}" value="Logout">
+							</form>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 
-	<div class="container loading-effect">
-		<h2>Web Socket</h2>
-		<table style="width: 100%;">
-			<tbody>
-				<tr>
-					<td class="Item">Ping:</td>
-					<td colspan="2"><span id="ws-ping-label">{{bot.ws.ping}}</span>ms</td>
-				</tr>
-				<tr>
-					<td class="Item">Status:</td>
-					<td colspan="2">
-						<img src="/images/state-{{bot.ws.status}}.png" class="miniicon" id="ws-state-icon">
-						<span id="ws-state-label">{{bot.ws.status}}</span>
-					</td>
-				</tr>
-				<tr>
-					<td class="Item">Shard status:</td>
-					<td colspan="2">
-						<img src="/images/state-{{bot.shard.state}}.png" class="miniicon" id="shard-state-icon">
-						<span id="shard-state-label">{{bot.shard.state}}</span>
-					</td>
-				</tr>
-				<tr class="show-{{showWeatherStatus}}">
-					<td class="blue" colspan="3"></td>
-				</tr>
-				<tr class="show-{{showWeatherStatus}}">
-					<td class="h2" colspan="3">Weather report</td>
-				</tr>
-				<tr class="show-{{showWeatherStatus}}">
-					<td class="Item">Status:</td>
-					<td colspan="2"><span>{{bot.statesManager.WeatherReport.Text}}</span></td>
-				</tr>
-				<tr class="show-{{showNewsStatus}}">
-					<td class="blue" colspan="3"></td>
-				</tr>
-				<tr class="show-{{showNewsStatus}}">
-					<td class="h2" colspan="3">News</td>
-				</tr>
-				<tr class="show-{{showNewsStatus}}">
-					<td class="Item">All processed:</td>
-					<td colspan="2"><span>{{bot.statesManager.News.AllProcessed}}</span></td>
-				</tr>
-				<tr class="show-{{showNewsStatus}}">
-					<td class="Item">Loading text 1:</td>
-					<td colspan="2"><span>{{bot.statesManager.News.LoadingText}}</span></td>
-				</tr>
-				<tr class="show-{{showNewsStatus}}">
-					<td class="Item">Loading text 2:</td>
-					<td colspan="2"><span>{{bot.statesManager.News.LoadingText2}}</span></td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+		<div class="container loading-effect">
+			<h2>Web Socket</h2>
+			<table style="width: 100%;">
+				<tbody>
+					<tr>
+						<td class="Item">Ping:</td>
+						<td colspan="2"><span id="ws-ping-label">{{bot.ws.ping}}</span>ms</td>
+					</tr>
+					<tr>
+						<td class="Item">Status:</td>
+						<td colspan="2">
+							<img src="/images/state-{{bot.ws.status}}.png" class="miniicon" id="ws-state-icon">
+							<span id="ws-state-label">{{bot.ws.status}}</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="Item">Shard status:</td>
+						<td colspan="2">
+							<img src="/images/state-{{bot.shard.state}}.png" class="miniicon" id="shard-state-icon">
+							<span id="shard-state-label">{{bot.shard.state}}</span>
+						</td>
+					</tr>
+					<tr class="show-{{showWeatherStatus}}">
+						<td class="blue" colspan="3"></td>
+					</tr>
+					<tr class="show-{{showWeatherStatus}}">
+						<td class="h2" colspan="3">Weather report</td>
+					</tr>
+					<tr class="show-{{showWeatherStatus}}">
+						<td class="Item">Status:</td>
+						<td colspan="2"><span>{{bot.statesManager.WeatherReport.Text}}</span></td>
+					</tr>
+					<tr class="show-{{showNewsStatus}}">
+						<td class="blue" colspan="3"></td>
+					</tr>
+					<tr class="show-{{showNewsStatus}}">
+						<td class="h2" colspan="3">News</td>
+					</tr>
+					<tr class="show-{{showNewsStatus}}">
+						<td class="Item">All processed:</td>
+						<td colspan="2"><span>{{bot.statesManager.News.AllProcessed}}</span></td>
+					</tr>
+					<tr class="show-{{showNewsStatus}}">
+						<td class="Item">Loading text 1:</td>
+						<td colspan="2"><span>{{bot.statesManager.News.LoadingText}}</span></td>
+					</tr>
+					<tr class="show-{{showNewsStatus}}">
+						<td class="Item">Loading text 2:</td>
+						<td colspan="2"><span>{{bot.statesManager.News.LoadingText2}}</span></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 
-	<div class="container loading-effect">
-		<h2>System</h2>
-		<table style="width: 100%;">
-			<tbody>
-				<tr>
-					<td width="25%" class="Item">CPUs:</td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>
-						<table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
-							<tbody>
-								<tr>
-									<td class="ListM">
-										<b>Model</b>
-									</td>
-									<td class="ListM"  style="width: 100%;">
-										<b>Times</b>
-									</td>
-								</tr>
-								<style>
-									.multi-progressbar-content {
-										height: 100%;
-										display: inline-block;
-										margin: 0;
-										color: #fff;
-										text-align: center;
-										border-left: 1px solid var(--bg);
-										background: #077ba8;
-										text-overflow: clip;
-									}
+		<div class="container loading-effect">
+			<h2>System</h2>
+			<table style="width: 100%;">
+				<tbody>
+					<tr>
+						<td width="25%" class="Item">CPUs:</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>
+							<table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
+								<tbody>
+									<tr>
+										<td class="ListM">
+											<b>Model</b>
+										</td>
+										<td class="ListM"  style="width: 100%;">
+											<b>Times</b>
+										</td>
+									</tr>
+									<style>
+										.multi-progressbar-content {
+											height: 100%;
+											display: inline-block;
+											margin: 0;
+											color: #fff;
+											text-align: center;
+											border-left: 1px solid var(--bg);
+											background: #077ba8;
+											text-overflow: clip;
+										}
 
-									.multi-progressbar-content > div {
-										width: 100%;
-										overflow: hidden;
-										font-size: 11px;
-										display: inline-block;
-										user-select: none;
-									}
+										.multi-progressbar-content > div {
+											width: 100%;
+											overflow: hidden;
+											font-size: 11px;
+											display: inline-block;
+											user-select: none;
+										}
 
-									.tooltiptext {
-										font-size: 12px;
-										transform: translateY(-30px);
-										color: #000;
-										z-index: 2;
-									}
-								</style>
-								{{#each bot.system.CPUs}}
-								<tr>
-									<td style="padding:0px 2px 0px 2px;word-break:break-all">
-										{{model}}
-									</td>
-									<td style="padding:0px 2px 0px 2px;word-break:break-all">
-										<div style="font-size: 0px; height: 16px; width: 100%; border: 1px solid #fff2; background: var(--bg);">
-											<div id="cpu{{id}}t0" class="multi-progressbar-content tooltip">
-												<span class="tooltiptext">
-													{{times.user}} sec
-												</span>
-												<div>User</div>
+										.tooltiptext {
+											font-size: 12px;
+											transform: translateY(-30px);
+											color: #000;
+											z-index: 2;
+										}
+									</style>
+									{{#each bot.system.CPUs}}
+									<tr>
+										<td style="padding:0px 2px 0px 2px;word-break:break-all">
+											{{model}}
+										</td>
+										<td style="padding:0px 2px 0px 2px;word-break:break-all">
+											<div style="font-size: 0px; height: 16px; width: 100%; border: 1px solid #fff2; background: var(--bg);">
+												<div id="cpu{{id}}t0" class="multi-progressbar-content tooltip">
+													<span class="tooltiptext">
+														{{times.user}} sec
+													</span>
+													<div>User</div>
+												</div>
+												<div id="cpu{{id}}t1" class="multi-progressbar-content tooltip">
+													<span class="tooltiptext">
+														{{times.idle}} sec
+													</span>
+													<div>Idle</div>
+												</div>
+												<div id="cpu{{id}}t2" class="multi-progressbar-content tooltip">
+													<span class="tooltiptext">
+														{{times.sys}} sec
+													</span>
+													<div>Sys</div>
+												</div>
+												<div id="cpu{{id}}t3" class="multi-progressbar-content tooltip">
+													<span class="tooltiptext">
+														{{times.irq}} sec
+													</span>
+													<div>Irq</div>
+												</div>
+												<div id="cpu{{id}}t4" class="multi-progressbar-content tooltip">
+													<span class="tooltiptext">
+														{{times.nice}} sec
+													</span>
+													<div>Nice</div>
+												</div>
 											</div>
-											<div id="cpu{{id}}t1" class="multi-progressbar-content tooltip">
-												<span class="tooltiptext">
-													{{times.idle}} sec
-												</span>
-												<div>Idle</div>
-											</div>
-											<div id="cpu{{id}}t2" class="multi-progressbar-content tooltip">
-												<span class="tooltiptext">
-													{{times.sys}} sec
-												</span>
-												<div>Sys</div>
-											</div>
-											<div id="cpu{{id}}t3" class="multi-progressbar-content tooltip">
-												<span class="tooltiptext">
-													{{times.irq}} sec
-												</span>
-												<div>Irq</div>
-											</div>
-											<div id="cpu{{id}}t4" class="multi-progressbar-content tooltip">
-												<span class="tooltiptext">
-													{{times.nice}} sec
-												</span>
-												<div>Nice</div>
-											</div>
-										</div>
-									</td>
-								</tr>
-								<script>
-									var syst{{id}}V0 = {{times.user}};
-									var syst{{id}}V1 = {{times.idle}};
-									var syst{{id}}V2 = {{times.sys}};
-									var syst{{id}}V3 = {{times.irq}};
-									var syst{{id}}V4 = {{times.nice}};
+										</td>
+									</tr>
+									<script>
+										var syst{{id}}V0 = {{times.user}};
+										var syst{{id}}V1 = {{times.idle}};
+										var syst{{id}}V2 = {{times.sys}};
+										var syst{{id}}V3 = {{times.irq}};
+										var syst{{id}}V4 = {{times.nice}};
 
-									const total{{id}} = syst{{id}}V0 + syst{{id}}V1 + syst{{id}}V2 + syst{{id}}V3 + syst{{id}}V4;
+										const total{{id}} = syst{{id}}V0 + syst{{id}}V1 + syst{{id}}V2 + syst{{id}}V3 + syst{{id}}V4;
 
-									document.getElementById('cpu{{id}}t0').style.width = 'calc(' + (syst{{id}}V0 / total{{id}} * 100) + '%' + ' - 2px)';
-									document.getElementById('cpu{{id}}t1').style.width = 'calc(' + (syst{{id}}V1 / total{{id}} * 100) + '%' + ' - 2px)';
-									document.getElementById('cpu{{id}}t2').style.width = 'calc(' + (syst{{id}}V2 / total{{id}} * 100) + '%' + ' - 2px)';
-									document.getElementById('cpu{{id}}t3').style.width = 'calc(' + (syst{{id}}V3 / total{{id}} * 100) + '%' + ' - 2px)';
-									document.getElementById('cpu{{id}}t4').style.width = 'calc(' + (syst{{id}}V4 / total{{id}} * 100) + '%' + ' - 2px)';
-								</script>
-								{{/each}}
-							</tbody>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td width="25%" class="Item">System Uptime:</td>
-					<td colspan="2">
-						<span id="system-uptime-label">{{bot.system.Uptime}}</span>
-					</td>
-				</tr>
-				<tr>
-					<td width="25%" class="Item">Memory:</td>
-					<td colspan="2">
-						<meter min="0" max="{{bot.system.TotalMemory}}" value="{{bot.system.UsedMemory}}" title="{{bot.system.UsedMemory}}/{{bot.system.TotalMemory}}"></meter>
-					</td>
-				</tr>
-				<tr>
-					<td width="25%" class="Item">Logged in as:</td>
-					<td colspan="2">
-						{{bot.system.UserInfo.username}}
-					</td>
-				</tr>
-			</tbody>
-		</table>
+										document.getElementById('cpu{{id}}t0').style.width = 'calc(' + (syst{{id}}V0 / total{{id}} * 100) + '%' + ' - 2px)';
+										document.getElementById('cpu{{id}}t1').style.width = 'calc(' + (syst{{id}}V1 / total{{id}} * 100) + '%' + ' - 2px)';
+										document.getElementById('cpu{{id}}t2').style.width = 'calc(' + (syst{{id}}V2 / total{{id}} * 100) + '%' + ' - 2px)';
+										document.getElementById('cpu{{id}}t3').style.width = 'calc(' + (syst{{id}}V3 / total{{id}} * 100) + '%' + ' - 2px)';
+										document.getElementById('cpu{{id}}t4').style.width = 'calc(' + (syst{{id}}V4 / total{{id}} * 100) + '%' + ' - 2px)';
+									</script>
+									{{/each}}
+								</tbody>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%" class="Item">System Uptime:</td>
+						<td colspan="2">
+							<span id="system-uptime-label">{{bot.system.Uptime}}</span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%" class="Item">Memory:</td>
+						<td colspan="2">
+							<meter min="0" max="{{bot.system.TotalMemory}}" value="{{bot.system.UsedMemory}}" title="{{bot.system.UsedMemory}}/{{bot.system.TotalMemory}}"></meter>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%" class="Item">Logged in as:</td>
+						<td colspan="2">
+							{{bot.system.UserInfo.username}}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 
 	<script>

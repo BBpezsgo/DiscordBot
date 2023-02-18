@@ -42,3 +42,5 @@ source/DiscordBotManager.pdb
 source/DiscordBotManager.deps.json
 source/DiscordBotManager.runtimeconfig.json
 source/pressures.txt
+/dist
+/log

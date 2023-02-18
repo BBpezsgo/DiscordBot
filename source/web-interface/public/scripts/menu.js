@@ -228,7 +228,7 @@ function menuDisplay() {
                 const target = e.target
                 doClick(Number.parseInt(target.getAttribute('data').split('-')[0]), Number.parseInt(menuList[target.getAttribute('data').split('-')[1]]))
             }
-            newA.innerText = menuList[n + 3]
+            // newA.innerText = menuList[n + 3]
             newOL.appendChild(newA)
 
             if (menuList[n] === 'log-error') {

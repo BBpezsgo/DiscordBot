@@ -1077,7 +1077,15 @@ class WebInterfaceManager {
             messages.sort(function(a, b) { return a.createdAtTimestamp - b.createdAtTimestamp })
         }
 
-        this.RenderPage(req, res, 'Moderating', { server: guild, channel: channel, messages: messages })
+        const channelGroups = this.Get_ChannelsInGuild(g).groups
+        const singleChannels = this.Get_ChannelsInGuild(g).singleChannels
+
+        for (let i = 0; i < channelGroups.length; i++)
+        { if (channel.id === channelGroups[i].id) { channelGroups[i].selected = true; break } }
+        for (let i = 0; i < singleChannels.length; i++)
+        { if (channel.id === singleChannels[i].id) { singleChannels[i].selected = true; break } }
+
+        this.RenderPage(req, res, 'Moderating', { server: guild, channel: channel, messages: messages, groups: channelGroups, singleChannels: singleChannels })
     }
 
     RenderPage_Commands(req, res) {
@@ -1166,6 +1174,14 @@ class WebInterfaceManager {
         */
 
         //#region GET HTML
+
+        this.app.get('/dcbot/BotStatusPanel', (req, res) => {
+            res.render('view/BotStatusPanel', {
+                username: this.client.user.username,
+                avatar: this.client.user.avatarURL({ size: 32 }),
+                discriminator: this.client.user.discriminator,
+            })
+        })
 
         this.app.get('/dcbot/view/menu.html', (req, res) => {
             res.render('view/Menu')

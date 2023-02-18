@@ -13,162 +13,154 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
-<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
-   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
-
-    <h1>Database</h1>
-
-	<div class="container loading-effect">
-        <table border="0" width="100%">
-            <tbody>
+<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+	<div style="width: 250px;" id="context-menubar">
+		<div id="context-menubar-content">
+            <h1>Users</h1>
+            {{#each users}}
+            <table class="user-menuitem" onclick="document.getElementById('view-user-{{id}}').click()">
                 <tr>
-                    <td></td>
-                    <td colspan="2">
-                        <ul id="myUL">
-                            <li>
-                                <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
-                                <ul class="nested">
-                                    {{#each info.backupFolder.files}}
-                                    <li class="data-file">
-                                        <span>{{filename}}</span>
-                                        <b>{{size}}</b>
-                                    </li>
-                                    {{/each}}
-                                </ul>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="Item"></td>
-                    <td colspan="2">
-                        <ul id="myUL">
-                            <li>
-                                <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
-                                <form action="/dcbot/view/Database.html/Backup/All" method="post"
-                                    style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
-                                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                                    <input type="submit" value="Backup All">
-                                </form>
-                                <ul class="nested">
-                                    {{#each info.folder.files}}
-                                    <li class="data-file">
-                                        <span>{{filename}}</span>
-                                        <b>{{size}}</b>
-                                        <form action="/dcbot/view/Database.html/Backup/All" method="post"
-                                            style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
-                                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                                            <input type="text" name="filename" value="{{filename}}" style="display: none;">
-                                            <input type="submit" value="Backup">
-                                        </form>
-                                    </li>
-                                    {{/each}}
-                                </ul>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-	</div>
-
-	<div class="container loading-effect">
-		<h2>BOT's database</h2>
-        <table border="0" width="100%">
-            <tbody>
-                <tr>
-                    <td width="698" align="center">
-                        <ul id="myUL">
-                            <li>
-                                <span class="data-number">Day: </span>
-                                <b>{{bot.day}}</b>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-	</div>
-
-	<div class="container loading-effect">
-		<h2>Market</h2>
-        <table border="0" width="100%">
-            <tbody>
-                <tr>
-                    <td width="698" align="center">
-                        <ul id="myUL">
-                            <li>
-                                <span class="data-number">Day: </span>
-                                <b>{{market.day}}</b>
-                            </li>
-                            <li><span class="caret caret-down">Prices</span>
-                                <ul class="nested active">
-                                    <li>
-                                        <span class="data-number">Token: </span>
-                                        <b>{{market.prices.token}}</b>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Coupon: </span>
-                                        <b>{{market.prices.coupon}}</b>
-                                    </li>
-                                    <li>
-                                        <span class="data-number">Jewel: </span>
-                                        <b>{{market.prices.jewel}}</b>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-	</div>
-
-	<div class="container loading-effect">
-		<h2>Users</h2>
-        <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
-            <tbody>
-                <tr>
-                    <td class="ListM" style="width: 100%;"></td>
-                    <td class="ListM">
-                        <b>ID</b>
-                    </td>
-                    <td class="ListM">
-
-                    </td>
-                </tr>
-                {{#each users}}
-                <tr>
-                    <td style="padding:0 4px">
-                        <div style="display: inline-block; transform: translate(-2px, 4px);">
+                    <td>
+                        <div class="user-menuitem-avatar">
                             <div class="tooltip">
-                                <img src="{{avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 8px;">
+                                <img src="{{avatarUrlSmall}}" width="32" height="32" title="Avatar" style="border-radius: 16px;">
                                 <span class="tooltiptext">
                                     <img src="{{avatarUrlLarge}}">
                                 </span>
                             </div>
                         </div>
-                        <span title="Username">{{name}}</span>
+                        <span class="user-menuitem-name" title="Username">{{name}}</span>
                         
                         {{#if haveDatabase}}
-                        <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
+                        <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(-6px); opacity: 50%;">
                         {{/if}}
                     </td>
-                    <td style="padding:0 4px">
-                        {{id}}
-                    </td>
-                    <td style="padding:0 4px">
+                    <td>
                         <img class="show-invert-{{haveDatabase}} miniicon" src="/images/err2.png" width="16" height="16">
                         <form action="/dcbot/view/Database.html/Search" method="post" style="margin: 0; display: inline-block;"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{id}}" style="display: none;">
-                            <input type="submit" value="View">
+                            <input id="view-user-{{id}}" style="display: none" type="submit" value="View">
                         </form>
                     </td>
                 </tr>
-                {{/each}}
-            </tbody>
-        </table>
+            </table>
+            {{/each}}
+		</div>
+    	<div id="bot-status-panel">
+			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
+		</div>
+	</div>
+	<div id="content">
+
+        <h1>Database</h1>
+
+        <div class="container loading-effect">
+            <table border="0" width="100%">
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td colspan="2">
+                            <ul id="myUL">
+                                <li>
+                                    <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
+                                    <ul class="nested">
+                                        {{#each info.backupFolder.files}}
+                                        <li class="data-file">
+                                            <span>{{filename}}</span>
+                                            <b>{{size}}</b>
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="Item"></td>
+                        <td colspan="2">
+                            <ul id="myUL">
+                                <li>
+                                    <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
+                                    <form action="/dcbot/view/Database.html/Backup/All" method="post"
+                                        style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
+                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                                        <input type="submit" value="Backup All">
+                                    </form>
+                                    <ul class="nested">
+                                        {{#each info.folder.files}}
+                                        <li class="data-file">
+                                            <span>{{filename}}</span>
+                                            <b>{{size}}</b>
+                                            <form action="/dcbot/view/Database.html/Backup/All" method="post"
+                                                style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
+                                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                                                <input type="text" name="filename" value="{{filename}}" style="display: none;">
+                                                <input type="submit" value="Backup">
+                                            </form>
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container loading-effect">
+            <h2>BOT's database</h2>
+            <table border="0" width="100%">
+                <tbody>
+                    <tr>
+                        <td width="698" align="center">
+                            <ul id="myUL">
+                                <li>
+                                    <span class="data-number">Day: </span>
+                                    <b>{{bot.day}}</b>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container loading-effect">
+            <h2>Market</h2>
+            <table border="0" width="100%">
+                <tbody>
+                    <tr>
+                        <td width="698" align="center">
+                            <ul id="myUL">
+                                <li>
+                                    <span class="data-number">Day: </span>
+                                    <b>{{market.day}}</b>
+                                </li>
+                                <li><span class="caret caret-down">Prices</span>
+                                    <ul class="nested active">
+                                        <li>
+                                            <span class="data-number">Token: </span>
+                                            <b>{{market.prices.token}}</b>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Coupon: </span>
+                                            <b>{{market.prices.coupon}}</b>
+                                        </li>
+                                        <li>
+                                            <span class="data-number">Jewel: </span>
+                                            <b>{{market.prices.jewel}}</b>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
 	</div>
     
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>

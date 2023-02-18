@@ -4,7 +4,6 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="pragma" content="no-cache">
-    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
 	<link href="/styles/css-vars.css" rel="stylesheet" type="text/css">
     <link href="/styles/css_main.css" rel="stylesheet" type="text/css">
     <link href="/styles/tree.css" rel="stylesheet" type="text/css">
@@ -35,184 +34,56 @@
     </style>
 </head>
 
-<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
-   	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
-
-    <h1>Moderating</h1>
-
-    <div class="container loading-effect">
-        <form action="/dcbot/view/Moderating.html/Back" method="post"
-            style="display: inline-block; margin-right: 10px;"
-            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-            <input type="submit" value="" class="btn-tool btn-tool-back">
-        </form>
-        <h2 style="display: inline-block; transform: translateY(4px);">
-            <span style="color: #aaa">Guild</span>
-            <div class="tooltip" style="transform: translateY(10px);">
-                <img class="server-icon circle-32" src="{{server.iconUrlSmall}}" width="32" height="32" title="{{server.nameAcronym}}" style="border-radius: 32px;">
-                <span class="tooltiptext" style="font-weight: normal;">
-                    <img src="{{server.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
-                </span>
-            </div>
-            {{server.name}}
-        </h2>
-        <table id="autoWidth" style="width: 598px;">
-            <tbody>
+<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+	<div style="width: 250px;" id="context-menubar">
+        <div id="server-panel">
+            <style>
+                #server-panel table, #server-panel tr, #server-panel td {
+                    border: 0px;
+                    margin: 0px;
+                    padding: 0px;
+                }
+            </style>
+            <table cellspacing="0" style="position: relative; top: 10px; left: 8px;">
                 <tr>
-                    <td width="25%" class="Item">ID:</td>
-                    <td colspan="2">
-                        {{server.id}}
+                    <td style="user-select: none">
+                        <img src="{{server.iconUrlSmall}}" width="32" height="32" style="border-radius: 16px; margin-right: 4px">
+                    </td>
+                    <td style="color: #f3f4f5; font-weight: 700; font-size: 14px;">
+                        {{server.name}}
                     </td>
                 </tr>
+            </table>
+        </div>
+		<div id="context-menubar-content" style="overflow-x: hidden;">
+            {{#each singleChannels}}
+            <table class="channel-menuitem" onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">
                 <tr>
-                    <td width="25%" class="Item">Created at:</td>
-                    <td colspan="2">
-                        {{server.createdAt}}
+                    <td style="width:24px">
+                        <img src="/dcbot/images/{{this.typeUrl}}.png" width="24" height="24" title="{{this.typeText}}">
                     </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Member count:</td>
-                    <td colspan="2">
-                        {{server.memberCount}}
+                    <td style="font-size: 14px; font-weight: 600;">
+                        <span>{{this.name}}</span>
                     </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Nsfw level:</td>
-                    <td colspan="2">
-                        {{server.nsfwLevel}}
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Mfa level:</td>
-                    <td colspan="2">
-                        {{server.mfaLevel}}
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Verification level:</td>
-                    <td colspan="2">
-                        {{server.verificationLevel}}
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Available:</td>
-                    <td colspan="2">
-                        <img width="16" height="16" src="/images/bool-{{server.available}}.png">
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Partnered:</td>
-                    <td colspan="2">
-                        <img width="16" height="16" src="/images/bool-{{server.partnered}}.png">
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Large:</td>
-                    <td colspan="2">
-                        <img width="16" height="16" src="/images/bool-{{server.large}}.png">
-                    </td>
-                </tr>
-                <tr>
-                    <td width="25%" class="Item">Verified:</td>
-                    <td colspan="2">
-                        <img width="16" height="16" src="/images/bool-{{server.verified}}.png">
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="container loading-effect">
-        <h2>Channels</h2>
-        <table border="1" cellspacing="0" cellpadding="0" style="width: 100%;">
-            <tbody>
-                <tr>
-                    <td class="ListM">
-                        <div class="caret-all"></div>
-                    </td>
-                    <td class="ListM" style="width: 100%;">
-                        <b>Name</b>
-                    </td>
-                    <td class="ListM">
-                        <b>ID</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Delb.</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Mange.</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Viewb.</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Join.</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Spek.</b>
-                    </td>
-                    <td class="ListM">
-                        
-                    </td>
-                </tr>
-                {{#each singleChannels}}
-                <tr>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img src="/dcbot/images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <span class="fake-link" onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">{{this.name}}</span>
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        {{this.id}}
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.deletable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.manageable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.joinable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.speakable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all;">
+                    <td style="display: none;">
                         <form action="/dcbot/view/Moderating.html/Server/Search" method="post" id="view-channel-{{this.id}}"
                             style="margin: 0;"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                            <input type="text" name="id" value="{{this.id}}">
                             <input type="submit" value="View">
                         </form>
                     </td>
                 </tr>
-                {{/each}}
-                {{#each groups}}
+            </table>
+            {{/each}}
+            {{#each groups}}
+            <table class="channel-menuitem" onclick="OnCaretClick('{{this.id}}')">
                 <tr>
                     <td style="padding:0 2px;word-break:break-all; width: 16px;">
                         <div class="caret" id="{{this.id}}"></div>
                     </td>
-                    <td style="padding:0 2px;word-break:break-all" class="fake-link" onclick="OnCaretClick('{{id}}')">
+                    <td style="font-size: 14px; font-weight: 600;">
                         {{this.name}}
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        {{this.id}}
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.deletable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.manageable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all" colspan="2">
-                        
                     </td>
                     <td style="padding:0 2px;word-break:break-all">
                         <form action="/dcbot/view/Moderating.html/Server/Search" method="post"
@@ -223,35 +94,19 @@
                         </form>
                     </td>
                 </tr>
-                {{#each channels}}
-                <tr class="nested {{this.parentId}}">
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img src="/dcbot/images/{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeText}}">
+            </table>
+            {{#each channels}}
+            <table class="channel-menuitem nested {{this.parentId}}"  onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">
+                <tr>
+                    <td style="width:24px">
+                        <img src="/dcbot/images/{{this.typeUrl}}.png" width="24" height="24" title="{{this.typeText}}">
                     </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <span class="fake-link" onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">{{this.name}}</span>
+                    <td style="font-size: 14px; font-weight: 600;">
+                        <span>{{this.name}}</span>
                         {{#if nsfw}}<span class="tag">NSFW</span>{{/if}}
                         {{#if isAfk}}<span class="tag">AFK</span>{{/if}}
                     </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        {{this.id}}
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.deletable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.manageable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.viewable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.joinable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{this.speakable}}.png">
-                    </td>
-                    <td style="padding:0 2px;word-break:break-all">
+                    <td style="display: none;">
                         <form action="/dcbot/view/Moderating.html/Server/Search" method="post" style="margin: 0" id="view-channel-{{this.id}}"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
@@ -259,302 +114,392 @@
                         </form>
                     </td>
                 </tr>
-                {{/each}}
-                {{/each}}
-            </tbody>
-        </table>
-    </div>
+            </table>
+            {{/each}}
+            {{/each}}
+		</div>
+		<div id="bot-status-panel">
+			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
+		</div>
+	</div>
+	<div id="content">
 
-	<div class="container loading-effect">
-		<h2>Members</h2>
-        <table border="1" cellspacing="0">
-            <tbody>
-                <tr>
-                    <td class="ListM" style="width: 100%;"></td>
-                    <td class="ListM">
-                        <b>ID</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Created At</b>
-                    </td>
-                    <td>
-                        
-                    </td>
-                    <td class="ListM">
-                        <b>Hash</b>
-                    </td>
-                </tr>
-                {{#each members}}
-                <tr>
-                    <td style="padding:0 4px 4px 4px;">
-                        <div style="display: inline-block; transform: translate(-2px, 4px);">
-                            {{#if avatarUrlSmall}}
-                            <div class="tooltip">
-                                <img src="{{avatarUrlSmall}}" width="16" height="16" title="Display Avatar" style="border-radius: 8px;">
-                                <span class="tooltiptext">
-                                    <img src="{{avatarUrlBig}}">
-                                </span>
-                            </div>      
+        <h1>Moderating</h1>
+
+        <div class="container loading-effect">
+            <form action="/dcbot/view/Moderating.html/Back" method="post"
+                style="display: inline-block; margin-right: 10px;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                <input type="submit" value="" class="btn-tool btn-tool-back">
+            </form>
+            <h2 style="display: inline-block; transform: translateY(4px);">
+                <span style="color: #aaa">Guild</span>
+                <div class="tooltip" style="transform: translateY(10px);">
+                    <img class="server-icon circle-32" src="{{server.iconUrlSmall}}" width="32" height="32" title="{{server.nameAcronym}}" style="border-radius: 32px;">
+                    <span class="tooltiptext" style="font-weight: normal;">
+                        <img src="{{server.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
+                    </span>
+                </div>
+                {{server.name}}
+            </h2>
+            <table id="autoWidth" style="width: 598px;">
+                <tbody>
+                    <tr>
+                        <td width="25%" class="Item">ID:</td>
+                        <td colspan="2">
+                            {{server.id}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Created at:</td>
+                        <td colspan="2">
+                            {{server.createdAt}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Member count:</td>
+                        <td colspan="2">
+                            {{server.memberCount}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Nsfw level:</td>
+                        <td colspan="2">
+                            {{server.nsfwLevel}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Mfa level:</td>
+                        <td colspan="2">
+                            {{server.mfaLevel}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Verification level:</td>
+                        <td colspan="2">
+                            {{server.verificationLevel}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Available:</td>
+                        <td colspan="2">
+                            <img width="16" height="16" src="/images/bool-{{server.available}}.png">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Partnered:</td>
+                        <td colspan="2">
+                            <img width="16" height="16" src="/images/bool-{{server.partnered}}.png">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Large:</td>
+                        <td colspan="2">
+                            <img width="16" height="16" src="/images/bool-{{server.large}}.png">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Verified:</td>
+                        <td colspan="2">
+                            <img width="16" height="16" src="/images/bool-{{server.verified}}.png">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container loading-effect">
+            <h2>Members</h2>
+            <table border="1" cellspacing="0">
+                <tbody>
+                    <tr>
+                        <td class="ListM" style="width: 100%;"></td>
+                        <td class="ListM">
+                            <b>ID</b>
+                        </td>
+                        <td class="ListM">
+                            <b>Created At</b>
+                        </td>
+                        <td>
+                            
+                        </td>
+                        <td class="ListM">
+                            <b>Hash</b>
+                        </td>
+                    </tr>
+                    {{#each members}}
+                    <tr>
+                        <td style="padding:0 4px 4px 4px;">
+                            <div style="display: inline-block; transform: translate(-2px, 4px);">
+                                {{#if avatarUrlSmall}}
+                                <div class="tooltip">
+                                    <img src="{{avatarUrlSmall}}" width="16" height="16" title="Display Avatar" style="border-radius: 8px;">
+                                    <span class="tooltiptext">
+                                        <img src="{{avatarUrlBig}}">
+                                    </span>
+                                </div>      
+                                {{else}}
+                                {{#if user.avatarUrlSmall}}
+                                <div class="tooltip">
+                                    <img src="{{user.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 8px;">
+                                    <span class="tooltiptext">
+                                        <img src="{{user.avatarUrlBig}}">
+                                    </span>
+                                </div>
+                                {{else}}
+                                {{#if user.defaultAvatarUrl}}
+                                <img src="{{user.defaultAvatarUrl}}" width="16" height="16" title="Default avatar" style="border-radius: 8px;">
+                                {{else}}
+                                <img src="/dcbot/images/default-avatar.png" width="16" height="16" title="Avatar can't be loaded" style="border-radius: 8px; background-color: #fff3; opacity: .7;">
+                                {{/if}}
+                                {{/if}}
+                                {{/if}}
+                            </div>
+
+                            <span title="{{#if nickname}}Nickname{{else}}Username{{/if}}">{{#if nickname}}{{nickname}}{{else}}{{user.username}}{{/if}}</span>{{#if user.discriminator}}<span style="color: #999;" title="Discriminator">#{{user.discriminator}}</span>{{/if}}
+                            
+                            {{#if user.bot}}<span class="tag">BOT</span>{{/if}}
+                            {{#if user.system}}<span class="tag">System</span>{{/if}}
+                            
+                            {{#if isOwner}}
+                            <span class="user-badge" title="Owner">
+                                <img src="/dcbot/images/userBadges/Server_Crown_badge.png">
+                            </span>
+                            {{/if}}
+
+                            {{#if user.flags.HypeSquadOnlineHouse1}}
+                            <span class="user-badge">
+                                <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">
+                            </span>
+                            {{/if}}
+
+                            {{#if user.flags.HypeSquadOnlineHouse2}}
+                            <span class="user-badge">
+                                <img src="https://static.wikia.nocookie.net/discord/images/2/27/Hypesquad_brilliance_badge.png">
+                            </span>
+                            {{/if}}
+
+                            {{#if user.flags.HypeSquadOnlineHouse3}}
+                            <span class="user-badge">
+                                <img src="https://static.wikia.nocookie.net/discord/images/c/ca/Hypesquad_balance_badge.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if user.flags.Staff}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/Discord-staff.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if user.flags.BugHunterLevel1}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/Bug_hunter_badge.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if user.flags.BugHunterLevel2}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/Bug_buster_badge.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if user.flags.CertifiedModerator}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/Discord_Certified_Moderator.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if user.flags.Partner}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/DiscordPartnerBadge.svg">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if false}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/Early_supporter_badge.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if false}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/HypeSquad_Event_Badge.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if false}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/New_badge.svg">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if false}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/Nitro_badge.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if false}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/SupportsCommandsBadge.png">
+                            </span>
+                            {{/if}}
+                            
+                            {{#if VerifiedDeveloper}}
+                            <span class="user-badge">
+                                <img src="/dcbot/images/userBadges/Verified_developer_badge.png">
+                            </span>
+                            {{/if}}
+
+                            {{#if cache}}
+                            <img src="/images/offline.png" width="12" height="12" title="From Cache" alt="Cache Icon" style="transform: translateY(2px); opacity: 50%;">
+                            {{/if}}
+
+                            {{#if user.haveDatabase}}
+                            <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
+                            {{/if}}
+
+                            {{#if user.hexAccentColor}}
+                            <div style="
+                                width: 16px;
+                                height: 16px;
+                                border: 1px solid black;
+                                border-radius: 3px;
+                                background-color: {{hexAccentColor}};
+                                float: right;
+                                transform: translateY(4px);
+                            " title="Accent color">
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{id}}
+                        </td>
+                        <td>
+                            <span title="{{user.createdAt}}">{{user.createdAtText}}</span>
+                        </td>
+                        <td>
+                            <button class="btn-fetch" onclick="Post('/Guild/Member/Fetch?guild={{../server.id}}&id={{id}}', event, () => { Reload() })" title="Fetch"></button>
+                        </td>
+                        <td>
+                            <!--<img width="16" height="16" src="/images/bool-{{user.haveHash}}.png" style="transform: translateY(3px);">-->
+                            {{#if user.haveHash}}
+                            <input type="text" value="{{user.hash}}" readonly style="width: 100px;">
                             {{else}}
-                            {{#if user.avatarUrlSmall}}
+                            <form action="/view/GenerateHash" method="post"
+                                style="margin: 0; display: inline-block;"
+                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                                <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                                <input type="submit" value="Generate">
+                            </form>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/each}}
+                    {{#if server.membersNotFetched}}
+                    <tr>
+                        <td colspan="5">{{server.membersNotFetched}} members are not fetched</td>
+                    </tr>
+                    {{/if}}
+                    {{#if server.membersNotVisible}}
+                    <tr>
+                        <td colspan="5">{{server.membersNotVisible}} members are not visible</td>
+                    </tr>
+                    {{/if}}
+                </tbody>
+            </table>
+            
+            <h2>Fetch Member</h2>
+
+            <form action="/Guild/Member/Fetch" method="post" style="margin: 0; display: inline-block;"
+                onsubmit="
+                    event.preventDefault()
+                    Post('/Guild/Member/Fetch?guild={{server.id}}&id=' + document.getElementById('fetch-member-id').value, event, () => {
+                        Reload()
+                    }, 'fetch-member-error')
+                ">
+                <input type="text" name="id" id="fetch-member-id" minlength="18" maxlength="18" required>
+                <input type="submit" value="Fetch Member">
+            </form>
+            <p style="color: #b32d2d;" id="fetch-member-error"></p>
+            
+            <h2>Fetch All Members</h2>
+
+            <form action="/Guild/Member/FetchAll" method="post" style="margin: 0; display: inline-block;"
+                onsubmit="
+                    event.preventDefault()
+                    Post('/Guild/Member/FetchAll?guild={{server.id}}', event, () => {
+                        Reload()
+                    }, 'fetch-member-all-error')
+                ">
+                <input type="submit" value="Fetch All Members">
+            </form>
+            <p style="color: #b32d2d;" id="fetch-member-all-error"></p>
+        </div>
+        
+        <div class="container loading-effect">
+            <h2>Emojis</h2>
+            <table class="datas" border="1" align="center" width="100%" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td class="ListM">
+                            <b>Emoji</b>
+                        </td>
+                        <td class="ListM" style="width: 100%;">
+                            <b>Name</b>
+                        </td>
+                        <td class="ListM">
+                            <b>ID</b>
+                        </td>
+                        <td class="ListM">
+                            <b>Created At</b>
+                        </td>
+                        <td class="ListM">
+                            <b>Identifier</b>
+                        </td>
+                        <td class="ListM">
+                            <b>Aval.</b>
+                        </td>
+                        <td class="ListM">
+                            <b>Dela.</b>
+                        </td>
+                    </tr>
+                    {{#each emojis}}
+                    <tr>
+                        <td style="padding:0 2 0 2;word-break:break-all">
                             <div class="tooltip">
-                                <img src="{{user.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 8px;">
+                                <img src="{{url}}" width="16" height="16">
                                 <span class="tooltiptext">
-                                    <img src="{{user.avatarUrlBig}}">
+                                    <img src="{{url}}" width="128" height="128">
                                 </span>
                             </div>
-                            {{else}}
-                            {{#if user.defaultAvatarUrl}}
-                            <img src="{{user.defaultAvatarUrl}}" width="16" height="16" title="Default avatar" style="border-radius: 8px;">
-                            {{else}}
-                            <img src="/dcbot/images/default-avatar.png" width="16" height="16" title="Avatar can't be loaded" style="border-radius: 8px; background-color: #fff3; opacity: .7;">
-                            {{/if}}
-                            {{/if}}
-                            {{/if}}
-                        </div>
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            {{name}}
+                            <a href="{{url}}" target="_blank" title="Channel Link"><i class="material-icons" style="margin-left: 4px;">link</i></a>
+                            {{#if animated}}<img width="16" height="16" class="miniicon" src="/images/video.png">{{/if}}
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            {{id}}
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            {{createdAt}}
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            <:{{identifier}}>
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            <img width="16" height="16" src="/images/bool-{{available}}.png">
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            <img width="16" height="16" src="/images/bool-{{deletable}}.png">
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
 
-                        <span title="{{#if nickname}}Nickname{{else}}Username{{/if}}">{{#if nickname}}{{nickname}}{{else}}{{user.username}}{{/if}}</span>{{#if user.discriminator}}<span style="color: #999;" title="Discriminator">#{{user.discriminator}}</span>{{/if}}
-                        
-                        {{#if user.bot}}<span class="tag">BOT</span>{{/if}}
-                        {{#if user.system}}<span class="tag">System</span>{{/if}}
-                        
-                        {{#if isOwner}}
-                        <span class="user-badge" title="Owner">
-                            <img src="/dcbot/images/userBadges/Server_Crown_badge.png">
-                        </span>
-                        {{/if}}
-
-                        {{#if user.flags.HypeSquadOnlineHouse1}}
-                        <span class="user-badge">
-                            <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">
-                        </span>
-                        {{/if}}
-
-                        {{#if user.flags.HypeSquadOnlineHouse2}}
-                        <span class="user-badge">
-                            <img src="https://static.wikia.nocookie.net/discord/images/2/27/Hypesquad_brilliance_badge.png">
-                        </span>
-                        {{/if}}
-
-                        {{#if user.flags.HypeSquadOnlineHouse3}}
-                        <span class="user-badge">
-                            <img src="https://static.wikia.nocookie.net/discord/images/c/ca/Hypesquad_balance_badge.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if user.flags.Staff}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/Discord-staff.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if user.flags.BugHunterLevel1}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/Bug_hunter_badge.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if user.flags.BugHunterLevel2}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/Bug_buster_badge.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if user.flags.CertifiedModerator}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/Discord_Certified_Moderator.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if user.flags.Partner}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/DiscordPartnerBadge.svg">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if false}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/Early_supporter_badge.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if false}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/HypeSquad_Event_Badge.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if false}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/New_badge.svg">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if false}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/Nitro_badge.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if false}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/SupportsCommandsBadge.png">
-                        </span>
-                        {{/if}}
-                        
-                        {{#if VerifiedDeveloper}}
-                        <span class="user-badge">
-                            <img src="/dcbot/images/userBadges/Verified_developer_badge.png">
-                        </span>
-                        {{/if}}
-
-                        {{#if cache}}
-                        <img src="/images/offline.png" width="12" height="12" title="From Cache" alt="Cache Icon" style="transform: translateY(2px); opacity: 50%;">
-                        {{/if}}
-
-                        {{#if user.haveDatabase}}
-                        <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
-                        {{/if}}
-
-                        {{#if user.hexAccentColor}}
-                        <div style="
-                            width: 16px;
-                            height: 16px;
-                            border: 1px solid black;
-                            border-radius: 3px;
-                            background-color: {{hexAccentColor}};
-                            float: right;
-                            transform: translateY(4px);
-                        " title="Accent color">
-                        {{/if}}
-                    </td>
-                    <td>
-                        {{id}}
-                    </td>
-                    <td>
-                        <span title="{{user.createdAt}}">{{user.createdAtText}}</span>
-                    </td>
-                    <td>
-                        <button class="btn-fetch" onclick="Post('/Guild/Member/Fetch?guild={{../server.id}}&id={{id}}', event, () => { Reload() })" title="Fetch"></button>
-                    </td>
-                    <td>
-                        <!--<img width="16" height="16" src="/images/bool-{{user.haveHash}}.png" style="transform: translateY(3px);">-->
-                        {{#if user.haveHash}}
-                        <input type="text" value="{{user.hash}}" readonly style="width: 100px;">
-                        {{else}}
-                        <form action="/view/GenerateHash" method="post"
-                            style="margin: 0; display: inline-block;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
-                            <input type="submit" value="Generate">
-                        </form>
-                        {{/if}}
-                    </td>
-                </tr>
-                {{/each}}
-                {{#if server.membersNotFetched}}
-                <tr>
-                    <td colspan="5">{{server.membersNotFetched}} members are not fetched</td>
-                </tr>
-                {{/if}}
-                {{#if server.membersNotVisible}}
-                <tr>
-                    <td colspan="5">{{server.membersNotVisible}} members are not visible</td>
-                </tr>
-                {{/if}}
-            </tbody>
-        </table>
-        
-		<h2>Fetch Member</h2>
-
-        <form action="/Guild/Member/Fetch" method="post" style="margin: 0; display: inline-block;"
-            onsubmit="
-                event.preventDefault()
-                Post('/Guild/Member/Fetch?guild={{server.id}}&id=' + document.getElementById('fetch-member-id').value, event, () => {
-                    Reload()
-                }, 'fetch-member-error')
-            ">
-            <input type="text" name="id" id="fetch-member-id" minlength="18" maxlength="18" required>
-            <input type="submit" value="Fetch Member">
-        </form>
-        <p style="color: #b32d2d;" id="fetch-member-error"></p>
-        
-		<h2>Fetch All Members</h2>
-
-        <form action="/Guild/Member/FetchAll" method="post" style="margin: 0; display: inline-block;"
-            onsubmit="
-                event.preventDefault()
-                Post('/Guild/Member/FetchAll?guild={{server.id}}', event, () => {
-                    Reload()
-                }, 'fetch-member-all-error')
-            ">
-            <input type="submit" value="Fetch All Members">
-        </form>
-        <p style="color: #b32d2d;" id="fetch-member-all-error"></p>
-	</div>
-    
-	<div class="container loading-effect">
-		<h2>Emojis</h2>
-        <table class="datas" border="1" align="center" width="100%" cellspacing="0" cellpadding="0">
-            <tbody>
-                <tr>
-                    <td class="ListM">
-                        <b>Emoji</b>
-                    </td>
-                    <td class="ListM" style="width: 100%;">
-                        <b>Name</b>
-                    </td>
-                    <td class="ListM">
-                        <b>ID</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Created At</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Identifier</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Aval.</b>
-                    </td>
-                    <td class="ListM">
-                        <b>Dela.</b>
-                    </td>
-                </tr>
-                {{#each emojis}}
-                <tr>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <div class="tooltip">
-                            <img src="{{url}}" width="16" height="16">
-                            <span class="tooltiptext">
-                                <img src="{{url}}" width="128" height="128">
-                            </span>
-                        </div>
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        {{name}}
-                        <a href="{{url}}" target="_blank" title="Channel Link"><i class="material-icons" style="margin-left: 4px;">link</i></a>
-                        {{#if animated}}<img width="16" height="16" class="miniicon" src="/images/video.png">{{/if}}
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        {{id}}
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        {{createdAt}}
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <:{{identifier}}>
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{available}}.png">
-                    </td>
-                    <td style="padding:0 2 0 2;word-break:break-all">
-                        <img width="16" height="16" src="/images/bool-{{deletable}}.png">
-                    </td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
-	</div>
+    </div>
     
     <script src="/scripts/functions.js"></script>
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>

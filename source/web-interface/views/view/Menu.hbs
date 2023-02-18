@@ -4,7 +4,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<link href="/styles/css-vars.css" rel="stylesheet" type="text/css">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="wed, 26 Feb 1997 08:21:57 GMT">
     <script type="text/javascript">
         if(window.parent==window){window.location.href="http://192.168.1.100"}
         document.oncontextmenu=()=>{return false}
@@ -17,141 +16,71 @@
     </script>
     <script src="/scripts/menu.js" type="text/JavaScript">
     </script>
-    <style type="text/css">
-        menu ol.minus {
-            background-color: #fff1;
-        }
-        menu ol.minus:hover {
-            background-color: #fff2;
-        }
-
-        ol {
-            display: block;
-            list-style-type: decimal;
-            margin-block-start: 0em;
-            margin-block-end: 0em;
-            margin-inline-start: 0px;
-            margin-inline-end: 0px;
-            padding-inline-start: 0px;
-        }
-
-        ol img:not(.status-icon) {
-            height: 100%;
-            display: inline-block;
-            position: relative;
-            bottom: 6px;
-            opacity: 50%;
-            transform: scale(.8);
-        }
-
-        ol.dot2 img:not(.status-icon) {
-            display: none !important;
-        }
-
-        ol .status-icon {
-            height: 24px;
-            width: 24px;
-            display: inline-block;
-            position: relative;
-            bottom: 2px;
-            left: -45px;
-            border-radius: 50%;
-            background-color: #0000;
-            transform: scale(0.5);
-            transition: background-color 1s;
-        }
-
-        ol.dot2 .status-icon {
-            display: none !important;
-        }
-
-        menu ol {
-            position: relative;
-            border-end-end-radius: 100px;
-            border-start-end-radius: 100px;
-            height: 30px;
-            overflow: hidden;
-            padding-left: 25px;
-            padding-top: 12px;
-            cursor: pointer;
-        }
-
-        menu ol>a {
-            text-decoration: none;
-            user-select: none;
-            color: #eee;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        menu ol:not(.dot2)>a {
-            position: relative;
-            bottom: 16px;
-        }
-
-        menu ol:hover {
-            background-color: #3c4043;
-            color: #eee;
-        }
-
-        menu ol.dot2 {
-            padding-left: 85px;
-        }
-
-        menu ol span.ripple {
-            position: absolute;
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple 600ms linear;
-            background-color: #fff3;
-            pointer-events: none;
-        }
-
-        menu ol.selected span.ripple {
-            background-color: #0003;
-        }
-
-        menu ol.selected {
-            background-color: #8ab4f8;
-            color: #000;
-        }
-
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        .hidden {
-            display: none;
-        }
-        .show {
-            display: block;
-        }
-        menu {
-            display: block;
-            list-style-type: disc;
-            margin-block-start: 0em;
-            margin-block-end: 0em;
-            margin-inline-start: 0px;
-            margin-inline-end: 0px;
-            padding-inline-start: 0px;
-        }
-
-        ol a {
-            
-        }
-    </style>
     <script type="text/javascript">
         function ResetStatus(strInfo) {
             window.status = ""; return true;
         }
     </script>
     <style>
-        hr {
-            margin: 2px 30px;
-            border-color: #fff2;
+        html, body {
+            background-color: #1e1f22;
+        }
+
+        body {
+            margin: 0px;
+        }
+
+        menu {
+            margin: 0px;
+            padding: 8px 0px;
+        }
+
+        menu > ol {
+            background-color: #313338;
+            border-radius: 50%;
+            margin: 4px;
+            position: relative;
+            left: 10px;
+            width: 42px;
+            height: 42px;
+            overflow: visible;
+            padding: 0px;
+            cursor: pointer;
+            transition: background-color 200ms, border-radius 200ms;
+        }
+
+        menu > ol > img {
+            width: 42px;
+            height: 42px;
+        }
+
+        menu > ol:hover, menu > ol.selected {
+            background-color: #5865f2;
+            border-radius: 25%;
+        }
+
+        menu > ol:active {
+            transform: translateY(2px);
+        }
+
+        menu > hr {
+            margin: 10px;
+            border-color: #313338;
+            border-style: solid;
+        }
+
+        .status-icon {
+            display: block;
+            position: relative;
+            width: 14px;
+            height: 14px;
+            border-radius: 7px;
+            right: -26px;
+            top: -46px;
+            outline: 4px solid #1e1f22;
+            background-color: #1e1f22;
+            transition: opacity 200ms;
+            opacity: 0%;
         }
     </style>
 </head>
@@ -167,7 +96,7 @@
 
     <script>
         var GetDataPending = false
-        const statusIconErrors = document.getElementById('status-icon-error')
+        const statusIconErrors = document.getElementsByClassName('status-icon')
 		setInterval(() => {
             if (GetDataPending === true) { return }
             GetDataPending = true
@@ -178,16 +107,23 @@
 				if (xmlHttp.status == 200) {
                     /** @type {number} */
 					const res = JSON.parse(xmlHttp.responseText)
-                    if (res === 0) {
-                        statusIconErrors.style.backgroundColor = '#5550'
-                    } else if (res === 1) {
-                        statusIconErrors.style.backgroundColor = '#555'
-                    } else if (res === 2) {                            
-                        statusIconErrors.style.backgroundColor = '#fc6'
-                    } else if (res === 3) {                            
-                        statusIconErrors.style.backgroundColor = '#f62'
-                    } else if (res === 4) {                            
-                        statusIconErrors.style.backgroundColor = '#f00'
+                    for (let i = 0; i < statusIconErrors.length; i++) {
+                        /** @type {HTMLElement} */
+                        const statusIconError = statusIconErrors.item(i)
+                        if (res === 0) {
+                            statusIconError.style.opacity = '0%'
+                        } else if (res === 1) {
+                            statusIconError.style.opacity = '0%'
+                        } else if (res === 2) {                            
+                            statusIconError.style.backgroundColor = '#ffcd19'
+                            statusIconError.style.opacity = '100%'
+                        } else if (res === 3) {                            
+                            statusIconError.style.backgroundColor = '#eb8100'
+                            statusIconError.style.opacity = '100%'
+                        } else if (res === 4) {                            
+                            statusIconError.style.backgroundColor = '#b82b00'
+                            statusIconError.style.opacity = '100%'
+                        }
                     }
                 }
 			}
