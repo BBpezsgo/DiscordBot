@@ -1,4 +1,5 @@
 config.json
+source/mobile-config.json
 source/database
 source/database-copy
 node_modules

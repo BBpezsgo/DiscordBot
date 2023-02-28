@@ -1286,7 +1286,7 @@ class WebInterfaceManager {
                 uptime: GetTime(uptime)
             }
 
-            this.RenderPage(req, res, 'Process', { process: proc })
+            this.RenderPage(req, res, 'Process', { process: proc, dirname: __dirname, filename: __filename })
         })
 
         this.app.get('/dcbot/view/testing.html', (req, res) => {
