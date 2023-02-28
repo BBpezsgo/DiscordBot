@@ -10,7 +10,7 @@ function StringToArray(str) {
 
 /**@param {string} str @param {number} fontIndex */
 function StringToFont(str, fontIndex) {
-    const raw = fs.readFileSync('./commands/fontData.txt').toString('utf-8')
+    const raw = fs.readFileSync(Path.join(CONFIG.paths.base, './commands/fontData.txt')).toString('utf-8')
     const rawList = raw.split('\n')
     /**@type {string[][]} */
     const fonts = []
@@ -38,7 +38,7 @@ function CommandFont(command, privateCommand) {
 }
 
 function GetFonts() {
-    const raw = fs.readFileSync('./commands/fontData.txt').toString('utf-8')
+    const raw = fs.readFileSync(Path.join(CONFIG.paths.base, './commands/fontData.txt')).toString('utf-8')
     const rawList = raw.split('\n')
     /**@type {string[][]} */
     const fonts = []

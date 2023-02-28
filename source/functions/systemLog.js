@@ -1,5 +1,8 @@
 const fs = require('fs')
 const { GetTime, GetDate } = require('./functions')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 const startedMessage = '====== Started ======'
 const stoppedMessage = '====== Stopped ======'
@@ -23,22 +26,22 @@ function GetTimePrefix() {
 }
 
 function Log(message) {
-    fs.appendFile('./log/' + GetFilename() + '.log', '\n' + GetTimePrefix() + ' ' + message, function (err) {
+    fs.appendFile(Path.join(CONFIG.paths.base, './log/' + GetFilename() + '.log'), '\n' + GetTimePrefix() + ' ' + message, function (err) {
         if (err) { throw err }
     })
 }
 
 function LogRaw(message) {
-    fs.appendFile('./log/' + GetFilename() + '.log', message, function (err) {
+    fs.appendFile(Path.join(CONFIG.paths.base, './log/' + GetFilename() + '.log'), message, function (err) {
         if (err) { throw err }
     })
 }
 
 function SystemLog(message) {
-    if (fs.existsSync('./log')) {
+    if (fs.existsSync(Path.join(CONFIG.paths.base, './log'))) {
         Log(message)
     } else {
-        fs.mkdir('./log', (err) => {
+        fs.mkdir(Path.join(CONFIG.paths.base, './log'), (err) => {
             if (err) { throw err }
             Log(message)
         })
@@ -50,10 +53,10 @@ function SystemStart(startedInvisible, startedByUser) {
     '\n\n\n\n' + GetTimePrefix() + ' ' + startedMessage + '\n' +
     'Invisible: ' + startedInvisible + '\n' +
     'StartedbyUser: ' + startedByUser
-    if (fs.existsSync('./log')) {
+    if (fs.existsSync(Path.join(CONFIG.paths.base, './log'))) {
         LogRaw(message)
     } else {
-        fs.mkdir('./log', (err) => {
+        fs.mkdir(Path.join(CONFIG.paths.base, './log'), (err) => {
             if (err) throw err
             LogRaw(message)
         })
@@ -62,10 +65,10 @@ function SystemStart(startedInvisible, startedByUser) {
 
 function SystemStop() {
     const message = '\n' + GetTimePrefix() + ' ' + stoppedMessage
-    if (fs.existsSync('./log')) {
+    if (fs.existsSync(Path.join(CONFIG.paths.base, './log'))) {
         LogRaw(message)
     } else {
-        fs.mkdir('./log', (err) => {
+        fs.mkdir(Path.join(CONFIG.paths.base, './log'), (err) => {
             if (err) throw err
             LogRaw(message)
         })
@@ -75,10 +78,10 @@ function SystemStop() {
 function GetLogs() {
     /** @type {{ dateText: string; content: string;}[]} */
     const filesRaw = []
-    fs.readdirSync('./log/').forEach(filename => {
+    fs.readdirSync(Path.join(CONFIG.paths.base, './log/')).forEach(filename => {
         filesRaw.push({
             dateText: filename.split('.')[0],
-            content: fs.readFileSync('./log/' + filename, 'utf-8')
+            content: fs.readFileSync(Path.join(CONFIG.paths.base, './log/' + filename), 'utf-8')
         })
     })
 
@@ -167,10 +170,10 @@ function GetLogs() {
 function GetUptimeHistory2() {
     /** @type {{ dateText: string; content: string;}[]} */
     const filesRaw = []
-    fs.readdirSync('./log/').forEach(filename => {
+    fs.readdirSync(Path.join(CONFIG.paths.base, './log/')).forEach(filename => {
         filesRaw.push({
             dateText: filename.split('.')[0],
-            content: fs.readFileSync('./log/' + filename, 'utf-8')
+            content: fs.readFileSync(Path.join(CONFIG.paths.base, './log/' + filename), 'utf-8')
         })
     })
 

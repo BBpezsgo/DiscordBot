@@ -24,6 +24,9 @@ const { MessageType, GuildVerificationLevel } = require('discord.js')
 const process = require('process')
 const archivePath = 'D:/Mappa/Discord/DiscordOldData/'
 const Key = require('../key')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 class WebInterfaceManager {
     /**
@@ -56,11 +59,11 @@ class WebInterfaceManager {
         this.app.engine('hbs', ExpressHandlebars.engine({
             extname: '.hbs',
             defaultLayout: 'layout',
-            layoutsDir: __dirname + '/layouts'
+            layoutsDir: Path.join(CONFIG.paths.webInterface, '/layouts')
         }))
-        this.app.set('views', path.join(__dirname, 'views'))
+        this.app.set('views', path.join(CONFIG.paths.webInterface, 'views'))
         this.app.set('view engine', 'hbs')
-        this.app.use(express.static(path.join(__dirname, 'public')))
+        this.app.use(express.static(path.join(CONFIG.paths.webInterface, 'public')))
         this.app.use(bodyParser.urlencoded({ extended: false }))
         this.app.use(bodyParser.json())
 
@@ -1303,7 +1306,7 @@ class WebInterfaceManager {
         })
 
         this.app.get('/dcbot/view/log-error.html', (req, res) => {
-            const data = fs.readFileSync('./node.error.log', 'utf8')
+            const data = fs.readFileSync(Path.join(CONFIG.paths.base, './node.error.log'), 'utf8')
             const lines = data.split('\n')
 
             var linesProcessed = []
@@ -1590,7 +1593,7 @@ class WebInterfaceManager {
         })
 
         this.app.get('/errors.json', (req, res) => {
-            const data = fs.readFileSync('./node.error.log', 'utf8')
+            const data = fs.readFileSync(Path.join(CONFIG.paths.base, './node.error.log'), 'utf8')
             const lines = data.split('\n')
 
             var notificationIcon = 0
@@ -2120,7 +2123,7 @@ class WebInterfaceManager {
         })
 
         this.app.post('/view/Log/Clear', (req, res) => {
-            fs.writeFileSync('./node.error.log', '')
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './node.error.log'), '')
         })
 
         this.app.post('/view/GenerateHash', (req, res) => {

@@ -2,7 +2,10 @@ const Discord = require('discord.js')
 const { StatesManager } = require('../functions/statesManager')
 const MVM = require('../services/mvm')
 const LogError = require('../functions/errorLog')
-const roadsInInterest = require('../mvm-roads-in-interest.json')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
+const roadsInInterest = require(Path.join(CONFIG.paths.base, './mvm-roads-in-interest.json'))
 const { FormatError } = require('../functions/formatError')
 
 const icon = 'https://media.glassdoor.com/sqll/1303067/mvm-group-squarelogo-1636624757422.png'

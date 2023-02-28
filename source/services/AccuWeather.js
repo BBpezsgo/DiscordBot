@@ -1,3 +1,6 @@
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 const tokens = require('../config.json').tokens
 const fs = require('fs')
 const { CityBekescsaba } = require('../commands/weatherFunctions')
@@ -29,10 +32,10 @@ const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
 
 /** @param {Types.ServiceCallback<any>} callback */
 const AccuWeatherForecast = function(callback) {
-    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
     if (ReadFromCache) {
-        if (fs.existsSync('./cache/weather/accu-weather.json')) {
-            callback(JSON.parse(fs.readFileSync('./cache/weather/accu-weather.json', { encoding: 'utf-8' })))
+        if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather.json'))) {
+            callback(JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather.json'), { encoding: 'utf-8' })))
             return
         }
     }
@@ -55,8 +58,8 @@ const AccuWeatherForecast = function(callback) {
             var headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync('./cache/weather/accu-weather-headers.txt', headersText, { encoding: 'utf-8' })
-            fs.writeFileSync('./cache/weather/accu-weather.json', body, { encoding: 'utf-8' })
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-headers.txt'), headersText, { encoding: 'utf-8' })
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather.json'), body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
     } catch (err) {
@@ -66,10 +69,10 @@ const AccuWeatherForecast = function(callback) {
 
 /** @param {Types.ServiceCallback<any>} callback */
 const AccuWeatherCurrent = function(callback) {
-    if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
     if (ReadFromCache) {
-        if (fs.existsSync('./cache/weather/accu-weather-current.json')) {
-            callback(JSON.parse(fs.readFileSync('./cache/weather/accu-weather-current.json', { encoding: 'utf-8' })))
+        if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-current.json'))) {
+            callback(JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-current.json'), { encoding: 'utf-8' })))
             return
         }
     }
@@ -92,8 +95,8 @@ const AccuWeatherCurrent = function(callback) {
             var headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync('./cache/weather/accu-weather-current-headers.txt', headersText, { encoding: 'utf-8' })
-            fs.writeFileSync('./cache/weather/accu-weather-current.json', body, { encoding: 'utf-8' })
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-current-headers.txt'), headersText, { encoding: 'utf-8' })
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-current.json'), body, { encoding: 'utf-8' })
             callback(JSON.parse(body))
         })
     } catch (err) {

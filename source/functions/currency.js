@@ -1,6 +1,9 @@
 const https = require('https')
 const fs = require('fs')
 const xml = require('xml2js')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 const ReadFromCache = true
 
@@ -21,8 +24,8 @@ const ProcessData = function(data) {
 /** @param {(result: any, error: string | undefined) => void} callback */
 const Download = function(callback) {
     if (ReadFromCache) {
-        if (fs.existsSync('../cache/currency-data.xml')) {
-            return fs.readFileSync('../cache/currency-data.xml', { encoding: 'utf-8' })
+        if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/currency-data.xml'))) {
+            return fs.readFileSync(Path.join(CONFIG.paths.base, './cache/currency-data.xml'), { encoding: 'utf-8' })
         }
     }
 
@@ -30,12 +33,12 @@ const Download = function(callback) {
         const req = https.request('https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', function (res) {
             res.setEncoding('utf8')
             var data = ''
-            fs.writeFileSync('../currency-res-.json', JSON.stringify({ headers: res.headers }), { encoding: 'utf-8' })
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/currency-res-.json'), JSON.stringify({ headers: res.headers }), { encoding: 'utf-8' })
             res.on('data', function (chunk) {
                 data += chunk
             })
             res.on('end', () => {
-                fs.writeFileSync('../currency-data-.xml', data, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/currency-data-.xml'), data, { encoding: 'utf-8' })
                 var parser = new xml.Parser()
                 parser.parseString(data, function (error, result) {
                     if (error) {

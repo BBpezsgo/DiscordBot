@@ -1,12 +1,15 @@
 const Discord = require('discord.js')
 const fs = require('fs')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 function TryGetUser(id) {
-    if (!fs.existsSync('./cache/')) { return undefined }
-    if (!fs.existsSync('./cache/users.json')) { return undefined }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) { return undefined }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/users.json'))) { return undefined }
     
     /** @type {Discord.User[]} */
-    const users = JSON.parse(fs.readFileSync('./cache/users.json', { encoding: 'utf-8' }))
+    const users = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/users.json'), { encoding: 'utf-8' }))
     for (let i = 0; i < users.length; i++) {
         if (users[i].id == id) {
             return users[i]
@@ -17,11 +20,11 @@ function TryGetUser(id) {
 
 /** @param {Discord.Client} client */
 function GetUsers(client) {
-    if (!fs.existsSync('./cache/')) { return [] }
-    if (!fs.existsSync('./cache/users.json')) { return [] }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) { return [] }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/users.json'))) { return [] }
 
     /** @type {Discord.User[]} */
-    const users = JSON.parse(fs.readFileSync('./cache/users.json', { encoding: 'utf-8' }))
+    const users = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/users.json'), { encoding: 'utf-8' }))
     if (client !== undefined) {
         for (let i = 0; i < users.length; i++) {
             users[i] = new Discord.User(client, users[i])        
@@ -32,11 +35,11 @@ function GetUsers(client) {
 
 /** @param {Discord.Client} client */
 function GetGuilds(client) {
-    if (!fs.existsSync('./cache/')) { return [] }
-    if (!fs.existsSync('./cache/guilds.json')) { return [] }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) { return [] }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/guilds.json'))) { return [] }
 
     /** @type {Discord.Guild[]} */
-    const guilds = JSON.parse(fs.readFileSync('./cache/guilds.json', { encoding: 'utf-8' }))
+    const guilds = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/guilds.json'), { encoding: 'utf-8' }))
     if (client !== undefined) {
         for (let i = 0; i < guilds.length; i++) {
             guilds[i] = new Discord.Guild(client, guilds[i])        
@@ -47,16 +50,16 @@ function GetGuilds(client) {
 
 /** @param {Discord.Client} client */
 function SaveUsers(client) {
-    if (!fs.existsSync('./cache/')) {
-        fs.mkdirSync('./cache/')
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) {
+        fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/'))
     }
-    if (!fs.existsSync('./cache/users.json')) {
-        fs.writeFileSync('./cache/users.json', '[]', { encoding: 'utf-8' })
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/users.json'))) {
+        fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/users.json'), '[]', { encoding: 'utf-8' })
     }
 
     const users = client.users.cache.toJSON()
     /** @type {Discord.User[]} */
-    const usersSaved = JSON.parse(fs.readFileSync('./cache/users.json', { encoding: 'utf-8' }))
+    const usersSaved = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/users.json'), { encoding: 'utf-8' }))
 
     for (let i = 0; i < usersSaved.length; i++) {
         var found = false
@@ -72,21 +75,21 @@ function SaveUsers(client) {
         }
     }
 
-    fs.writeFileSync('./cache/users.json', JSON.stringify(users, undefined, ' '), { encoding: 'utf-8' })
+    fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/users.json'), JSON.stringify(users, undefined, ' '), { encoding: 'utf-8' })
 }
 
 /** @param {Discord.Client} client */
 function SaveGuilds(client) {
-    if (!fs.existsSync('./cache/')) {
-        fs.mkdirSync('./cache/')
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) {
+        fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/'))
     }
-    if (!fs.existsSync('./cache/guilds.json')) {
-        fs.writeFileSync('./cache/guilds.json', '[]', { encoding: 'utf-8' })
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/guilds.json'))) {
+        fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/guilds.json'), '[]', { encoding: 'utf-8' })
     }
 
     const guilds = client.guilds.cache.toJSON()
     /** @type {Discord.Guild[]} */
-    const guildsSaved = JSON.parse(fs.readFileSync('./cache/guilds.json', { encoding: 'utf-8' }))
+    const guildsSaved = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/guilds.json'), { encoding: 'utf-8' }))
 
     for (let i = 0; i < guildsSaved.length; i++) {
         var found = false
@@ -102,30 +105,30 @@ function SaveGuilds(client) {
         }
     }
 
-    fs.writeFileSync('./cache/guilds.json', JSON.stringify(guilds, undefined, ' '), { encoding: 'utf-8' })
+    fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/guilds.json'), JSON.stringify(guilds, undefined, ' '), { encoding: 'utf-8' })
 }
 
 /** @param {Discord.Client} client @param {string} guildID */
 function GetMembers(client, guildID) {
-    if (!fs.existsSync('./cache/')) { return [] }
-    if (!fs.existsSync(`./cache/members-${guildID}.json`)) { return [] }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) { return [] }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, `./cache/members-${guildID}.json`))) { return [] }
 
     /**
       @type {{
         id: string
         nickname: nickname
       }[]} */
-    const members = JSON.parse(fs.readFileSync(`./cache/members-${guildID}.json`, { encoding: 'utf-8' }))
+    const members = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, `./cache/members-${guildID}.json`), { encoding: 'utf-8' }))
     return members
 }
 
 /** @param {Discord.Client} client @param {Discord.Guild} guild */
 function SaveMembers(client, guild) {
-    if (!fs.existsSync('./cache/')) {
-        fs.mkdirSync('./cache/')
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) {
+        fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/'))
     }
-    if (!fs.existsSync(`./cache/members-${guild.id}.json`)) {
-        fs.writeFileSync(`./cache/members-${guild.id}.json`, '[]', { encoding: 'utf-8' })
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, `./cache/members-${guild.id}.json`))) {
+        fs.writeFileSync(Path.join(CONFIG.paths.base, `./cache/members-${guild.id}.json`), '[]', { encoding: 'utf-8' })
     }
 
     /**
@@ -145,7 +148,7 @@ function SaveMembers(client, guild) {
         id: string
         nickname: nickname
       }[]} */
-    const membersSaved = JSON.parse(fs.readFileSync(`./cache/members-${guild.id}.json`, { encoding: 'utf-8' }))
+    const membersSaved = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, `./cache/members-${guild.id}.json`), { encoding: 'utf-8' }))
 
     for (let i = 0; i < membersSaved.length; i++) {
         var found = false
@@ -161,13 +164,13 @@ function SaveMembers(client, guild) {
         }
     }
 
-    fs.writeFileSync(`./cache/members-${guild.id}.json`, JSON.stringify(members, undefined, ' '), { encoding: 'utf-8' })
+    fs.writeFileSync(Path.join(CONFIG.paths.base, `./cache/members-${guild.id}.json`), JSON.stringify(members, undefined, ' '), { encoding: 'utf-8' })
 }
 
 /** @param {Discord.Client} client */
 function SaveAll(client) {
-    if (!fs.existsSync('./cache/')) {
-        fs.mkdirSync('./cache/')
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) {
+        fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/'))
     }
     SaveUsers(client)
 }

@@ -2,6 +2,9 @@ const Tesco = require('../services/tesco')
 const Discord = require('discord.js')
 const fs = require('fs')
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 /** @param {Discord.CommandInteraction<Discord.CacheType>} command */
 module.exports = async (command) => {
@@ -18,8 +21,8 @@ module.exports = async (command) => {
                 return
             }
 
-            if (!fs.existsSync('./cache/tesco/')) { fs.mkdirSync('./cache/tesco/', { recursive: true }) }
-            fs.writeFileSync('./cache/tesco/result.json', JSON.stringify(searchResult.result, null, ' '), 'utf-8')
+            if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/tesco/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/tesco/'), { recursive: true }) }
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/tesco/result.json'), JSON.stringify(searchResult.result, null, ' '), 'utf-8')
             
             /** @type {(Discord.APIEmbed | Discord.JSONEncodable<Discord.APIEmbed>)[]} */
             const embeds = []

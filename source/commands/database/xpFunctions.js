@@ -1,5 +1,8 @@
 const { Message } = require('discord.js')
 const fs = require('fs')
+/** @type {import('../../config').Config} */
+const CONFIG = require('../../config.json')
+const Path = require('path')
 
 /*
 ((https{0,1})(:\/\/)([\w]+)(\.)([\w]+)(\.[\w]+)*((\/)[\w]+){0,}(\/){0,1}((\?)[\w\_\-]+(\=)([\w\-\+\_]+\+{0,1})+((\&)[\w\_\-]+(\=)([\w\-\+\_]+))*){0,1}((\#)[\w\-\+\_]*){0,1})
@@ -46,7 +49,7 @@ function calculateAddXp(message) {
         }
     }
 
-    settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'))
+    settings = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, 'settings.json'), 'utf-8'))
 
     var msg = message.content
 

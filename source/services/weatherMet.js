@@ -1,9 +1,12 @@
 const https = require('https')
 const fs = require('fs')
 const { JSDOM } = require('jsdom')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 const baseUrl = 'https://www.met.hu'
-const basePath = './cache/weather/'
+const basePath = Path.join(CONFIG.paths.base, './cache/weather/')
 
 const MaxTimeDifference = 1000 * 60
     * 10 // 10 minutes
@@ -24,16 +27,16 @@ function SaveCache(cacheName, data) {
 /** @returns {{date: number, data: any}} */
 function LoadCache(cacheName) {
     if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath, { recursive: true }) }
-    if (!fs.existsSync(basePath + `${cacheName}.json`)) {
-        fs.writeFileSync(basePath + `${cacheName}.json`, JSON.stringify({ date: 0, data: null }, null, ' '), { encoding: 'utf-8' })
+    if (!fs.existsSync(Path.join(basePath, `${cacheName}.json`))) {
+        fs.writeFileSync(Path.join(basePath, `${cacheName}.json`), JSON.stringify({ date: 0, data: null }, null, ' '), { encoding: 'utf-8' })
         return { date: 0, data: null }
     }
-    return JSON.parse(fs.readFileSync(basePath + `${cacheName}.json`, { encoding: 'utf-8' }))
+    return JSON.parse(fs.readFileSync(Path.join(basePath, `${cacheName}.json`), { encoding: 'utf-8' }))
 }
 
 function SaveCacheRaw(cacheName, rawData) {
     if (!fs.existsSync(basePath)) { fs.mkdirSync(basePath, { recursive: true }) }
-    fs.writeFileSync(basePath + `${cacheName}.json`, rawData)
+    fs.writeFileSync(Path.join(basePath, `${cacheName}.json`), rawData)
 }
 
 const UrlPaths = {
@@ -177,25 +180,25 @@ function ProcessCountyData(data) {
 
 async function CreateSnapshotAsync() {
     const snapshot = 'snapshot-' + Date.now() + '/'
-    fs.mkdirSync(basePath + snapshot)
+    fs.mkdirSync(Path.join(basePath, snapshot))
     
     const Func0 = async function(page) {
         try {
             const data = await DownloadAsync(UrlPaths.Warnings.Main + page)
-            fs.writeFileSync(basePath + snapshot + 'page-' + page + '.html', data, FsSettings)
-            fs.writeFileSync(basePath + snapshot + 'page-' + page + '.json', JSON.stringify(ProcessData(data), undefined, ' '), FsSettings)    
+            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '.html'), data, FsSettings)
+            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '.json'), JSON.stringify(ProcessData(data), undefined, ' '), FsSettings)    
         } catch (error) {
-            fs.writeFileSync(basePath + snapshot + 'page-' + page + '-error.json', JSON.stringify(error, undefined, ' '), FsSettings)    
+            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '-error.json'), JSON.stringify(error, undefined, ' '), FsSettings)    
         }
     }
     
     const Func1 = async function(countyID) {
         try {
             const data = await DownloadAsync(UrlPaths.Warnings.County + 'id=' + CountyDays.Today + '&kod=' + countyID)
-            fs.writeFileSync(basePath + snapshot + 'county-' + countyID + '.html', data, FsSettings)
-            fs.writeFileSync(basePath + snapshot + 'county-' + countyID + '.json', JSON.stringify(ProcessCountyData(data), undefined, ' '), FsSettings)    
+            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '.html'), data, FsSettings)
+            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '.json'), JSON.stringify(ProcessCountyData(data), undefined, ' '), FsSettings)    
         } catch (error) {
-            fs.writeFileSync(basePath + snapshot + 'county-' + countyID + '-error.json', JSON.stringify(error, undefined, ' '), FsSettings)    
+            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '-error.json'), JSON.stringify(error, undefined, ' '), FsSettings)    
         }
     }
 

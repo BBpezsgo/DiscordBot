@@ -4,8 +4,11 @@ process.title = "Discord BOT"
 
 const LogError = require('./functions/errorLog')
 const fs = require('fs')
+const Path = require('path')
+/** @type {import('./config').Config} */
+const CONFIG = require('./config.json')
 process.on('uncaughtException', function (err) {
-    fs.appendFileSync('./node.error.log', 'CRASH\n', { encoding: 'utf-8' })
+    fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), 'CRASH\n', { encoding: 'utf-8' })
     LogError(err)
 })
 
@@ -37,7 +40,7 @@ function Log(message, messageType = 'NORMAL') {
 
 logManager.scriptLoadingText = 'Loading script... (set process things)'
 
-process.__defineGetter__('stderr', function() { return fs.createWriteStream(__dirname + '\\node.error.log', { flags: 'a' }) })
+process.__defineGetter__('stderr', function() { return fs.createWriteStream(Path.join(CONFIG.paths.base, 'node.error.log'), { flags: 'a' }) })
 
 var botStopped = false
 
@@ -195,7 +198,6 @@ const WebInterface = require('./web-interface/manager')
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
 const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActivityType } = require('discord.js')
-const { perfix, tokens } = require('./config.json')
 
 const { AutoReact } = require('./functions/autoReact')
 
@@ -239,7 +241,7 @@ statesManager.botLoaded = true
 logManager.scriptLoadingText = 'Loading script... (loading database)'
 
 logManager.Loading('Loading database', 'Manager')
-const database = new DatabaseManager('./database/', './database-copy/', statesManager)
+const database = new DatabaseManager(Path.join(CONFIG.paths.base, './database/'), Path.join(CONFIG.paths.base, './database-copy/'), statesManager)
 logManager.Loading('Loading database', 'datas')
 const databaseIsSuccesfullyLoaded = database.LoadDatabase()
 
@@ -1475,9 +1477,9 @@ bot.on('interactionCreate', async interaction => {
             
             var rawWordList = ''
             if (settings.language == 'EN') {
-                rawWordList = fs.readFileSync('./word-list/english.txt', 'utf-8')
+                rawWordList = fs.readFileSync(Path.join(CONFIG.paths.base, './word-list/english.txt'), 'utf-8')
             } else if (settings.language == 'HU') {
-                rawWordList = fs.readFileSync('./word-list/hungarian.txt', 'utf-8')
+                rawWordList = fs.readFileSync(Path.join(CONFIG.paths.base, './word-list/hungarian.txt'), 'utf-8')
             } else {
                 interaction.reply({ content: '> **\\❌ Hiba: Ismeretlen nyelv "' + settings.language + '"!**', ephemeral: true})
                 return
@@ -1995,7 +1997,7 @@ bot.once('ready', async () => {
 
     try {
         /** @type {string[]} */
-        const channelsWithSettings = JSON.parse(fs.readFileSync('./settings.json')).channelSettings.channelsWithSettings
+        const channelsWithSettings = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './settings.json'))).channelSettings.channelsWithSettings
         channelsWithSettings.forEach(channelWithSettings => {
             bot.channels.fetch(channelWithSettings)
                 .then((chn) => {
@@ -2103,7 +2105,7 @@ bot.on('messageCreate', async msg => {
         }
     }
 
-    if (message.content.startsWith(perfix)) {
+    if (message.content.startsWith(CONFIG.perfix)) {
         processCommand(message, thisIsPrivateMessage, sender, message.content.substring(1).trim())
         return
     }
@@ -2679,7 +2681,7 @@ async function processApplicationCommand(command, privateCommand) {
 logManager.scriptLoadingText = 'Loading script... (define some functions)'
 function StartBot() {
     SystemLog('Start bot...')
-    bot.login(tokens.discord)
+    bot.login(CONFIG.tokens.discord)
         .then((token) => {
             SystemLog('Logged in')
         })

@@ -6,6 +6,9 @@ const Openweathermap = require('../services/Openweathermap')
 const NASA = require('../services/NASA')
 const WeatherAlertsService = require('../services/weatherMet')
 const LogError = require('../functions/errorLog')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 const seasons = {
     'early autumn': { name: 'Kora ősz', icon: '🍂' },
@@ -590,8 +593,8 @@ function getEmbedMars(data, weeklyImage) {
     var averagePressure = 0
     try {
         var text = ""
-        if (fs.existsSync('./pressures.txt')) {
-            text = fs.readFileSync('./pressures.txt', 'utf-8')
+        if (fs.existsSync(Path.join(CONFIG.paths.base, './pressures.txt'))) {
+            text = fs.readFileSync(Path.join(CONFIG.paths.base, './pressures.txt'), 'utf-8')
         }
         var lines = text.split('\n')
         var solsLogged = []
@@ -606,7 +609,7 @@ function getEmbedMars(data, weeklyImage) {
                 solsLogged.push(sol.sol)
             }
         })
-        fs.writeFileSync('./pressures.txt', text, 'utf-8')
+        fs.writeFileSync(Path.join(CONFIG.paths.base, './pressures.txt'), text, 'utf-8')
         var lines = text.split('\n')
         var n = 0
         lines.forEach(line => {

@@ -1,13 +1,16 @@
 const fs = require('fs')
+const Path = require('path')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
 
 /** @param {{hashes:{id:string;hash:string;}[];}} hashes */
 function SaveHash(hashes) {
     var rawData = JSON.stringify(hashes)
-    fs.writeFileSync('user-hash.json', rawData, { encoding: 'utf-8' })
+    fs.writeFileSync(Path.join(CONFIG.paths.base, 'user-hash.json'), rawData, { encoding: 'utf-8' })
 }
 
 function LoadHash() {
-    var rawData = fs.readFileSync('user-hash.json', { encoding: 'utf-8' })
+    var rawData = fs.readFileSync(Path.join(CONFIG.paths.base, 'user-hash.json'), { encoding: 'utf-8' })
     /** @type {{hashes:{id:string;hash:string;}[];}} */
     var data = JSON.parse(rawData)
     return data

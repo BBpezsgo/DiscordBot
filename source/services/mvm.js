@@ -1,6 +1,9 @@
 const https = require('https')
 const fs = require('fs')
 const jsdom = require('jsdom')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 function ParseData(text) {
     const c = new jsdom.JSDOM(text)
@@ -51,10 +54,10 @@ function Get(authValues = null) {
     ]*/
     console.log('MVM Get')
     return new Promise(((callback) => {
-        if (!fs.existsSync('./cache/mvm/')) { fs.mkdirSync('./cache/mvm/', { recursive: true }) }
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/mvm/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/mvm/'), { recursive: true }) }
         if (false) {
-            if (fs.existsSync('./cache/mvm/mvm.json')) {
-                callback(JSON.parse(fs.readFileSync('./cache/mvm/mvm.json', { encoding: 'utf-8' })))
+            if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/mvm/mvm.json'))) {
+                callback(JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/mvm/mvm.json'), { encoding: 'utf-8' })))
                 return
             }
         }
@@ -99,9 +102,9 @@ function Get(authValues = null) {
                 data += chunk.toString()
             })
             res.on('end', async () => {
-                // fs.writeFileSync('./cache/mvm/raw.html', data, 'utf-8')
-                // fs.writeFileSync('./cache/mvm/raw.json', JSON.stringify(data), 'utf-8')
-                // fs.writeFileSync('./cache/mvm/res.json', JSON.stringify(res.headers), 'utf-8')
+                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/raw.html'), data, 'utf-8')
+                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/raw.json'), JSON.stringify(data), 'utf-8')
+                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/res.json'), JSON.stringify(res.headers), 'utf-8')
 
                 if (data === authRequiredRes) {
                     if (authValues !== null) {
@@ -127,7 +130,7 @@ function Get(authValues = null) {
                 const dom = new jsdom.JSDOM(data)
                 const a = dom.window.document.body.firstElementChild.firstElementChild.childNodes[2].innerHTML
                 const parsedData = ParseData(a)
-                fs.writeFileSync('./cache/mvm/data.json', JSON.stringify(parsedData, null, ' '), 'utf-8')
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/data.json'), JSON.stringify(parsedData, null, ' '), 'utf-8')
                 callback(parsedData)
             })
         })
@@ -144,7 +147,7 @@ function Get(authValues = null) {
 function Authorize() {
     console.log('MVM Auth')
     return new Promise(((callback) => {
-        if (!fs.existsSync('./cache/mvm/')) { fs.mkdirSync('./cache/mvm/') }
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/mvm/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/mvm/')) }
         
         const req = https.request({
             host: 'www.mvmnext.hu',
@@ -159,9 +162,9 @@ function Authorize() {
                 data += chunk.toString()
             })
             res.on('end', () => {
-                // fs.writeFileSync('./cache/mvm/auth-raw.html', data, 'utf-8')
-                // fs.writeFileSync('./cache/mvm/auth-raw.json', JSON.stringify(data), 'utf-8')
-                // fs.writeFileSync('./cache/mvm/auth-cookies.json', JSON.stringify(res.headers['set-cookie']), 'utf-8')
+                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/auth-raw.html'), data, 'utf-8')
+                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/auth-raw.json'), JSON.stringify(data), 'utf-8')
+                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/auth-cookies.json'), JSON.stringify(res.headers['set-cookie']), 'utf-8')
                 const dom = new jsdom.JSDOM(data)
                 const viewState = dom.window.document.getElementById('j_id1:javax.faces.ViewState:0').value
                 const setCookie = res.headers['set-cookie']

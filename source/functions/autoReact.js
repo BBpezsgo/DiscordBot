@@ -1,8 +1,11 @@
 const { Message } = require('discord.js')
 const fs = require('fs')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 /** @param {Message} message */
- function AutoReact(message) {
+function AutoReact(message) {
     try {
         var isHaveMusic = false
         if (message.content.includes('https://youtu.be/') === true) { isHaveMusic = true }
@@ -12,7 +15,7 @@ const fs = require('fs')
 
         if (isHaveMusic === false) { return }
 
-        const settingsRaw = fs.readFileSync('./settings.json')
+        const settingsRaw = fs.readFileSync(Path.join(CONFIG.paths.base, './settings.json'))
         const settings = JSON.parse(settingsRaw)
         const channelSettings = settings.channelSettings
         const messageChannelId = message.channel.id

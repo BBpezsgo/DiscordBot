@@ -1,6 +1,9 @@
 const tokens = require('../config.json').tokens
 const fs = require('fs')
 const { CityBekescsaba } = require('../commands/weatherFunctions')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 const URLs = {
     Mars: {
@@ -17,10 +20,10 @@ const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
 
 const NasaMarsWeather = function() {
     return new Promise((resolve, reject) => {
-        if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
         if (ReadFromCache) {
-            if (fs.existsSync('./cache/weather/nasa-mars-weather.json')) {
-                resolve(JSON.parse(fs.readFileSync('./cache/weather/nasa-mars-weather.json', { encoding: 'utf-8' })))
+            if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-weather.json'))) {
+                resolve(JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-weather.json'), { encoding: 'utf-8' })))
                 return
             }
         }
@@ -43,9 +46,9 @@ const NasaMarsWeather = function() {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync('./cache/weather/nasa-mars-weather-headers.txt', headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-weather-headers.txt'), headersText, { encoding: 'utf-8' })
 
-                fs.writeFileSync('./cache/weather/nasa-mars-weather.json', body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-weather.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
         } catch (err) {
@@ -56,10 +59,10 @@ const NasaMarsWeather = function() {
 
 const NasaMarsWeeklyImage = () => {
     return new Promise((resolve, reject) => {
-        if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
         if (ReadFromCache) {
-            if (fs.existsSync('./cache/weather/nasa-mars-image.json')) {
-                resolve(JSON.parse(fs.readFileSync('./cache/weather/nasa-mars-image.json', { encoding: 'utf-8' })))
+            if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-image.json'))) {
+                resolve(JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-image.json'), { encoding: 'utf-8' })))
                 return
             }
         }
@@ -82,9 +85,9 @@ const NasaMarsWeeklyImage = () => {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync('./cache/weather/nasa-mars-image-headers.txt', headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-image-headers.txt'), headersText, { encoding: 'utf-8' })
 
-                fs.writeFileSync('./cache/weather/nasa-mars-image.json', body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-image.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
         } catch (err) {

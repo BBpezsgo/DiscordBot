@@ -3,6 +3,9 @@ const { DatabaseManager } = require('./databaseManager')
 const { FormatError } = require('./formatError')
 const { SystemLog } = require('./systemLog')
 const fs = require('fs')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 /** @param {DatabaseManager} database @param {number} lastDay */
 function Taxation(database, lastDay) {
@@ -19,7 +22,7 @@ function Taxation(database, lastDay) {
                 database.dataBasic[element].money = userMoneyFinal
             } catch (error) {
                 SystemLog('Tax error: ' + error.message)
-                fs.appendFileSync('./node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
+                fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
             }
         }
         // console.log("Mindenki megadózva")

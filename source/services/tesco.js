@@ -3,6 +3,9 @@ const DOM = require('jsdom')
 const fs = require('fs')
 const LogError = require('../functions/errorLog')
 const Types = require('./tesco')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 const ReadFromCache = false
 
@@ -86,8 +89,8 @@ const ProcessData = function(data) {
             }
         }
 
-        if (!fs.existsSync('./cache/tesco/errorLiS/')) { fs.mkdirSync('./cache/tesco/errorLiS/') }
-        fs.writeFileSync('./cache/tesco/errorLiS/' + Date.now() + '.html', i_.outerHTML, 'utf-8')
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/tesco/errorLiS/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/tesco/errorLiS/')) }
+        fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/tesco/errorLiS/' + Date.now() + '.html'), i_.outerHTML, 'utf-8')
 
         result.push({
             url: 'https://bevasarlas.tesco.hu' + url,
@@ -104,10 +107,10 @@ const ProcessData = function(data) {
 
 /** @param {(isCache: boolean, result: string | undefined, error: string | undefined) => void} callback */
 const Download = function(search, callback) {
-    if (!fs.existsSync('./cache/tesco/')) { fs.mkdirSync('./cache/tesco/') }
+    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/tesco/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/tesco/')) }
     if (ReadFromCache) {
-        if (fs.existsSync('./cache/tesco/search-data-' + search + '.html')) {
-            callback(true, fs.readFileSync('./cache/tesco/search-data-' + search + '.html', { encoding: 'utf-8' }))
+        if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/tesco/search-data-' + search + '.html'))) {
+            callback(true, fs.readFileSync(Path.join(CONFIG.paths.base, './cache/tesco/search-data-' + search + '.html'), { encoding: 'utf-8' }))
             return
         }
     }
@@ -141,14 +144,14 @@ const Download = function(search, callback) {
 
     try {            
         const req = https.request(options, function (res) {
-            fs.writeFileSync('./cache/tesco/search-res-' + search + '.json', JSON.stringify({ headers: res.headers }), { encoding: 'utf-8' })
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/tesco/search-res-' + search + '.json'), JSON.stringify({ headers: res.headers }), { encoding: 'utf-8' })
             res.setEncoding('utf8')
             var data = ''
             res.on('data', function (chunk) {
                 data += chunk
             })
             res.on('end', () => {
-                fs.writeFileSync('./cache/tesco/search-data-' + search + '.html', data, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/tesco/search-data-' + search + '.html'), data, { encoding: 'utf-8' })
                 callback(false, data)
             })
             res.on('error', (error) => {
@@ -170,7 +173,7 @@ const Download = function(search, callback) {
     }
 }
 
-// ProcessData(fs.readFileSync('./tesco-cache/search-data-bread.html', { encoding: 'utf-8' }))
+// ProcessData(fs.readFileSync(Path.join(CONFIG.paths.base, './tesco-cache/search-data-bread.html'), { encoding: 'utf-8' }))
 // Download('bread', (result, error) => { if(error){return}; ProcessData(result); })
 
 /** @returns {Types.SearchForPromise} */

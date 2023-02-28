@@ -115,8 +115,7 @@ var menuList = new Array(
     // Process
     "process", 0, 0, str_menu.process,
     // Logs
-    "log-error", 0, 1, str_menu.log,
-    "log-error", 0, 2, str_menu.logErrors,
+    "log-error", 0, 0, str_menu.logErrors,
     // "log-system", 0, 2, str_menu.logSystem,
     // "log-handlebars", 0, 2, str_menu.logHandlebars,
     "---", 0, 0, "---",

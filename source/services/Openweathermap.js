@@ -1,6 +1,8 @@
 const fs = require('fs')
 const request = require("request")
-
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 const Types = require('./Openweathermap')
 const { CityBekescsaba } = require('../commands/weatherFunctions')
 const tokens = require('../config.json').tokens
@@ -16,10 +18,10 @@ const URLs = {
 
 const OpenweathermapForecast = function() {
     return new Promise((resolve, reject) => {
-        if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
         if (ReadFromCache) {
-            if (fs.existsSync('./cache/weather/openweathermap-forecast.json')) {
-                var cacheData = JSON.parse(fs.readFileSync('./cache/weather/openweathermap-forecast.json', { encoding: 'utf-8' }))
+            if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast.json'))) {
+                var cacheData = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast.json'), { encoding: 'utf-8' }))
                 cacheData['fromCache'] = true
                 resolve(cacheData)
                 return
@@ -44,9 +46,9 @@ const OpenweathermapForecast = function() {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync('./cache/weather/openweathermap-forecast-headers.txt', headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast-headers.txt'), headersText, { encoding: 'utf-8' })
 
-                fs.writeFileSync('./cache/weather/openweathermap-forecast.json', body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast.json'), body, { encoding: 'utf-8' })
                 var data = JSON.parse(body)
                 data['fromCache'] = false
                 resolve(data)
@@ -59,13 +61,13 @@ const OpenweathermapForecast = function() {
 
 const OpenweathermapWeather = function() {
     return new Promise((resolve, reject) => {
-        if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
-        if (fs.existsSync('./cache/weather/openweathermap-weather.json')) {
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
+        if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather.json'))) {
             /** @type {Types.OpenWeatherMap.WeatherResult} */
-            var cacheData = JSON.parse(fs.readFileSync('./cache/weather/openweathermap-weather.json', { encoding: 'utf-8' }))
+            var cacheData = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather.json'), { encoding: 'utf-8' }))
             const date = cacheData.dt * 1000
             const diff = Date.now() - date
-            fs.writeFileSync('./cache/weather/openweathermap-weather-date.txt', `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather-date.txt'), `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
             if (diff <= MaxTimeDifference || ReadFromCache) {
                 cacheData['fromCache'] = true
                 resolve(cacheData)
@@ -91,9 +93,9 @@ const OpenweathermapWeather = function() {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync('./cache/weather/openweathermap-weather-headers.txt', headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather-headers.txt'), headersText, { encoding: 'utf-8' })
 
-                fs.writeFileSync('./cache/weather/openweathermap-weather.json', body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather.json'), body, { encoding: 'utf-8' })
                 
                 var data = JSON.parse(body)
                 data['fromCache'] = false
@@ -107,10 +109,10 @@ const OpenweathermapWeather = function() {
 
 const OpenweathermapPollution = function() {
     return new Promise((resolve, reject) => {
-        if (!fs.existsSync('./cache/weather/')) { fs.mkdirSync('./cache/weather/') }
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
         if (ReadFromCache) {
-            if (fs.existsSync('./cache/weather/openweathermap-pollution.json')) {
-                resolve(JSON.parse(fs.readFileSync('./cache/weather/openweathermap-pollution.json', { encoding: 'utf-8' })))
+            if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-pollution.json'))) {
+                resolve(JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-pollution.json'), { encoding: 'utf-8' })))
                 return
             }
         }
@@ -133,9 +135,9 @@ const OpenweathermapPollution = function() {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync('./cache/weather/openweathermap-pollution-headers.txt', headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-pollution-headers.txt'), headersText, { encoding: 'utf-8' })
 
-                fs.writeFileSync('./cache/weather/openweathermap-pollution.json', body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-pollution.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
         } catch (err) {

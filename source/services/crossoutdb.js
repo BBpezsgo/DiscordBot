@@ -1,5 +1,8 @@
 const request = require("request")
 const fs = require('fs')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 /** @param {string} query */
 function SearchFor(query) {
@@ -9,11 +12,11 @@ function SearchFor(query) {
                 reject(error)
                 return
             }
-            if (!fs.existsSync('./cache/crossoutdb/')) { fs.mkdirSync('./cache/crossoutdb/', { recursive: true }) }
+            if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/crossoutdb/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/crossoutdb/'), { recursive: true }) }
             
             const resultList = JSON.parse(body)
 
-            fs.writeFileSync(`./cache/crossoutdb/search-${query}.json`, JSON.stringify(resultList, null, ' '), { encoding: 'utf-8' })
+            fs.writeFileSync(Path.join(CONFIG.paths.base, `./cache/crossoutdb/search-${query}.json`), JSON.stringify(resultList, null, ' '), { encoding: 'utf-8' })
 
             if (!resultList) {
                 resolve(null)

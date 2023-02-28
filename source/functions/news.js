@@ -5,6 +5,9 @@ const { StatesManager } = require('./statesManager')
 const { FormatError } = require('./formatError')
 const { SystemLog } = require('./systemLog')
 const ytdl = require("ytdl-core")
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
+const Path = require('path')
 
 class NewsMessage {
     /**
@@ -273,12 +276,12 @@ class NewsManager {
                     })
                     .catch((error) => {
                         if (this.enableLogs) SystemLog(`[NEWS]: Can't fetch news messages! Reason: ${error}`)
-                        if (this.enableLogs) fs.appendFileSync('../node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
+                        if (this.enableLogs) fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
                     })
             })
             .catch((error) => {
                 if (this.enableLogs) SystemLog(`[NEWS]: Can't fetch news channel! Reason: ${error}`)
-                if (this.enableLogs) fs.appendFileSync('../node.error.log', FormatError(error) + '\n', { encoding: 'utf-8' })
+                if (this.enableLogs) fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
             })
     }
     
@@ -407,10 +410,10 @@ class NewsManager {
     
         const d = new Date(Date.now())
         var id = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${message.id}`
-        if (fs.existsSync('./news-archive/') !== true) {
-            fs.mkdirSync('./news-archive/')
+        if (fs.existsSync(Path.join(CONFIG.paths.base, './news-archive/')) !== true) {
+            fs.mkdirSync(Path.join(CONFIG.paths.base, './news-archive/'))
         }
-        fs.writeFileSync('./news-archive/' + id + '.json', JSON.stringify(data, null, ' '), 'utf-8')
+        fs.writeFileSync(Path.join(CONFIG.paths.base, './news-archive/' + id + '.json'), JSON.stringify(data, null, ' '), 'utf-8')
     }
 }
 
