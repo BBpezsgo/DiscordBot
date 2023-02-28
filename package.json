@@ -8,7 +8,7 @@
     "test": "node ./source/tests/test.js",
     "build": "tsc --project tsconfig.json",
     "start": "npm run build && node --enable-source-maps dist/desktop.js",
-    "start-mobile": "node mobile.js",
+    "start-mobile": "cd source && node mobile.js",
     "start-desktop-startup": "cd source && node desktop.js invisible system",
     "start-desktop-user": "cd source && node desktop.js visible user",
     "start-raspberry": "node ./source/raspberry"
