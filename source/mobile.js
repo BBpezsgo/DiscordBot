@@ -1,5 +1,6 @@
-const LogError = require('./functions/errorLog')
 const fs = require('fs')
+fs.writeFileSync('./aaaaaaaa', __dirname, 'utf8')
+const LogError = require('./functions/errorLog')
 const Path = require('path')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
