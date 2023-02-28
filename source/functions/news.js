@@ -276,12 +276,12 @@ class NewsManager {
                     })
                     .catch((error) => {
                         if (this.enableLogs) SystemLog(`[NEWS]: Can't fetch news messages! Reason: ${error}`)
-                        if (this.enableLogs) fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
+                        if (this.enableLogs) fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
                     })
             })
             .catch((error) => {
                 if (this.enableLogs) SystemLog(`[NEWS]: Can't fetch news channel! Reason: ${error}`)
-                if (this.enableLogs) fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
+                if (this.enableLogs) fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
             })
     }
     

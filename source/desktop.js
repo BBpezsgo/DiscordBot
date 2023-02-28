@@ -8,7 +8,7 @@ const Path = require('path')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
 process.on('uncaughtException', function (err) {
-    fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), 'CRASH\n', { encoding: 'utf-8' })
+    fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), 'CRASH\n', { encoding: 'utf-8' })
     LogError(err)
 })
 

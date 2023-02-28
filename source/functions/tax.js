@@ -22,7 +22,7 @@ function Taxation(database, lastDay) {
                 database.dataBasic[element].money = userMoneyFinal
             } catch (error) {
                 SystemLog('Tax error: ' + error.message)
-                fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
+                fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
             }
         }
         // console.log("Mindenki megadózva")

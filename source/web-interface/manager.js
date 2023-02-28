@@ -159,9 +159,24 @@ class WebInterfaceManager {
             }
 
             const Config = require('../config.json')
-            res.status(200).send({
-                config: Config
-            })
+            res.status(200).send(Config)
+        })
+        
+        this.app.get('/mobile-config.json', (req, res) => {
+            if (req.headers['this-is-forwarded'] === 'bruh') {
+                res.status(401).send('Access denied: only accessible from LAN<br><br>You are trying to access it through my forwarder >:(')
+                return
+            }
+
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+
+            if (ip.startsWith('127.') || ip.startsWith('192.168.1.')) {} else {
+                res.status(401).send('Access denied: only accessible from LAN<br><br>The address ' + ip + ' is not private')
+                return
+            }
+
+            const configRaw = fs.readFileSync(Path.join(CONFIG.paths.base, './mobile-config.json'))
+            res.status(200).send(JSON.parse(configRaw))
         })
         
         this.app.get('*', (req, res) => {
@@ -1306,7 +1321,7 @@ class WebInterfaceManager {
         })
 
         this.app.get('/dcbot/view/log-error.html', (req, res) => {
-            const data = fs.readFileSync(Path.join(CONFIG.paths.base, './node.error.log'), 'utf8')
+            const data = fs.readFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), 'utf8')
             const lines = data.split('\n')
 
             var linesProcessed = []
@@ -1593,7 +1608,7 @@ class WebInterfaceManager {
         })
 
         this.app.get('/errors.json', (req, res) => {
-            const data = fs.readFileSync(Path.join(CONFIG.paths.base, './node.error.log'), 'utf8')
+            const data = fs.readFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), 'utf8')
             const lines = data.split('\n')
 
             var notificationIcon = 0
@@ -2123,7 +2138,7 @@ class WebInterfaceManager {
         })
 
         this.app.post('/view/Log/Clear', (req, res) => {
-            fs.writeFileSync(Path.join(CONFIG.paths.base, './node.error.log'), '')
+            fs.writeFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), '')
         })
 
         this.app.post('/view/GenerateHash', (req, res) => {

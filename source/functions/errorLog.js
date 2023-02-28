@@ -5,7 +5,7 @@ const CONFIG = require('../config.json')
 const Path = require('path')
 
 function LogError(error) {
-    fs.appendFileSync(Path.join(CONFIG.paths.base, './node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
+    fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
 }
 
 module.exports = LogError
