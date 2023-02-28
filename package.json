@@ -8,9 +8,8 @@
     "test": "node ./source/tests/test.js",
     "build": "tsc --project tsconfig.json",
     "start": "npm run build && node --enable-source-maps dist/desktop.js",
-    "start-mobile": "node ./source/mobile",
-    "start-desktop": "node ./source/desktop",
-    "start-desktop-startup": "node ./source/desktop.js invisible system",
+    "start-mobile": "node mobile.js",
+    "start-desktop-startup": "cd source && node desktop.js invisible system",
     "start-desktop-user": "cd source && node desktop.js visible user",
     "start-raspberry": "node ./source/raspberry"
   },
