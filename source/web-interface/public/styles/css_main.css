@@ -630,6 +630,7 @@ input[type=reset]:active {
 }
 
 input[type=checkbox] {	
+	appearance: none;
 	-webkit-appearance: none;
 	border: 2px solid var(--btn-secondary-border);
 	padding: 9px;
