@@ -25,7 +25,8 @@ const ProcessLogMessage = (log, i = 0) => {
     return logText
 }
 
-const Log = (/** @type {string} */ msg) => {
+/** @param {string | number | object | boolean} msg */
+function Log(msg) {
     if (useDefaultLogSystem) {
         if (typeof msg === 'string') {
             console.log(ProcessLogMessage(msg))
@@ -33,7 +34,7 @@ const Log = (/** @type {string} */ msg) => {
             console.log(msg)
         }
     } else {
-        logs.push(msg)
+        logs.push(msg.toString())
     }
 }
 
