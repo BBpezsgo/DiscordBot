@@ -7,7 +7,7 @@ const useDefaultLogSystem = false
 
 /** @param {string} log */
 const ProcessLogMessage = (log, i = 0) => {
-    var logText = log
+    let logText = log
 
     if (useDefaultLogSystem) {
         logText = logText.replace('%SPINNER%', ' ')
@@ -25,7 +25,7 @@ const ProcessLogMessage = (log, i = 0) => {
     return logText
 }
 
-const Log = (msg) => {
+const Log = (/** @type {string} */ msg) => {
     if (useDefaultLogSystem) {
         if (typeof msg === 'string') {
             console.log(ProcessLogMessage(msg))
@@ -59,26 +59,33 @@ const CliColor = {
     FgDefault: '\033[37m'
 }
 
-/**Reprints a line on the console */
+/**
+ * Reprints a line on the console
+ * @param {string | Uint8Array} text
+ */
 const reprint = (text, x = 0, y = 0) => {
     process.stdout.cursorTo(x, y)
-    process.stdout.clearLine()
+    process.stdout.clearLine(0)
     process.stdout.write(text)
     process.stdout.write('\n')
 }
 
+/**
+ * @param {string} char
+ * @param {number} len
+ */
 function chars(char, len) {
-    txt = ""
+    let txt = ""
     for (let i = 0; i < len; i++) {
         txt += char
     }
     return txt
 }
 
-/**@param {number} bytes */
+/** @param {number} bytes */
 function GetDataSize(bytes) {
-    var txt = "bytes"
-    var val = bytes
+    let txt = "bytes"
+    let val = bytes
     if (val > 1024) {
         txt = "Kb"
         val = val / 1024
@@ -100,11 +107,11 @@ function RefreshScreen() {
 
     const window = { width: 40, height: 5 }
 
-    var txt = ''
+    let txt = ''
 
     for (let i = 0; i < logs.length; i++) {
         const log = logs[i]
-        var logText = ProcessLogMessage(log, i)
+        let logText = ProcessLogMessage(log, i)
 
         if (window.width - logText.length > 0) {
             logText += chars(' ', window.width - logText.length)
@@ -180,7 +187,7 @@ const request = https.get(url, function (res) {
     var cur = 0
     if (fs.existsSync('./DiscordBot-Main/full-bytes.json')) { fs.writeFileSync('./full-bytes.json', fs.readFileSync('./DiscordBot-Main/full-bytes.json', { encoding: 'utf-8' }), { encoding: 'utf-8' }) }
     /** @type {number} */
-    const full = JSON.parse(fs.readFileSync('./full-bytes.json'))
+    const full = JSON.parse(fs.readFileSync('./full-bytes.json', "utf-8"))
 
     res.on('data', function (chunk) {
         cur += chunk.length
@@ -258,7 +265,7 @@ function Unzip() {
         RefreshScreen()
     } catch (err) {
         clearInterval(timer)
-        if (fs.readFileSync('./' + fileName) == '404: Not Found') {
+        if (fs.readFileSync('./' + fileName, 'utf-8') == '404: Not Found') {
             Log(`  ${CliColor.FgRed}Reposity not found${CliColor.FgDefault}`)
         } else {
             Log(`  ${err}`)
