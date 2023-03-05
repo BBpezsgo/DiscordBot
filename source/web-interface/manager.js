@@ -1194,10 +1194,14 @@ class WebInterfaceManager {
         //#region GET HTML
 
         this.app.get('/dcbot/BotStatusPanel', (req, res) => {
-            res.render('view/BotStatusPanel', {
+            res.render('view/BotStatusPanel', this.client.user ? {
                 username: this.client.user.username,
                 avatar: this.client.user.avatarURL({ size: 32 }),
                 discriminator: this.client.user.discriminator,
+            } : {
+                username: null,
+                avatar: null,
+                discriminator: '0000',
             })
         })
 
