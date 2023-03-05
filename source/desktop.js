@@ -1959,6 +1959,7 @@ bot.once('ready', async () => {
     const { MarketOnStart } = require('./functions/market')
     const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
     const { TrySendMVMReport } = require('./functions/dailyElectricityReport.js')
+    const DailyExchangeReport = require('./functions/dailyExchangeReport')
     const { activitiesDesktop } = require('./functions/enums.js')
 
     CacheManager.SaveUsers(bot)
@@ -1980,6 +1981,7 @@ bot.once('ready', async () => {
 
     TrySendWeatherReport(statesManager, bot, ChannelId.ProcessedNews)
     TrySendMVMReport(statesManager, bot, ChannelId.ProcessedNews)
+    DailyExchangeReport.TrySendReport(statesManager, bot, ChannelId.ProcessedNews)
 
     MarketOnStart(database)
 
