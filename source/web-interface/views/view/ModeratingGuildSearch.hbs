@@ -31,6 +31,50 @@
             display: inline-block;
             transform: translateY(4px);
         }
+
+        .channel-menuitem:not(.channel-menuitem-selected) .btn-view-channel {
+            opacity: 0%;
+        }
+
+        .channel-menuitem:not(.channel-menuitem-selected):hover .btn-view-channel {
+            opacity: 50%;
+        }
+
+        .btn-view-channel {
+            float: right;
+            background-image: url('/images/settings.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            min-width: 20px !important;
+            background-color: unset !important;
+            opacity: 50%;
+        }
+
+        .btn-view-channel:hover {
+            opacity: 70% !important;
+        }
+
+        .btn-view-channel:active {
+            opacity: 100% !important;
+        }
+
+        .caret::before {
+            content: '>';
+            color: currentColor;
+            display: inline-block;
+            position: relative;
+            top: -2px;
+            left: 4px;
+            font-weight: 1000;
+            transition: transform 200ms;
+            transform-origin: 4px 9px;
+        }
+
+        .caret-down::before {
+            content: '>' !important;
+            transform: rotate(90deg);
+        }
     </style>
 </head>
 
@@ -77,10 +121,10 @@
             </table>
             {{/each}}
             {{#each groups}}
-            <table class="channel-menuitem" onclick="OnCaretClick('{{this.id}}')">
+            <table class="channel-menuitem" style="cursor:unset" onclick="OnCaretClick('{{this.id}}')">
                 <tr>
                     <td style="padding:0 2px;word-break:break-all; width: 16px;">
-                        <div class="caret" id="{{this.id}}"></div>
+                        <div class="caret" style="pointer-events:none;" id="{{this.id}}"></div>
                     </td>
                     <td style="font-size: 14px; font-weight: 600;">
                         {{this.name}}
@@ -90,7 +134,7 @@
                             style="margin: 0;"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
-                            <input type="submit" value="View">
+                            <input type="submit" value="" class="btn-view-channel">
                         </form>
                     </td>
                 </tr>
@@ -127,11 +171,13 @@
         <h1>Moderating</h1>
 
         <div class="container loading-effect">
+            <!--
             <form action="/dcbot/view/Moderating.html/Back" method="post"
                 style="display: inline-block; margin-right: 10px;"
                 onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                 <input type="submit" value="" class="btn-tool btn-tool-back">
             </form>
+            -->
             <h2 style="display: inline-block; transform: translateY(4px);">
                 <span style="color: #aaa">Guild</span>
                 <div class="tooltip" style="transform: translateY(10px);">
@@ -141,6 +187,28 @@
                     </span>
                 </div>
                 {{server.name}}
+                <script>
+                    function FetchThis() {
+                        const guildId = {{server.id}}
+                        const xmlHttp = new XMLHttpRequest()
+                        xmlHttp.onreadystatechange = function() { 
+                            if (xmlHttp.readyState !== 4) return
+                            if (xmlHttp.status === 404) return
+
+                            const res = JSON.parse(xmlHttp.responseText)
+                            if (res.message === 'ok') {
+                                setTimeout(Reload,1000)
+                            } else if (res.rawError !== undefined) {
+                                console.warn(JSON.stringify(res, null, ' '))
+                            } else {
+                                console.warn(res)
+                            }
+                        }
+                        xmlHttp.open('POST', '/Guild/Fetch', true)
+                        xmlHttp.send(null)
+                    }
+                </script>
+                <input type="submit" value="" onclick="this.style.pointerEvents='none';this.style.opacity='20%';FetchThis()" class="btn-fetch">
             </h2>
             <table id="autoWidth" style="width: 598px;">
                 <tbody>

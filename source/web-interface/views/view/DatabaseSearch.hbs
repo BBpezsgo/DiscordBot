@@ -32,11 +32,12 @@
                         <span class="user-menuitem-name" title="Username">{{name}}</span>
                         
                         {{#if haveDatabase}}
-                        <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(-6px); opacity: 50%;">
+                        <img src="/images/database2.svg" width="12" height="12" title="Has a database" alt="Database Icon" style="transform: translateY(-6px); opacity: 50%;">
+                        {{else}}
+                        <img src="/images/err2.png" width="16" height="16" title="Has no database" alt="Error icon" style="transform:translateY(-6px)" class="miniicon">
                         {{/if}}
                     </td>
                     <td>
-                        <img class="show-invert-{{haveDatabase}} miniicon" src="/images/err2.png" width="16" height="16">
                         <form action="/dcbot/view/Database.html/Search" method="post" style="margin: 0; display: inline-block;"
                             onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                             <input type="text" name="id" value="{{id}}" style="display: none;">

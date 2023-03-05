@@ -832,7 +832,7 @@ class WebInterfaceManager {
             users.push({
                 id: cacheUser.id,
                 name: cacheUser.username,
-                avatarUrlSmall: cacheUser.avatarURL({ size: 16 }),
+                avatarUrlSmall: cacheUser.avatarURL({ size: 32 }),
                 avatarUrlLarge: cacheUser.avatarURL({ size: 128 }),
                 haveDatabase: (this.database.dataBasic[cacheUser.id] != undefined)
             })
@@ -1546,6 +1546,18 @@ class WebInterfaceManager {
             res.status(200).send(JSON.stringify({ creatingPercent: this.commandsCreatingPercent }))
         })
 
+        this.app.get('/dcbot/guilds.json', (req, res) => {
+            const guilds = []
+            this.client.guilds.cache.forEach(guild => {
+                guilds.push({
+                    id: guild.id,
+                    iconUrl: guild.iconURL({ size: 64 }),
+                    name: guild.name,
+                })
+            })
+            res.status(200).send(JSON.stringify(guilds))
+        })
+
         const GetTitle = () => {
             var icon = ''
 
@@ -1622,42 +1634,30 @@ class WebInterfaceManager {
                 if (line.length < 2) { continue }
                 
                 if (line == 'CRASH') {
-                    if (notificationIcon < 4)
-                    { notificationIcon = 4 }
+                    if (notificationIcon < 4) notificationIcon = 4
                     break
                 } else if (line.startsWith('Error: ')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
+                    if (notificationIcon < 3) notificationIcon = 3
                 } else if (line.startsWith('DiscordAPIError[')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
+                    if (notificationIcon < 3) notificationIcon = 3
                 } else if (line.startsWith('Error [')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
+                    if (notificationIcon < 3) notificationIcon = 3
                 } else if (line.startsWith('TypeError: ')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
+                    if (notificationIcon < 3) notificationIcon = 3
                 } else if (line.startsWith('ReferenceError: ')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
+                    if (notificationIcon < 3) notificationIcon = 3
                 } else if (line.startsWith('DiscordAPIError: ')) {
-                    if (notificationIcon < 3)
-                    { notificationIcon = 3 }
+                    if (notificationIcon < 3) notificationIcon = 3
                 } else if (line.startsWith('    at ')) {
-                    if (notificationIcon < 1)
-                    { notificationIcon = 1 }
+                    if (notificationIcon < 1) notificationIcon = 1
                 } else if (line.includes(' DeprecationWarning:')) {
-                    if (notificationIcon < 2)
-                    { notificationIcon = 2 }
+                    if (notificationIcon < 2) notificationIcon = 2
                 } else if (line.includes(' ExperimentalWarning:')) {
-                    if (notificationIcon < 2)
-                    { notificationIcon = 2 }
+                    if (notificationIcon < 2) notificationIcon = 2
                 } else if (line == '(Use `node --trace-deprecation ...` to show where the warning was created)') {
-                    if (notificationIcon < 1)
-                    { notificationIcon = 1 }    
+                    if (notificationIcon < 1) notificationIcon = 1
                 } else {
-                    if (notificationIcon < 1)
-                    { notificationIcon = 1 }
+                    if (notificationIcon < 1) notificationIcon = 1
                 }
             }
 
@@ -2001,6 +2001,18 @@ class WebInterfaceManager {
 
         this.app.post('/dcbot/view/Moderating.html/Search', (req, res) => {
             const serverId = req.body.id
+
+            if (this.client.guilds.cache.has(serverId)) {
+                this.moderatingSearchedServerId = serverId
+
+                this.RenderPage_ModeratingGuildSearch(req, res, '')
+            } else {
+                this.RenderPage_ModeratingSearch(req, res, 'Server not found')
+            }
+        })
+
+        this.app.get('/dcbot/view/Moderating.html/Search', (req, res) => {
+            const serverId = req.query.id
 
             if (this.client.guilds.cache.has(serverId)) {
                 this.moderatingSearchedServerId = serverId

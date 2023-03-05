@@ -8,7 +8,7 @@
     "test": "node ./source/tests/test.js",
     "build": "tsc --project tsconfig.json",
     "desktop": "npm run build && node --enable-source-maps dist/desktop.js",
-    "mobile":  "npm run build && node --enable-source-maps dist/mobile.js",
+    "mobile": "npm run build && node --enable-source-maps dist/mobile.js",
     "start-mobile": "cd source && node mobile.js",
     "start-desktop-startup": "cd source && node desktop.js invisible system",
     "start-desktop-user": "cd source && node desktop.js visible user",
@@ -38,6 +38,8 @@
     "ytdl-core": "^4.11.2"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.2",
+    "@types/express": "^4.17.17",
     "@types/node": "^18.13.0",
     "typescript": "^4.9.5"
   }

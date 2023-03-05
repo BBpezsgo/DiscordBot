@@ -24,6 +24,7 @@
     <style>
         html, body {
             background-color: #1e1f22;
+            user-select: none;
         }
 
         body {
@@ -92,7 +93,6 @@
             menuDisplay()
         </script>
     </menu>
-</body>
 
     <script>
         var GetDataPending = false
@@ -112,17 +112,23 @@
                         const statusIconError = statusIconErrors.item(i)
                         if (res === 0) {
                             statusIconError.style.opacity = '0%'
+                        statusIconError.title = ''
                         } else if (res === 1) {
-                            statusIconError.style.opacity = '0%'
-                        } else if (res === 2) {                            
+                            statusIconError.style.backgroundColor = '#888888'
+                            statusIconError.style.opacity = '100%'
+                            statusIconError.title = 'Level: Other'
+                        } else if (res === 2) {
                             statusIconError.style.backgroundColor = '#ffcd19'
                             statusIconError.style.opacity = '100%'
+                            statusIconError.title = 'Level: Warning'
                         } else if (res === 3) {                            
                             statusIconError.style.backgroundColor = '#eb8100'
                             statusIconError.style.opacity = '100%'
+                            statusIconError.title = 'Level: Error'
                         } else if (res === 4) {                            
                             statusIconError.style.backgroundColor = '#b82b00'
                             statusIconError.style.opacity = '100%'
+                            statusIconError.title = 'Level: Crash'
                         }
                     }
                 }
@@ -156,5 +162,6 @@
             button.appendChild(circle);
         }
     </script>
+</body>
 
 </html>

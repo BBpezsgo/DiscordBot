@@ -103,7 +103,7 @@ const MenuList = [
     }
 ]
 
-var menuList = new Array(
+const menuList = new Array(
     //	url							display	level			string
     //	url:	url to visite when click on this menu item. it's not full path, but only filename.
     //		if it's not null, must be one and only; else if it's null, that means it has branches, and the actual url is the one of its first visitable branches.
@@ -131,7 +131,7 @@ var menuList = new Array(
     "application", 0, 2, str_menu.application,
     "application-commands", 0, 2, str_menu.commands,
     // Moderating
-    "moderating", 0, 0, str_menu.moderating,
+    // "moderating", 0, 0, str_menu.moderating,
 
     "---", 0, 0, "---",
 
@@ -142,9 +142,17 @@ var menuList = new Array(
 
     // Testing
     // "testing", 0, 0, str_menu.testing,
-);
+)
 
-var map = new Array();
+/** @param {(result: { id: string, iconUrl: string, name: string }[]) => void} callback */
+function GetGuilds(callback) {
+    var xmlHttp =  new XMLHttpRequest()
+    xmlHttp.open('GET', '/dcbot/guilds.json')
+    xmlHttp.onloadend = (e) => { if (xmlHttp.status == 200) callback(JSON.parse(xmlHttp.responseText)) }
+    xmlHttp.send(null)
+}
+
+var map = new Array()
 
 function menuInit() {
     for (var n = 0; n < menuList.length; n += 4) {
@@ -178,8 +186,7 @@ function menuDisplay() {
         if (menuList[n + 2] == 0) {
             className = "dot1";
             display = "block";
-        }
-        else if ((menuList[n + 2] > 0) && (menuList[n + 4 + 2] > menuList[n + 2])) {
+        } else if ((menuList[n + 2] > 0) && (menuList[n + 4 + 2] > menuList[n + 2])) {
             className = "plus";
             if (menuList[n + 2] == 1) {
                 display = "block";
@@ -187,8 +194,7 @@ function menuDisplay() {
             else {
                 display = "none";
             }
-        }
-        else {
+        } else {
             className = "dot2";
             display = "none";
         }
@@ -227,7 +233,7 @@ function menuDisplay() {
                 const target = e.target
                 doClick(Number.parseInt(target.getAttribute('data').split('-')[0]), Number.parseInt(menuList[target.getAttribute('data').split('-')[1]]))
             }
-            // newA.innerText = menuList[n + 3]
+            newOL.title = menuList[n + 3]
             newOL.appendChild(newA)
 
             if (menuList[n] === 'log-error') {
@@ -244,18 +250,52 @@ function menuDisplay() {
         i++;
     }
 
+    GetGuilds(guilds => {
+        if (guilds.length > 0) {
+            const newOL = document.createElement('hr')
+            newOL.id = `hr${i}`
+            document.getElementsByTagName('menu')[0].appendChild(newOL)
+        }
+        guilds.forEach(guild => {
+            const newOL = document.createElement('ol')
+            newOL.id = `guild-ol${guild.id}`
+            newOL.className = 'dot1'
+            newOL.style.display = 'block'
+            newOL.style.backgroundImage = 'url(\'' + guild.iconUrl + '\')'
+            newOL.style.backgroundPosition = 'center'
+            newOL.style.backgroundSize = 'cover'
+            newOL.onclick = (e) => {
+                newA.click()
+            }
+            document.getElementsByTagName('menu')[0].appendChild(newOL)
+        
+            const newA = document.createElement('a')
+            newA.id = `guild-a${guild.id}`
+            newA.href = `/dcbot/view/Moderating.html/Search?id=${guild.id}`
+            newA.target = 'mainFrame'
+            newA.className = 'L1'
+            newA.setAttribute('data', `guild-${guild.id}`)
+            newA.onclick = (e) => {
+                collapseAll()
+                UnselectAll()
 
+                /** @type {HTMLAnchorElement} */
+                const target = e.target
+                const guild = target.getAttribute('data').split('-')[1]
+                document.getElementById('guild-ol' + guild).classList.add('selected')
+            }
+            newOL.title = guild.name
+            newOL.appendChild(newA)
+        })
+    })
 }
 
 
 function UnselectAll() {
-    const l = menuList.length / 4 // document.getElementsByTagName('ol').length
-    for (var i = 0; i < l; i++) {
-        try {
-            document.getElementById('ol' + i).classList.remove('selected')
-        } catch (ex) {
-            continue
-        }
+    const elements = document.getElementsByClassName('selected')
+    for (let i = 0; i < elements.length; i++) {
+        const element = elements.item(i)
+        element.classList.remove('selected')
     }
 }
 
