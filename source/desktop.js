@@ -44,7 +44,7 @@ process.__defineGetter__('stderr', function() { return fs.createWriteStream(Path
 
 var botStopped = false
 
-process.stdin.on('mousepress', function (info) {})
+process.stdin.on('mousepress', function (info) { })
 
 process.stdin.resume()
 
@@ -77,7 +77,6 @@ process.stdin.on('data', function (b) {
         key.button = null
         key.sequence = s
         key.buf = Buffer(key.sequence)
-
         if ((modifier & 96) === 96) {
             key.name = 'scroll'
             key.button = modifier & 1 ? 'down' : 'up'
@@ -91,10 +90,7 @@ process.stdin.on('data', function (b) {
                 default: return;
             }
         }
-        console.error(key)
-    } else {
-        // console.error(0, s, b)
-    }
+    } else { }
 })
 
 // Enable "raw mode"
@@ -103,7 +99,7 @@ if (process.stdin.setRawMode) {
 } else {
     const tty = require('tty')
     if (tty.setRawMode)
-    { tty.setRawMode(true) }    
+    { tty.setRawMode(true) }
 }
 
 // Enable "mouse reporting"
@@ -123,7 +119,6 @@ process.on('exit', function (code) {
 logManager.scriptLoadingText = 'Loading script... (loading npm packages)'
 
 //#region NPM Packages and variables
-
 
 
 
@@ -181,9 +176,9 @@ const {
     getMapPoint
 } = require('./commands/game')
 
-logManager.Loading("Loading extensions", 'translator')
+logManager.Loading("Loading extensions", 'Debug translator')
 const { TranslateMessage } = require('./functions/translator.js')
-logManager.Loading("Loading extensions", 'statesManager')
+logManager.Loading("Loading extensions", 'StatesManager')
 const { StatesManager } = require('./functions/statesManager.js')
 logManager.Loading("Loading extensions", 'DatabaseManager')
 const { DatabaseManager } = require('./functions/databaseManager.js')
@@ -210,6 +205,11 @@ const {
     Color,
     ChannelId,
     CliColor
+
+
+
+
+    
 } = require('./functions/enums.js')
 const { CommandHangman, HangmanManager } = require('./commands/hangman.js')
 

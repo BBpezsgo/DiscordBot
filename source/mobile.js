@@ -1,5 +1,9 @@
-const fs = require('fs')
+console.log('The script is executing!')
+
+
+
 const LogError = require('./functions/errorLog')
+const fs = require('fs')
 const Path = require('path')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
@@ -34,9 +38,11 @@ function Log(message, messageType = 'NORMAL') {
     logManager.LogMessage({ message: message, messageType })
 }
 
+logManager.scriptLoadingText = 'Loading script... (set process things)'
+
 process.__defineGetter__('stderr', function() { return fs.createWriteStream(Path.join(CONFIG.paths.base, 'node.error.log'), {flags:'a'}) })
 
-
+var botStopped = false
 
 process.stdin.on('mousepress', function (info) { })
 
@@ -48,12 +54,17 @@ process.stdin.on('data', function (b) {
     logManager.OnKeyDown(s)
 
     if (s === '\u0003') {
-        process.stdin.pause()
-        StopBot()
-        log(DONE + ': A BOT leállítva!')
+        if (botStopped == true) {
+
+            SystemStop()
+            process.stdin.pause()
+            setTimeout(() => { process.exit() }, 500)
+        } else {
+
+            StopBot()
+        }
     } else if (/^\u001b\[M/.test(s)) {
         // mouse event
-        // console.error('s.length:', s.length)
         // reuse the key array albeit its name
         // otherwise recompute as the mouse event is structured differently
         var modifier = s.charCodeAt(3)
@@ -86,7 +97,9 @@ process.stdin.on('data', function (b) {
 if (process.stdin.setRawMode) {
     process.stdin.setRawMode(true)
 } else {
-    require('tty').setRawMode(true)
+    const tty = require('tty')
+    if (tty.setRawMode)
+    { tty.setRawMode(true) }
 }
 
 // Enable "mouse reporting"
@@ -102,6 +115,8 @@ process.on('exit', function (code) {
 
 
 })
+
+logManager.scriptLoadingText = 'Loading script... (loading npm packages)'
 
 //#region NPM Packages and variables
 
@@ -140,17 +155,36 @@ const CommandHelp = require('./commands/help')
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 logManager.Loading("Loading extensions", 'Debug translator')
 const { TranslateMessage } = require('./functions/translator.js')
 logManager.Loading("Loading extensions", 'StatesManager')
 const { StatesManager } = require('./functions/statesManager.js')
-
-
-
 logManager.Loading('Loading packet', "ytdl-core")
 const ytdl = require('ytdl-core')
 
-
+logManager.Loading("Loading extensions", "MusicPlayer")
+const MusicPlayer = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
 const WebInterface = require('./web-interface/manager')
@@ -160,15 +194,13 @@ logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')
 const { GatewayIntentBits } = require('discord.js')
 
-logManager.Loading('Loading packet', "config.json")
-const { perfix, tokens } = require('./config.json')
 
-logManager.Loading('Loading packet', "NewsManager")
+
+logManager.Loading('Loading packet', "other functions")
+
+const { DateToString } = require('./functions/dateToString')
 const NewsManager = require('./functions/news')
 
-logManager.Loading('Loading packet', "Other functions")
-const { DateToString } = require('./functions/dateToString')
-const GetAddress = require('./functions/getAddress')
 const {
     INFO,
     ERROR,
@@ -179,11 +211,14 @@ const {
     Color,
     activitiesMobile
 } = require('./functions/enums.js')
-
+logManager.Loading('Loading packet', "config.json")
+const { perfix, tokens } = require('./config.json')
+logManager.scriptLoadingText = 'Loading script... (create Discord client instance)'
 
 logManager.BlankScreen()
 
-
+logManager.Loading('Loading packet', "Other functions")
+const GetAddress = require('./functions/getAddress')
 
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
@@ -197,7 +232,6 @@ const newsManager = new NewsManager(statesManager, false)
 
 statesManager.botLoaded = true
 
-function log() {}
 
 
 
@@ -222,6 +256,14 @@ function log() {}
 
 
 
+
+
+
+
+
+
+
+logManager.scriptLoadingText = 'Loading script... (create WebInterface instance)'
 
 const ws = new WebInterface('1234', GetAddress(), 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'MOBILE')
 logManager.BlankScreen()
@@ -237,11 +279,11 @@ let musicFinished = true
 
 
 
-
-
 //#endregion
 
+logManager.scriptLoadingText = 'Loading script... (define some functions)'
 //#region Functions
+
 /**@param {number} days @returns {number} */
 function DaysToMilliseconds(days) {
     return days * 24 * 60 * 60 * 1000
@@ -252,22 +294,18 @@ function DaysToMilliseconds(days) {
 //#region Listener-ek
 
 bot.on('reconnecting', () => {
-    log(INFO + ': Újracsatlakozás...')
     statesManager.botLoadingState = 'Reconnecting'
 })
 
 bot.on('disconnect', () => {
-    log(ERROR + ': Megszakadt a kapcsolat!')
     statesManager.botLoadingState = 'Disconnect'
 })
 
 bot.on('resume', () => {
-    log(INFO + ': Folytatás')
     statesManager.botLoadingState = 'Resume'
 })
 
 bot.on('error', error => {
-    log(ERROR + ': ' + error)
     statesManager.botLoadingState = 'Error'
 })
 
@@ -280,26 +318,22 @@ bot.on('debug', debug => {
     if (translatedDebug == null) return
 
     if (translatedDebug.secret == true) return
-
-    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
 })
 
 bot.on('warn', warn => {
     Log(warn, 'WARNING')
-    log(WARNING + ': ' + warn)
     statesManager.botLoadingState = 'Warning'
 })
 
 bot.on('shardError', (error, shardID) => {
-    log(ERROR + ': shardError: ' + error)
+
 })
 
 bot.on('invalidated', () => {
-    log(ERROR + ': Érvénytelen')
+
 })
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
-    log(ERROR + ': Lecsatlakozva')
     statesManager.Shard.IsLoading = true
     statesManager.Shard.LoadingText = 'Lecsatlakozva'
 })
@@ -323,36 +357,31 @@ bot.on('shardReconnecting', (shardID) => {
 })
 
 bot.on('shardResume', (shardID, replayedEvents) => {
-    log(SHARD & ': Folytatás: ' + replayedEvents.toString())
     statesManager.Shard.IsLoading = false
 })
 
 bot.on('raw', async event => {
-    log(DEBUG & ': raw')
+
 })
 
 bot.on('close', () => {
-    log(SHARD & ': close')
     statesManager.botLoadingState = 'Close'
 })
 
 bot.on('destroyed', () => {
-    log(SHARD & ': destroyed')
     statesManager.botLoadingState = 'Destroyed'
 })
 
 bot.on('invalidSession', () => {
-    log(SHARD & ': invalidSession')
     statesManager.botLoadingState = 'Invalid Session'
 })
 
 bot.on('allReady', () => {
-    log(SHARD & ': allReady')
     statesManager.botLoadingState = 'All Ready'
 })
 
 bot.on('presenceUpdate', (oldPresence, newPresence) => {
-    log(DEBUG & ': newStatus: ' + newPresence.status.toString())
+    
 })
 
 bot.on('voiceStateUpdate', (voiceStateOld, voiceStateNew) => { })
@@ -754,8 +783,6 @@ bot.once('ready', async () => {
     TrySendWeatherReport(statesManager, bot, '746266528508411935')
     TrySendMVMReport(statesManager, bot, '746266528508411935')
 
-    log(DONE + ': A BOT kész!')
-
     newsManager.OnStart(bot)
     setInterval(() => {
         newsManager.TryProcessNext(bot)
@@ -1050,9 +1077,9 @@ async function processApplicationCommand(command) {
 function StartBot() {
     bot.login(tokens.discord).catch((err) => {
         if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
-            log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
+
         } else {
-            log(ERROR + ': ' + err)
+
         }
     })
 }
