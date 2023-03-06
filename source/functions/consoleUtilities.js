@@ -4,7 +4,7 @@ function Get(s) {
     // reuse the key array albeit its name
     // otherwise recompute as the mouse event is structured differently
     const modifier = s.charCodeAt(3)
-    /** @type {import('./consoleKey').ConsoleKey} */
+    /** @type {import('./consoleUtilities').ConsoleKey} */
     var key = {}
     key.shift = !!(modifier & 4)
     key.meta = !!(modifier & 8)

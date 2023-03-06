@@ -48,7 +48,7 @@ process.stdin.on('mousepress', function (info) { })
 
 process.stdin.resume()
 
-const ConsoleUtilities = require('./functions/consoleKey')
+const ConsoleUtilities = require('./functions/consoleUtilities')
 process.stdin.on('data', function (b) {
     const s = b.toString('utf8')
     
