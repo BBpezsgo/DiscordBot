@@ -48,8 +48,9 @@ process.stdin.on('mousepress', function (info) { })
 
 process.stdin.resume()
 
+const ConsoleUtilities = require('./functions/consoleKey')
 process.stdin.on('data', function (b) {
-    var s = b.toString('utf8')
+    const s = b.toString('utf8')
     
     logManager.OnKeyDown(s)
 
@@ -63,33 +64,8 @@ process.stdin.on('data', function (b) {
 
             StopBot()
         }
-    } else if (/^\u001b\[M/.test(s)) {
-        // mouse event
-        // reuse the key array albeit its name
-        // otherwise recompute as the mouse event is structured differently
-        var modifier = s.charCodeAt(3)
-        var key = {}
-        key.shift = !!(modifier & 4)
-        key.meta = !!(modifier & 8)
-        key.ctrl = !!(modifier & 16)
-        key.x = s.charCodeAt(4) - 32
-        key.y = s.charCodeAt(5) - 32
-        key.button = null
-        key.sequence = s
-        key.buf = Buffer(key.sequence)
-        if ((modifier & 96) === 96) {
-            key.name = 'scroll'
-            key.button = modifier & 1 ? 'down' : 'up'
-        } else {
-            key.name = modifier & 64 ? 'move' : 'click'
-            switch (modifier & 3) {
-                case 0: key.button = 'left'; break;
-                case 1: key.button = 'middle'; break;
-                case 2: key.button = 'right'; break;
-                case 3: key.button = 'none'; break;
-                default: return;
-            }
-        }
+    } else if (ConsoleUtilities.IsMouse(s)) {
+        const key = ConsoleUtilities.Get(s)
     } else { }
 })
 
@@ -202,14 +178,9 @@ const { DateToString } = require('./functions/dateToString')
 const NewsManager = require('./functions/news')
 
 const {
-    INFO,
-    ERROR,
-    WARNING,
-    SHARD,
-    DEBUG,
-    DONE,
     Color,
     activitiesMobile
+
 } = require('./functions/enums.js')
 logManager.Loading('Loading packet', "config.json")
 const { perfix, tokens } = require('./config.json')
