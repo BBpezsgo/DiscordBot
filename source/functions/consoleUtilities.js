@@ -35,4 +35,4 @@ function IsMouse(raw) {
     return /^\u001b\[M/.test(raw)
 }
 
-module.exports = { Create }
+module.exports = { Get, IsMouse }
