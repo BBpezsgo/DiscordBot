@@ -48,13 +48,11 @@ process.stdin.on('mousepress', function (info) { })
 
 process.stdin.resume()
 
-const ConsoleUtilities = require('./functions/consoleUtilities')
-process.stdin.on('data', function (b) {
-    const s = b.toString('utf8')
-    
-    logManager.OnKeyDown(s)
+const ConsoleUtilities = new (require('./functions/consoleUtilities')).ConsoleUtilities()
+ConsoleUtilities.on('onKeyDown', key => {
+    logManager.OnKeyDown(key)
 
-    if (s === '\u0003') {
+    if (key === '\u0003') {
         if (botStopped == true) {
             SystemLog('Exit by user (terminal)')
             SystemStop()
@@ -64,10 +62,9 @@ process.stdin.on('data', function (b) {
             SystemLog('Destroy bot by user (terminal)')
             StopBot()
         }
-    } else if (ConsoleUtilities.IsMouse(s)) {
-        const key = ConsoleUtilities.Get(s)
-    } else { }
+    }
 })
+ConsoleUtilities.Listen()
 
 // Enable "raw mode"
 if (process.stdin.setRawMode) {

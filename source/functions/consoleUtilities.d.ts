@@ -1,4 +1,6 @@
-export type ConsoleKey = {
+import EventEmitter from "events"
+
+export type ConsoleMouse = {
     shift: boolean
     meta: boolean
     ctrl: boolean
@@ -10,5 +12,12 @@ export type ConsoleKey = {
     name: 'scroll' | 'move' | 'click'
 }
 
-export function Get(raw: string): ConsoleKey
-export function IsMouse(raw: string): boolean
+export interface ConsoleUtilities {
+    on(event: 'onKeyDown', listener: (key: string) => void): this
+    on(event: 'onMouse', listener: (mouse: ConsoleMouse) => void): this
+    on(event: string, listener: () => void): this
+}
+
+export class ConsoleUtilities extends EventEmitter {
+    Listen(): void
+}
