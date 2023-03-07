@@ -65,24 +65,10 @@ ConsoleUtilities.on('onKeyDown', key => {
     }
 })
 ConsoleUtilities.Listen()
-
-// Enable "raw mode"
-if (process.stdin.setRawMode) {
-    process.stdin.setRawMode(true)
-} else {
-    const tty = require('tty')
-    if (tty.setRawMode)
-    { tty.setRawMode(true) }
-}
-
-// Enable "mouse reporting"
-process.stdout.write('\x1b[?1005h')
-process.stdout.write('\x1b[?1003h')
+ConsoleUtilities.EnableMouse()
 
 process.on('exit', function (code) {
-    // Turn off mouse reporting
-    process.stdout.write('\x1b[?1005l')
-    process.stdout.write('\x1b[?1003l')
+    ConsoleUtilities.DisableMouse()
     console.log('Exit with code ' + code)
 
     SystemLog('Exited with code ' + code)
@@ -106,6 +92,10 @@ logManager.Loading("Loading commands", 'database/market')
 const CommandMarket = require('./commands/database/market')
 logManager.Loading("Loading commands", 'database/settings')
 const CommandSettings = require('./commands/settings')
+logManager.Loading("Loading commands", 'quiz')
+const QuizManager = require('./commands/quiz')
+logManager.Loading("Loading commands", 'poll')
+const PollManager = require('./commands/poll')
 
 logManager.Loading("Loading extensions", 'database/xpFunctions')
 const { xpRankIcon, xpRankText, calculateAddXp } = require('./commands/database/xpFunctions')
@@ -653,178 +643,6 @@ function commandAllCrate(sender, ammount, privateCommand) {
     }
 }
 
-/**@param {number} days @returns {number} */
-function DaysToMilliseconds(days) {
-    return days * 24 * 60 * 60 * 1000
-}
-
-/**
- * @param {Discord.MessageAttachment} image
- * @param {string} titleText
- * @param {string} listOfOptionText
- * @param {string} listOfOptionEmojis
- */
-async function quiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image = undefined) {
-    const optionEmojis = listOfOptionEmojis.toString().split(';')
-    const optionTexts = listOfOptionText.toString().split(';')
-    let optionText = ''
-    for (let i = 0; i < optionTexts.length; i++) {
-        optionText += `> ${optionEmojis[i]}  ${optionTexts[i].trim()}\n`
-    }
-
-    const dateNow = Date.now() + DaysToMilliseconds(2)
-
-    const embed = new Discord.EmbedBuilder()
-        .setColor(Color.Pink)
-        .setTitle('Quiz!')
-        .setDescription(
-            `\\✔️  **${addXpValue}\\🍺** és **${addToken}\\🎫**\n` +
-            `\\❌ **-${removeXpValue}\\🍺** és **-${removeToken}\\🎫**\n` +
-            `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
-        )
-        .addFields([{
-            name: titleText,
-            value: optionText
-        }])
-        .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
-        .setFooter({ text: "Vége:" })
-        .setTimestamp(dateNow)
-    if (image != undefined) {
-        embed.setImage(image.url)
-    }
-
-    /** @type {Discord.GuildTextBasedChannel | undefined} */
-    const quizChannel = bot.channels.cache.get(ChannelId.Quiz)
-    const sentQuiz = await quizChannel.send({ embeds: [embed] })
-    if (sentQuiz) {
-        await sentQuiz.react('🎯')
-        for (let i = 0; i < optionEmojis.length; i++) {
-            if (optionEmojis[i].includes('<')) {
-                await sentQuiz.react(optionEmojis[i].split(':')[2].replace('>', ''))
-            } else {
-                await sentQuiz.react(optionEmojis[i])
-            }
-        }  
-        await quizChannel.send('> <@&799342836931231775>')      
-    }
-}
-
-/**
-* @param {string} titleText
-* @param {string} listOfOptionText
-* @param {string} listOfOptionEmojis
-* @param {boolean} wouldYouRather
-*/
-function poll(titleText, listOfOptionText, listOfOptionEmojis, wouldYouRather) {
-    const optionEmojis = listOfOptionEmojis.toString().replace(' ', '').split(';')
-    const optionTexts = listOfOptionText.toString().replace(' ', '').split(';')
-    let optionText = ''
-    if (wouldYouRather) {
-        for (let i = 0; i < optionTexts.length; i++) {
-            optionText += `${optionEmojis[i]}  ${optionTexts[i]}\n`
-            if (i < optionTexts.length - 1) {
-                optionText += `   vagy\n`
-            }
-        }
-    } else {
-        for (let i = 0; i < optionTexts.length; i++) {
-            optionText += `${optionEmojis[i]}  ${optionTexts[i]}\n`
-        }
-    }
-    const embed = new Discord.EmbedBuilder()
-        .setColor(Color.DarkPink)
-        .setTitle('Szavazás!')
-        .addFields([{
-            name: titleText,
-            value: optionText
-        }])
-
-    bot.channels.cache.get('795935090026086410').send({ embeds: [embed] }).then(message => {
-        message.channel.send('> <@&795935996982198272>')
-        for (let i = 0; i < optionEmojis.length; i++) {
-            if (optionEmojis[i].includes('<')) {
-                message.react(optionEmojis[i].split(':')[2].replace('>', ''))
-            } else {
-                message.react(optionEmojis[i])
-            }
-        }
-    })
-
-}
-
-/**@param {Discord.GuildMember} member @returns {boolean} */
-function HasQuizStreakRole(member) {
-    const roles = ['929443006627586078', '929443558040166461', '929443627527180288', '929443673077329961']
-    return member.roles.cache.some(role => roles.includes(role.id))
-}
-
-/**@param {string} quizMessageId @param {number} correctIndex */
-async function quizDone(quizMessageId, correctIndex) {
-
-    /**@type {Discord.TextChannel} */
-    const channel = bot.channels.cache.get(ChannelId.Quiz)
-    channel.messages.fetch({ limit: 10 }).then(async (messages) => {
-        const message = messages.get(quizMessageId)
-        /**@type {string[]} */
-        const answersEmoji = []
-        const variableHAHA = message.embeds[0].fields[0].value.split('\n')
-        variableHAHA.forEach(element => {
-            const gfgfdgdfgdf = element.replace('>', '').trimStart().split(' ')[0]
-            if (gfgfdgdfgdf.includes('🎯')) { } else {
-                answersEmoji.push(gfgfdgdfgdf)
-            }
-        })
-        const correctAnswer = message.embeds[0].fields[0].value.split('\n')[correctIndex].replace('>', '').trimStart()
-        const correctAnswerEmoji = correctAnswer.split(' ')[0]
-        const correctAnswerText = correctAnswer.replace(correctAnswerEmoji, '').trimStart()
-        const awardAdd0 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
-        const awardAdd1 = message.embeds[0].description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
-        const awardRemove0 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
-        const awardRemove1 = message.embeds[0].description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
-
-        message.reactions.resolve('🎯').users.fetch().then(async (userList0) => {
-            /**@type {string[]} */
-            const usersWithCorrectAnswer = []
-            /**@type {string[]} */
-            const usersWithWrongAnswer = []
-            const usersWithMultiplier = userList0.map((user) => user.id)
-
-            const members = bot.guilds.cache.get('737954264386764812').members
-            let finalText = '**A helyes válasz: ' + correctAnswerEmoji + ' ' + correctAnswerText + '**'
-
-            for (let i = 0; i < answersEmoji.length; i++) {
-                const currentAnswerEmoji = answersEmoji[i]
-                await message.reactions.resolve(currentAnswerEmoji).users.fetch().then(async (userList1) => {
-                    const users = userList1.map((user) => user.id)
-                    for (let j = 0; j < users.length; j++) {
-                        const userId = users[j]
-                        if (userId == bot.user.id) { continue }
-
-                        //const members = await bot.guilds.cache.get('737954264386764812').members.fetch({ limit: 20 })
-                        const member = await bot.guilds.cache.get('737954264386764812').members.fetch({ user: userId })
-
-                        if (currentAnswerEmoji == correctAnswerEmoji) {
-                            usersWithCorrectAnswer.push(userId)
-                            if (usersWithMultiplier.includes(userId) && HasQuizStreakRole(member)) {
-                                finalText += '\n> <@!' + userId + '> nyert ' + (parseInt(awardAdd0) * 2) + ' \\\uD83C\uDF7At és ' + (parseInt(awardAdd1) * 2) + ' \\🎫t'
-                            } else {
-                                finalText += '\n> <@!' + userId + '> nyert ' + (awardAdd0) + ' \\\uD83C\uDF7At és ' + (awardAdd1) + ' \\🎫t'
-                            }
-                        } else {
-                            usersWithWrongAnswer.push(userId)
-                            if (usersWithMultiplier.includes(userId) && HasQuizStreakRole(member)) {
-                                finalText += '\n> <@!' + userId + '> veszített ' + (parseInt(awardRemove0) * 2) + ' \\\uD83C\uDF7At és ' + (parseInt(awardRemove1) * 2) + ' \\🎫t'
-                            } else {
-                                finalText += '\n> <@!' + userId + '> veszített ' + (awardRemove0) + ' \\\uD83C\uDF7At és ' + (awardRemove1) + ' \\🎫t'
-                            }
-                        }
-                    }
-                })
-            }
-            bot.channels.cache.get(ChannelId.Quiz).send(finalText)
-        })
-    })
-}
 //#endregion
 
 logManager.scriptLoadingText = 'Loading script... (setup client listeners)'
@@ -2202,9 +2020,9 @@ async function processCommand(message, thisIsPrivateMessage, sender, command) {
     if (command.startsWith(`quiz\n`)) {
         const msgArgs = command.toString().replace(`quiz\n`, '').split('\n')
         if (message.attachments.size == 1) {
-            quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6], message.attachments.first())
+            QuizManager.Quiz(bot, msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6], message.attachments.first())
         } else {
-            quiz(msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
+            QuizManager.Quiz(bot, msgArgs[0], msgArgs[1], msgArgs[2], msgArgs[3], msgArgs[4], msgArgs[5], msgArgs[6])
         }
         database.UserstatsSendCommand(sender)
         return
@@ -2239,21 +2057,21 @@ async function processCommand(message, thisIsPrivateMessage, sender, command) {
     }
 
     if (command.startsWith(`quizdone `)) {
-        quizDone(command.replace(`quizdone `, '').split(' ')[0], command.replace(`quizdone `, '').split(' ')[1])
+        QuizManager.QuizDone(bot, command.replace(`quizdone `, '').split(' ')[0], command.replace(`quizdone `, '').split(' ')[1])
         database.UserstatsSendCommand(sender)
         return
     }
 
     if (command.startsWith(`poll simple\n`)) {
         const msgArgs = command.toString().replace(`poll simple\n`, '').split('\n')
-        poll(msgArgs[0], msgArgs[1], msgArgs[2], false)
+        PollManager.poll(bot, msgArgs[0], msgArgs[1], msgArgs[2], false)
         database.UserstatsSendCommand(sender)
         return
     }
 
     if (command.startsWith(`poll wyr\n`)) {
         const msgArgs = command.toString().replace(`poll wyr\n`, '').split('\n')
-        poll(msgArgs[0], msgArgs[1], msgArgs[2], true)
+        PollManager.poll(bot, msgArgs[0], msgArgs[1], msgArgs[2], true)
         database.UserstatsSendCommand(sender)
         return
     }
@@ -2582,7 +2400,7 @@ async function processApplicationCommand(command, privateCommand) {
         bot.channels.fetch(ChannelId.Quiz)
             .then(async () => {
                 try {
-                    quiz(command.options.getString("title"), command.options.getString("options"), command.options.getString("option_emojis"), command.options.getInteger("add_xp"), command.options.getInteger("remove_xp"), command.options.getInteger("add_token"), command.options.getInteger("remove_token"))
+                    QuizManager.Quiz(bot, command.options.getString("title"), command.options.getString("options"), command.options.getString("option_emojis"), command.options.getInteger("add_xp"), command.options.getInteger("remove_xp"), command.options.getInteger("add_token"), command.options.getInteger("remove_token"))
                         .then(() => {
                             command.editReply({ content: '> \\✔️ **Kész**', ephemeral: true })
                         })

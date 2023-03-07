@@ -20,4 +20,8 @@ export interface ConsoleUtilities {
 
 export class ConsoleUtilities extends EventEmitter {
     Listen(): void
+    /** Enables "mouse reporting" */
+    EnableMouse(): void
+    /** Disables "mouse reporting" */
+    DisableMouse(): void
 }

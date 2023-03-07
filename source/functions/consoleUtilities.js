@@ -59,6 +59,25 @@ class ConsoleUtilities extends EventEmitter {
 
             this.emit('onKeyDown', s)
         })
+
+        // Enable "raw mode"
+        if (process.stdin.setRawMode) {
+            process.stdin.setRawMode(true)
+        } else {
+            const tty = require('tty')
+            if (tty.setRawMode)
+            { tty.setRawMode(true) }
+        }
+    }
+
+    EnableMouse() {
+        process.stdout.write('\x1b[?1005h')
+        process.stdout.write('\x1b[?1003h')
+    }
+
+    DisableMouse() {
+        process.stdout.write('\x1b[?1005l')
+        process.stdout.write('\x1b[?1003l')
     }
 }
 
