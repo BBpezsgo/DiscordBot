@@ -106,7 +106,7 @@ async function TrySendReport(statesManager, client, channelID) {
 
     if (oldReport === null || oldReport === undefined) {
         await SendReport(channel, statesManager)
-    } else {
+    } else if (new Date(oldReport.createdTimestamp).getDate() != new Date(Date.now()).getDate()) {
         statesManager.ExchangeReport.Text = 'Delete old Exchange report message...'
         await oldReport.delete()
         await SendReport(channel, statesManager)
