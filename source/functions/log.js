@@ -415,7 +415,9 @@ class LogManager {
                     (this.statesManager.Commands.All != this.statesManager.Commands.Created) ||
                     (this.statesManager.Ytdl.IsLoading == true) ||
                     (this.newsLoadingTextTimeout < 30) ||
-                    (this.statesManager.News.AllProcessed == false)
+                    (this.statesManager.News.AllProcessed == false) ||
+                    (this.statesManager.ExchangeReport.Text.length > 0) ||
+                    (this.statesManager.MVMReport.Text.length > 0)
 
                 if (needPrintThis) {
                     txt += FixedWidth('', window.width) + '\n'
@@ -433,7 +435,7 @@ class LogManager {
                             if (this.statesManager.WeatherReport.Text.length > 0) {
                                 txt += FixedWidth('│' + FixedWidth('Weather report:', 20) + this.statesManager.WeatherReport.Text, window.width) + '\n'
                             } else {
-                                txt += FixedWidth('│' + FixedWidth('Weather report:', 20) + 'Done', window.width) + '\n'
+                                txt += FixedWidth('│' + FixedWidth('Weather report:', 20) + `${CliColor.FgGreen}Done${CliColor.FgWhite}`, window.width) + '\n'
                             }
                         }
                     }
@@ -445,7 +447,7 @@ class LogManager {
                                 txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + this.statesManager.News.LoadingText, window.width) + '\n'
                             }
                         } else {
-                            txt += FixedWidth('│' + FixedWidth('News:', 20) + 'Done', window.width) + '\n'
+                            txt += FixedWidth('│' + FixedWidth('News:', 20) + `${CliColor.FgGreen}Done${CliColor.FgWhite}`, window.width) + '\n'
                         }
                     } else if (this.statesManager.News.AllProcessed == false) {
                         txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + 'Loading...', window.width) + '\n'
@@ -454,13 +456,13 @@ class LogManager {
                     if (this.statesManager.ExchangeReport.Text.length > 0) {
                         txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' ExchangeReport:', 20) + this.statesManager.ExchangeReport.Text, window.width) + '\n'
                     } else {
-                        txt += FixedWidth('│' + FixedWidth('ExchangeReport:', 20) + 'Done', window.width) + '\n'
+                        txt += FixedWidth('│' + FixedWidth('ExchangeReport:', 20) + `${CliColor.FgGreen}Done${CliColor.FgWhite}`, window.width) + '\n'
                     }
                     
                     if (this.statesManager.MVMReport.Text.length > 0) {
                         txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' MVMReport:', 20) + this.statesManager.MVMReport.Text, window.width) + '\n'
                     } else {
-                        txt += FixedWidth('│' + FixedWidth('MVMReport:', 20) + 'Done', window.width) + '\n'
+                        txt += FixedWidth('│' + FixedWidth('MVMReport:', 20) + `${CliColor.FgGreen}Done${CliColor.FgWhite}`, window.width) + '\n'
                     }
                 }
             }
