@@ -450,6 +450,18 @@ class LogManager {
                     } else if (this.statesManager.News.AllProcessed == false) {
                         txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + 'Loading...', window.width) + '\n'
                     }
+                    
+                    if (this.statesManager.ExchangeReport.Text.length > 0) {
+                        txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' ExchangeReport:', 20) + this.statesManager.ExchangeReport.Text, window.width) + '\n'
+                    } else {
+                        txt += FixedWidth('│' + FixedWidth('ExchangeReport:', 20) + 'Done', window.width) + '\n'
+                    }
+                    
+                    if (this.statesManager.MVMReport.Text.length > 0) {
+                        txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' MVMReport:', 20) + this.statesManager.MVMReport.Text, window.width) + '\n'
+                    } else {
+                        txt += FixedWidth('│' + FixedWidth('MVMReport:', 20) + 'Done', window.width) + '\n'
+                    }
                 }
             }
         } else {
