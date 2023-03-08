@@ -868,7 +868,7 @@ bot.on('messageCreate', async message => { //Message
 
 
     if (message.content.startsWith('https://www.reddit.com/r/')) {
-        CommandRedditsave(message)
+        CommandRedditsave.Redditsave(message)
     }
 
     //#region News

@@ -591,7 +591,7 @@ bot.on('messageCreate', async message => { //Message
     message.fetch().then(async (msg) => {
         if (msg.content.startsWith('https://www.reddit.com/r/')) {
             const CommandRedditsave = require('./commands/redditsave')
-            CommandRedditsave(msg)
+            CommandRedditsave.Redditsave(msg)
         }
 
         await newsManager.TryProcessMessage(msg)

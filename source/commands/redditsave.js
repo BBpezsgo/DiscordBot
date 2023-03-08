@@ -120,7 +120,7 @@ function IsLargerThan8Mb(text) {
 }
 
 /** @param {Discord.Message} message */
-module.exports = async (message) => {
+async function Redditsave(message) {
     const messageContentUrl = message.content
 
     const button1 = new ButtonBuilder()
@@ -252,3 +252,27 @@ module.exports = async (message) => {
         message.reply("Error: " + err.message)
     })
 }
+
+/** @param {Discord.ButtonInteraction<Discord.CacheType>} e */
+function OnButtonClick(e) {
+    if (e.component.customId.startsWith('redditsaveDeleteMain')) {
+        if (e.component.customId.includes(e.user.id)) {
+            e.channel.messages.cache.get(e.component.customId.split('.')[1]).delete()
+            const button1 = e.message.components[0].components[0]
+            const button2 = e.message.components[0].components[1]
+            const row = new ActionRowBuilder()
+                .addComponents(button1, button2)
+            e.update({ embeds: [e.message.embeds[0]], components: [row] })
+            return true
+        }
+    }
+    if (e.component.customId.startsWith('redditsaveDelete')) {
+        if (e.component.customId.includes(e.user.id)) {
+            e.message.delete()
+            return true
+        }
+    }
+    return false
+}
+
+module.exports = { Redditsave, OnButtonClick }

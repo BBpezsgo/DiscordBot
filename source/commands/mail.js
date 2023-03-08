@@ -253,6 +253,76 @@ class MailManager {
 
         this.database.SaveDatabase()
     }
+
+    /** @param {Discord.ButtonInteraction<Discord.CacheType>} e */
+    OnButtonClick(e) {
+        if (e.component.customId === 'mailFolderMain') {
+            const message = this.GetMailMessage(e.user, 0)
+            e.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+            return true
+        }
+        
+        if (e.component.customId === 'mailFolderInbox') {
+            const message = this.GetMailMessage(e.user, 1)
+            e.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+            return true
+        }
+        
+        if (e.component.customId === 'mailFolderOutbox') {
+            const message = this.GetMailMessage(e.user, 2)
+            e.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+            return true
+        }
+        
+        if (e.component.customId === 'mailWrite') {
+            this.currentlyWritingEmails.push(
+                new CurrentlyWritingMail(
+                    e.user,
+                    new Mail(
+                        -1,
+                        new MailUser(e.user.username, e.user.id),
+                        new MailUser(e.user.username, e.user.id),
+                        'Cím',
+                        'Üzenet'
+                    ),
+                    e.message
+                ))
+
+            const message = this.GetMailMessage(e.user, 3)
+            e.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+            return true
+        }
+        
+        if (e.component.customId === 'mailWriteAbort') {
+            const message = this.GetMailMessage(e.user)
+            e.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+            this.currentlyWritingEmails.splice(this.GetCurrentlyEditingMailIndex(e.user.id), 1)
+            return true
+        }
+        
+        if (e.component.customId === 'mailWriteSend') {
+            const editingMail = this.currentlyWritingEmails[this.GetCurrentlyEditingMailIndex(e.user.id)]
+            let newMail = editingMail.mail
+            newMail.date = Date.now()
+            newMail.sender = new MailUser(editingMail.user.username, editingMail.user.id)
+            newMail.id = this.GenerateMailID()
+            const sended = this.sendMailOM(newMail)
+
+            if (sended === true) {
+                editingMail.message.channel.send('\\✔️ **A levél elküldve neki: ' + editingMail.mail.reciver.name + '**')
+
+                const message = this.GetMailMessage(e.user)
+                e.update({ embeds: [message.embed], components: [message.actionRows[0]] })
+                this.currentlyWritingEmails.splice(this.GetCurrentlyEditingMailIndex(e.user.id), 1)
+            } else {
+                editingMail.message.channel.send('\\❌ **A levelet nem sikerült elküldeni**')
+            }
+
+            return true
+        }
+
+        return false
+    }
 }
 
 class Mail {

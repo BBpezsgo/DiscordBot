@@ -524,4 +524,303 @@ function CommandShop(channel, sender, senderMember, databaseManager, menuIndex =
     return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary] }
 }
 
-module.exports = { CommandShop, removeAllColorRoles }
+/**
+ * @param {Discord.ButtonInteraction<Discord.CacheType>} e
+ * @param {DatabaseManager} database
+ */
+function OnButtonClick(e, database) {
+    const privateCommand = database.dataBasic[e.user.id].privateCommands
+
+    if (e.component.customId == 'shopClose') {
+        e.client.channels.fetch(e.channelId)
+            .then((channel) => {
+                channel.messages.fetch(e.message.id)
+                    .then((message) => {
+                        message.delete()
+                    })
+            })
+        return true
+    }
+
+    if (e.component.customId.startsWith('shopBuy')) {
+        const money = database.dataBasic[e.user.id].money
+        const buyItem = e.component.customId.replace('shopBuy', '')
+        if (buyItem == 'Crate') {
+            if (money >= 2099) {
+                database.dataBasic[e.user.id].money -= 2099
+                database.dataBackpacks[e.user.id].crates += 1
+
+                e.update(CommandShop(e.channel, e.user, e.member, database, 1, '', privateCommand))
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'Gift') {
+            if (money >= 3999) {
+                database.dataBasic[e.user.id].money -= 3999
+                database.dataBackpacks[e.user.id].gifts += 1
+
+                e.update(CommandShop(e.channel, e.user, e.member, database, 1, '', privateCommand))
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'Ticket') {
+            if (money >= 8999) {
+                database.dataBasic[e.user.id].money -= 8999
+                database.dataBackpacks[e.user.id].tickets += 1
+
+                e.update(CommandShop(e.channel, e.user, e.member, database, 1, '', privateCommand))
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'WC') {
+            if (money >= 799) {
+                database.dataBasic[e.user.id].money -= 799
+
+                e.update(CommandShop(e.channel, e.user, e.member, database, 1, '', privateCommand))
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'LuckySmall') {
+            if (money >= 1999) {
+                database.dataBasic[e.user.id].money -= 1999
+                database.dataBackpacks[e.user.id].luckyCards.small += 1
+
+                e.update(CommandShop(e.channel, e.user, e.member, database, 2, '', privateCommand))
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'LuckyMedium') {
+            if (money >= 3599) {
+                database.dataBasic[e.user.id].money -= 3599
+                database.dataBackpacks[e.user.id].luckyCards.medium += 1
+
+                e.update(CommandShop(e.channel, e.user, e.member, database, 2, '', privateCommand))
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'LuckyLarge') {
+            if (money >= 6999) {
+                database.dataBasic[e.user.id].money -= 6999
+                database.dataBackpacks[e.user.id].luckyCards.large += 1
+
+                e.update(CommandShop(e.channel, e.user, e.member, database, 2, '', privateCommand))
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        }
+        return true
+    }
+    return false
+}
+
+/**
+ * @param {Discord.SelectMenuInteraction<Discord.CacheType>} e
+ * @param {DatabaseManager} database
+ */
+function OnSelectMenu(e, database) {
+    const privateCommand = database.dataBasic[e.user.id].privateCommands
+
+    if (e.customId.startsWith('shopMenu')) {
+        e.update(CommandShop(e.channel, e.user, e.member, database, e.values[0], '', privateCommand))
+        return
+    }
+
+    if (e.customId == 'shopBackpackColors') {
+        const selectedIndex = e.values[0]
+        const money = database.dataBasic[e.user.id].money
+
+        if (selectedIndex == 0) {
+            if (money >= 3299) {
+                database.dataBasic[e.user.id].money -= 3299
+                database.dataBasic[e.user.id].color = '#fffff9'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 1) {
+            if (money >= 99) {
+                database.dataBasic[e.user.id].money -= 99
+                database.dataBasic[e.user.id].color = '#000000'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 2) {
+            if (money >= 2999) {
+                database.dataBasic[e.user.id].money -= 2999
+                database.dataBasic[e.user.id].color = 'brown'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 3) {
+            if (money >= 1499) {
+                database.dataBasic[e.user.id].money -= 1499
+                database.dataBasic[e.user.id].color = 'red'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 4) {
+            if (money >= 2499) {
+                database.dataBasic[e.user.id].money -= 2499
+                database.dataBasic[e.user.id].color = 'orange'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 5) {
+            if (money >= 1499) {
+                database.dataBasic[e.user.id].money -= 1499
+                database.dataBasic[e.user.id].color = 'yellow'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 6) {
+            if (money >= 2499) {
+                database.dataBasic[e.user.id].money -= 2499
+                database.dataBasic[e.user.id].color = 'green'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 7) {
+            if (money >= 1499) {
+                database.dataBasic[e.user.id].money -= 1499
+                database.dataBasic[e.user.id].color = 'blue'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 8) {
+            if (money >= 2499) {
+                database.dataBasic[e.user.id].money -= 2499
+                database.dataBasic[e.user.id].color = 'purple'
+
+                database.SaveDatabase()
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        }
+        e.update(CommandShop(e.channel, e.user, e.member, database, 4, '', privateCommand))
+
+        return
+    }
+
+    if (e.customId == 'shopNameColors') {
+        const { ColorRoles } = require('../../functions/enums.js')
+
+        const selectedIndex = e.values[0]
+        const money = database.dataBasic[e.user.id].money
+
+        var newColorRoleId = ''
+
+        if (selectedIndex == 0) {
+            if (money >= 9) {
+                database.dataBasic[e.user.id].money -= 9
+                removeAllColorRoles(e.member, '')
+                newColorRoleId = '0'
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 1) {
+            if (money >= 2999) {
+                removeAllColorRoles(e.member, ColorRoles.red)
+                try {
+                    e.member.roles.add(e.member.guild.roles.cache.get(ColorRoles.red))
+                    database.dataBasic[e.user.id].money -= 2999
+                    newColorRoleId = ColorRoles.red
+                } catch (error) { }
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 2) {
+            if (money >= 3499) {
+                removeAllColorRoles(e.member, ColorRoles.orange)
+                try {
+                    e.member.roles.add(e.member.guild.roles.cache.get(ColorRoles.orange))
+                    database.dataBasic[e.user.id].money -= 3499
+                    newColorRoleId = ColorRoles.orange
+                } catch (error) { }
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 3) {
+            if (money >= 2999) {
+                removeAllColorRoles(e.member, ColorRoles.yellow)
+                try {
+                    e.member.roles.add(e.member.guild.roles.cache.get(ColorRoles.yellow))
+                    database.dataBasic[e.user.id].money -= 2999
+                    newColorRoleId = ColorRoles.yellow
+                } catch (error) { }
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 4) {
+            if (money >= 3499) {
+                removeAllColorRoles(e.member, ColorRoles.green)
+                try {
+                    e.member.roles.add(e.member.guild.roles.cache.get(ColorRoles.green))
+                    database.dataBasic[e.user.id].money -= 3499
+                    newColorRoleId = ColorRoles.green
+                } catch (error) { }
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 5) {
+            if (money >= 2999) {
+                removeAllColorRoles(e.member, ColorRoles.blue)
+                try {
+                    e.member.roles.add(e.member.guild.roles.cache.get(ColorRoles.blue))
+                    database.dataBasic[e.user.id].money -= 2999
+                    newColorRoleId = ColorRoles.blue
+                } catch (error) { }
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 6) {
+            if (money >= 3499) {
+                removeAllColorRoles(e.member, ColorRoles.purple)
+                try {
+                    e.member.roles.add(e.member.guild.roles.cache.get(ColorRoles.purple))
+                    database.dataBasic[e.user.id].money -= 3499
+                    newColorRoleId = ColorRoles.purple
+                } catch (error) { }
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (selectedIndex == 7) {
+            if (money >= 3999) {
+                removeAllColorRoles(e.member, ColorRoles.invisible)
+                try {
+                    e.member.roles.add(e.member.guild.roles.cache.get(ColorRoles.invisible))
+                    database.dataBasic[e.user.id].money -= 3999
+                    newColorRoleId = ColorRoles.invisible
+                } catch (error) { }
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        }
+
+        e.update(CommandShop(e.channel, e.user, e.member, database, 5, newColorRoleId, privateCommand))
+        return
+    }
+}
+
+module.exports = { CommandShop, removeAllColorRoles, OnButtonClick, OnSelectMenu }
