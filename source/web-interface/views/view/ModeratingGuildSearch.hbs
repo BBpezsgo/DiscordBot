@@ -40,6 +40,26 @@
             opacity: 50%;
         }
 
+        .channel-menuitem.channel-menuitem-group {
+            width: calc(100% - 16px);
+            max-width: calc(100% - 16px);
+            height: 16px;
+            border-radius: unset;
+            margin: 4px;
+            cursor: pointer;
+            user-select: none;
+            color: #989aa2;
+        }
+
+        .channel-menuitem.channel-menuitem-group:hover {
+            background-color: unset;
+            color: var(--text-primary);
+        }
+
+        .channel-menuitem.channel-menuitem-group:hover {
+            background-color: unset;
+        }
+
         .btn-view-channel {
             float: right;
             background-image: url('/images/settings.png');
@@ -60,19 +80,22 @@
         }
 
         .caret::before {
-            content: '>';
-            color: currentColor;
+            background-image: url('/images/expand2.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+
+            content: '';
             display: inline-block;
-            position: relative;
-            top: -2px;
-            left: 4px;
+            top: 4px;
             font-weight: 1000;
             transition: transform 200ms;
-            transform-origin: 4px 9px;
+            width: 16px;
+            height: 16px;
         }
 
         .caret-down::before {
-            content: '>' !important;
+            content: '' !important;
             transform: rotate(90deg);
         }
     </style>
@@ -121,12 +144,12 @@
             </table>
             {{/each}}
             {{#each groups}}
-            <table class="channel-menuitem" style="cursor:unset" onclick="OnCaretClick('{{this.id}}')">
+            <table class="channel-menuitem channel-menuitem-group" style="cursor:unset" onclick="OnCaretClick('{{this.id}}')">
                 <tr>
                     <td style="padding:0 2px;word-break:break-all; width: 16px;">
                         <div class="caret" style="pointer-events:none;" id="{{this.id}}"></div>
                     </td>
-                    <td style="font-size: 14px; font-weight: 600;">
+                    <td style="font-size: 12px; height: 12px; text-transform: uppercase; font-weight: 600;">
                         {{this.name}}
                     </td>
                     <td style="padding:0 2px;word-break:break-all">
@@ -485,7 +508,7 @@
                         Reload()
                     }, 'fetch-member-error')
                 ">
-                <input type="text" name="id" id="fetch-member-id" minlength="18" maxlength="18" required>
+                <input type="text" name="id" id="fetch-member-id" minlength="18" maxlength="20" required>
                 <input type="submit" value="Fetch Member">
             </form>
             <p style="color: #b32d2d;" id="fetch-member-error"></p>

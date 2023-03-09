@@ -57,75 +57,53 @@
         <h1>Database</h1>
 
         <div class="container loading-effect">
-            <table border="0" width="100%">
-                <tbody>
-                    <tr>
-                        <td></td>
-                        <td colspan="2">
-                            <ul id="myUL">
-                                <li>
-                                    <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
-                                    <ul class="nested">
-                                        {{#each info.backupFolder.files}}
-                                        <li class="data-file">
-                                            <span>{{filename}}</span>
-                                            <b>{{size}}</b>
-                                        </li>
-                                        {{/each}}
-                                    </ul>
-                                </li>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="Item"></td>
-                        <td colspan="2">
-                            <ul id="myUL">
-                                <li>
-                                    <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
-                                    <form action="/dcbot/view/Database.html/Backup/All" method="post"
-                                        style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
-                                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                                        <input type="submit" value="Backup All">
-                                    </form>
-                                    <ul class="nested">
-                                        {{#each info.folder.files}}
-                                        <li class="data-file">
-                                            <span>{{filename}}</span>
-                                            <b>{{size}}</b>
-                                            <form action="/dcbot/view/Database.html/Backup/All" method="post"
-                                                style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
-                                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                                                <input type="text" name="filename" value="{{filename}}" style="display: none;">
-                                                <input type="submit" value="Backup">
-                                            </form>
-                                        </li>
-                                        {{/each}}
-                                    </ul>
-                                </li>
-                            </ul>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <h2></h2>
+
+            <ul id="myUL">
+                <li>
+                    <span class="caret"><b>Backup folder: </b>{{info.backupFolder.path}}</span>
+                    <ul class="nested">
+                        {{#each info.backupFolder.files}}
+                        <li class="data-file">
+                            <span>{{filename}}</span>
+                            <b>{{size}}</b>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </li>
+            </ul>
+            
+            <ul id="myUL">
+                <li>
+                    <span class="caret"><b>Folder: </b>{{info.folder.path}}</span>
+                    <ul class="nested">
+                        {{#each info.folder.files}}
+                        <li class="data-file">
+                            <span>{{filename}}</span>
+                            <b>{{size}}</b>
+                            <form action="/dcbot/view/Database.html/Backup/All" method="post"
+                                style="margin: 0px 0px 0px 20px; display: inline-block; transform: translateY(-1px);"
+                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                                <input type="text" name="filename" value="{{filename}}" style="display: none;">
+                                <input type="submit" value="Backup">
+                            </form>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </li>
+            </ul>
+
+            <form action="/dcbot/view/Database.html/Backup/All" method="post"
+                style="margin-top: 20px"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                <input type="submit" value="Backup All">
+            </form>
         </div>
 
         <div class="container loading-effect">
             <h2>BOT's database</h2>
-            <table border="0" width="100%">
-                <tbody>
-                    <tr>
-                        <td width="698" align="center">
-                            <ul id="myUL">
-                                <li>
-                                    <span class="data-number">Day: </span>
-                                    <b>{{bot.day}}</b>
-                                </li>
-                            </ul>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+
+            <span class="data-number">Day:</span> <b>{{bot.day}}</b>
         </div>
 
         <div class="container loading-effect">

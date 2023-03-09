@@ -629,6 +629,27 @@ input[type=reset]:active {
 	outline: none;
 }
 
+.button-secondary {
+	border: none;
+	background-color: var(--btn-secondary-bg) !important;
+	color: var(--btn-secondary-text) !important;
+	padding: 8px 10px;
+	min-width: 80px;
+	border-radius: 3px;
+	transition: background 200ms, outline 50ms;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.button-secondary:hover {
+	background-color: var(--btn-secondary-hover-bg) !important;
+}
+
+.button-secondary:active {
+	background-color: var(--btn-secondary-active-bg) !important;
+	outline: none;
+}
+
 input[type=checkbox] {	
 	appearance: none;
 	-webkit-appearance: none;

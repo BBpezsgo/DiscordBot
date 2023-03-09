@@ -884,16 +884,23 @@ class WebInterfaceManager {
     }
 
     RenderPage_ModeratingGuildSearch(req, res, searchError) {
-        if (this.moderatingSearchedServerId.length == 0) {
+        if (this.moderatingSearchedServerId.length === 0) {
             this.RenderPage_ModeratingSearch(req, res, 'No server selected')
             return
         }
+
+        const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
+
+        if (!g) {
+            this.RenderPage_ModeratingSearch(req, res, 'No server selected')
+            return
+        }
+
         if (this.moderatingSearchedChannelId.length > 0) {
             this.RenderPage_Moderating(req, res)
             return
         }
 
-        const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
         const guild = {
             iconUrlSmall: g.iconURL({ size: 32 }),
             iconUrlLarge: g.iconURL({ size: 128 }),
@@ -992,16 +999,31 @@ class WebInterfaceManager {
     }
 
     RenderPage_Moderating(req, res) {
-        if (this.moderatingSearchedServerId.length == 0) {
+        if (this.moderatingSearchedServerId.length === 0) {
             this.RenderPage_ModeratingSearch(req, res, 'No server selected')
-            return
-        }
-        if (this.moderatingSearchedChannelId.length == 0) {
-            this.RenderPage_ModeratingGuildSearch(req, res, 'No channel selected')
             return
         }
 
         const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
+
+        if (!g) {
+            this.RenderPage_ModeratingSearch(req, res, 'No server selected')
+            return
+        }
+
+        if (this.moderatingSearchedChannelId.length === 0) {
+            this.RenderPage_ModeratingGuildSearch(req, res, 'No channel selected')
+            return
+        }
+
+        /** @type {Discord.GuildBasedChannel} */
+        const c = g.channels.cache.get(this.moderatingSearchedChannelId)
+
+        if (!c) {
+            this.RenderPage_ModeratingGuildSearch(req, res, 'No channel selected')
+            return
+        }
+
         const guild = {
             iconUrlSmall: g.iconURL({ size: 32 }),
             iconUrlLarge: g.iconURL({ size: 128 }),
@@ -1025,8 +1047,6 @@ class WebInterfaceManager {
             // verified: g.verified,
         }
 
-        /** @type {Discord.GuildBasedChannel} */
-        const c = g.channels.cache.get(this.moderatingSearchedChannelId)
         const channel = {
             id: c.id,
             archived: c.archived,
@@ -1105,7 +1125,7 @@ class WebInterfaceManager {
                 })
             })
 
-            messages.sort(function(a, b) { return a.createdAtTimestamp - b.createdAtTimestamp })
+            messages.sort((a, b) => { return a.createdAtTimestamp - b.createdAtTimestamp })
         }
 
         const channelGroups = this.Get_ChannelsInGuild(g).groups
@@ -1873,6 +1893,40 @@ class WebInterfaceManager {
                                 })
                         } else if (count) {
                             res.status(200).send('ID is requied')
+                        }
+                    } else {
+                        res.status(200).send('Invalid channel type')
+                    }
+                })
+                .catch((error) => {
+                    res.status(200).send(error)
+                })
+        })
+
+        this.app.post('/Message/FetchMore', (req, res) => {
+            var count = req.query.count
+            if (count === undefined || count === null) {
+                count = req.body.count
+            }
+
+            var channel = req.query.channel
+            if (channel === undefined || channel === null) {
+                channel = req.body.channel
+            }
+
+            this.client.channels.fetch(channel)
+                .then((ch) => {
+                    if (ch.type === Discord.ChannelType.GuildText) {
+                        if (count) {
+                            ch.messages.fetch({ limit: count })
+                                .then(() => {
+                                    res.status(200).send({ message: 'ok' })
+                                })
+                                .catch((error) => {
+                                    res.status(200).send(error)
+                                })
+                        } else {
+                            res.status(200).send('Count is requied')
                         }
                     } else {
                         res.status(200).send('Invalid channel type')

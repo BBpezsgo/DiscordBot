@@ -183,17 +183,45 @@
 			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
 		</div>
 	</div>
+    <style>
+        #content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow-y: unset;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #content > #messages-container {
+	        flex: 1 1 100%;
+            overflow-y: scroll;
+        }
+
+        #content > #channel-panel {
+            box-shadow: #0008 0px 1px 1px;
+            flex: 0 0 53px;
+            overflow: hidden;
+        }
+
+        #content > #send-message {
+            flex: 0 0 53px;
+        }
+    </style>
 	<div id="content">
-        
-        <h1>Moderating</h1>
-        
+        <div id="channel-panel">
+            <form action="/dcbot/view/Moderating.html/Server/Back" method="post"
+                style="display: inline-block; margin-right: 20px;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                <input type="submit" value="" class="btn-tool btn-tool-back">
+            </form>
+
+            <h1 style="display:inline-block">{{channel.name}}</h1>
+        </div>
+
+        <!--
         <div class="container loading-effect">
             <h2>
-                <form action="/dcbot/view/Moderating.html/Server/Back" method="post"
-                    style="display: inline-block; margin-right: 20px;"
-                    onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                    <input type="submit" value="" class="btn-tool btn-tool-back">
-                </form>
                 <span style="color: #aaa">Channel</span>
                 {{channel.name}}
                 <span style="color: #aaa">in guild</span>
@@ -217,7 +245,8 @@
                         <td width="25%" class="Item">Topic:</td>
                         <td colspan="2">
                             <p style="word-wrap: break-word; max-width: 300px; overflow: auto; line-break: anywhere;">
-                                {{channel.topic}}</p>
+                                {{channel.topic}}
+                            </p>
                         </td>
                     </tr>
                     <tr>
@@ -343,169 +372,257 @@
                 </tbody>
             </table>
         </div>
+        -->
         
-        <div class="container loading-effect">
-            <h2>Messages</h2>
+        <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Message/Fetch?id=' + document.getElementById('fetch-msg-id').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
+            ">
+            <input type="text" name="id" value="" id="fetch-msg-id" required minlength="18" maxlength="18">
+            <input type="submit" value="Fetch">
+        </form>
+        <form action="/Message/FetchMore" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Message/FetchMore?count=' + document.getElementById('fetch-count').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
+            ">
+            <input type="number" name="count" value="" id="fetch-count" required min="1" max="20">
+            <input type="submit" value="Fetch More">
+        </form>
+        <!--
+        <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
+            onsubmit="
+                event.preventDefault()
+                Post('/Message/Fetch?count=' + document.getElementById('fetch-msg-count').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
+            ">
+            <h4>By Count</h4>
+            <input type="number" min="1" max="15" name="count" value="15" id="fetch-msg-count">
+            <input type="submit" value="Fetch">
+        </form>
+        -->
+        <p style="color: #b32d2d;" id="fetch-msg-error"></p>
 
-            <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
+        <style>
+            .message-container {
+                display: block;
+                margin: 0px;
+                margin-top: 16px;
+                padding: 8px;
+
+                display: grid;
+                grid-template-columns: 64px auto;
+            }
+
+            .message-container:hover {
+                background-color: #2e3035;
+            }
+
+            .message-container .message-actions {
+                display: none;
+                float: right;
+                position: relative;
+                top: -24px;
+                border: 1px solid #27282b;
+                background-color: #313338;
+                border-radius: 5px;
+                white-space: nowrap;
+                direction: rtl;
+                user-select: none;
+                overflow: hidden;
+            }
+
+            .message-container:hover .message-actions {
+                display: inline-block;
+            }
+
+            .message-container .message-actions:hover {
+                box-shadow: #0004 0px 2px 2px;
+            }
+
+            .message-container .message-actions > * {
+                background-color: transparent;
+                border-radius: unset;
+                padding: 0px;
+                width: 32px;
+                height: 32px;
+                min-width: unset;
+                display: inline-block;
+                transition-duration: unset;
+            }
+            .message-container .message-actions > *:hover {
+                background-color: #37383e;
+            }
+
+            .message-container .message-actions > *:active {
+                background-color: #3c3e43;
+            }
+
+            .message-container .message-actions > * > img {
+                opacity: 50%;
+            }
+
+            .message-container .message-actions > *:hover > img {
+                opacity: 70%;
+            }
+
+            .message-container .message-actions > *:active > img {
+                opacity: 90%;
+            }
+
+            .message-container .message-actions > *:active > * {
+                transform: translateY(1px);
+            }
+        </style>
+
+        <div id="messages-container">
+            <form action="/Message/FetchMore" method="post" style="margin: 0; display: inline-block; width: 100%; text-align: center;"
                 onsubmit="
                     event.preventDefault()
-                    Post('/Message/Fetch?id=' + document.getElementById('fetch-msg-id').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
+                    Post('/Message/FetchMore?count=' + document.getElementById('fetch-count-2').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error-2')
                 ">
-                <input type="text" name="id" value="" id="fetch-msg-id" required minlength="18" maxlength="18">
-                <input type="submit" value="Fetch">
+                <input type="number" name="count" value=7 id="fetch-count-2" hidden>
+                <input type="submit" value="Fetch Messages" class="button-secondary">
             </form>
-            <!--
-            <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
-                onsubmit="
-                    event.preventDefault()
-                    Post('/Message/Fetch?count=' + document.getElementById('fetch-msg-count').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error')
-                ">
-                <h4>By Count</h4>
-                <input type="number" min="1" max="15" name="count" value="15" id="fetch-msg-count">
-                <input type="submit" value="Fetch">
-            </form>
-            -->
-            <p style="color: #b32d2d;" id="fetch-msg-error"></p>
+            <p style="color: #b32d2d;" id="fetch-msg-error-2"></p>
 
-            <table style="width: 100%;">
-                <tbody>
-                    <tr>
-                        <td width="698" align="center" colspan="2">
-                            <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0">
-                                <tbody>
-                                    <tr>
-                                        <td class="ListM"></td>
-                                        <td class="ListM" style="width: 100%;"></td>
-                                        <td class="ListM">
-                                            <b>ID</b>
-                                        </td>
-                                        <td class="ListM">
-                                            <b>Created At</b>
-                                        </td>
-                                        <td class="ListM">
-                                            <b>Type</b>
-                                        </td>
-                                        <td class="ListM" colspan="2"></td>
-                                    </tr>
-                                    {{#each messages}}
-                                    <tr>
-                                        {{#if types.ChannelPinnedMessage}}
-                                        <td style="padding:0 2 0 2;word-break:break-all" colspan="2">
-                                            <div class="tooltip">
-                                                <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 50%;">
-                                                <span class="tooltiptext">
-                                                    <img src="{{author.avatarUrlBig}}" style="transform: translateY(4px);">
-                                                </span>
-                                            </div>
-                                            <span>{{author.username}}</span><span style="opacity: .7;">#{{author.discriminator}}</span>
+            {{#each messages}}
+            <div class="message-container">
+                {{#if types.ChannelPinnedMessage}}
+                <div>
+                    <img src="{{author.avatarUrlBig}}" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                </div>
 
-                                            <span>pinned a message</span>
+                <div>
+                    <div class="message-actions">
+                        {{#if deletable}}
+                        <button onclick="Post('/Message/Delete?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
+                            <img src="/images/delete.png" title="Delete">
+                        </button>
+                        {{/if}}
+                        <button onclick="document.getElementById('message-link-{{id}}').click()">
+                            <img src="/images/link.png" title="Message Link">
+                        </button>
+                        <a href="{{url}}" style="display:none" target="_blank" title="Link" id="message-link-{{id}}"></a>
+                    </div>
+                    <div>
+                        <span class="tooltiptext" style="font-weight:bold;font-size:16px;">{{author.username}}</span>
+                        {{#if system}}<span class="tag">System</span>{{/if}}
+                        {{#if crosspostable}}<span class="tag">Crosspostable</span>{{/if}}
+                        <span>{{this.createdAt}}</span>
+                        {{#if pinned}}
+                        <span class="user-badge">
+                            <img src="/images/pinned.png" title="Pinned">
+                        </span>
+                        {{/if}}
+                    </div>
+                    <div>
+                        <span>{{author.username}} pinned a message</span>
+                    </div>
+                </div>
 
-                                            <a href="{{url}}" target="_blank" title="Message Link"><i class="material-icons" style="margin-left: 4px;">link</i></a>
-                                            
-                                            {{#if crosspostable}}<span class="tag" style="float: right;">Crosspostable</span>{{/if}}
-                                            {{#if system}}<span class="tag" style="float: right;">System</span>{{/if}}
-                                            {{#if pinned}}
-                                            <span class="user-badge" style="float: right;">
-                                                <img src="/images/pinned.png" title="Pinned">
-                                            </span>
-                                            {{/if}}
-                                        </td>
-                                        {{else}}
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            <div class="tooltip">
-                                                <img src="{{author.avatarUrlSmall}}" width="16" height="16" title="Avatar" style="border-radius: 50%;">
-                                                <span class="tooltiptext">
-                                                    <img src="{{author.avatarUrlBig}}" width="32" height="32" style="transform: translateY(4px);">
-                                                    <h2 style="display: inline">{{author.username}}</h2><h2 style="display: inline; opacity: .7;">#{{author.discriminator}}</h2>
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.cleanContent}}
-
-                                            <a href="{{url}}" target="_blank" title="Message Link"><i class="material-icons" style="margin-left: 4px;">link</i></a>
-
-                                            {{#if crosspostable}}<span class="tag" style="float: right;">Crosspostable</span>{{/if}}
-                                            <!--
-                                            {{#if editable}}
-                                            <span class="user-badge" style="float: right;">
-                                                <img src="/images/edit.png" title="Editable">
-                                            </span>
-                                            {{/if}}
-                                            -->
-                                            {{#if system}}<span class="tag" style="float: right;">System</span>{{/if}}
-                                            {{#if pinned}}
-                                            <span class="user-badge" style="float: right;">
-                                                <img src="/images/pinned.png" title="Pinned">
-                                            </span>
-                                            {{/if}}
-                                        </td>
-                                        {{/if}}
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.id}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.createdAt}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.type}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{#if deletable}}
-                                            <button style="float: right;" class="btn-custom" onclick="Post('/Message/Delete?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
-                                                <img src="/images/delete.png" title="Delete">
-                                            </button>
-                                            {{/if}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{#if pinned}}
-                                            <button style="float: right;" class="btn-custom" onclick="Post('/Message/Unpin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
-                                                <img src="/images/pinned.png" title="Unpin">
-                                            </button>
-                                            {{else}}
-                                            {{#if pinnable}}
-                                            <button style="float: right;" class="btn-custom" onclick="Post('/Message/Pin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
-                                                <img src="/images/pin.png" title="Pin">
-                                            </button>
-                                            {{/if}}
-                                            {{/if}}
-                                        </td>
-                                    </tr>
-                                    {{/each}}
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <h2>Send Message</h2>
-            <table style="width: 100%;">
-                <tbody>
-                    <tr>
-                        <td colspan="3">
-                            <form action="/Message/Send" method="post"
-                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
-                                <input type="text" name="channel" value="{{channel.id}}" style="display: none;">
-
-                                <textarea name="content" rows="2" cols="60" maxlength="2000" placeholder="Content" required></textarea><br>
-                            
-                                <input type="checkbox" id="tts" name="tts" value="tts">
-                                <label for="tts">Tts</label><br>
-
-                                <input type="reset" value="Reset">
-                                <input type="submit" value="Send">
-
-                                <p style="color: #f00" id="send-message-error"></p>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                {{else}}
+                <div>
+                    <img src="{{author.avatarUrlBig}}" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                </div>
+                <div>
+                    <div class="message-actions">
+                        {{#if deletable}}
+                        <button onclick="Post('/Message/Delete?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
+                            <img src="/images/delete.png" title="Delete">
+                        </button>
+                        {{/if}}
+                        {{#if pinned}}
+                        <button onclick="Post('/Message/Unpin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
+                            <img src="/images/pinned.png" title="Unpin">
+                        </button>
+                        {{else}}
+                        {{#if pinnable}}
+                        <button onclick="Post('/Message/Pin?id={{id}}&channel={{../channel.id}}', event, () => { setTimeout(() => { Reload() }, 200) })">
+                            <img src="/images/pin.png" title="Pin">
+                        </button>
+                        {{/if}}
+                        {{/if}}
+                        <button onclick="document.getElementById('message-link-{{id}}').click()">
+                            <img src="/images/link.png" title="Message Link">
+                        </button>
+                        <a href="{{url}}" style="display:none" target="_blank" title="Link" id="message-link-{{id}}"></a>
+                    </div>
+                    <div>
+                        <span class="tooltiptext" style="font-weight:bold;font-size:16px;">{{author.username}}</span>
+                        {{#if system}}<span class="tag">System</span>{{/if}}
+                        {{#if crosspostable}}<span class="tag">Crosspostable</span>{{/if}}
+                        <span style="color:#aaa;">{{this.createdAt}}</span>
+                        {{#if pinned}}
+                        <span class="user-badge">
+                            <img src="/images/pinned.png" title="Pinned">
+                        </span>
+                        {{/if}}
+                    </div>
+                    <div>
+                        {{this.cleanContent}}
+                    </div>
+                </div>
+                {{/if}}
+            </div>
+            {{/each}}
         </div>
 
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                const objDiv = document.getElementById("messages-container")
+                objDiv.scrollTop = objDiv.scrollHeight
+            })
+        </script>
+        
+        <style>
+            div#send-message {
+                padding: 16px;
+            }
+
+            div#send-message > form {
+                background-color: #383a40;
+                border-radius: 8px;
+                padding: 4px;
+            }
+
+            div#send-message > form textarea {
+                background-color: #383a40;
+                display: inline-block;
+                border: none;
+                font-size: 16px;
+                font-family: "Arial", "Helvetica", "Geneva", "Swiss", "SunSans-Regular", "sans-serif";
+            }
+
+            div#send-message > form textarea:focus {
+                outline: none;
+            }
+        </style>
+        <div id="send-message">
+            <form action="/Message/Send" method="post"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
+                <input type="text" name="channel" value="{{channel.id}}" style="display: none;">
+                <input type="checkbox" id="tts" name="tts" value="tts" style="display:none">
+
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="width:100%">
+                                <textarea name="content" rows="2" cols="30" maxlength="2000" placeholder="Message {{channel.name}}" required></textarea><br>
+                            </td>
+                            <td>
+                                <input type="reset" value="Reset">
+                            </td>
+                            <td>
+                                <input type="submit" value="Send">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p style="color: #f00" id="send-message-error"></p>
+            </form>
+        </div>
 	</div>
     
     <script src="/scripts/functions.js"></script>
