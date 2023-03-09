@@ -86,8 +86,8 @@ logManager.scriptLoadingText = 'Loading script... (loading npm packages)'
 
 logManager.Loading("Loading commands", 'database/shop')
 const CommandShop = require('./commands/database/shop')
-
-
+logManager.Loading("Loading commands", 'database/backpack')
+const CommandBackpack = require('./commands/database/backpack')
 logManager.Loading("Loading commands", 'database/market')
 const CommandMarket = require('./commands/database/market')
 logManager.Loading("Loading commands", 'database/settings')
@@ -725,139 +725,7 @@ bot.on('interactionCreate', async interaction => {
 
         }
 
-        if (interaction.component.customId === 'openDayCrate') {
-            if (Math.floor((database.dataBot.day - database.dataBasic[interaction.user.id].day) / 7) <= 0) {
-                interaction.reply({ content: '> **\\❌ Már kinyitottad a heti ládádat!*', ephemeral: true })
-            } else {
-                const rewald = openDayCrate(interaction.user.id)
-                const rewaldIndex = rewald.split('|')[0]
-                const rewaldValue = rewald.split('|')[1]
-                let txt = ''
-
-                if (rewaldIndex === '2') {
-                    txt = '**\\🍺 ' + rewaldValue + '** xp-t'
-                } else if (rewaldIndex === '3') {
-                    txt = '**\\💵' + rewaldValue + '** pénzt'
-                } else if (rewaldIndex === '1') {
-                    txt = '**\\🧱 1 ládát**'
-                } else if (rewaldIndex === '0') {
-                    txt = '**\\🎟️ 1 kupont**'
-                } else {
-                    txt = rewald
-                }
-
-                interaction.reply({ content: '> \\🧰 Kaptál:  ' + txt, ephemeral: true })
-            }
-
-            database.dataBasic[interaction.user.id].day += 7
-            if (database.dataBasic[interaction.user.id].day > database.dataBot.day) {
-                database.dataBasic[interaction.user.id].day = database.dataBot.day
-            }
-
-            interaction.message.edit(commandStore(interaction.user, privateCommand))
-
-            database.SaveDatabase()
-            return
-        }
-
-        if (interaction.component.customId === 'openCrate') {
-            if (database.dataBackpacks[interaction.user.id].crates > 0) {
-                database.dataBackpacks[interaction.user.id].crates -= 1
-                var replies = ['xp', 'money', 'gift']
-                var random = Math.floor(Math.random() * 3)
-                var out = replies[random]
-                var val = 0
-                var txt = ''
-
-                if (out === 'xp') {
-                    val = Math.floor(Math.random() * 110) + 10
-                    txt = '**\\🍺 ' + val + '** xp-t'
-                    database.dataBasic[interaction.user.id].score += val
-                }
-                if (out === 'money') {
-                    val = Math.floor(Math.random() * 2000) + 3000
-                    txt = '**\\💵' + val + '** pénzt'
-                    database.dataBasic[interaction.user.id].money += val
-                }
-                if (out === 'gift') {
-                    txt = '**\\🎁 1** ajándékot'
-                    database.dataBackpacks[interaction.user.id].gifts += 1
-                }
-
-                interaction.message.edit(commandStore(interaction.user, privateCommand))
-                interaction.reply({ content: '> \\🧱 Kaptál:  ' + txt, ephemeral: true })
-                database.SaveDatabase()
-            } else {
-                interaction.message.edit(commandStore(interaction.user, privateCommand))
-                interaction.reply({ content: '> \\🧱 Nincs több ládád!', ephemeral: true })
-            }
-
-            return
-        }
-
-        if (interaction.component.customId === 'useLuckyCardSmall') {
-            database.dataBackpacks[interaction.user.id].luckyCards.small -= 1
-            var val = 0
-
-            var nyeroszam = Math.floor(Math.random() * 2)
-            if (nyeroszam === 1) {
-                val = Math.floor(Math.random() * 1001) + 1500
-                database.dataBasic[interaction.user.id].money += val
-            }
-
-            if (val === 0) {
-                interaction.reply({ content: '> \\💶 Nyertél:  **semmit**', ephemeral: true })
-            } else {
-                interaction.reply({ content: '> \\💶 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true })
-            }
-
-            interaction.message.edit(commandStore(interaction.user, privateCommand))
-
-            database.SaveDatabase()
-            return
-        }
-
-        if (interaction.component.customId === 'useLuckyCardMedium') {
-            database.dataBackpacks[interaction.user.id].luckyCards.medium -= 1
-            var val = 0
-
-            var nyeroszam = Math.floor(Math.random() * 4)
-            if (nyeroszam === 1) {
-                val = Math.floor(Math.random() * 3001) + 3000
-                database.dataBasic[interaction.user.id].money += val
-            }
-
-            if (val === 0) {
-                interaction.reply({ content: '> \\💷 Nyertél:  **semmit**', ephemeral: true })
-            } else {
-                interaction.reply({ content: '> \\💷 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true })
-            }
-
-            interaction.message.edit(commandStore(interaction.user, privateCommand))
-
-            database.SaveDatabase()
-            return
-        }
-
-        if (interaction.component.customId === 'useLuckyCardLarge') {
-            database.dataBackpacks[interaction.user.id].luckyCards.large -= 1
-            var val = 0
-
-            var nyeroszam = Math.floor(Math.random() * 9)
-            if (nyeroszam === 1) {
-                val = Math.floor(Math.random() * 5001) + 6500
-                database.dataBasic[interaction.user.id].money += val
-            }
-
-            if (val === 0) {
-                interaction.reply({ content: '> \\💴 Nyertél:  **semmit**', ephemeral: true })
-            } else {
-                interaction.reply({ content: '> \\💴 Nyertél:  **\\💵' + val + '** pénzt', ephemeral: true })
-            }
-
-            interaction.message.edit(commandStore(interaction.user, privateCommand))
-
-            database.SaveDatabase()
+        if (CommandBackpack.OnButtonClick(interaction, database)) {
             return
         }
 
@@ -1995,6 +1863,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `backpack`) {
+        CommandBackpack.OnCommand(command, database, privateCommand)
         command.reply(commandStore(command.user, privateCommand))
         database.UserstatsSendCommand(command.user)
         return

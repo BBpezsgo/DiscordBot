@@ -10,6 +10,7 @@ function IsAnything(obj) {
     return true
 }
 
+/** @type {import('./databaseManager').DatabaseManager} */
 class DatabaseManager {
     /**
      * @param {string} databaseFolderPath this.databaseFolderPath + 'dataFilename.json'
@@ -298,6 +299,40 @@ class DatabaseManager {
     UserstatsSendCommand(user) { userstatsSendCommand(this, user) }
     /** @param {Discord.User} user */
     UserstatsAddUserToMemory(user) { userstatsAddUserToMemory(this, user) }
+
+    Fix() {
+        let users = Object.keys(this.dataBackpacks)
+        for (const user of users) {
+            this.dataBackpacks[user].crates = Number.parseInt((this.dataBackpacks[user].crates ?? 0).toString())
+            this.dataBackpacks[user].getGift = Number.parseInt((this.dataBackpacks[user].getGift ?? 0).toString())
+            this.dataBackpacks[user].gifts = Number.parseInt((this.dataBackpacks[user].gifts ?? 0).toString())
+            this.dataBackpacks[user].jewel = Number.parseInt((this.dataBackpacks[user].jewel ?? 0).toString())
+            this.dataBackpacks[user].luckyCards.large = Number.parseInt((this.dataBackpacks[user].luckyCards.large ?? 0).toString())
+            this.dataBackpacks[user].luckyCards.medium = Number.parseInt((this.dataBackpacks[user].luckyCards.medium ?? 0).toString())
+            this.dataBackpacks[user].luckyCards.small = Number.parseInt((this.dataBackpacks[user].luckyCards.small ?? 0).toString())
+            this.dataBackpacks[user].quizTokens = Number.parseInt((this.dataBackpacks[user].quizTokens ?? 0).toString())
+            this.dataBackpacks[user].tickets = Number.parseInt((this.dataBackpacks[user].tickets ?? 0).toString())
+        }
+    
+        users = Object.keys(this.dataBasic)
+        for (const user of users) {
+            this.dataBasic[user].day = Number.parseInt((this.dataBasic[user].day ?? 0).toString())
+            this.dataBasic[user].money = Number.parseInt((this.dataBasic[user].money ?? 0).toString())
+            this.dataBasic[user].score = Number.parseInt((this.dataBasic[user].score ?? 0).toString())
+        }
+    
+        this.dataBot.day = Number.parseInt((this.dataBot.day ?? 0).toString())
+    
+        users = Object.keys(this.dataUserstats)
+        for (const user of users) {
+            this.dataUserstats[user].chars = Number.parseInt((this.dataUserstats[user].chars ?? 0).toString())
+            this.dataUserstats[user].commands = Number.parseInt((this.dataUserstats[user].commands ?? 0).toString())
+            this.dataUserstats[user].memes = Number.parseInt((this.dataUserstats[user].memes ?? 0).toString())
+            this.dataUserstats[user].messages = Number.parseInt((this.dataUserstats[user].messages ?? 0).toString())
+            this.dataUserstats[user].musics = Number.parseInt((this.dataUserstats[user].musics ?? 0).toString())
+            this.dataUserstats[user].youtubevideos = Number.parseInt((this.dataUserstats[user].youtubevideos ?? 0).toString())
+        }
+    }
 }
 
 module.exports = { DatabaseManager }

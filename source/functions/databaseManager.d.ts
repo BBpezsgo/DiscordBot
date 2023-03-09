@@ -162,5 +162,7 @@ export class DatabaseManager {
     UserstatsSendChars(user: Discord.User, text: string)
     UserstatsSendCommand(user: Discord.User)
     UserstatsAddUserToMemory(user: Discord.User)
+
+    Fix()
 }
 

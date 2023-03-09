@@ -198,19 +198,19 @@
                                         setTimeout(() => {Reload()}, 1000);
                                         ">
                                         <li>
-                                            <span class="data-number">Score: </span>
+                                            <span class="data-{{userDatabase.scoreType}}">Score: </span>
                                             <input name="score" type="number" value="{{userDatabase.score}}" required>
                                         </li>
                                         <li>
-                                            <span class="data-number"> Money: </span>
+                                            <span class="data-{{userDatabase.moneyType}}"> Money: </span>
                                             <input name="money" type="number" value="{{userDatabase.money}}" required>
                                         </li>
                                         <li>
-                                            <span class="data-number"> Day: </span>
+                                            <span class="data-{{userDatabase.dayType}}"> Day: </span>
                                             <input name="day" type="number" value="{{userDatabase.day}}" required>
                                         </li>
                                         <li>
-                                            <span class="data-string"> Color: </span>
+                                            <span class="data-{{userDatabase.colorType}}"> Color: </span>
                                             <div style="
                                                 display: inline-block;
                                                 transform: translateY(5px);
@@ -223,7 +223,7 @@
                                             </div>
                                         </li>
                                         <li>
-                                            <span class="data-bool">Private commands: </span>
+                                            <span class="data-{{userDatabase.privateCommandsType}}">Private commands: </span>
                                             <b>{{userDatabase.privateCommands}}</b>
                                         </li>
                                         <div style="height: 7px;"></div>
@@ -240,40 +240,40 @@
                                         setTimeout(() => {Reload()}, 1000);
                                         ">
                                         <li>
-                                            <span class="data-number">Crates: </span>
+                                            <span class="data-{{userDatabase.cratesType}}">Crates: </span>
                                             <input name="crates" type="number" value="{{userDatabase.crates}}" required>
                                         </li>
                                         <li>
-                                            <span class="data-number">Gifts: </span>
+                                            <span class="data-{{userDatabase.giftsType}}">Gifts: </span>
                                             <input name="gifts" type="number" value="{{userDatabase.gifts}}" required>
                                         </li>
                                         <li>
-                                            <span class="data-number">Get gift: </span>
+                                            <span class="data-{{userDatabase.getGiftType}}">Get gift: </span>
                                             <input name="getGift" type="number" value="{{userDatabase.getGift}}" required>
                                         </li>
                                         <li>
-                                            <span class="data-number">Tickets: </span>
+                                            <span class="data-{{userDatabase.ticketsType}}">Tickets: </span>
                                             <input name="tickets" type="number" value="{{userDatabase.tickets}}" required>
                                         </li>
                                         <li>
-                                            <span class="data-number">Quiz tokens: </span>
+                                            <span class="data-{{userDatabase.quizTokensType}}">Quiz tokens: </span>
                                             <input name="quizTokens" type="number" value="{{userDatabase.quizTokens}}"
                                                 required>
                                         </li>
                                         <li><span class="caret">Lucky cards</span>
                                             <ul class="nested">
                                                 <li>
-                                                    <span class="data-number">Small: </span>
+                                                    <span class="data-{{userDatabase.luckyCards.smallType}}">Small: </span>
                                                     <input name="luckyCardsSmall" type="number"
                                                         value="{{userDatabase.luckyCards.small}}" required>
                                                 </li>
                                                 <li>
-                                                    <span class="data-number">Medium: </span>
+                                                    <span class="data-{{userDatabase.luckyCards.mediumType}}">Medium: </span>
                                                     <input name="luckyCardsMedium" type="number"
                                                         value="{{userDatabase.luckyCards.medium}}" required>
                                                 </li>
                                                 <li>
-                                                    <span class="data-number">Large: </span>
+                                                    <span class="data-{{userDatabase.luckyCards.largeType}}">Large: </span>
                                                     <input name="luckyCardsLarge" type="number"
                                                         value="{{userDatabase.luckyCards.large}}" required>
                                                 </li>
@@ -360,6 +360,12 @@
             </tbody>
         </table>
 
+        <form action="/database/fix" method="post"
+            style="margin: 0;"
+            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {window.location.reload()}, 1000);">
+                <input type="text" name="id" value="{{user.id}}" style="display: none;">
+                <input type="submit" value="Fix Types">
+        </form>
     </div>
     
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>

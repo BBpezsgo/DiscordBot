@@ -701,20 +701,33 @@ class WebInterfaceManager {
             const userDatabase = {
                 userId: userId,
                 score: this.database.dataBasic[userId].score,
+                scoreType: typeof this.database.dataBasic[userId].score,
                 money: this.database.dataBasic[userId].money,
+                moneyType: typeof this.database.dataBasic[userId].money,
                 day: this.database.dataBasic[userId].day,
+                dayType: typeof this.database.dataBasic[userId].day,
                 color: this.database.dataBasic[userId].color,
+                colorType: typeof this.database.dataBasic[userId].color,
                 privateCommands: this.database.dataBasic[userId].privateCommands,
+                privateCommandsType: typeof this.database.dataBasic[userId].privateCommands,
 
                 crates: this.database.dataBackpacks[userId].crates,
+                cratesType: typeof this.database.dataBackpacks[userId].crates,
                 gifts: this.database.dataBackpacks[userId].gifts,
+                giftsType: typeof this.database.dataBackpacks[userId].gifts,
                 getGift: this.database.dataBackpacks[userId].getGift,
+                getGiftType: typeof this.database.dataBackpacks[userId].getGift,
                 tickets: this.database.dataBackpacks[userId].tickets,
+                ticketsType: typeof this.database.dataBackpacks[userId].tickets,
                 quizTokens: this.database.dataBackpacks[userId].quizTokens,
+                quizTokensType: typeof this.database.dataBackpacks[userId].quizTokens,
                 luckyCards: {
                     small: this.database.dataBackpacks[userId].luckyCards.small,
+                    smallType: typeof this.database.dataBackpacks[userId].luckyCards.small,
                     medium: this.database.dataBackpacks[userId].luckyCards.medium,
+                    mediumType: typeof this.database.dataBackpacks[userId].luckyCards.medium,
                     large: this.database.dataBackpacks[userId].luckyCards.large,
+                    largeType: typeof this.database.dataBackpacks[userId].luckyCards.large,
                 },
 
                 businessIndex: 0,
@@ -2050,6 +2063,22 @@ class WebInterfaceManager {
         this.app.post('/dcbot/view/Database.html/Search', (req, res) => {
             if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
 
+            const userId = req.body.id
+
+            if (this.client.users.cache.has(userId)) {
+                this.databaseSearchedUserId = userId
+
+                this.RenderPage_Database(req, res, userId)
+            } else {
+                this.RenderPage_DatabaseSearch(req, res, 'User not found')
+            }
+        })
+
+        this.app.post('/database/fix', (req, res) => {
+            if (this.ClientType != 'DESKTOP') { res.status(501).send('This is not available: the server is running on the phone'); return }
+
+            this.database.Fix()
+            
             const userId = req.body.id
 
             if (this.client.users.cache.has(userId)) {
