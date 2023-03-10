@@ -21,9 +21,9 @@ process.on('uncaughtException', function (err) {
 
 var autoStartBot = true
 
-const { SystemLog, SystemStart, SystemStop } = require('./functions/systemLog')
+const System = require('./functions/systemLog')
 
-SystemStart(false, true)
+System.Start(false, true)
 
 const startDateTime = new Date(Date.now())
 
@@ -50,12 +50,12 @@ process.stdin.on('data', function (b) {
 
     if (s === '\u0003') {
         if (botStopped == true) {
-            SystemLog('Exit by user (terminal)')
-            SystemStop()
+            System.Log('Exit by user (terminal)')
+            System.Stop()
             process.stdin.pause()
             setTimeout(() => { process.exit() }, 500)
         } else {
-            SystemLog('Destroy bot by user (terminal)')
+            System.Log('Destroy bot by user (terminal)')
             StopBot()
         }
     } else if (/^\u001b\[M/.test(s)) {
@@ -109,8 +109,8 @@ process.on('exit', function (code) {
     process.stdout.write('\x1b[?1003l')
     console.log('Exit with code ' + code)
 
-    SystemLog('Exited with code ' + code)
-    SystemStop()
+    System.Log('Exited with code ' + code)
+    System.Stop()
 })
 
 //#region NPM Packages and variables
@@ -724,7 +724,7 @@ async function GetOldDailyWeatherReport(channelId) {
 }
 
 bot.once('ready', async () => {
-    SystemLog('Bot is ready')
+    System.Log('Bot is ready')
 
     statesManager.botLoadingState = 'Ready'
     try {
@@ -1220,7 +1220,7 @@ async function processApplicationCommand(command) {
 }
 
 function StartBot() {
-    SystemLog('Start bot...')
+    System.Log('Start bot...')
     bot.login(tokens.discord).catch((err) => {
         if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
             log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
@@ -1237,7 +1237,7 @@ function StopBot() {
 
 const endDateTime = new Date(Date.now())
 const ellapsedMilliseconds = endDateTime - startDateTime
-SystemLog('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
+System.Log('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
 
 
 StartBot()

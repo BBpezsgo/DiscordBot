@@ -3,7 +3,7 @@ const fs = require("fs")
 const { Color } = require('./enums.js')
 const { StatesManager } = require('./statesManager')
 const { FormatError } = require('./formatError')
-const { SystemLog } = require('./systemLog')
+const System = require('./systemLog')
 const ytdl = require("ytdl-core")
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
@@ -236,38 +236,38 @@ class NewsManager {
 
     /** @param {Discord.Client} client */
     async OnStart(client) {
-        if (this.enableLogs) SystemLog('[NEWS]: Fetch processed news channel...')
+        if (this.enableLogs) System.Log('[NEWS]: Fetch processed news channel...')
         const fetchedProcessedNewsChannel = await client.channels.fetch(NewsProcessedChannel)
         if (fetchedProcessedNewsChannel == null) {
-            if (this.enableLogs) SystemLog(`[NEWS]: Can't fetch processed news channel!`)
+            if (this.enableLogs) System.Log(`[NEWS]: Can't fetch processed news channel!`)
         }
     
-        if (this.enableLogs) SystemLog('[NEWS]: Fetch test news channel...')
+        if (this.enableLogs) System.Log('[NEWS]: Fetch test news channel...')
         const fetchedCopyNewsChannel = await client.channels.fetch('1010110583800078397')
         if (fetchedCopyNewsChannel == null) {
-            if (this.enableLogs) SystemLog(`[NEWS]: Can't fetch test news channel!`)
+            if (this.enableLogs) System.Log(`[NEWS]: Can't fetch test news channel!`)
         }
 
-        if (this.enableLogs) SystemLog('[NEWS]: Fetch news channel...')
+        if (this.enableLogs) System.Log('[NEWS]: Fetch news channel...')
         this.statesManager.News.LoadingText = 'Fetch news channel...'
         client.channels.fetch(NewsIncomingChannel, { force: true })
             .then((c) => {
                 /** @type {Discord.GuildTextBasedChannel | null} */
                 const channel = c
-                if (this.enableLogs) SystemLog('[NEWS]: Fetch news messages...')
+                if (this.enableLogs) System.Log('[NEWS]: Fetch news messages...')
                 this.statesManager.News.LoadingText = 'Fetch news messages...'
                 channel.messages.fetch()
                     .then((messages) => {
                         /** @type {Discord.Message<true>[]} */
                         const listOfMessage = []
             
-                        if (this.enableLogs) SystemLog(`[NEWS]: Looping messages... (${messages.size})`)
+                        if (this.enableLogs) System.Log(`[NEWS]: Looping messages... (${messages.size})`)
                         this.statesManager.News.LoadingText = 'Looping messages...'
                         messages.forEach((message) => {
                             listOfMessage.push(message)
                         })
             
-                        if (this.enableLogs) SystemLog(`[NEWS]: Processing messages... (${listOfMessage.length})`)
+                        if (this.enableLogs) System.Log(`[NEWS]: Processing messages... (${listOfMessage.length})`)
                         this.statesManager.News.LoadingText = 'Processing messages...'
                         listOfMessage.reverse()
                         listOfMessage.forEach(message => {
@@ -275,12 +275,12 @@ class NewsManager {
                         })
                     })
                     .catch((error) => {
-                        if (this.enableLogs) SystemLog(`[NEWS]: Can't fetch news messages! Reason: ${error}`)
+                        if (this.enableLogs) System.Log(`[NEWS]: Can't fetch news messages! Reason: ${error}`)
                         if (this.enableLogs) fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
                     })
             })
             .catch((error) => {
-                if (this.enableLogs) SystemLog(`[NEWS]: Can't fetch news channel! Reason: ${error}`)
+                if (this.enableLogs) System.Log(`[NEWS]: Can't fetch news channel! Reason: ${error}`)
                 if (this.enableLogs) fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
             })
     }
@@ -298,7 +298,7 @@ class NewsManager {
             const embed = newsMessage.embed
             this.statesManager.News.LoadingText2 = 'Send new message...'
 
-            if (this.enableLogs) SystemLog(`[NEWS]: Send copy of news message...`)
+            if (this.enableLogs) System.Log(`[NEWS]: Send copy of news message...`)
             /** @type {Discord.GuildTextBasedChannel | null} */
             const newsTestChannel = client.channels.cache.get('1010110583800078397')
             if (newsTestChannel != null) {
@@ -309,17 +309,17 @@ class NewsManager {
                     components: newsMessage.message.components
                 })
                 .then(() => {
-                    if (this.enableLogs) SystemLog(`[NEWS]: Send processed news message...`)
+                    if (this.enableLogs) System.Log(`[NEWS]: Send processed news message...`)
                     if (newsMessage.NotifyRoleId.length == 0) {
                         newsChannel.send({ embeds: [embed] })
                             .then((sendedMessage) => {
                                 if (DeleteRawNewsMessages) {
                                     NewsManager.SaveRawNewsMessage(newsMessage.message, sendedMessage.id)
-                                    if (this.enableLogs) SystemLog(`[NEWS]: Delete raw message...`)
+                                    if (this.enableLogs) System.Log(`[NEWS]: Delete raw message...`)
                                     this.statesManager.News.LoadingText2 = 'Delete raw message...'
                                     newsMessage.message.delete()
                                         .catch((error) => {
-                                            if (this.enableLogs) SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
+                                            if (this.enableLogs) System.Log(`[NEWS]: Can't delete raw message! Reason: ${error}`)
                                         })
                                         .finally(() => {
                                             this.statesManager.News.LoadingText2 = ''
@@ -329,18 +329,18 @@ class NewsManager {
                                 }
                             })
                             .catch((error) => {                    
-                                if (this.enableLogs) SystemLog(`[NEWS]: Can't send processed news message! Reason: ${error}`)
+                                if (this.enableLogs) System.Log(`[NEWS]: Can't send processed news message! Reason: ${error}`)
                             })
                     } else {
                         newsChannel.send({ content: `<@&${newsMessage.NotifyRoleId}>`, embeds: [embed] })
                             .then((sendedMessage) => {
                                 if (DeleteRawNewsMessages) {
                                     NewsManager.SaveRawNewsMessage(newsMessage.message, sendedMessage.id)
-                                    if (this.enableLogs) SystemLog(`[NEWS]: Delete raw message...`)
+                                    if (this.enableLogs) System.Log(`[NEWS]: Delete raw message...`)
                                     this.statesManager.News.LoadingText2 = 'Delete raw message...'
                                     newsMessage.message.delete()
                                         .catch((error) => {
-                                            if (this.enableLogs) SystemLog(`[NEWS]: Can't delete raw message! Reason: ${error}`)
+                                            if (this.enableLogs) System.Log(`[NEWS]: Can't delete raw message! Reason: ${error}`)
                                         })
                                         .finally(() => {
                                             this.statesManager.News.LoadingText2 = ''
@@ -350,12 +350,12 @@ class NewsManager {
                                 }
                             })
                             .catch((error) => {                    
-                                if (this.enableLogs) SystemLog(`[NEWS]: Can't send processed news message! Reason: ${error}`)
+                                if (this.enableLogs) System.Log(`[NEWS]: Can't send processed news message! Reason: ${error}`)
                             })
                     }
                 })
                 .catch((error) => {                    
-                    if (this.enableLogs) SystemLog(`[NEWS]: Can't send copy of news message! Reason: ${error}`)
+                    if (this.enableLogs) System.Log(`[NEWS]: Can't send copy of news message! Reason: ${error}`)
                 })
             }
             this.lastNoNews = false
@@ -365,7 +365,7 @@ class NewsManager {
             this.statesManager.News.LoadingText2 = ''
             this.lastNoNews = true
             this.statesManager.News.AllProcessed = true
-            if (this.enableLogs) SystemLog(`[NEWS]: All news processed!`)
+            if (this.enableLogs) System.Log(`[NEWS]: All news processed!`)
         }
     }
 

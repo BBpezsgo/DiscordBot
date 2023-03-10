@@ -1,7 +1,7 @@
 const { usersWithTax } = require('./enums')
 const { DatabaseManager } = require('./databaseManager')
 const { FormatError } = require('./formatError')
-const { SystemLog } = require('./systemLog')
+const System = require('./systemLog')
 const fs = require('fs')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
@@ -21,7 +21,7 @@ function Taxation(database, lastDay) {
                 // console.log("Adó:  " + userMoney + " ---1%-->" + finalTax + " ------->" + userMoneyFinal)
                 database.dataBasic[element].money = userMoneyFinal
             } catch (error) {
-                SystemLog('Tax error: ' + error.message)
+                System.Log('Tax error: ' + error.message)
                 fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
             }
         }

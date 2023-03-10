@@ -24,9 +24,9 @@ process.argv.forEach(function (val, index, array) {
 
 var autoStartBot = true
 
-const { SystemLog, SystemStart, SystemStop } = require('./functions/systemLog')
+const System = require('./functions/systemLog')
 
-SystemStart(startedInvisible, startedByUser)
+System.Start(startedInvisible, startedByUser)
 
 const startDateTime = new Date(Date.now())
 
@@ -54,12 +54,12 @@ ConsoleUtilities.on('onKeyDown', key => {
 
     if (key === '\u0003') {
         if (botStopped == true) {
-            SystemLog('Exit by user (terminal)')
-            SystemStop()
+            System.Log('Exit by user (terminal)')
+            System.Stop()
             process.stdin.pause()
             setTimeout(() => { process.exit() }, 500)
         } else {
-            SystemLog('Destroy bot by user (terminal)')
+            System.Log('Destroy bot by user (terminal)')
             StopBot()
         }
     }
@@ -71,8 +71,8 @@ process.on('exit', function (code) {
     ConsoleUtilities.DisableMouse()
     console.log('Exit with code ' + code)
 
-    SystemLog('Exited with code ' + code)
-    SystemStop()
+    System.Log('Exited with code ' + code)
+    System.Stop()
 })
 
 logManager.scriptLoadingText = 'Loading script... (loading npm packages)'
@@ -194,7 +194,7 @@ logManager.Loading('Loading database', 'datas')
 const databaseIsSuccesfullyLoaded = database.LoadDatabase()
 
 if (!databaseIsSuccesfullyLoaded) {
-    SystemLog('Error: Database not found')
+    System.Log('Error: Database not found')
     Log("Can't read database!", 'ERROR')
     console.log(CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
     autoStartBot = false
@@ -207,7 +207,7 @@ if (!databaseIsSuccesfullyLoaded) {
                 StartBot()
             }, 1000)
         } else {
-            SystemStop()
+            System.Stop()
             setTimeout(() => { process.exit() }, 500)
         }
     })
@@ -312,22 +312,22 @@ logManager.scriptLoadingText = 'Loading script... (setup basic listeners)'
 
 bot.on('reconnecting', () => {
     statesManager.botLoadingState = 'Reconnecting'
-    SystemLog('Reconnecting')
+    System.Log('Reconnecting')
 })
 
 bot.on('disconnect', () => {
     statesManager.botLoadingState = 'Disconnect'
-    SystemLog('Disconnect')
+    System.Log('Disconnect')
 })
 
 bot.on('resume', () => {
     statesManager.botLoadingState = 'Resume'
-    SystemLog('Resume')
+    System.Log('Resume')
 })
 
 bot.on('error', error => {
     statesManager.botLoadingState = 'Error'
-    SystemLog('Error: ' + error.message)
+    System.Log('Error: ' + error.message)
     LogError(error)
 })
 
@@ -340,7 +340,7 @@ bot.on('debug', debug => {
     if (translatedDebug == null) return
 
     if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
-        SystemLog('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
+        System.Log('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
     }
 })
 
@@ -390,12 +390,12 @@ bot.on('raw', async event => {
 
 bot.on('close', () => {
     statesManager.botLoadingState = 'Close'
-    SystemLog('Close')
+    System.Log('Close')
 })
 
 bot.on('destroyed', () => {
     statesManager.botLoadingState = 'Destroyed'
-    SystemLog('Destroyed')
+    System.Log('Destroyed')
 })
 
 bot.on('invalidSession', () => {
@@ -1231,7 +1231,7 @@ bot.on('clickMenu', async (button) => {
 })
 
 bot.once('ready', async () => {
-    SystemLog('Bot is ready')
+    System.Log('Bot is ready')
     statesManager.botLoadingState = 'Ready'
 
     const { Taxation } = require('./functions/tax')
@@ -1936,27 +1936,27 @@ async function processApplicationCommand(command, privateCommand) {
 
 logManager.scriptLoadingText = 'Loading script... (define some functions)'
 function StartBot() {
-    SystemLog('Start bot...')
+    System.Log('Start bot...')
     bot.login(CONFIG.tokens.discord)
         .then((token) => {
-            SystemLog('Logged in')
+            System.Log('Logged in')
         })
         .catch((error) => {
-            SystemLog('Error: ' + error.message)
+            System.Log('Error: ' + error.message)
             LogError(error)
         })
 }
 
 function StopBot() {
     bot.destroy()
-    SystemLog('Destroyed')
+    System.Log('Destroyed')
     botStopped = true
 }
 
 logManager.scriptLoadingText = 'Loading script... (Finishing up)'
 const endDateTime = new Date(Date.now())
 const ellapsedMilliseconds = endDateTime - startDateTime
-SystemLog('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
+System.Log('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
 
 logManager.scriptLoadingText = ''
 

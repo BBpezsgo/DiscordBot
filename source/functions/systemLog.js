@@ -85,16 +85,19 @@ function GetLogs() {
         })
     })
 
+    /** @type {import('./systemLog').SystemLog[]} */
     const events = []
 
     for (let i = 0; i < filesRaw.length; i++) {
         const dateText = filesRaw[i].dateText
         const rawData = filesRaw[i].content
         
+        /** @type {import('./systemLog').SystemLog} */
         const newEvent = { dateText: dateText, groups: [] }
         const lines = rawData.split('\n')
 
         var thereIsAnyLogGroup = false
+        /** @type {import('./systemLog').SystemLogGroup} */
         var newLogGroup = { }
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i]
@@ -132,7 +135,7 @@ function GetLogs() {
                     newLogGroup.endTime = time
                     newLogGroup.closedByUser = true
                 } else if (logData.startsWith('Ping: ')) {
-                    const ping = logData.replace('Ping: ', '').replace('ms', '')
+                    const ping = Number.parseInt(logData.replace('Ping: ', '').replace('ms', ''))
                     var pingBaddness = 'none'
                     if (ping < 120) {
                         pingBaddness = 'good'
@@ -301,4 +304,4 @@ function GetUptimeHistory() {
     return times
 }
 
-module.exports = { SystemLog, SystemStart, SystemStop, GetLogs, GetUptimeHistory }
+module.exports = { Log: SystemLog, Start: SystemStart, Stop: SystemStop, GetLogs, GetUptimeHistory }

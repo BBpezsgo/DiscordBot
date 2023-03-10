@@ -4,7 +4,7 @@ const CONFIG = require('../config.json')
 const { StatesManager } = require('./statesManager')
 
 const LogError = require('./errorLog')
-const { SystemLog, SystemStart, SystemStop } = require('./systemLog')
+const System = require('../functions/systemLog')
 const { TranslateMessage } = require('./translator')
 const LogManager = require('./log')
 
@@ -62,22 +62,22 @@ module.exports = class DiscordBot {
     SetupListeners() {
         this.Client.on('reconnecting', () => {
             this.StatesManager.botLoadingState = 'Reconnecting'
-            SystemLog('Reconnecting')
+            System.Log('Reconnecting')
         })
 
         this.Client.on('disconnect', () => {
             this.StatesManager.botLoadingState = 'Disconnect'
-            SystemLog('Disconnect')
+            System.Log('Disconnect')
         })
 
         this.Client.on('resume', () => {
             this.StatesManager.botLoadingState = 'Resume'
-            SystemLog('Resume')
+            System.Log('Resume')
         })
 
         this.Client.on('error', error => {
             this.StatesManager.botLoadingState = 'Error'
-            SystemLog('Error: ' + error.message)
+            System.Log('Error: ' + error.message)
             LogError(error)
         })
 
@@ -90,7 +90,7 @@ module.exports = class DiscordBot {
             if (translatedDebug == null) return
 
             if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
-                SystemLog('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
+                System.Log('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
             }
         })
 
@@ -141,12 +141,12 @@ module.exports = class DiscordBot {
 
         this.Client.on('close', () => {
             this.StatesManager.botLoadingState = 'Close'
-            SystemLog('Close')
+            System.Log('Close')
         })
 
         this.Client.on('destroyed', () => {
             this.StatesManager.botLoadingState = 'Destroyed'
-            SystemLog('Destroyed')
+            System.Log('Destroyed')
         })
 
         this.Client.on('invalidSession', () => {

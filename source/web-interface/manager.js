@@ -17,7 +17,7 @@ const {
     MFALevel
 } = require('../functions/enums')
 const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
-const { SystemLog, GetLogs, GetUptimeHistory } = require('../functions/systemLog')
+const System = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
 const { MessageType, GuildVerificationLevel } = require('discord.js')
@@ -1550,7 +1550,7 @@ class WebInterfaceManager {
             if (this.ClientType == 'MOBILE') {
                 this.RenderPage(req, res, 'SystemLogsNotSupported', {})
             } else {
-                this.RenderPage(req, res, 'SystemLogs', { logs: GetLogs(), uptimeHistory: GetUptimeHistory() })
+                this.RenderPage(req, res, 'SystemLogs', { logs: System.GetLogs(), uptimeHistory: System.GetUptimeHistory() })
             }
         })
 
@@ -1971,7 +1971,7 @@ class WebInterfaceManager {
 
         this.app.post('/DiscordClient/Stop', (req, res) => {
             if (this.ClientType != 'MOBILE') {
-                SystemLog('Destroy bot by user (handlebars)')
+                System.Log('Destroy bot by user (handlebars)')
             }
 
             this.StopBot()
@@ -2044,7 +2044,7 @@ class WebInterfaceManager {
 
         this.app.post('/Process/Exit', (req, res) => {
             if (this.ClientType != 'MOBILE') {
-                SystemLog('Exit by user (handlebars)')
+                System.Log('Exit by user (handlebars)')
             }
             setTimeout(() => { process.exit() }, 500)
         })
