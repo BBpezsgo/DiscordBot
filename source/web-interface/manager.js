@@ -137,7 +137,7 @@ class WebInterfaceManager {
         }, 1000);
 
         this.RegisterHandlebarsRoots()
-        this.RegisterPublicRoots()
+        if (this.database) this.RegisterPublicRoots()
         this.RegisterWeatherRoots()
         this.RegisterArchiveBrowserRoots()
         
@@ -292,7 +292,7 @@ class WebInterfaceManager {
             haveHash: (GetHash(user.id) !== null && GetHash(user.id) !== undefined),
             hash: '' + GetHash(user.id),
             createdAtText: user.createdAt.getFullYear() + '. ' + user.createdAt.getMonth() + '. ' + user.createdAt.getDate() + '.',
-            haveDatabase: this.database.dataBasic[user.id] !== undefined,        
+            haveDatabase: this.database ? this.database.dataBasic[user.id] !== undefined : false,        
         }
         if (user.flags !== undefined && user.flags !== null) {            
             userJson.flags.BotHTTPInteractions = user.flags.has('BotHTTPInteractions')
