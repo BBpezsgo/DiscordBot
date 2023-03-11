@@ -880,30 +880,26 @@ button.btn-toggle-info:active {
 }
 
 .mention {
-	background-color: #8ab4f860;
+	background-color: #3d4270;
 	border-radius: 2px;
 	font-weight: 600;
-}
-
-.mention:hover {
-	background-color: #8ab4f8b0;
+	color: #c9cdfb;
 }
 
 .mention-clickable {
-	background-color: #8ab4f860;
+	background-color: #3d4270;
 	border-radius: 2px;
 	font-weight: 600;
+	color: #c9cdfb;
 	cursor: pointer;
 }
 
 .mention-clickable:hover {
-	background-color: #8ab4f8b0;
-	text-decoration: underline;
+	background-color: #5865f2;
 }
 
 .mention-clickable:active {
-	background-color: #8ab4f8;
-	text-decoration: underline;
+	background-color: #5865f2;
 }
 
 .mention-spinner::before {

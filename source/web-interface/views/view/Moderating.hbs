@@ -799,7 +799,7 @@
 
                     <div class="reaction-container">
                         {{#each reactions}}
-                        <div class="reaction{{#if me}}reaction-me{{/if}}"{{#if this.url}}{{else}} style="position:relative;top:-2px"{{/if}}>
+                        <div class="reaction{{#if me}} reaction-me{{/if}}"{{#if this.url}}{{else}} style="position:relative;top:-2px"{{/if}}>
                             {{#if this.url}}
                             <img src="{{this.url}}" width="16" height="16">
                             {{else}}
