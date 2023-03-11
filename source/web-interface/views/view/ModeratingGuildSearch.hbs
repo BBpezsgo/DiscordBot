@@ -147,7 +147,7 @@
             <table class="channel-menuitem channel-menuitem-group" style="cursor:unset" onclick="OnCaretClick('{{this.id}}')">
                 <tr>
                     <td style="padding:0 2px;word-break:break-all; width: 16px;">
-                        <div class="caret" style="pointer-events:none;" id="{{this.id}}"></div>
+                        <div class="caret caret-down" style="pointer-events:none;" id="{{this.id}}"></div>
                     </td>
                     <td style="font-size: 12px; height: 12px; text-transform: uppercase; font-weight: 600;">
                         {{this.name}}
@@ -163,7 +163,7 @@
                 </tr>
             </table>
             {{#each channels}}
-            <table class="channel-menuitem nested {{this.parentId}}"  onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">
+            <table class="channel-menuitem nested {{this.parentId}} nested-show"  onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">
                 <tr>
                     <td style="width:24px">
                         <img src="/dcbot/images/{{this.typeUrl}}.png" width="24" height="24" title="{{this.typeText}}">

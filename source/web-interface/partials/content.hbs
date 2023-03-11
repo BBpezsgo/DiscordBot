@@ -1,0 +1,106 @@
+{{#each this}}
+
+{{#switch this.type}}
+{{#case 'TEXT'}}
+{{this.data}}
+{{/case}}
+
+{{#case 'USER'}}
+{{#if this.details}}
+<span class="mention">@<img width="16" height="16"
+        style="display: inline; transform: translate(2px, 3px); border-radius: 50%;" src="{{this.details.avatarURL}}">
+    {{this.details.username}}</span>
+{{else}}
+<span class="mention-clickable"
+    onclick="event.target.classList.add('mention-spinner'); Post('/User/Fetch?id={{this.data}}',event,()=>{event.target.classList.remove('mention-spinner')})"
+    title="Click to fetch user">User {{this.data}}</span>
+{{/if}}
+{{/case}}
+
+{{#case 'CHANNEL'}}
+{{#if this.details}}
+<span class="mention">#{{this.details.name}}</span>
+{{else}}
+<span class="mention-clickable"
+    onclick="event.target.classList.add('mention-spinner'); Post('/Channel/Fetch?id={{this.data}}',event,()=>{event.target.classList.remove('mention-spinner')})"
+    title="Click to fetch channel">Channel {{this.data}}</span>
+{{/if}}
+{{/case}}
+
+{{#case 'ROLE'}}
+{{#if this.details}}
+<span class="mention">@{{this.details.name}}</span>
+{{else}}
+<span class="mention-clickable"
+    onclick="event.target.classList.add('mention-spinner'); Post('/Role/Fetch?id={{this.data}}',event,()=>{event.target.classList.remove('mention-spinner')})"
+    title="Click to fetch role">Role {{this.data}}</span>
+{{/if}}
+{{/case}}
+
+{{#case 'EMOJI'}}
+{{#if this.details.url}}
+<img width="16" height="16" style="display: inline-block;" src="{{this.details.url}}" alt="{{this.details.name}}">
+{{else}}
+<img width="16" height="16" style="display: inline-block;" src="https://cdn.discordapp.com/emojis/{{this.data}}.png"
+    alt="{{this.data}}">
+{{/if}}
+{{/case}}
+
+{{#case 'PING'}}
+<span class="mention">{{this.data}}</span>
+{{/case}}
+
+{{#case 'BOLD'}}
+<b>{{this.data}}</b>
+{{/case}}
+
+{{#case 'SPOILER'}}
+<span class="text-spoiler text-spoiler-hidden"
+    onclick="event.currentTarget.classList.remove('text-spoiler-hidden')">{{this.data}}</span>
+{{/case}}
+
+{{#case 'ITALIC'}}
+<i>{{this.data}}</i>
+{{/case}}
+
+{{#case 'BLOCK'}}
+<span class="text-content-block">{{this.data}}</span>
+{{/case}}
+
+{{#case 'SMALLCODE'}}
+<span class="text-content-smallcode">{{this.data}}</span>
+{{/case}}
+
+{{#case 'URL'}}
+{{#if this.attachmentID}}
+<span class="message-attachment" onclick="ToggleAttachment('{{../id}}-{{this.attachmentID}}')"><i
+        class="material-icons">link</i>Linked attachment</span>
+{{else}}
+<a href="{{this.data}}" target="_blank">{{this.data}}<i class="material-icons">open_in_new</i></a>
+{{/if}}
+{{/case}}
+
+{{#case 'IMG'}}
+<div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:none;">
+    <img src="{{this.data}}" style="display: block; max-height: 256px;">
+    <a href="{{this.data}}" target="_blank"><i class="material-icons">open_in_new</i></a>
+</div>
+{{/case}}
+
+{{#case 'VIDEO'}}
+<div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:none;">
+    <video src="{{this.data}}" style="display: block; max-height: 256px;" controls>
+        <a href="{{this.data}}" target="_blank"><i class="material-icons">open_in_new</i></a>
+</div>
+{{/case}}
+
+{{#case 'BR'}}
+<br>
+{{/case}}
+
+{{#casedefault}}
+{{this.type}}
+{{/casedefault}}
+{{/switch}}
+
+{{/each}}

@@ -408,7 +408,7 @@
                 display: block;
                 margin: 0px;
                 margin-top: 16px;
-                padding: 8px;
+                padding: 2px 8px;
 
                 display: grid;
                 grid-template-columns: 64px auto;
@@ -419,7 +419,9 @@
             }
 
             .message-container .message-actions {
-                display: none;
+                display: inline-block;
+                opacity: 0%;
+                pointer-events: none;
                 float: right;
                 position: relative;
                 top: -24px;
@@ -433,7 +435,8 @@
             }
 
             .message-container:hover .message-actions {
-                display: inline-block;
+                opacity: 100%;
+                pointer-events: all;
             }
 
             .message-container .message-actions:hover {
@@ -476,15 +479,183 @@
         </style>
 
         <div id="messages-container">
-            <form action="/Message/FetchMore" method="post" style="margin: 0; display: inline-block; width: 100%; text-align: center;"
+            <form action="/Message/FetchMoreSimple" method="post" style="margin: 0; display: inline-block; width: 100%; text-align: center;"
                 onsubmit="
                     event.preventDefault()
-                    Post('/Message/FetchMore?count=' + document.getElementById('fetch-count-2').value + '&channel={{channel.id}}', event, () => {Reload()}, 'fetch-msg-error-2')
+                    Post('/Message/FetchMoreSimple?channel={{channel.id}}', event, () => { Reload() }, 'fetch-msg-error-2')
                 ">
-                <input type="number" name="count" value=7 id="fetch-count-2" hidden>
-                <input type="submit" value="Fetch Messages" class="button-secondary">
+                <input type="submit" value="Load More Messages" class="button-secondary">
             </form>
             <p style="color: #b32d2d;" id="fetch-msg-error-2"></p>
+
+            <script>
+                function ToggleAttachment(id) {
+                    const attachment = document.getElementById('msg-attachment-' + id)
+                    if (attachment.style.display === 'none') {
+                        attachment.style.display = 'block'
+                    } else {
+                        const videoElement = attachment.querySelector('video')
+                        if (videoElement) {
+                            videoElement.pause()
+                        }
+                        attachment.style.display = 'none'
+                    }
+                }
+            </script>
+            
+            <style>
+                .text-spoiler {
+                    border-radius: 3px;
+                    background-color: #46484c;
+                    transition: color 200ms, background-color 200ms;
+                }
+                .text-spoiler.text-spoiler-hidden {
+                    color: transparent;
+                    user-select: none;
+                    cursor: pointer;
+                    background-color: #1e1f22;
+                }
+                .text-spoiler.text-spoiler-hidden:hover {
+                    background-color: #212226;
+                }
+
+                .text-content-block {
+                    border: none;
+                    border-left: 4px solid #4e5058;
+                    padding-left: 10px;
+                }
+
+                .text-content-smallcode {
+                    background-color: #1e1f22;
+                    border-radius: 2px;
+                    font-family: monospace;
+                    font-weight: 600;
+                    padding: 1px 2px;
+                }
+            </style>
+
+            <style>
+                .reaction-container {
+                    user-select: none;
+                }
+                .reaction-container>.reaction {
+                    display: inline-block;
+                    height: 24px;
+                    min-width: 40px;
+                    background-color: #2b2d31;
+                    border-radius: 8px;
+                    padding: 3px;
+                    margin-top: 8px;
+                    margin-right: 2px;
+                }
+                .reaction-container>.reaction>img {
+                    display: inline-block;
+                    margin-left: 2px;
+                }
+                .reaction-container>.reaction>span:first-child:not(:last-child) {
+                    display: inline-block;
+                    margin-left: 2px;
+                    width: 16px;
+                    height: 16px;
+                }
+                .reaction-container>.reaction>span:last-child {
+                    font-weight: bolder;
+                    float: right;
+                    padding-right: 6px;
+                }
+
+                .reaction-container>.reaction-me {
+                    background-color: #373a54;
+                    outline: 1px solid #5865f2;
+                }
+            </style>
+
+            <style>
+                .embed-container>.embed {
+                    background-color: #2b2d31;
+                    border-radius: 3px;
+                    display: block;
+                    padding: 12px;
+                    border: none;
+                    border-left: 4px solid #1e1f22;
+                    max-width: 60%;
+                    margin-top: 8px;
+                }
+
+                .embed-container>.embed>.embed-title {
+                    font-size: 16px;
+                    text-decoration: none;
+                    cursor: default;
+                    color: #fff;
+                    font-weight: bold;
+                }
+
+                .embed-container>.embed>.embed-title.embed-title-link {
+                    text-decoration: underline;
+                    cursor: pointer;
+                    color: var(--primary);
+                }
+
+                .embed-container>.embed>.embed-author>a {
+                    font-size: 14px;
+                    font-weight: bold;
+                    position: relative;
+                    top: -6px;
+                    text-decoration: none;
+                    cursor: default;
+                    color: #fff;
+                }
+                
+                .embed-container>.embed>.embed-author>a:link {
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+                
+                .embed-container>.embed>.embed-author>img {
+                    display: inline-block;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    margin-right: 8px;
+                }
+
+                .embed-container>.embed>.embed-thumbnail {
+                    float: right;
+                    border-radius: 6px;
+                }
+                
+                .embed-container>.embed>.embed-image {
+                    border-radius: 4px;
+                    max-width: 100%;
+                }
+                
+                .embed-container>.embed>.embed-footer {
+                    font-size: 12px;
+                }
+                
+                .embed-container>.embed>.embed-field-container {
+                    display: block;
+                }
+                
+                .embed-container>.embed>.embed-field-container>.embed-field {
+                    display: block;
+                    margin: 8px 8px 8px 0px;
+                }
+                
+                .embed-container>.embed>.embed-field-container>.embed-field>.embed-field-name {
+                    display: block;
+                    font-weight: bold;
+                    font-size: 13px;
+                }
+            </style>
+
+            <style>
+                .message-container .tag {
+                    font-size: 9px;
+                    padding: 1px 5px;
+                    font-weight: 600;
+                }
+            </style>
 
             {{#each messages}}
             <div class="message-container">
@@ -551,8 +722,9 @@
                     <div>
                         <span class="tooltiptext" style="font-weight:bold;font-size:16px;">{{author.username}}</span>
                         {{#if system}}<span class="tag">System</span>{{/if}}
+                        {{#if author.bot}}<span class="tag">BOT</span>{{/if}}
                         {{#if crosspostable}}<span class="tag">Crosspostable</span>{{/if}}
-                        <span style="color:#aaa;">{{this.createdAt}}</span>
+                        <span style="color:#aaa; cursor: default;">{{this.createdAt}}</span>
                         {{#if pinned}}
                         <span class="user-badge">
                             <img src="/images/pinned.png" title="Pinned">
@@ -560,7 +732,82 @@
                         {{/if}}
                     </div>
                     <div>
-                        {{this.cleanContent}}
+                        {{#with this.content}}{{> content}}{{/with}}
+
+                        {{#each this.attachments}}
+                        <!--<span class="message-attachment" onclick="ToggleAttachment('{{this.id}}')"><i class="material-icons">insert_drive_file</i>Attachment</span>-->
+                        <div id="msg-attachment-{{this.id}}" style="display:block;">
+                            {{#switch this.contentType}}
+                                {{#case 'image/jpeg'}}
+                                <img src="{{this.url}}"height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
+                                {{/case}}
+
+                                {{#case 'video/mp4'}}
+                                <video src="{{this.url}}" height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;" controls>
+                                {{/case}}
+
+                                {{#casedefault}}
+                                <span>{{this.contentType}}</span>
+                                {{/casedefault}}
+                            {{/switch}}
+                            <a href="{{this.url}}" target="_blank"><i class="material-icons">open_in_new</i></a>
+                        </div>
+                        {{/each}}
+                    </div>
+
+                    <div class="embed-container">
+                        {{#each embeds}}
+                        <div class="embed" style="{{#if this.color}}border-left-color:{{this.color}};{{/if}}{{#if this.thumbnail.url}}min-height:130px;{{/if}}">
+                            {{#if this.thumbnail.url}}
+                            <img src="{{this.thumbnail.url}}" height="100" class="embed-thumbnail">
+                            {{/if}}
+                            {{#if this.author}}
+                            <div class="embed-author">
+                                <img src="{{this.author.iconURL}}">
+                                <a{{#if this.author.url}} href="{{this.author.url}}"{{/if}} target="_blank">
+                                    {{this.author.name}}
+                                </a>
+                            </div>
+                            {{/if}}
+                            <a{{#if this.url}} href="{{this.url}}"{{/if}} target="_blank" class="embed-title {{#if this.url}}embed-title-link{{/if}}">
+                                {{#with this.title}}{{> content}}{{/with}}
+                            </a>
+                            <p class="embed-description">
+                                {{#with this.description}}{{> content}}{{/with}}
+                            </p>
+                            <div class="embed-field-container">
+                                {{#each this.fields}}
+                                <div class="embed-field"{{#if this.inline}} style="display:inline-block"{{/if}}>
+                                    <div class="embed-field-name">
+                                        {{#with this.name}}{{> content}}{{/with}}
+                                    </div>
+                                    <div class="embed-field-value">
+                                        {{#with this.value}}{{> content}}{{/with}}
+                                    </div>
+                                </div>
+                                {{/each}}
+                            </div>
+                            {{#if this.image}}
+                            <img src="{{this.image.url}}" class="embed-image">
+                            {{/if}}
+                            <div class="embed-footer">
+                                {{this.footer.text}}
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+
+                    <div class="reaction-container">
+                        {{#each reactions}}
+                        <div class="reaction{{#if me}}reaction-me{{/if}}"{{#if this.url}}{{else}} style="position:relative;top:-2px"{{/if}}>
+                            {{#if this.url}}
+                            <img src="{{this.url}}" width="16" height="16">
+                            {{else}}
+                            <span>{{this.name}}</span>
+                            {{/if}}
+                            <span>{{this.count}}</span>
+                        </div>
+                        {{/each}}
                     </div>
                 </div>
                 {{/if}}
@@ -570,6 +817,7 @@
 
         <script>
             window.addEventListener('DOMContentLoaded', () => {
+                if (window.location.href.includes('#noReload')) { return }
                 const objDiv = document.getElementById("messages-container")
                 objDiv.scrollTop = objDiv.scrollHeight
             })

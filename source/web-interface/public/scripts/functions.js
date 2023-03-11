@@ -21,7 +21,7 @@ function Post(url, event, callback, errorLabelID) {
             try {
                 const res = JSON.parse(xmlHttp.responseText)
                 if (res.message === 'ok' || res.message === 'kind of okay') {
-                    console.log('Success')
+                    console.log('Success:', res.details)
                     if (callback !== undefined) {
                         callback(xmlHttp.responseText)
                     }
@@ -40,6 +40,7 @@ function Post(url, event, callback, errorLabelID) {
                             `
                     }
                 } else {
+                    console.warn('HTTP POST', xmlHttp)
                     if (errorLabelID !== undefined) {
                         const errorLabel = document.getElementById(errorLabelID)
                         errorLabel.innerHTML =
@@ -54,7 +55,7 @@ function Post(url, event, callback, errorLabelID) {
                     const errorLabel = document.getElementById(errorLabelID)
                     errorLabel.innerHTML =
                         `
-                        <b><a href='${xmlHttp.responseURL}' target='_blank'>HTTP POST</a>: Invalid Response</b><br>
+                        <b><a href='${xmlHttp.responseURL}' target='_blank'>HTTP POST</a>: Error</b><br>
                         ${xmlHttp.response}
                         `
                 }

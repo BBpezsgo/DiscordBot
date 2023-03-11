@@ -1,9 +1,12 @@
 const express = require('express')
 const ExpressHandlebars = require('express-handlebars')
+const Handlebars = require('handlebars')
 const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
 const LogManager = require('../functions/log')
+const ContentParser = require('./content-parser')
+const LogError = require('../functions/errorLog')
 const CacheManager = require('../functions/offline-cache')
 const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../functions/userHashManager')
 const fs = require('fs')
@@ -27,6 +30,38 @@ const Key = require('../key')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
+
+/** @type {Handlebars.HelperDeclareSpec} */
+const HandlebarsHelpers = {
+    "equal": function(arg1, arg2, /** @type {Handlebars.HelperOptions} */ options) {
+        if (arg1 === arg2) {
+            return options.fn(this)
+        }
+        return options.inverse(this)
+    },
+    'switch': function(value, /** @type {Handlebars.HelperOptions} */ options) {
+        this.switch_value = value
+        this.done = false
+        return options.fn(this)
+    },
+    'case': function(value, /** @type {Handlebars.HelperOptions} */ options) {
+        if (this.done !== true && value === this.switch_value) {
+            this.done = true
+            return options.fn(this)
+        }
+    },
+    'casedefault': function(/** @type {Handlebars.HelperOptions} */ options) {
+        if (this.done !== true) {
+            return options.fn(this)
+        }
+    },
+    'helperMissing': function() {
+        /** @type {Handlebars.HelperOptions} */
+        const options = arguments[arguments.length - 1]
+        const args = Array.prototype.slice.call(arguments, 0, arguments.length - 1)
+        return new Handlebars.SafeString("Missing: " + options.name + "(" + args + ")")
+    }
+}
 
 class WebInterfaceManager {
     /**
@@ -59,7 +94,9 @@ class WebInterfaceManager {
         this.app.engine('hbs', ExpressHandlebars.engine({
             extname: '.hbs',
             defaultLayout: 'layout',
-            layoutsDir: Path.join(CONFIG.paths.webInterface, '/layouts')
+            layoutsDir: Path.join(CONFIG.paths.webInterface, '/layouts'),
+            helpers: HandlebarsHelpers,
+            partialsDir: Path.join(CONFIG.paths.webInterface, '/partials'),
         }))
         this.app.set('views', path.join(CONFIG.paths.webInterface, 'views'))
         this.app.set('view engine', 'hbs')
@@ -897,8 +934,13 @@ class WebInterfaceManager {
         }
 
         if (this.moderatingSearchedChannelId.length > 0) {
-            this.RenderPage_Moderating(req, res)
-            return
+            /** @type {Discord.GuildBasedChannel} */
+            const c = g.channels.cache.get(this.moderatingSearchedChannelId)
+    
+            if (c) {
+                this.RenderPage_Moderating(req, res)
+                return
+            }
         }
 
         const guild = {
@@ -998,6 +1040,104 @@ class WebInterfaceManager {
         this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, members: members, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError, emojis: emojis })
     }
 
+    /**
+     * @param {Discord.Message} message
+     */
+    GetHandlebarsMessage(message) {
+        const result = (new ContentParser.Parser(message.content)).result
+
+        var attachmentCounter = 0
+        for (let i = 0; i < result.length; i++) {
+            switch (result[i].type) {
+                case 'URL':
+                    {
+                        const URL = require('node:url')
+                        const url = URL.parse(result[i].data)
+                        if (url.path.toLowerCase().endsWith('.png') ||
+                        url.path.toLowerCase().endsWith('.jpg') ||
+                        url.path.toLowerCase().endsWith('.gif')) {
+                            attachmentCounter += 1
+                            result[i].attachmentID = attachmentCounter
+                            result.push({
+                                type: 'IMG',
+                                data: result[i].data,
+                                attachmentID: attachmentCounter
+                            })
+                        } else if (url.path.toLowerCase().endsWith('.mov') ||
+                                   url.path.toLowerCase().endsWith('.mp4')) {
+                            attachmentCounter += 1
+                            result[i].attachmentID = attachmentCounter
+                            result.push({
+                                type: 'VIDEO',
+                                data: result[i].data,
+                                attachmentID: attachmentCounter
+                            })
+                        }
+                        break
+                    }
+                case 'USER':
+                    {
+                        if (this.client.users.cache.has(result[i].data)) {
+                            const details = this.client.users.cache.get(result[i].data)
+                            result[i].details = {
+                                username: details.username,
+                                avatarURL: details.avatarURL({ size: 16 }),
+                                defaultAvatarURL: details.defaultAvatarURL,
+                            }
+                        }
+                        break
+                    }
+                case 'CHANNEL':
+                    {
+                        if (this.client.channels.cache.has(result[i].data)) {
+                            const details = this.client.channels.cache.get(result[i].data)
+                            result[i].details = {
+                                name: details.name,
+                            }
+                        }
+                        break
+                    }
+                case 'EMOJI':
+                    {
+                        const parsedEmoji = Discord.parseEmoji(element.data)
+                        var details = {
+                            id: parsedEmoji.id,
+                            animated: parsedEmoji.animated,
+                            name: parsedEmoji.name
+                        }
+                        
+                        if (this.client.emojis.cache.has(parsedEmoji.id)) {
+                            details.url = this.client.emojis.cache.get(parsedEmoji.id).url
+                        }
+
+                        result[i].details = details
+                        break
+                    }
+                case 'ROLE':
+                    {
+                        if (this.moderatingSearchedServerId && this.moderatingSearchedServerId.length > 0) {
+                            const guild = this.client.guilds.cache.get(this.moderatingSearchedServerId)
+                            if (!guild) break
+                            if (guild.roles.cache.has(result[i].data)) {
+                                const details = guild.roles.cache.get(result[i].data)
+                                result[i].details = {
+                                    name: details.name,
+                                    hexColor: details.hexColor,
+                                }
+                            }
+                        }
+                        break
+                    }
+                default:
+                    {
+                        break
+                    }
+            }
+        }
+
+        return result
+    }
+
     RenderPage_Moderating(req, res) {
         if (this.moderatingSearchedServerId.length === 0) {
             this.RenderPage_ModeratingSearch(req, res, 'No server selected')
@@ -1079,13 +1219,64 @@ class WebInterfaceManager {
             const cTxt = c
 
             cTxt.messages.cache.forEach((message) => {
+                const attachments = message.attachments.toJSON()
+                const attachmentsResult = []
+                for (const attachment of attachments) {
+                    attachmentsResult.push({
+                        contentType: attachment.contentType,
+                        description: attachment.description,
+                        height: attachment.height,
+                        width: attachment.width,
+                        id: attachment.id,
+                        name: attachment.name,
+                        spoiler: attachment.spoiler,
+                        url: attachment.url,
+                    })
+                }
+
+                const reactions = message.reactions.cache.toJSON()
+                const reactionsResult = []
+                for (const reaction of reactions) {
+                    reactionsResult.push({
+                        count: reaction.count,
+                        url: reaction.emoji.url,
+                        name: reaction.emoji.name,
+                        me: reaction.me,
+                    })
+                }
+
+                const embedsResult = []
+                for (const embed of message.embeds) {
+                    embedsResult.push({
+                        color: embed.hexColor,
+                        author: embed.author,
+                        description: (new ContentParser.Parser(embed.description)).result,
+                        footer: embed.footer,
+                        image: embed.image,
+                        thumbnail: embed.thumbnail,
+                        url: embed.url,
+                        title: (new ContentParser.Parser(embed.title)).result,
+                        fields: embed.fields.map(field => {
+                            return {
+                                name: (new ContentParser.Parser(field.name)).result,
+                                value: (new ContentParser.Parser(field.value)).result,
+                                inline: field.inline,
+                            }
+                        }),
+                    })
+                }
+
                 messages.push({
+                    content: this.GetHandlebarsMessage(message),
+                    reactions: reactionsResult,
+                    attachments: attachmentsResult,
+                    embeds: embedsResult,
                     id: message.id,
                     position: message.position,
                     applicationId: message.applicationId,
                     cleanContent: message.cleanContent,
                     tts: message.tts,
-                    content: message.content,
+                    // content: message.content,
                     createdAt: GetDate(message.createdAt),
                     createdAtTimestamp: message.createdAt.getTime(),
                     crosspostable: message.crosspostable,
@@ -1934,6 +2125,54 @@ class WebInterfaceManager {
                 })
                 .catch((error) => {
                     res.status(200).send(error)
+                })
+        })
+
+        this.app.post('/Message/FetchMoreSimple', (req, res) => {
+            const channelID = req.query.channel ?? req.body.channel
+
+            if (!channelID || typeof channelID !== 'string') {
+                res.status(400).send({ error: 'Channel is requied' })
+            }
+
+            this.client.channels.fetch(channelID)
+                .then((channel) => {
+                    if (channel.type !== Discord.ChannelType.GuildText) {
+                        res.status(400).send({ error: 'Invalid channel type' })
+                        return
+                    }
+
+                    if (channel.messages.cache.toJSON().length > 0) {
+                        const messages = channel.messages.cache.toJSON().sort((a, b) => {
+                            return a.createdTimestamp - b.createdTimestamp
+                        })
+
+                        channel.messages.fetch({ limit: 5, before: messages[0].id })
+                            .then(() => {
+                                res.status(200).send({
+                                    message: 'ok',
+                                    details: `Fetched ${5} messages before ${messages[0].id} in channel ${channel.id}`
+                                })
+                            })
+                            .catch((error) => {
+                                res.status(500).send({ error })
+                            })
+                    } else {
+                        channel.messages.fetch({ limit: 5 })
+                            .then(() => {
+                                res.status(200).send({
+                                    message: 'ok',
+                                    details: `Fetched ${5} messages in channel ${channel.id}`
+                                })
+                            })
+                            .catch((error) => {
+                                res.status(500).send({ error })
+                            })
+                    }
+                })
+                .catch((error) => {
+                    LogError(error)
+                    res.status(500).send()
                 })
         })
 
