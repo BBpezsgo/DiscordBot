@@ -1400,13 +1400,6 @@ async function processApplicationCommand(command, privateCommand) {
         return
     }
 
-    if (command.commandName === `wordle`) {
-        command.deferReply({ ephemeral: privateCommand }).then(() => {
-            CrossoutTest(command, command.options.getString('search'), privateCommand)
-        })
-        return
-    }
-
     if (command.commandName == `gift`) {
         database.UserstatsSendCommand(command.user)
         CommandGift.OnCommand(command, database)

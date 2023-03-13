@@ -185,11 +185,6 @@ function GenerateGuildCommands() {
         .setType(3)
     generatedCommands.push(showMessageXpValueContextMenu.toJSON())
 
-    const commandWordle = new SlashCommandBuilder()
-        .setName('wordle')
-        .setDescription('Wordle játék (angol)')
-    generatedCommands.push(commandWordle.toJSON())
-
     const commandHangman = new SlashCommandBuilder()
         .setName('hangman')
         .setDescription('Hangman játék')
