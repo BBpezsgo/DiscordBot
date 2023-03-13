@@ -363,12 +363,12 @@ bot.on('interactionCreate', async interaction => {
                 interaction.reply({
                     content:
                         '> Ez az üzenet **' + messageXpValue.total + '**\\🍺t ér:' + '\n' +
-                        '>   alap érték: ' + messageXpValue.messageBasicReward + '\\🍺' + '\n' +
-                        '>   fájl bónusz: ' + messageXpValue.messageAttachmentBonus + '\\🍺' + '\n' +
-                        '>   hossz bónusz: ' + messageXpValue.messageLengthBonus + '\\🍺' + '\n' +
-                        '>   emoji bónusz: ' + messageXpValue.messageEmojiBonus + '\\🍺' + '\n' +
-                        '>   link bónusz: ' + messageXpValue.otherBonuses + '\\🍺' + '\n' +
-                        '>   egyedi emoji bónusz: ' + messageXpValue.messageCustomEmojiBonus + '\\🍺'
+                        '>  Alap érték: ' + messageXpValue.messageBasicReward + '\\🍺' + '\n' +
+                        '>  \\📄 Fájl bónusz: ' + messageXpValue.messageAttachmentBonus + '\\🍺' + '\n' +
+                        '>  \\➰ Hossz bónusz: ' + messageXpValue.messageLengthBonus + '\\🍺' + '\n' +
+                        '>  \\🙂 Emoji bónusz: ' + messageXpValue.messageEmojiBonus + '\\🍺' + '\n' +
+                        '>  \\🔗 Link bónusz: ' + messageXpValue.otherBonuses + '\\🍺' + '\n' +
+                        '>  \\💄 Egyedi emoji bónusz: ' + messageXpValue.messageCustomEmojiBonus + '\\🍺'
                     ,ephemeral: true
                 })
             }
