@@ -1,7 +1,7 @@
-const { usersWithTax } = require('./enums')
-const { DatabaseManager } = require('./databaseManager')
-const { FormatError } = require('./formatError')
-const System = require('./systemLog')
+const { usersWithTax } = require('../functions/enums')
+const { DatabaseManager } = require('../functions/databaseManager')
+const { FormatError } = require('../functions/formatError')
+const System = require('../functions/systemLog')
 const fs = require('fs')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')

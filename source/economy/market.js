@@ -1,15 +1,30 @@
+const { DatabaseManager } = require('../functions/databaseManager')
 const Discord = require('discord.js')
-const fs = require('fs')
-const { DatabaseManager } = require('../../functions/databaseManager.js')
-const { Color } = require('../../functions/enums')
+const { Color } = require('../functions/enums')
 const { ActionRowBuilder, ButtonBuilder } = require('discord.js')
-const { abbrev } = require('../../functions/abbrev')
+const { abbrev } = require('../functions/abbrev')
+const seedrandom = require('seedrandom')
+
+function GetValues() {    
+    const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
+
+    const randomGenerator1 = seedrandom((dayOfYear + 0).toString().padStart(3, '0'))
+    const randomGenerator2 = seedrandom((dayOfYear + 400).toString().padStart(3, '0'))
+    const randomGenerator3 = seedrandom((dayOfYear + 800).toString().padStart(3, '0'))
+    
+    return {
+        'token': (Math.floor(randomGenerator1() * 1000) + 5000),
+        'coupon': (Math.floor(randomGenerator2() * 1000) + 4000),
+        'jewel': (Math.floor(randomGenerator3() * 100) + 11000)
+    }
+}
 
 /**
  * @param {DatabaseManager} database
  * @param {boolean} privateCommand
 */
-module.exports = (database, dataMarket, user, privateCommand = false) => {
+function OnCommand(database, dataMarket, user, privateCommand = false) {
+    const values = GetValues()
     const newEmbed = new Discord.EmbedBuilder()
         .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
         .setTitle('Piac')
@@ -23,10 +38,10 @@ module.exports = (database, dataMarket, user, privateCommand = false) => {
             {
                 name: 'Ajánlatok:',
                 value:
-                    '> 1\\🎫||' + database.dataBackpacks[user.id].quizTokens + ' db a hátizsákban|| ➜ ' + dataMarket.prices.token + '\\💵\n' +
-                    '> 1\\🎟️||' + database.dataBackpacks[user.id].tickets + ' db a hátizsákban|| ➜ ' + dataMarket.prices.coupon + '\\💵\n' +
-                    '> 1\\💍||' + database.dataBackpacks[user.id].jewel + ' db a hátizsákban|| ➜ ' + dataMarket.prices.jewel + '\\💵\n' +
-                    '> ' + dataMarket.prices.jewel + '\\💵 ➜ 1\\💍||' + database.dataBackpacks[user.id].jewel + ' db a hátizsákban||'
+                    '> 1\\🎫||' + database.dataBackpacks[user.id].quizTokens + ' db a hátizsákban|| ➜ ' + values.token + '\\💵\n' +
+                    '> 1\\🎟️||' + database.dataBackpacks[user.id].tickets + ' db a hátizsákban|| ➜ ' + values.coupon + '\\💵\n' +
+                    '> 1\\💍||' + database.dataBackpacks[user.id].jewel + ' db a hátizsákban|| ➜ ' + values.jewel + '\\💵\n' +
+                    '> ' + values.jewel + '\\💵 ➜ 1\\💍||' + database.dataBackpacks[user.id].jewel + ' db a hátizsákban||'
             }
         ])
         .setColor(Color.Highlight)
@@ -56,7 +71,7 @@ module.exports = (database, dataMarket, user, privateCommand = false) => {
     if (database.dataBackpacks[user.id].jewel <= 0) {
         buttonJewelToMoney.setDisabled(true)
     }
-    if (database.dataBasic[user.id].money < Number.parseInt(dataMarket.prices.jewel)) {
+    if (database.dataBasic[user.id].money < Number.parseInt(values.jewel)) {
         buttonMoneyToJewel.setDisabled(true)
     }
 
@@ -65,11 +80,14 @@ module.exports = (database, dataMarket, user, privateCommand = false) => {
         .setCustomId("marketClose")
         .setStyle(Discord.ButtonStyle.Secondary)
 
-    const row = new ActionRowBuilder()
+    const mainRow = new ActionRowBuilder()
         .addComponents(buttonTokenToMoney, buttonTicketToMoney, buttonJewelToMoney, buttonMoneyToJewel)
-    const row2 = new ActionRowBuilder()
-    if (privateCommand == false) {
-        row2.addComponents(buttonExit)
+    if (privateCommand === false) {
+        const secondaryRow = new ActionRowBuilder()
+        secondaryRow.addComponents(buttonExit)
+        return { embeds: [ newEmbed ], components: [ mainRow, secondaryRow ], ephemeral: false }
     }
-    return { embeds: [newEmbed], components: [row, row2], ephemeral: privateCommand }
+    return { embeds: [ newEmbed ], components: [ mainRow ], ephemeral: true }
 }
+
+module.exports = { GetValues, OnCommand }

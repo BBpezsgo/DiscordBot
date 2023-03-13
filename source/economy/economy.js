@@ -1,21 +1,149 @@
-const { Message } = require('discord.js')
+// @ts-check
+
+const Discord = require('discord.js')
 const fs = require('fs')
-/** @type {import('../../config').Config} */
-const CONFIG = require('../../config.json')
+/** @type {import('../config').Config} */
+// @ts-ignore
+const CONFIG = require('../config.json')
 const Path = require('path')
 
-/*
-((https{0,1})(:\/\/)([\w]+)(\.)([\w]+)(\.[\w]+)*((\/)[\w]+){0,}(\/){0,1}((\?)[\w\_\-]+(\=)([\w\-\+\_]+\+{0,1})+((\&)[\w\_\-]+(\=)([\w\-\+\_]+))*){0,1}((\#)[\w\-\+\_]*){0,1})
-*/
+class EconomyMember {
+    /**
+     * @param {Economy} economy
+     * @param {string} userID
+     */
+    constructor(economy, userID) {
+        this.economy = economy
+        this.userID = userID
+    }
+}
 
-const linkRegex = /((https{0,1})(:\/\/)([\w]+)(\.)([\w]+)(\.[\w]+)*((\/)[\w]+){0,}(\/){0,1}((\?)[\w\_\-]+(\=)([\w\-\+\_]+\+{0,1})+((\&)[\w\_\-]+(\=)([\w\-\+\_]+))*){0,1}((\#)[\w\-\+\_]*){0,1})/g
-const customEmojiRegex = /(<:[a-zA-Z]+:[0-9]{18}>)/
-const builtinEmojiRegex = /(:[a-z_]+:)/
+class Economy {
+    /**
+     * @param {import('../functions/databaseManager').DatabaseManager} database
+     */
+    constructor(database) {
+        this.database = database
+    }
+
+    /**
+     * @param {Discord.GuildMember} user
+     * @param {number} ammount
+     * @param {Discord.GuildTextBasedChannel} notifyChannel
+     */
+    AddScore(user, ammount, notifyChannel) {
+        const oldScore = this.database.dataBasic[user.id].score
+        this.database.dataBasic[user.id].score += ammount
+        const newScore = this.database.dataBasic[user.id].score
+    
+        if (oldScore < 1000 && newScore > 999 || oldScore < 5000 && newScore > 4999 || oldScore < 10000 && newScore > 9999 || oldScore < 50000 && newScore > 49999 || oldScore < 100000 && newScore > 99999) {
+            let rank = xpRankIcon(newScore)
+            let rankName = xpRankText(newScore)
+            let addMoney = 0
+            if (newScore < 1000) {
+            } else if (newScore < 5000) {
+                addMoney = 500
+            } else if (newScore < 10000) {
+                addMoney = 1000
+            } else if (newScore < 50000) {
+                addMoney = 1400
+            } else if (newScore < 80000) {
+                addMoney = 1800
+            } else if (newScore < 100000) {
+                addMoney = 2300
+            } else if (newScore < 140000) {
+                addMoney = 2500
+            } else if (newScore < 180000) {
+                addMoney = 2900
+            } else if (newScore < 250000) {
+                addMoney = 3300
+            } else if (newScore < 350000) {
+                addMoney = 3500
+            } else if (newScore < 500000) {
+                addMoney = 3800
+            } else if (newScore < 780000) {
+                addMoney = 4700
+            } else if (newScore < 1000000) {
+                addMoney = 5800
+            } else if (newScore < 1500000) {
+                addMoney = 10000
+            } else if (newScore < 1800000) {
+                addMoney = 11000
+            } else {
+                addMoney = 15000
+            }
+    
+            this.database.dataBasic[user.id].money += addMoney
+            const embed = new Discord.EmbedBuilder()
+                .setAuthor({ name: user.displayName, iconURL: user.displayAvatarURL() })
+                .setTitle('Szintet léptél!')
+                .addFields([
+                    {
+                        name: 'Rang',
+                        value: '\\' + rank.toString() + '  (' + rankName + ')',
+                        inline: true
+                    },
+                    {
+                        name: 'Jutalmad',
+                        value: addMoney.toString() + '\\💵',
+                        inline: true
+                    }
+                ])
+                .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/clinking-beer-mugs_1f37b.png')
+                .setColor(Discord.Colors.Blurple)
+            notifyChannel.send({ embeds: [embed] })
+        }
+    
+        this.database.SaveDatabase()
+    }
+
+    /**
+     * @param {string} userID
+     */
+    OpenDayCrate(userID) {
+        const RandomPercente = Math.floor(Math.random() * 100)
+        let val = 0
+        if (RandomPercente < 10) { // 10%
+            val = 1
+            this.database.dataBackpacks[userID].tickets += val
+    
+            return 0 + '|' + val
+        } else if (RandomPercente < 30) { // 20%
+            val = 1
+            this.database.dataBackpacks[userID].crates += val
+    
+            return 1 + '|' + val
+        } else if (RandomPercente < 60) { // 30%
+            val = Math.floor(Math.random() * 50) + 30
+            this.database.dataBasic[userID].score += val
+    
+            return 2 + '|' + val
+        } else { // 40%
+            val = Math.floor(Math.random() * 300) + 100
+            this.database.dataBasic[userID].money += val
+    
+            return 3 + '|' + val
+        }
+    }
+
+    /**
+     * @param {string} userID
+     */
+    Member(userID) {
+        const dataBasic = this.database.dataBasic[userID]
+        if (!dataBasic) return null
+        return new EconomyMember(this, userID)
+    }
+}
 
 /**
- * @param {Message} message
+ * @param {Discord.Message} message
  */
 function calculateAddXp(message) {
+    const linkRegex = /((https{0,1})(:\/\/)([\w]+)(\.)([\w]+)(\.[\w]+)*((\/)[\w]+){0,}(\/){0,1}((\?)[\w\_\-]+(\=)([\w\-\+\_]+\+{0,1})+((\&)[\w\_\-]+(\=)([\w\-\+\_]+))*){0,1}((\#)[\w\-\+\_]*){0,1})/g
+    const customEmojiRegex = /(<:[a-zA-Z]+:[0-9]{18}>)/
+    const builtinEmojiRegex = /(:[a-z_]+:)/
+    
     var settings = {
         "xpRewards": {
             "messageContents": {
@@ -142,6 +270,9 @@ function calculateAddXp(message) {
     }
 }
 
+/**
+ * @param {number} score
+ */
 function xpRankIconModern(score) {
     if (score < 1000) {
         return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/japanese-symbol-for-beginner_1f530.png'
@@ -177,6 +308,9 @@ function xpRankIconModern(score) {
         return 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/310/nazar-amulet_1f9ff.png'
     }
 }
+/**
+ * @param {number} score
+ */
 function xpRankIcon(score) {
     if (score < 1000) {
         return '🔰' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/japanese-symbol-for-beginner_1f530.png'
@@ -212,6 +346,9 @@ function xpRankIcon(score) {
         return '🧿' //'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/nazar-amulet_1f9ff.png'
     }
 }
+/**
+ * @param {number} score
+ */
 function xpRankText(score) {
     if (score < 1000) {
         return 'Ujjonc'
@@ -247,6 +384,9 @@ function xpRankText(score) {
         return 'Isten'
     }
 }
+/**
+ * @param {number} score
+ */
 function xpRankPrevoius(score) {
     if (score < 1000) {
         return 0
@@ -280,6 +420,9 @@ function xpRankPrevoius(score) {
         return 1500000
     }
 }
+/**
+ * @param {number} score
+ */
 function xpRankNext(score) {
     if (score < 1000) {
         return 1000
@@ -314,4 +457,4 @@ function xpRankNext(score) {
     }
 }
 
-module.exports =  {xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText, calculateAddXp, xpRankIconModern }
+module.exports = { Economy }

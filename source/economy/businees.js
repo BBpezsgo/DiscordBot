@@ -1,5 +1,5 @@
 const Discord = require('discord.js')
-const { DatabaseManager } = require('../../functions/databaseManager.js')
+const { DatabaseManager } = require('../functions/databaseManager.js')
 
 const now = new Date()
 const start = new Date(now.getFullYear(), 0, 0)
@@ -276,7 +276,7 @@ module.exports = (channel, sender, isPrivate, database) => {
 
                                 channel.send('> \\💰 Beszedtél \\💵**' + addMoney + '** pénzt')
                             } catch (error) {
-                                channel.send('> \\❌ ' + error.toString())
+                                channel.send('> \\❗ ' + error.toString())
                             }
                         } else {
                             channel.send('> \\❌ **Még nem termelt semmit**')

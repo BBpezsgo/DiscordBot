@@ -165,7 +165,7 @@ const { musicGetLengthText } = require('./commands/music/functions')
 
 logManager.Loading('Loading', "WS")
 const WebInterface = require('./web-interface/manager')
-const { GetHash, GetID, AddNewUser } = require('./functions/userHashManager')
+const { GetHash, GetID, AddNewUser } = require('./economy/userHashManager')
 
 logManager.Loading('Loading packet', "discord.js")
 const Discord = require('discord.js')

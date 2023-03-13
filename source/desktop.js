@@ -84,23 +84,27 @@ logManager.scriptLoadingText = 'Loading script... (loading npm packages)'
 
 
 
-logManager.Loading("Loading commands", 'database/shop')
-const CommandShop = require('./commands/database/shop')
-logManager.Loading("Loading commands", 'database/backpack')
-const CommandBackpack = require('./commands/database/backpack')
-logManager.Loading("Loading commands", 'database/market')
-const CommandMarket = require('./commands/database/market')
-logManager.Loading("Loading commands", 'database/settings')
-const CommandSettings = require('./commands/settings')
-logManager.Loading("Loading commands", 'database/gift')
-const CommandGift = require('./commands/database/gift')
+logManager.Loading("Loading commands", 'economy/shop')
+const CommandShop = require('./economy/shop')
+logManager.Loading("Loading commands", 'economy/backpack')
+const CommandBackpack = require('./economy/backpack')
+logManager.Loading("Loading commands", 'economy/open-crate')
+const CommandOpenCrate = require('./economy/open-crate')
+logManager.Loading("Loading commands", 'economy/open-daily-crate')
+const CommandOpenDailyCrate = require('./economy/open-daily-crate')
+logManager.Loading("Loading commands", 'economy/market')
+const CommandMarket = require('./economy/market')
+logManager.Loading("Loading commands", 'economy/settings')
+const CommandSettings = require('./economy/settings')
+logManager.Loading("Loading commands", 'economy/gift')
+const CommandGift = require('./economy/gift')
 logManager.Loading("Loading commands", 'quiz')
-const QuizManager = require('./commands/quiz')
+const QuizManager = require('./economy/quiz')
 logManager.Loading("Loading commands", 'poll')
 const PollManager = require('./commands/poll')
 
-logManager.Loading("Loading extensions", 'database/xpFunctions')
-const { xpRankIcon, xpRankText, calculateAddXp } = require('./commands/database/xpFunctions')
+logManager.Loading("Loading extensions", 'economy/xpFunctions')
+const { xpRankIcon, xpRankText, calculateAddXp } = require('./economy/xpFunctions')
 
 
 
@@ -135,6 +139,8 @@ logManager.Loading("Loading extensions", 'StatesManager')
 const { StatesManager } = require('./functions/statesManager.js')
 logManager.Loading("Loading extensions", 'DatabaseManager')
 const { DatabaseManager } = require('./functions/databaseManager.js')
+logManager.Loading("Loading extensions", 'EconomyManager')
+const { Economy } = require('./economy/economy')
 
 logManager.Loading("Loading extensions", "MusicPlayer")
 const MusicPlayer = require('./commands/music/functions')
@@ -213,6 +219,8 @@ if (!databaseIsSuccesfullyLoaded) {
     })
 }
 
+const economy = new Economy(database)
+
 logManager.scriptLoadingText = 'Loading script... (create WebInterface instance)'
 
 const ws = new WebInterface('1234', '192.168.1.100', 5665, bot, logManager, database, StartBot, StopBot, statesManager, 'DESKTOP')
@@ -228,82 +236,6 @@ const mailManager = new MailManager(database)
 
 logManager.scriptLoadingText = 'Loading script... (create Game instance)'
 const game = new Game()
-
-//#endregion
-
-logManager.scriptLoadingText = 'Loading script... (define some functions)'
-//#region Functions
-
-/**
-* @param {Discord.User} user
-* @param {Discord.TextChannel} channel
-* @param {number} ammount
- */
-function addXp(user, channel, ammount) {
-    const oldScore = database.dataBasic[user.id].score
-    database.dataBasic[user.id].score += ammount
-    const newScore = database.dataBasic[user.id].score
-
-    if (oldScore < 1000 && newScore > 999 || oldScore < 5000 && newScore > 4999 || oldScore < 10000 && newScore > 9999 || oldScore < 50000 && newScore > 49999 || oldScore < 100000 && newScore > 99999) {
-        let rank = xpRankIcon(newScore)
-        let rankName = xpRankText(newScore)
-        let addMoney = 0
-        if (newScore < 1000) {
-        } else if (newScore < 5000) {
-            addMoney = 500
-        } else if (newScore < 10000) {
-            addMoney = 1000
-        } else if (newScore < 50000) {
-            addMoney = 1400
-        } else if (newScore < 80000) {
-            addMoney = 1800
-        } else if (newScore < 100000) {
-            addMoney = 2300
-        } else if (newScore < 140000) {
-            addMoney = 2500
-        } else if (newScore < 180000) {
-            addMoney = 2900
-        } else if (newScore < 250000) {
-            addMoney = 3300
-        } else if (newScore < 350000) {
-            addMoney = 3500
-        } else if (newScore < 500000) {
-            addMoney = 3800
-        } else if (newScore < 780000) {
-            addMoney = 4700
-        } else if (newScore < 1000000) {
-            addMoney = 5800
-        } else if (newScore < 1500000) {
-            addMoney = 10000
-        } else if (newScore < 1800000) {
-            addMoney = 11000
-        } else {
-            addMoney = 15000
-        }
-
-        database.dataBasic[user.id].money += addMoney
-        const embed = new Discord.EmbedBuilder()
-            .setAuthor({ name: user.username, iconURL: user.avatarURL() })
-            .setTitle('Szintet léptél!')
-            .addFields([
-                {
-                    name: 'Rang',
-                    value: '\\' + rank.toString() + '  (' + rankName + ')',
-                    inline: true
-                },
-                {
-                    name: 'Jutalmad',
-                    value: addMoney.toString() + '\\💵',
-                    inline: true
-                }
-            ])
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/clinking-beer-mugs_1f37b.png')
-            .setColor(Color.Highlight)
-        channel.send({ embeds: [embed] })
-    }
-
-    database.SaveDatabase()
-}
 
 //#endregion
 
@@ -412,241 +344,6 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
 
 //#endregion
 
-//#region Commands
-logManager.scriptLoadingText = 'Loading script... (define some command functions)'
-//#region Command Functions
-
-/**
- * @param {number} userId
- * @returns {string} The result string
- */
-function openDayCrate(userId) {
-    const RandomPercente = Math.floor(Math.random() * 100)
-    let val = 0
-    if (RandomPercente < 10) { // 10%
-        val = 1
-        database.dataBackpacks[userId].tickets += val
-
-        return 0 + '|' + val
-    } else if (RandomPercente < 30) { // 20%
-        val = 1
-        database.dataBackpacks[userId].crates += val
-
-        return 1 + '|' + val
-    } else if (RandomPercente < 60) { // 30%
-        val = Math.floor(Math.random() * 50) + 30
-        database.dataBasic[userId].score += val
-
-        return 2 + '|' + val
-    } else { // 40%
-        val = Math.floor(Math.random() * 300) + 100
-        database.dataBasic[userId].money += val
-
-        return 3 + '|' + val
-    }
-}
-
-//#endregion
-
-/**
- * @param {Discord.User} sender 
- * @param {boolean} privateCommand
- */
-function commandStore(sender, privateCommand) {
-    const GetUserColor = require('./functions/userColor')
-    const { abbrev } = require('./functions/abbrev')
-    
-    var dayCrates = (database.dataBot.day - database.dataBasic[sender.id].day) / 7
-    var crates = database.dataBackpacks[sender.id].crates
-    var gifts = database.dataBackpacks[sender.id].gifts
-    var tickets = database.dataBackpacks[sender.id].tickets
-    var getGifts = database.dataBackpacks[sender.id].getGift
-    var quizTokens = database.dataBackpacks[sender.id].quizTokens
-    var smallLuckyCard = database.dataBackpacks[sender.id].luckyCards.small
-    var mediumLuckyCard = database.dataBackpacks[sender.id].luckyCards.medium
-    var largeLuckyCard = database.dataBackpacks[sender.id].luckyCards.large
-    var money = database.dataBasic[sender.id].money
-
-    const embed = new Discord.EmbedBuilder()
-        .setAuthor({ name: sender.username, iconURL: sender.avatarURL() })
-        .setTitle('Hátizsák')
-        .addFields([
-            { name: 'Pénz', value: '\\💵 ' + abbrev(money), inline: false },
-            {
-                name: 'Alap cuccok', value: 
-                '> \\🧱 ' + crates + ' láda\n' +
-                '> \\🎁 ' + gifts + ' ajándék\n' +
-                '> \\🎟️ ' + tickets + ' kupon\n' +
-                '> \\🎫 ' + quizTokens + ' Quiz Token\n' +
-                '> \\🧰 ' + Math.floor(dayCrates) + ' heti láda',
-                inline: false
-            },
-            {
-                name: 'Sorsjegyek', value: 
-                '> \\💶 ' + smallLuckyCard + ' Black Jack\n' +
-                '> \\💷 ' + mediumLuckyCard + ' Buksza\n' +
-                '> \\💴 ' + largeLuckyCard + ' Fáraók Kincse',
-                inline: false
-            }
-        ])
-        .setFooter({ text: 'Ha használni szeretnéd az egyik cuccodat, kattints az ikonjára!' })
-        .setColor(GetUserColor(database.dataBasic[sender.id].color))
-        .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/briefcase_1f4bc.png')
-    if (getGifts > 0) {
-        if (getGifts == 1) {
-            embed.addFields([{ name: 'Van egy ajándékod, ami kicsomagolásra vár', value: 'Kattints a \\🎀-ra a kicsomagoláshoz!' }])
-        } else {
-            embed.addFields([{ name: 'Van ' + getGifts + ' ajándékod, ami kicsomagolásra vár', value: 'Kattints a \\🎀-ra a kicsomagoláshoz!' }])
-        }
-    }
-    const buttonCrate = new ButtonBuilder()
-        .setLabel("🧱")
-        .setCustomId("openCrate")
-        .setStyle(Discord.ButtonStyle.Primary)
-    const buttonDayCrate = new ButtonBuilder()
-        .setLabel("🧰")
-        .setCustomId("openDayCrate")
-        .setStyle(Discord.ButtonStyle.Primary)
-    const buttonLuckyCardSmall = new ButtonBuilder()
-        .setLabel("💶")
-        .setCustomId("useLuckyCardSmall")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonLuckyCardMedium = new ButtonBuilder()
-        .setLabel("💷")
-        .setCustomId("useLuckyCardMedium")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonLuckyCardLarge = new ButtonBuilder()
-        .setLabel("💴")
-        .setCustomId("useLuckyCardLarge")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonOpenGift = new ButtonBuilder()
-        .setLabel("🎀")
-        .setCustomId("openGift")
-        .setStyle(Discord.ButtonStyle.Primary)
-    const buttonSendGift = new ButtonBuilder()
-        .setLabel("🎁")
-        .setCustomId("sendGift")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    if (!crates > 0) { buttonCrate.setDisabled(true) }
-    if (!(Math.floor(dayCrates)) > 0) { buttonDayCrate.setDisabled(true) }
-    if (!smallLuckyCard > 0) { buttonLuckyCardSmall.setDisabled(true) }
-    if (!mediumLuckyCard > 0) { buttonLuckyCardMedium.setDisabled(true) }
-    if (!largeLuckyCard > 0) { buttonLuckyCardLarge.setDisabled(true) }
-    if (!getGifts > 0) { buttonOpenGift.setDisabled(true) }
-    if (!gifts > 0) { buttonSendGift.setDisabled(true) }
-    const rowPrimary = new ActionRowBuilder()
-        .addComponents(buttonCrate, buttonDayCrate, buttonLuckyCardSmall, buttonLuckyCardMedium, buttonLuckyCardLarge)
-    const rowSecondary = new ActionRowBuilder()
-        .addComponents(buttonSendGift)
-    if (getGifts > 0) { rowSecondary.addComponents(buttonOpenGift) }
-    return { embeds: [embed], components: [rowPrimary, rowSecondary], ephemeral: privateCommand }
-}
-
-/**
- * @param {Discord.GuildMember} sender 
- * @param {number} ammount
- * @param {boolean} privateCommand
- */
-function commandAllNapi(sender, ammount, privateCommand) {
-    if (Math.floor((database.dataBot.day - database.dataBasic[sender.id].day) / 7) <= 0) {
-        return { content: '> **\\❌ Nincs heti ládád! \\🧰**', ephemeral: privateCommand }
-    } else {
-        var dayCrateCountRaw = (database.dataBot.day - database.dataBasic[sender.id].day) / 7
-        let dayCrates = Math.min(dayCrateCountRaw, ammount)
-
-        let getXpS = 0
-        let getChestS = 0
-        let getMoney = 0
-        let getTicket = 0
-        for (let i = 0; i < Math.floor(dayCrates); i++) {
-
-            const rewald = openDayCrate(sender.id)
-            const rewaldIndex = rewald.split('|')[0]
-            const rewaldValue = parseInt(rewald.split('|')[1])
-
-            if (rewaldIndex === '2') {
-                getXpS += rewaldValue
-            } else if (rewaldIndex === '3') {
-                getMoney += rewaldValue
-            } else if (rewaldIndex === '1') {
-                getChestS += 1
-            } else if (rewaldIndex === '0') {
-                getTicket += 1
-            }
-
-        }
-
-
-        database.dataBasic[sender.id].day = database.dataBasic[sender.id].day + (Math.floor(dayCrates) * 7)
-        database.SaveDatabase()
-
-        return {
-            content: '> ' + Math.floor(dayCrates) + 'x \\🧰 Kaptál:\n' +
-                '>     \\💵 **' + getMoney + '** pénzt\n' +
-                '>     \\🍺 **' + getXpS + '** xpt\n' +
-                '>     \\🧱 **' + getChestS + '** ládát\n' +
-                '>     \\🎟️ **' + getTicket + '** kupont',
-            ephemeral: privateCommand
-        }
-    }
-}
-
-/**
- * @param {Discord.GuildMember} sender 
- * @param {number} ammount
- * @param {boolean} privateCommand
- */
-function commandAllCrate(sender, ammount, privateCommand) {
-    if (database.dataBackpacks[sender.id].crates === 0) {
-        return {
-            content: '> **\\❌ Nincs ládád! \\🧱**',
-            ephemeral: privateCommand
-        }
-    } else {
-        let Crates = Math.min(database.dataBackpacks[sender.id].crates, ammount)
-
-        let getXpS = 0
-        let getGiftS = 0
-        let getMoney = 0
-        for (let i = 0; i < Crates; i++) {
-
-            let replies = ['xp', 'money', 'gift']
-            let random = Math.floor(Math.random() * 3)
-            let out = replies[random]
-            let val = 0
-
-            if (out === 'xp') {
-                val = Math.floor(Math.random() * 110) + 100
-                getXpS += val
-                database.dataBasic[sender.id].score += val
-            }
-            if (out === 'money') {
-                val = Math.floor(Math.random() * 2000) + 2000
-                getMoney += val
-                database.dataBasic[sender.id].money += val
-            }
-            if (out === 'gift') {
-                getGiftS += 1
-                database.dataBackpacks[sender.id].gifts += 1
-            }
-        }
-
-        database.dataBackpacks[sender.id].crates = database.dataBackpacks[sender.id].crates - Crates
-        database.SaveDatabase()
-
-        return {
-            content: '> ' + Crates + 'x \\🧱 Kaptál:\n' +
-                '>     \\🍺 **' + getXpS + '** xpt\n' +
-                '>     \\💵 **' + getMoney + '** pénzt\n' +
-                '>     \\🎁 **' + getGiftS + '** ajándékot',
-            ephemeral: privateCommand
-        }
-
-    }
-}
-
-//#endregion
-
 logManager.scriptLoadingText = 'Loading script... (setup client listeners)'
 bot.on('interactionCreate', async interaction => {
     if (interaction.member === undefined)
@@ -702,7 +399,7 @@ bot.on('interactionCreate', async interaction => {
                     }
                 }
             } catch (error) {
-                interaction.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
+                interaction.reply({ content: '> **\\❗ ' + error.toString() + '**', ephemeral: true })
             }
         }
     } else if (interaction.isCommand()) processApplicationCommand(interaction, privateCommand)
@@ -885,44 +582,45 @@ bot.on('interactionCreate', async interaction => {
         }
 
         if (interaction.component.customId.startsWith('market')) {
+            const values = CommandMarket.GetValues()
             const money = database.dataBasic[interaction.user.id].money
             const buyItem = interaction.component.customId.replace('market', '')
             if (buyItem == 'TokenToMoney') {
                 if (database.dataBackpacks[interaction.user.id].quizTokens > 0) {
-                    database.dataBasic[interaction.user.id].money += Number.parseInt(database.dataMarket.prices.token)
+                    database.dataBasic[interaction.user.id].money += Number.parseInt(values.token)
                     database.dataBackpacks[interaction.user.id].quizTokens -= 1
 
-                    interaction.update(CommandMarket(database, database.dataMarket, interaction.user, privateCommand))
+                    interaction.update(CommandMarket.OnCommand(database, database.dataMarket, interaction.user, privateCommand))
                     database.SaveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'TicketToMoney') {
                 if (database.dataBackpacks[interaction.user.id].tickets > 0) {
-                    database.dataBasic[interaction.user.id].money += Number.parseInt(database.dataMarket.prices.coupon)
+                    database.dataBasic[interaction.user.id].money += Number.parseInt(values.coupon)
                     database.dataBackpacks[interaction.user.id].tickets -= 1
 
-                    interaction.update(CommandMarket(database, database.dataMarket, interaction.user, privateCommand))
+                    interaction.update(CommandMarket.OnCommand(database, database.dataMarket, interaction.user, privateCommand))
                     database.SaveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'JewelToMoney') {
                 if (database.dataBackpacks[interaction.user.id].jewel > 0) {
-                    database.dataBasic[interaction.user.id].money += Number.parseInt(database.dataMarket.prices.jewel)
+                    database.dataBasic[interaction.user.id].money += Number.parseInt(values.jewel)
                     database.dataBackpacks[interaction.user.id].jewel -= 1
 
-                    interaction.update(CommandMarket(database, database.dataMarket, interaction.user, privateCommand))
+                    interaction.update(CommandMarket.OnCommand(database, database.dataMarket, interaction.user, privateCommand))
                     database.SaveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
                 }
             } else if (buyItem == 'MoneyToJewel') {
                 if (money >= Number.parseInt(database.dataMarket.prices.jewel)) {
-                    database.dataBasic[interaction.user.id].money -= Number.parseInt(database.dataMarket.prices.jewel)
+                    database.dataBasic[interaction.user.id].money -= Number.parseInt(values.jewel)
                     database.dataBackpacks[interaction.user.id].jewel += 1
 
-                    interaction.update(CommandMarket(database, database.dataMarket, interaction.user, privateCommand))
+                    interaction.update(CommandMarket.OnCommand(database, database.dataMarket, interaction.user, privateCommand))
                     database.SaveDatabase()
                 } else {
                     interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
@@ -1084,7 +782,7 @@ bot.on('interactionCreate', async interaction => {
                     interaction.update(CommandSettings(database, interaction.member, privateCommand))
                 }, 1500)
             } catch (error) {
-                interaction.channel.send({ content: '> \\❌ **Error: ' + error + '**' })
+                interaction.channel.send({ content: '> \\❗ **Error: ' + error + '**' })
             }
 
             return
@@ -1169,7 +867,7 @@ bot.on('clickMenu', async (button) => {
                 database.SaveDatabase()
             }
         } catch (error) {
-            button.message.channel.send('> \\❌ **Hiba: ' + error.message + '**')
+            button.message.channel.send('> \\❗ **Hiba: ' + error.message + '**')
         }
         button.reply.defer()
     } else if (button.id === 'pollFinish') {
@@ -1234,8 +932,7 @@ bot.once('ready', async () => {
     System.Log('Bot is ready')
     statesManager.botLoadingState = 'Ready'
 
-    const { Taxation } = require('./functions/tax')
-    const { MarketOnStart } = require('./functions/market')
+    const { Taxation } = require('./economy/tax')
     const { TrySendWeatherReport } = require('./functions/dailyWeatherReport')
     const { TrySendMVMReport } = require('./functions/dailyElectricityReport.js')
     const DailyExchangeReport = require('./functions/dailyExchangeReport')
@@ -1261,8 +958,6 @@ bot.once('ready', async () => {
     TrySendWeatherReport(statesManager, bot, ChannelId.ProcessedNews)
     TrySendMVMReport(statesManager, bot, ChannelId.ProcessedNews)
     DailyExchangeReport.TrySendReport(statesManager, bot, ChannelId.ProcessedNews)
-
-    MarketOnStart(database)
 
     Taxation(database, lastDay)
 
@@ -1382,7 +1077,7 @@ bot.on('messageCreate', async msg => {
 
     if (message.content.length > 2) {
         if (thisIsPrivateMessage === false) {
-            addXp(sender, message.channel, calculateAddXp(message).total)
+            economy.AddScore(message.member, calculateAddXp(message).total, message.channel)
         }
     }
 
@@ -1419,7 +1114,7 @@ async function processCommand(message, thisIsPrivateMessage, sender, command) {
     //#region Enabled in dm
 
     if (command === `pms`) {
-        const CommandBusiness = require('./commands/database/businees')
+        const CommandBusiness = require('./economy/businees')
         CommandBusiness(message.channel, sender, thisIsPrivateMessage, database)
         database.UserstatsSendCommand(sender)
         return
@@ -1689,7 +1384,7 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `handlebars` || command.commandName === `webpage`) {
-        const { GetHash } = require('./functions/userHashManager')
+        const { GetHash } = require('./economy/userHashManager')
         const row = new ActionRowBuilder()
         const button = new ButtonBuilder()
             .setLabel('Weboldal')
@@ -1733,13 +1428,13 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `market` || command.commandName === `piac`) {
-        command.reply(CommandMarket(database, database.dataMarket, command.user, privateCommand))
+        command.reply(CommandMarket.OnCommand(database, database.dataMarket, command.user, privateCommand))
         database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `xp` || command.commandName === `score`) {
-        const CommandXp = require('./commands/database/xp')
+        const CommandXp = require('./economy/xp')
         CommandXp(command, database, privateCommand)
         database.UserstatsSendCommand(command.user)
         return
@@ -1838,25 +1533,25 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `crate`) {
-        command.reply(commandAllCrate(command.member, command.options.getInteger("darab"), privateCommand))
+        command.reply(CommandOpenCrate.On(command.member.id, command.options.getInteger("darab"), database))
         database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `heti`) {
-        command.reply(commandAllNapi(command.member, command.options.getInteger("darab"), privateCommand))
+        command.reply(CommandOpenDailyCrate.On(command.user.id, command.options.getInteger("darab"), database, economy))
         database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `napi`) {
-        command.reply(commandAllNapi(command.member, command.options.getInteger("darab"), privateCommand))
+        command.reply(CommandOpenDailyCrate.On(command.user.id, command.options.getInteger("darab"), database, economy))
         database.UserstatsSendCommand(command.user)
         return
     }
 
     if (command.commandName === `profil` || command.commandName === `profile`) {
-        const CommandProfil = require('./commands/profil')
+        const CommandProfil = require('./economy/profil')
         CommandProfil(database, command, privateCommand)
         database.UserstatsSendCommand(command.user)
         return
@@ -1864,7 +1559,6 @@ async function processApplicationCommand(command, privateCommand) {
 
     if (command.commandName === `backpack`) {
         CommandBackpack.OnCommand(command, database, privateCommand)
-        command.reply(commandStore(command.user, privateCommand))
         database.UserstatsSendCommand(command.user)
         return
     }
@@ -1885,14 +1579,14 @@ async function processApplicationCommand(command, privateCommand) {
                             command.editReply({ content: '> \\✔️ **Kész**', ephemeral: true })
                         })
                         .catch((error) => {
-                            command.editReply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
+                            command.editReply({ content: '> \\❗ **Hiba: ' + error.toString() + '**', ephemeral: true })
                         })
                 } catch (error) {
-                    command.editReply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
+                    command.editReply({ content: '> \\❗ **Hiba: ' + error.toString() + '**', ephemeral: true })
                 }
             })
             .catch((error) => {
-                command.editReply({ content: '> \\❌ **Hiba: ' + error.toString() + '**', ephemeral: true })
+                command.editReply({ content: '> \\❗ **Hiba: ' + error.toString() + '**', ephemeral: true })
             })
         database.UserstatsSendCommand(command.user)
         return

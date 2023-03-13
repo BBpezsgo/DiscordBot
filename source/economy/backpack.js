@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
-const GetUserColor = require('../../functions/userColor')
-const { abbrev } = require('../../functions/abbrev')
-const { DatabaseManager } = require('../../functions/databaseManager')
+const GetUserColor = require('./userColor')
+const { abbrev } = require('../functions/abbrev')
+const { DatabaseManager } = require('../functions/databaseManager')
 
 /**
  * @param {Discord.BaseInteraction<Cached>} e 

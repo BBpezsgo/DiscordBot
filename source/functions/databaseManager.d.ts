@@ -18,15 +18,15 @@ export type DataBasic = UserInDatabase & {
     privateCommands: boolean
 }
 
-export type DataMarket = {
-    day: number
-    prices:
-    {
-        token: number
-        coupon: number
-        jewel: number
-    }
-}
+// export type DataMarket = {
+//     day: number
+//     prices:
+//     {
+//         token: number
+//         coupon: number
+//         jewel: number
+//     }
+// }
 
 export type DataBackpack = UserInDatabase & {
     crates: number
@@ -127,7 +127,7 @@ export class DatabaseManager {
     dataUserstats: Users<DataUserstats>
     dataBusinesses: Users<DataBusiness>
 
-    dataMarket: DataMarket
+    // dataMarket: DataMarket
     dataPolls: DataPoll
     dataMail: DataMail
     dataBot: DataBot

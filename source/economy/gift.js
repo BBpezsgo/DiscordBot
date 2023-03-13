@@ -1,5 +1,35 @@
 const Discord = require('discord.js')
-const { DatabaseManager } = require('../../functions/databaseManager')
+const { DatabaseManager } = require('../functions/databaseManager')
+
+/**
+ * @param {string} userID
+ * @param {DatabaseManager} database
+ * @returns {{ammount: number, type: 'MONEY' | 'XP'}?}
+ */
+function OpenGift(userID, database) {
+    if (database.dataBackpacks[userID].getGift <= 0) return null
+    
+    const typeResult = ['xp', 'money'][Math.floor(Math.random() * 2)]
+    const result = { }
+
+    if (typeResult === 'xp') {
+        const ammount = Math.floor(Math.random() * 530) + 210
+        result.ammount = ammount
+        result.type = 'XP'
+        database.dataBasic[e.user.id].score += ammount
+        database.dataBackpacks[userID].getGift -= 1
+    } else if (typeResult === 'money') {
+        const ammount = Math.floor(Math.random() * 2300) + 1000
+        result.ammount = ammount
+        result.type = 'MONEY'
+        database.dataBasic[e.user.id].money += ammount
+        database.dataBackpacks[userID].getGift -= 1
+    }
+
+    database.SaveDatabase()
+
+    return result
+}
 
 /**
  * @param {Discord.ButtonInteraction<Discord.CacheType>} e
@@ -9,36 +39,34 @@ function OnButtonClick(e, database) {
     const privateCommand = database.dataBasic[e.user.id].privateCommands
 
     if (e.component.customId === 'openGift') {
-        database.dataBackpacks[e.user.id].getGift -= 1
-        var replies = ['xp', 'money']
-        var random = Math.floor(Math.random() * 2)
-        var out = replies[random]
-        var val = 0
-        var txt = ''
+        const result = OpenGift(e.user.id, database)
 
-        if (out === 'xp') {
-            val = Math.floor(Math.random() * 530) + 210
-            txt = '**\\🍺 ' + val + '** xp-t'
-            database.dataBasic[e.user.id].score += val
+        if (result === null) {
+            e.reply({ content: '> \\🎀 Nincs ajándékod amit kinyithatnál!', ephemeral: true })
+            e.message.edit(commandStore(e.user, privateCommand))
+        } else {
+            switch (result.type) {
+                case 'MONEY':
+                    {
+                        e.reply({ content: '> \\🎀 Kaptál **\\💵' + result.ammount + '** pénzt', ephemeral: true })
+                        e.message.edit(commandStore(e.user, privateCommand))
+                        break
+                    }
+                case 'XP':
+                    {
+                        e.reply({ content: '> \\🎀 Kaptál **\\🍺 ' + result.ammount + '** xp-t', ephemeral: true })
+                        e.message.edit(commandStore(e.user, privateCommand))
+                        break
+                    }
+                default:
+                    break
+            }
         }
-        if (out === 'money') {
-            val = Math.floor(Math.random() * 2300) + 1000
-            txt = '**\\💵' + val + '** pénzt'
-            database.dataBasic[e.user.id].money += val
-        }
-
-        e.reply({ content: '> \\🎀 Kaptál ' + txt, ephemeral: true })
-        e.message.edit(commandStore(e.user, privateCommand))
-
-        database.SaveDatabase()
         return true
     }
 
     if (e.component.customId === 'sendGift') {
         e.reply({ content: '> **\\❔ Használd a **`/gift <felhasználó>`** parancsot egy személy megajándékozásához, vagy jobb klikk a felhasználóra > Alkalmazások > Megajándékozás**', ephemeral: true })
-        e.message.edit(commandStore(e.user, privateCommand))
-
-        database.SaveDatabase()
         return true
     }
 
@@ -74,8 +102,8 @@ function OnCommand(command, database) {
             }
         }
     } catch (error) {
-        command.reply({ content: '> **\\❌ ' + error.toString() + '**', ephemeral: true })
+        command.reply({ content: '> **\\❗ ' + error.toString() + '**', ephemeral: true })
     }
 }
 
-module.exports = { OnButtonClick, OnCommand }
+module.exports = { OnButtonClick, OnCommand, OpenGift }

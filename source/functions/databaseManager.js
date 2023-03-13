@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const fs = require('fs')
 const { StatesManager } = require('../functions/statesManager')
-const { userstatsSendMeme, userstatsSendMusic, userstatsSendYoutube, userstatsSendMessage, userstatsSendChars, userstatsSendCommand, userstatsAddUserToMemory } = require('../functions/userstats.js')
+const { userstatsSendMeme, userstatsSendMusic, userstatsSendYoutube, userstatsSendMessage, userstatsSendChars, userstatsSendCommand, userstatsAddUserToMemory } = require('../economy/userstats.js')
 
 function IsAnything(obj) {
     if (obj == undefined) { return false }
@@ -22,7 +22,7 @@ class DatabaseManager {
         this.databaseFolderPath = databaseFolderPath
         this.backupFolderPath = backupFolderPath
         this.dataBasic = {}
-        this.dataMarket = {}
+        // this.dataMarket = {}
         this.dataBackpacks = {}
         this.dataPolls = {}
         this.dataMail = {}
@@ -185,10 +185,10 @@ class DatabaseManager {
             this.statesManager.Database.SaveText = 'bot'
             fs.writeFile(this.databaseFolderPath + 'bot.json', JSON.stringify(this.dataBot), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
         }
-        if (IsAnything(this.dataMarket)) {
-            this.statesManager.Database.SaveText = 'market'
-            fs.writeFile(this.databaseFolderPath + 'market.json', JSON.stringify(this.dataMarket), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
-        }
+        // if (IsAnything(this.dataMarket)) {
+        //     this.statesManager.Database.SaveText = 'market'
+        //     fs.writeFile(this.databaseFolderPath + 'market.json', JSON.stringify(this.dataMarket), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+        // }
         this.statesManager.Database.SaveText = ''
     }
 
@@ -204,7 +204,7 @@ class DatabaseManager {
         this.statesManager.Database.LoadText = 'bot'
         const rawJsonBot = fs.readFileSync(this.databaseFolderPath + 'bot.json', 'utf-8')
         this.statesManager.Database.LoadText = 'market'
-        const rawJsonMarket = fs.readFileSync(this.databaseFolderPath + 'market.json', 'utf-8')
+        // const rawJsonMarket = fs.readFileSync(this.databaseFolderPath + 'market.json', 'utf-8')
         this.statesManager.Database.LoadText = 'userNames'
         const rawJsonUsernames = fs.readFileSync(this.databaseFolderPath + 'userNames.json', 'utf-8')
         this.statesManager.Database.LoadText = 'mails'
@@ -233,10 +233,10 @@ class DatabaseManager {
         if (rawJsonBot != undefined && rawJsonBot != null && rawJsonBot != '') {
             this.dataBot = JSON.parse(rawJsonBot)
         } else { success = false }
-        this.statesManager.Database.ParsingText = 'market'
-        if (rawJsonMarket != undefined && rawJsonMarket != null && rawJsonMarket != '') {
-            this.dataMarket = JSON.parse(rawJsonMarket)
-        } else { success = false }
+        // this.statesManager.Database.ParsingText = 'market'
+        // if (rawJsonMarket != undefined && rawJsonMarket != null && rawJsonMarket != '') {
+        //     this.dataMarket = JSON.parse(rawJsonMarket)
+        // } else { success = false }
         this.statesManager.Database.ParsingText = 'userNames'
         if (rawJsonUsernames != undefined && rawJsonUsernames != null && rawJsonUsernames != '') {
             this.dataUsernames = JSON.parse(rawJsonUsernames)

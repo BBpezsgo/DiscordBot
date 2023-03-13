@@ -1,8 +1,8 @@
 const Discord = require('discord.js')
 const fs = require('fs')
 const { ActionRowBuilder, ButtonBuilder, SelectMenuBuilder } = require('discord.js');
-const { DatabaseManager } = require('../../functions/databaseManager')
-const { abbrev } = require('../../functions/abbrev')
+const { DatabaseManager } = require('../functions/databaseManager')
+const { abbrev } = require('../functions/abbrev')
 
 const ColorRoles = {
 	red: "850016210422464534",

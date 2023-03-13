@@ -61,7 +61,7 @@ async function SendReport(channel, statesManager) {
                 .setAuthor({ name: 'Error', url: 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', iconURL: icon })
                 .setTitle('Árfolyam betöltése sikertelen')
                 .setFooter({ text: 'www.ecb.europa.eu' })
-                .setDescription('> \\❌ ' + FormatError(error))
+                .setDescription('> \\❗ ' + FormatError(error))
         
             await channel.send({ embeds: [errorEmbed] })
         })

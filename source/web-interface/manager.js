@@ -8,7 +8,7 @@ const LogManager = require('../functions/log')
 const ContentParser = require('./content-parser')
 const LogError = require('../functions/errorLog')
 const CacheManager = require('../functions/offline-cache')
-const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../functions/userHashManager')
+const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../economy/userHashManager')
 const fs = require('fs')
 const os = require('os')
 const { DatabaseManager } = require('../functions/databaseManager.js')
@@ -830,12 +830,8 @@ class WebInterfaceManager {
             }
 
             const market = {
-                day: this.database.dataMarket.day,
-                prices: {
-                    token: this.database.dataMarket.prices.token,
-                    coupon: this.database.dataMarket.prices.coupon,
-                    jewel: this.database.dataMarket.prices.jewel,
-                },
+                // day: this.database.dataMarket.day,
+                prices: require('../economy/market').GetValues(),
             }
 
             this.RenderPage(req, res, 'Database', { userDatabase: userDatabase, user: user, bot: bot, market: market, info: info })
@@ -893,22 +889,7 @@ class WebInterfaceManager {
             day: this.database.dataBot.day,
         }
 
-        const market = {
-            day: this.database.dataMarket.day,
-            prices: {
-                token: '?',
-                coupon: '?',
-                jewel: '?',
-            },
-        }
-
-        if (this.database.dataMarket.prices != undefined) {
-            market.prices.token = this.database.dataMarket.prices.token
-            market.prices.coupon = this.database.dataMarket.prices.coupon
-            market.prices.jewel = this.database.dataMarket.prices.jewel
-        }
-
-        this.RenderPage(req, res, 'DatabaseSearch', { users: users, searchError: searchError, bot: bot, market: market, info: info })
+        this.RenderPage(req, res, 'DatabaseSearch', { users: users, searchError: searchError, bot: bot, info: info })
     }
 
     RenderPage_ModeratingSearch(req, res, searchError) {
@@ -2529,10 +2510,10 @@ class WebInterfaceManager {
             const { abbrev } = require('../functions/abbrev')
 
             const score = this.database.dataBasic[userId].score
-            const next = require('../commands/database/xpFunctions').xpRankNext(score)
+            const next = require('../economy/xpFunctions').xpRankNext(score)
             const scorePercent = score / next
-            const xpImageUrl = require('../commands/database/xpFunctions').xpRankIconModern(score)
-            const rankText = require('../commands/database/xpFunctions').xpRankText(score)
+            const xpImageUrl = require('../economy/xpFunctions').xpRankIconModern(score)
+            const rankText = require('../economy/xpFunctions').xpRankText(score)
 
             const dataBackpack = this.database.dataBackpacks[userId]
             const dataBasic = this.database.dataBasic[userId]

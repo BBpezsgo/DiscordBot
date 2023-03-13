@@ -93,7 +93,7 @@ const CommandHelp = require('./commands/help')
 
 
 logManager.Loading("Loading commands", 'quiz')
-const QuizManager = require('./commands/quiz')
+const QuizManager = require('./economy/quiz')
 logManager.Loading("Loading commands", 'poll')
 const PollManager = require('./commands/poll')
 

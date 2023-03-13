@@ -61,6 +61,6 @@ module.exports = async (command) => {
             await command.editReply({ embeds: embeds })
         })
         .catch(async error => {
-            await command.editReply({ content: `> \\❌ ${error}` })
+            await command.editReply({ content: `> \\❗ ${error}` })
         })
 }

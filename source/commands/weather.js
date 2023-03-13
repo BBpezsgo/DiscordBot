@@ -755,12 +755,12 @@ module.exports = async (command, privateCommand, earth = true) => {
                     })
                     .catch(error => {
                         LogError(error)
-                        command.editReply({ content: '> \\❌ ' + error })
+                        command.editReply({ content: '> \\❗ ' + error })
                     })
             })
             .catch(error => {
                 LogError(error)
-                command.editReply({ content: '> \\❌ ' + error })
+                command.editReply({ content: '> \\❗ ' + error })
             })
     }
 }
