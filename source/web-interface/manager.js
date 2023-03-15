@@ -79,13 +79,23 @@ class WebInterfaceManager {
         this.StartBot = StartBot
         this.StopBot = StopBot
 
+        this.ID = `${ip}:${port}`
+
         /** @type {'DESKTOP' | 'MOBILE' | 'RASPBERRY'} */
         this.ClientType = clientType
 
-        this.logManager = logManager
         this.database = database
 
         this.statesManager = statesManager
+
+        this.statesManager.WebInterface[this.ID] = {
+            IsDone: false,
+            Error: '',
+            URL: '',
+            ClientsTime: [],
+            Clients: [],
+            Requests: []
+        }
 
         if (clientType != 'MOBILE') { HbStart() }
 
@@ -222,8 +232,8 @@ class WebInterfaceManager {
         })
 
         this.OnStartListen = () => {
-            this.statesManager.WebInterface.IsDone = true
-            this.statesManager.WebInterface.URL = 'http://' + this.server.address().address + ":" + this.server.address().port
+            this.statesManager.WebInterface[this.ID].IsDone = true
+            this.statesManager.WebInterface[this.ID].URL = 'http://' + this.server.address().address + ":" + this.server.address().port
             if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'NORMAL', message: 'Listening on ' + ip + ':' + port })
             }
@@ -233,9 +243,9 @@ class WebInterfaceManager {
 
         this.server.on('error', (err) => {
             if (err.message.startsWith('listen EADDRNOTAVAIL: address not available')) {
-                this.statesManager.WebInterface.Error = 'Address not available'
+                this.statesManager.WebInterface[this.ID].Error = 'Address not available'
             } else {
-                this.statesManager.WebInterface.Error = err.message
+                this.statesManager.WebInterface[this.ID].Error = err.message
             }
             if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'ERROR', message: err.message, helperMessage: 'Server error: ' + err.message })
@@ -252,8 +262,8 @@ class WebInterfaceManager {
             socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
         })
         this.server.on('close', () => {
-            this.statesManager.WebInterface.IsDone = false
-            this.statesManager.WebInterface.URL = ''
+            this.statesManager.WebInterface[this.ID].IsDone = false
+            this.statesManager.WebInterface[this.ID].URL = ''
             if (this.ClientType != 'MOBILE') {
                 HbLog({ type: 'NORMAL', message: 'Server closed' })
             }
@@ -264,11 +274,11 @@ class WebInterfaceManager {
             }
         })
         this.server.on('connection', (socket) => {
-            this.statesManager.WebInterface.Clients.push(socket)
-            this.statesManager.WebInterface.ClientsTime.push(10)
+            this.statesManager.WebInterface[this.ID].Clients.push(socket)
+            this.statesManager.WebInterface[this.ID].ClientsTime.push(10)
         })
         this.server.on('request', (req, res) => {
-            this.statesManager.WebInterface.Requests.push(10)
+            this.statesManager.WebInterface[this.ID].Requests.push(10)
             if (this.ClientType != 'MOBILE') {
                 HbLog({ IP: req.socket.remoteAddress, type: 'REQUIEST', url: req.url, method: req.method, helperMessage: 'Someone requiested' })
             }

@@ -33,15 +33,15 @@ class StatesManager {
             Error: ''
         }
 
-        /** @type {{IsDone: boolean, Error: string, URL: string, ClientsTime: number[], Clients: Socket[], Requests: number[]}} */
-        this.WebInterface = {
+        /** @type {{IsDone: boolean, Error: string, URL: string, ClientsTime: number[], Clients: Socket[], Requests: number[]}[]} */
+        this.WebInterface = {}/* {
             IsDone: false,
             Error: '',
             URL: '',
             ClientsTime: [],
             Clients: [],
             Requests: []
-        }
+        }*/
 
         /**@type {number} */
         this.heartbeat = 0

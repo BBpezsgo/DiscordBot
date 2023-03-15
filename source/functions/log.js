@@ -211,16 +211,14 @@ class LogManager {
                     this.loadingIndex = 0
                 }
 
-                var delIndex = -1
-                for (let i = 0; i < this.statesManager.WebInterface.Requests.length; i++) {
-                    this.statesManager.WebInterface.Requests[i] -= this.deltaTime
-                    if (this.statesManager.WebInterface.Requests[i] <= 0) {
-                        delIndex = i
+                const webInterfaceIDs = Object.keys(this.statesManager.WebInterface)
+                for (const webInterfaceID of webInterfaceIDs) {
+                    var delIndex = -1
+                    for (let i = 0; i < this.statesManager.WebInterface[webInterfaceID].Requests.length; i++) {
+                        this.statesManager.WebInterface[webInterfaceID].Requests[i] -= this.deltaTime
+                        if (this.statesManager.WebInterface[webInterfaceID].Requests[i] <= 0) delIndex = i
                     }
-                }
-
-                if (delIndex > -1) {
-                    this.statesManager.WebInterface.Requests.splice(delIndex)
+                    if (delIndex > -1) this.statesManager.WebInterface[webInterfaceID].Requests.splice(delIndex)
                 }
 
                 if (this.statesManager.WeatherReport.Text.length == 0) {
@@ -242,19 +240,21 @@ class LogManager {
                 if (this.deltaTime < 0) { this.deltaTime = 0 }
                 this.lastTime = now
 
-                var removeIndex = -1
-                for (let i = 0; i < this.statesManager.WebInterface.Clients.length; i++) {
-                    const element = this.statesManager.WebInterface.Clients[i]
-                    if (element.destroyed == true) {
-                        this.statesManager.WebInterface.ClientsTime[i] -= 1
-                        if (this.statesManager.WebInterface.ClientsTime[i] <= 0) {
-                            removeIndex = i
+                for (const webInterfaceID of webInterfaceIDs) {
+                    var removeIndex = -1
+                    for (let i = 0; i < this.statesManager.WebInterface[webInterfaceID].Clients.length; i++) {
+                        const element = this.statesManager.WebInterface[webInterfaceID].Clients[i]
+                        if (element.destroyed == true) {
+                            this.statesManager.WebInterface[webInterfaceID].ClientsTime[i] -= 1
+                            if (this.statesManager.WebInterface[webInterfaceID].ClientsTime[i] <= 0) {
+                                removeIndex = i
+                            }
                         }
                     }
-                }
-                if (removeIndex > -1) {
-                    this.statesManager.WebInterface.Clients.splice(removeIndex, 1)
-                    this.statesManager.WebInterface.ClientsTime.splice(removeIndex, 1)
+                    if (removeIndex > -1) {
+                        this.statesManager.WebInterface[webInterfaceID].Clients.splice(removeIndex, 1)
+                        this.statesManager.WebInterface[webInterfaceID].ClientsTime.splice(removeIndex, 1)
+                    }
                 }
 
                 this.RefreshScreen()
@@ -359,17 +359,21 @@ class LogManager {
                 if (this.statesManager.Shard.Error.length > 0) {
                     txt += FixedWidth('│' + FixedWidth('Shard:', 20) + CliColor.FgRed + this.statesManager.Shard.Error + CliColor.FgDefault, window.width) + '\n'
                 }
-                txt += FixedWidth('', window.width) + '\n'
-                txt += FixedWidth('┌──── Web Interface', window.width)
-                txt += FixedWidth('│' + FixedWidth('HB State:', 20) + StateText_HB(this.statesManager.WebInterface.Error, this.statesManager.WebInterface.IsDone, this.statesManager.WebInterface.URL), window.width) + '\n'
-                if (this.statesManager.WebInterface.Clients.length > 0) {
-                    txt += FixedWidth('│' + FixedWidth('HB Requiests:', 20) + this.statesManager.WebInterface.Requests.length, window.width) + '\n'
-                    for (let i = 0; i < this.statesManager.WebInterface.Clients.length; i++) {
-                        const socket = this.statesManager.WebInterface.Clients[i]
-                        if (i == 0) {
-                            txt += FixedWidth('│' + FixedWidth('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
-                        } else {
-                            txt += FixedWidth('│' + FixedWidth('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
+
+                const webInterfaceIDs = Object.keys(this.statesManager.WebInterface)
+                for (const webInterfaceID of webInterfaceIDs) {
+                    txt += FixedWidth('', window.width) + '\n'
+                    txt += FixedWidth('┌──── Web Interface ' + webInterfaceID, window.width)
+                    txt += FixedWidth('│' + FixedWidth('HB State:', 20) + StateText_HB(this.statesManager.WebInterface[webInterfaceID].Error, this.statesManager.WebInterface[webInterfaceID].IsDone, this.statesManager.WebInterface[webInterfaceID].URL), window.width) + '\n'
+                    if (this.statesManager.WebInterface[webInterfaceID].Clients.length > 0) {
+                        txt += FixedWidth('│' + FixedWidth('HB Requiests:', 20) + this.statesManager.WebInterface[webInterfaceID].Requests.length, window.width) + '\n'
+                        for (let i = 0; i < this.statesManager.WebInterface[webInterfaceID].Clients.length; i++) {
+                            const socket = this.statesManager.WebInterface[webInterfaceID].Clients[i]
+                            if (i == 0) {
+                                txt += FixedWidth('│' + FixedWidth('HB Clients:', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
+                            } else {
+                                txt += FixedWidth('│' + FixedWidth('', 20) + "[" + socket.remoteAddress + ", " + this.GetSocketState(socket) + ", In: " + GetDataSize(socket.bytesRead) + ", Out: " + GetDataSize(socket.bytesWritten) + "]", window.width) + '\n'
+                            }
                         }
                     }
                 }
