@@ -33,11 +33,6 @@ process.on('uncaughtException', function (err) {
 const LogManager = require('./functions/log')
 var logManager = new LogManager(null, null)
 
-/** @param {string} message @param {'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR'} messageType */
-function Log(message, messageType = 'NORMAL') {
-    logManager.LogMessage({ message: message, messageType })
-}
-
 logManager.scriptLoadingText = 'Loading script... (set process things)'
 
 process.__defineGetter__('stderr', function() { return fs.createWriteStream(Path.join(CONFIG.paths.base, 'node.error.log'), {flags:'a'}) })
@@ -137,8 +132,6 @@ const PollManager = require('./commands/poll')
 
 
 
-logManager.Loading("Loading extensions", 'Debug translator')
-const { TranslateMessage } = require('./functions/translator.js')
 logManager.Loading("Loading extensions", 'StatesManager')
 const { StatesManager } = require('./functions/statesManager.js')
 logManager.Loading('Loading packet', "ytdl-core")
@@ -257,18 +250,10 @@ bot.on('error', error => {
 })
 
 bot.on('debug', debug => {
-    Log(debug, 'DEBUG')
-
     statesManager.ProcessDebugMessage(debug)
-    const translatedDebug = TranslateMessage(debug)
-
-    if (translatedDebug == null) return
-
-    if (translatedDebug.secret == true) return
 })
 
 bot.on('warn', warn => {
-    Log(warn, 'WARNING')
     statesManager.botLoadingState = 'Warning'
 })
 

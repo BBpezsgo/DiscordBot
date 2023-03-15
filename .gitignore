@@ -43,6 +43,7 @@ source/DiscordBotManager.pdb
 source/DiscordBotManager.deps.json
 source/DiscordBotManager.runtimeconfig.json
 source/pressures.txt
+source/functions/log-old.js
 /dist
 /log
 source/yeah.js

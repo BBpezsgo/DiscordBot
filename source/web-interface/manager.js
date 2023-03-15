@@ -20,7 +20,6 @@ const {
     MFALevel
 } = require('../functions/enums')
 const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
-const System = require('../functions/systemLog')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
 const { MessageType, GuildVerificationLevel } = require('discord.js')
@@ -1718,14 +1717,6 @@ class WebInterfaceManager {
             this.RenderPage(req, res, 'ErrorLogs', { logs: linesProcessed })
         })
 
-        this.app.get('/dcbot/view/log-system.html', (req, res) => {
-            if (this.ClientType == 'MOBILE') {
-                this.RenderPage(req, res, 'SystemLogsNotSupported', {})
-            } else {
-                this.RenderPage(req, res, 'SystemLogs', { logs: System.GetLogs(), uptimeHistory: System.GetUptimeHistory() })
-            }
-        })
-
         this.app.get('/dcbot/view/log-handlebars.html', (req, res) => {
             if (this.ClientType == 'MOBILE') {
                 this.RenderPage(req, res, 'HandlebarsLogsNotSupported', {})
@@ -2190,10 +2181,6 @@ class WebInterfaceManager {
         })
 
         this.app.post('/DiscordClient/Stop', (req, res) => {
-            if (this.ClientType != 'MOBILE') {
-                System.Log('Destroy bot by user (handlebars)')
-            }
-
             this.StopBot()
         })
 
@@ -2263,9 +2250,6 @@ class WebInterfaceManager {
         //#region POST to Web Interface
 
         this.app.post('/Process/Exit', (req, res) => {
-            if (this.ClientType != 'MOBILE') {
-                System.Log('Exit by user (handlebars)')
-            }
             setTimeout(() => { process.exit() }, 500)
         })
 

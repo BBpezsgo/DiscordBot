@@ -90,7 +90,7 @@ async function GetOldReport(statesManager, channel) {
  */
 async function SendReport(channel, statesManager) {
     statesManager.MVMReport.Text = 'Get MVM data...'
-    MVM.Get()
+    MVM.Get(statesManager)
         .then(async data => {
             if (HasInterestingData(data)) {
                 statesManager.MVMReport.Text = 'Send report message...'

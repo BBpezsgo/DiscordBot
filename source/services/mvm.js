@@ -28,14 +28,17 @@ function ParseData(text) {
 
 const ONE_DAY = (1000 * 60 * 60 * 24)
 const start = new Date(Date.now())
-const end = new Date(Date.now() + ONE_DAY*2)
+const end = new Date(Date.now() + (ONE_DAY * 7))
 
 function DateToCorrectString(date) { return `${date.getFullYear()}.${date.getMonth()+1}.${date.getDate()}` }
 
 const authRequiredRes = "<?xml version='1.0' encoding='UTF-8'?>\n<partial-response id=\"j_id1\"><redirect url=\"/aram/pages/online/aramszunet.jsf\"></redirect></partial-response>"
 
-/** @param {{viewState:string;cookies:never[]} | null} authValues */
-function Get(authValues = null) {
+/**
+ * @param {{viewState:string;cookies:never[]} | null} authValues
+ * @param {import('../functions/statesManager').StatesManager} statesManager
+ */
+function Get(statesManager, authValues = null) {
     /*authValues = [
         "f5_cspm=1234;",
         "f5avraaaaaaaaaaaaaaaa_session_=IPJJNOAEMMAGGMNICEPFEFEEFPMCHHGEAAHMIDMLBBBEGABPMMEDDNNEGANMNHJLKCBDAELMBIHFPKKLCJPAEOIJOAGDJDDOBFEJJBEKCFOIFPMKPOMCLKHBKENHLGBF;",
@@ -52,7 +55,6 @@ function Get(authValues = null) {
         "TS01be2081=01b458a307909ce3e888879b04d454442367267400b11cf742485f218ab4d433c263730307eff387de0304f4d74bf7624d8d9095a83b8c37906aba3ab67078ce0584c75e672b4ef53b9711f88a8e93700933ba2beb5607d762f81e1e91670319f4c25c108aef7876c6e9bdf31450140f3339774dd5c134286441618a3c897023c7b356c142e858d55543473401bf5f5c686e8ca707baf003c2c0c96ad38d0eeaa31d07c3af;",
         "f5avr0551801961aaaaaaaaaaaaaaaa_cspm_=EOBHIOAEIKAGOINIAIAOCKEEMNKCLHGECIHAKDNLABBEGABPNMEDDFNEGALMNHJLKCBCAELMHFDGHAOICJPAEOIJANMFMDJIHFALJPPJCFOIFPMLFHHJJMBBKENHLGID"
     ]*/
-    console.log('MVM Get')
     return new Promise(((callback) => {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/mvm/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/mvm/'), { recursive: true }) }
         if (false) {
@@ -76,6 +78,7 @@ function Get(authValues = null) {
             'aramszunetForm%3AaramszunetTable_rppDD=10&' +
             `javax.faces.ViewState=${(authValues === null) ? "-0000000000000000000:-0000000000000000000" : authValues.viewState}`
 
+        statesManager.MVMReport.Service = 'Send HTTP request...'
         const req = https.request({
             host: 'www.mvmnext.hu',
             path: '/aram/pages/online/aramszunet.jsf',
@@ -97,20 +100,25 @@ function Get(authValues = null) {
             },
             method: 'POST'
         }, (res) => {
+            statesManager.MVMReport.Service = 'Process HTTP response...'
             var data = ''
             res.on('data', (chunk) => {
                 data += chunk.toString()
+                statesManager.MVMReport.Service = `Process HTTP response (${data.length}) ...`
             })
             res.on('end', async () => {
-                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/raw.html'), data, 'utf-8')
-                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/raw.json'), JSON.stringify(data), 'utf-8')
-                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/res.json'), JSON.stringify(res.headers), 'utf-8')
+                statesManager.MVMReport.Service = 'HTTP response ended'
+
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/raw.html'), data, 'utf-8')
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/headers.json'), JSON.stringify(res.headers, null, ' '), 'utf-8')
 
                 if (data === authRequiredRes) {
+                    statesManager.MVMReport.Service = 'Can\'t access data, authorize self...'
                     if (authValues !== null) {
+                        statesManager.MVMReport.Service = 'Auth Failed'
                         throw new Error('MVM Auth Failed')
                     }
-                    const newAuthValues = await Authorize()
+                    const newAuthValues = await Authorize(statesManager)
                     var newAuthValues2 = {
                         viewState: newAuthValues.viewState,
                         cookies: []
@@ -122,15 +130,18 @@ function Get(authValues = null) {
                         }
                         newAuthValues2.cookies.push(element.split(';')[0] + ';')
                     }
-                    Get(newAuthValues2)
+                    Get(statesManager, newAuthValues2)
                         .then((a) => { callback(a) })
                         .catch((err) => { throw err })
                     return
                 }
+                statesManager.MVMReport.Service = 'Parse HTML...'
                 const dom = new jsdom.JSDOM(data)
+                statesManager.MVMReport.Service = 'Process DOM...'
                 const a = dom.window.document.body.firstElementChild.firstElementChild.childNodes[2].innerHTML
                 const parsedData = ParseData(a)
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/data.json'), JSON.stringify(parsedData, null, ' '), 'utf-8')
+                statesManager.MVMReport.Service = ''
                 callback(parsedData)
             })
         })
@@ -140,15 +151,16 @@ function Get(authValues = null) {
         })
 
         req.end(formData)
+        statesManager.MVMReport.Service = 'Wait for HTTP response ...'
     }))
 }
 
-/** @returns {Promise<{viewState:string,cookies:string[]}>} */
-function Authorize() {
-    console.log('MVM Auth')
+/** @returns {Promise<{viewState:string,cookies:string[]}>} @param {import('../functions/statesManager').StatesManager} statesManager */
+function Authorize(statesManager) {
     return new Promise(((callback) => {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/mvm/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/mvm/')) }
         
+        statesManager.MVMReport.Service = 'Authorize self: Send HTTP requiest ...'
         const req = https.request({
             host: 'www.mvmnext.hu',
             path: '/aram/pages/online/aramszunet.jsf',
@@ -157,20 +169,28 @@ function Authorize() {
             },
             method: 'GET'
         }, (res) => {
+            statesManager.MVMReport.Service = 'Authorize self: Process HTTP response ...'
             var data = ''
             res.on('data', (chunk) => {
                 data += chunk.toString()
+                statesManager.MVMReport.Service = `Authorize self: Process HTTP response (${data.length}) ...`
             })
             res.on('end', () => {
+                statesManager.MVMReport.Service = 'Authorize self: HTTP response ended'
+
                 // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/auth-raw.html'), data, 'utf-8')
-                // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/auth-raw.json'), JSON.stringify(data), 'utf-8')
                 // fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/mvm/auth-cookies.json'), JSON.stringify(res.headers['set-cookie']), 'utf-8')
+                
+                statesManager.MVMReport.Service = 'Authorize self: Parse HTML ...'
                 const dom = new jsdom.JSDOM(data)
+                statesManager.MVMReport.Service = 'Authorize self: Process DOM ...'
                 const viewState = dom.window.document.getElementById('j_id1:javax.faces.ViewState:0').value
                 const setCookie = res.headers['set-cookie']
                 if (setCookie === undefined) {
+                    statesManager.MVMReport.Service = 'Authorize self: Auth Failed'
                     throw new Error('MVM Auth failed')
                 }
+                statesManager.MVMReport.Service = 'Authorized'
                 callback({ viewState: viewState, cookies: setCookie })
             })
         })

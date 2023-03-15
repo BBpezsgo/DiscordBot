@@ -1,8 +1,7 @@
 const { GetTime, GetDataSize, Capitalize } = require('../functions/functions')
 const { WsStatus } = require('../functions/enums')
 
-const timelineStepSize = 20000
-
+/** @type {boolean} */
 const enabled = true
 
 const CliColor = {
@@ -59,7 +58,7 @@ const reprint = (text, x = 0, y = 0) => {
 }
 
 function chars(char, len) {
-    txt = ""
+    let txt = ""
     for (let i = 0; i < len; i++) {
         txt += char
     }
@@ -155,7 +154,7 @@ function RemoveColors(text) {
 }
 
 /** @param {string} text @param {number} width @param {number} marginLeft */
-function FixedWidth(text, width, marginLeft) {
+function FixedWidth(text, width, marginLeft = undefined) {
     var txt = text + ''
     const textLength = RemoveColors(txt).length
     if (marginLeft !== undefined) {
@@ -202,24 +201,10 @@ class LogManager {
         /** @type {number} */
         this.newsLoadingTextTimeout = 0
 
-        /** @type {(pressedButton: string) => void} */
-        this.promtCallback = (a) => {}
-        /** @type {string[]} */
-        this.promtButtons = []
-        /** @type {string} */
-        this.promtMessage = ''
-        /** @type {number} */
-        this.promtSelectedButton = 0
-        /** @type {string} */
-        this.promtPressedButton = ''
-
         this.scriptLoadingText = ''
 
-        /** @type {{ message: string, type: 'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR', timestamp: number }[]} */
-        this.logs = []
-
         if (bot != null && statesManager != null) {
-            if (enabled == false) { return }
+            if (enabled === false) { return }
             this.timer = setInterval(async () => {
                 this.loadingIndex += (this.deltaTime * 12)
                 if (Math.round(this.loadingIndex) >= spinner.length) {
@@ -251,8 +236,6 @@ class LogManager {
                 } else {
                     this.newsLoadingTextTimeout = 0
                 }
-
-
 
                 const now = (Date.now() / 1000)
                 this.deltaTime = now - this.lastTime
@@ -327,36 +310,13 @@ class LogManager {
     }
 
     BlankScreen() {
-        if (enabled == false) { return }
-        
+        if (enabled == false) return
         this.loadingOverride = ''
-
         var txt = ''
         txt += '\n'
-        
-        if (this.promtMessage.length > 0) {
-            const remaingHeight = (window.height - txt.split('\n').length - 1) - 2
-            for (let i = 0; i < remaingHeight; i++) {
-                txt += '\n'
-            }
-
-            txt += FixedWidth(this.promtMessage, window.width, 1) + '\n'
-            const buttons = this.promtButtons
-            var buttonsText = ''
-            for (let i = 0; i < buttons.length; i++) {
-                const button = buttons[i]
-                buttonsText += CliColor.BgWhite + CliColor.FgBlack + '| ' + button + ' |' + CliColor.FgDefault + CliColor.BgBlack + '  '
-            }
-            txt += FixedWidth(buttonsText, window.width, 1) + '\n'
-        } else {
-            const remaingHeight = window.height - txt.split('\n').length - 1
-            for (let i = 0; i < remaingHeight; i++) {
-                txt += '\n'
-            }
-        }
-
+        const remaingHeight = window.height - txt.split('\n').length - 1
+        for (let i = 0; i < remaingHeight; i++) txt += '\n'
         txt += '\n'
-
         reprint(txt)
     }
 
@@ -459,15 +419,18 @@ class LogManager {
                         txt += FixedWidth('│' + FixedWidth('ExchangeReport:', 20) + `${CliColor.FgGreen}Done${CliColor.FgWhite}`, window.width) + '\n'
                     }
                     
-                    if (this.statesManager.MVMReport.Text.length > 0) {
-                        txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' MVMReport:', 20) + this.statesManager.MVMReport.Text, window.width) + '\n'
+                    if (this.statesManager.MVMReport.Text.length > 0 || this.statesManager.MVMReport.Service.length > 0) {
+                        if (this.statesManager.MVMReport.Text.length > 0)
+                        { txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' MVM Report:', 20) + this.statesManager.MVMReport.Text, window.width) + '\n' }
+                        if (this.statesManager.MVMReport.Service.length > 0)
+                        { txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' MVM Service:', 20) + this.statesManager.MVMReport.Service, window.width) + '\n' }
                     } else {
                         txt += FixedWidth('│' + FixedWidth('MVMReport:', 20) + `${CliColor.FgGreen}Done${CliColor.FgWhite}`, window.width) + '\n'
                     }
                 }
             }
         } else {
-            txt += FixedWidth(FixedWidth('Delta time:', 20) + FixedWidth(Math.max(0, Math.round((this.deltaTime-0.1)*1000)/1000), 5) + ' sec', window.width) + '\n'
+            txt += FixedWidth(FixedWidth('Delta time:', 20) + FixedWidth(Math.max(0, Math.round((this.deltaTime-0.1)*1000)/1000).toString(), 5) + ' sec', window.width) + '\n'
             txt += FixedWidth(FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading:', 20) + this.loadingOverride, window.width) + '\n'
         }
         if (this.statesManager != undefined) {
@@ -482,42 +445,8 @@ class LogManager {
             }
         }
 
-        if (this.promtMessage.length > 0) {
-            const remaingHeight = ((window.height - txt.split('\n').length - 2) - 1) - 2
-            for (let i = 0; i < remaingHeight; i++) {
-                txt += FixedWidth('', window.width) + '\n'
-            }
-
-            txt += FixedWidth(this.promtMessage, window.width) + '\n'
-            const buttons = this.promtButtons
-            var buttonsText = ''
-            for (let i = 0; i < buttons.length; i++) {
-                const button = buttons[i]
-                if (i == this.promtSelectedButton) {
-                    buttonsText += CliColor.BgBlue + CliColor.FgWhite + '| ' + button + ' |' + CliColor.FgDefault + CliColor.BgBlack + '  '
-                } else {
-                    buttonsText += CliColor.BgWhite + CliColor.FgBlack + '| ' + button + ' |' + CliColor.FgDefault + CliColor.BgBlack + '  '
-                }
-            }
-            txt += FixedWidth(buttonsText, window.width) + '\n'
-        } else {
-            if (this.logs.length > 0) {
-                txt += '\n'
-                txt += FixedWidth('───── Logs', window.width) + '\n'
-            }
-
-            this.logs.reverse()
-            const remaingHeight = terminalSize.height - txt.split('\n').length - 4
-            for (let i = 0; i < remaingHeight; i++) {
-                const currentLogI = this.logs.length - i - 1
-                if (currentLogI < this.logs.length && currentLogI >= 0) {
-                    txt += FixedWidth(this.logs[currentLogI].message, window.width) + '\n'
-                } else {
-                    txt += FixedWidth('', window.width) + '\n'
-                }
-            }
-            this.logs.reverse()
-        }
+        const remaingHeight = terminalSize.height - txt.split('\n').length - 4
+        for (let i = 0; i < remaingHeight; i++) txt += FixedWidth('', window.width) + '\n'
 
         reprint(txt)
     }
@@ -533,84 +462,14 @@ class LogManager {
     }
 
     /**
-     * @param {string} captionText
-     * @param {string[]} buttons
-     */
-    Promt(captionText, buttons) {
-        this.promtButtons = buttons
-        this.promtMessage = captionText
-        this.promtSelectedButton = 0
-        this.promtPressedButton = ''
-        return new Promise(resolve => {
-            setInterval(() => {
-                if (this.promtPressedButton.length > 0) {
-                    resolve(this.promtPressedButton)
-
-                    this.promtCallback = null
-                    this.promtButtons = []
-                    this.promtMessage = ''
-                    this.promtSelectedButton = 0
-                    this.promtPressedButton = ''
-                }
-            }, 500)
-        })
-    }
-
-    /**
      * @param {string} key
      */
     OnKeyDown(key) {
-        if (this.CurrentlyPromt()) {
-            if (key == 'a') {
-                if (this.promtSelectedButton > 0) {
-                    this.promtSelectedButton -= 1
-                }
-            } else if (key == 'd') {
-                if (this.promtSelectedButton < this.promtButtons.length-1) {
-                    this.promtSelectedButton += 1
-                }
-            } else if (key == '\r') {
-                this.promtPressedButton = (this.promtButtons[this.promtSelectedButton])
-            }
-        } else {
-            if (key === '\u001b[A') { //  /\
-                
-            } else if (key === '\u001b[C') { //  >
-                
-            } else if (key === '\u001b[B') { //  \/
-                
-            } else if (key === '\u001b[D') { //  <
-                
-            }
-        }
-    }
-
-    CurrentlyPromt() {
-        return (this.promtMessage.length > 0)
-    }
-
-    /** @param {{ message: string, type: 'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR' }} message */
-    LogMessage(message) {
-        const trimmedMessage = (message.message === undefined) ? 'undefined' : message.message.trim()
-        if (trimmedMessage.includes('\n')) {
-            const lines = trimmedMessage.split('\n')
-            lines.forEach(line => {
-                this.logs.push({ message: line, type: message.type, timestamp: Date.now() })
-            })
-        } else {
-            this.logs.push({ message: trimmedMessage, type: message.type, timestamp: Date.now() })
-        }
+        
     }
 }
 
 class LoadingProgress {
-    /**
-     * @param {string} botState
-     * @param {number} botPercent
-     * @param {boolean} botLoading
-     * @param {string} handlebarsState
-     * @param {boolean} handlebarsLoading
-    */
     constructor() {
         this.botState = 'Betöltés'
         this.botPercent = 0

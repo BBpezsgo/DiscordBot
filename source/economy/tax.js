@@ -1,31 +1,21 @@
 const { usersWithTax } = require('../functions/enums')
 const { DatabaseManager } = require('../functions/databaseManager')
-const { FormatError } = require('../functions/formatError')
-const System = require('../functions/systemLog')
-const fs = require('fs')
-/** @type {import('../config').Config} */
-const CONFIG = require('../config.json')
-const Path = require('path')
+const LogError = require('../functions/errorLog')
 
 /** @param {DatabaseManager} database @param {number} lastDay */
 function Taxation(database, lastDay) {
     const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
-
-    for (let i = 0; i < dayOfYear - lastDay; i++) {
+    for (let day = 0; day < dayOfYear - lastDay; day++) {
         for (let i = 0; i < usersWithTax.length; i++) {
-            const element = usersWithTax[i]
+            const userID = usersWithTax[i]
             try {
-                const userMoney = database.dataBasic[element].money
-                const finalTax = Math.floor(userMoney * 0.001) * 2
-                const userMoneyFinal = userMoney - finalTax
-                // console.log("Adó:  " + userMoney + " ---1%-->" + finalTax + " ------->" + userMoneyFinal)
-                database.dataBasic[element].money = userMoneyFinal
+                const currentMoney = database.dataBasic[userID].money
+                const taxValue = Math.floor(currentMoney * 0.001) * 2
+                database.dataBasic[userID].money = currentMoney - taxValue
             } catch (error) {
-                System.Log('Tax error: ' + error.message)
-                fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), FormatError(error) + '\n', { encoding: 'utf-8' })
+                LogError(error)
             }
         }
-        // console.log("Mindenki megadózva")
     }
 }
 

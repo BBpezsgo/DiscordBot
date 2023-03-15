@@ -12,31 +12,12 @@ process.on('uncaughtException', function (err) {
     LogError(err)
 })
 
-var startedInvisible = false
-var startedByUser = false
-process.argv.forEach(function (val, index, array) {
-    if (val == 'invisible') {
-        startedInvisible = true
-    } else if (val == 'user') {
-        startedByUser = true
-    }
-})
-
 var autoStartBot = true
-
-const System = require('./functions/systemLog')
-
-System.Start(startedInvisible, startedByUser)
 
 const startDateTime = new Date(Date.now())
 
 const LogManager = require('./functions/log')
 var logManager = new LogManager(null, null)
-
-/** @param {string} message @param {'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR'} messageType */
-function Log(message, messageType = 'NORMAL') {
-    logManager.LogMessage({ message: message, messageType })
-}
 
 logManager.scriptLoadingText = 'Loading script... (set process things)'
 
@@ -54,12 +35,9 @@ ConsoleUtilities.on('onKeyDown', key => {
 
     if (key === '\u0003') {
         if (botStopped == true) {
-            System.Log('Exit by user (terminal)')
-            System.Stop()
             process.stdin.pause()
             setTimeout(() => { process.exit() }, 500)
         } else {
-            System.Log('Destroy bot by user (terminal)')
             StopBot()
         }
     }
@@ -70,9 +48,6 @@ ConsoleUtilities.EnableMouse()
 process.on('exit', function (code) {
     ConsoleUtilities.DisableMouse()
     console.log('Exit with code ' + code)
-
-    System.Log('Exited with code ' + code)
-    System.Stop()
 })
 
 logManager.scriptLoadingText = 'Loading script... (loading npm packages)'
@@ -104,7 +79,7 @@ logManager.Loading("Loading commands", 'poll')
 const PollManager = require('./commands/poll')
 
 logManager.Loading("Loading extensions", 'economy/xpFunctions')
-const { xpRankIcon, xpRankText, calculateAddXp } = require('./economy/xpFunctions')
+const { calculateAddXp } = require('./economy/xpFunctions')
 
 
 
@@ -133,8 +108,6 @@ const {
     getMapPoint
 } = require('./commands/game')
 
-logManager.Loading("Loading extensions", 'Debug translator')
-const { TranslateMessage } = require('./functions/translator.js')
 logManager.Loading("Loading extensions", 'StatesManager')
 const { StatesManager } = require('./functions/statesManager.js')
 logManager.Loading("Loading extensions", 'DatabaseManager')
@@ -200,23 +173,10 @@ logManager.Loading('Loading database', 'datas')
 const databaseIsSuccesfullyLoaded = database.LoadDatabase()
 
 if (!databaseIsSuccesfullyLoaded) {
-    System.Log('Error: Database not found')
-    Log("Can't read database!", 'ERROR')
+    logManager.Destroy()
     console.log(CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
     autoStartBot = false
-
-    logManager.Promt('Betölti a biztonsági másolatokat?', ['Igen', 'Nem']).then(pressed => {
-        if (pressed == 'Igen') {
-            database.BackupDatabase()
-
-            setTimeout(() => {
-                StartBot()
-            }, 1000)
-        } else {
-            System.Stop()
-            setTimeout(() => { process.exit() }, 500)
-        }
-    })
+    setTimeout(() => { process.exit() }, 2000)
 }
 
 const economy = new Economy(database)
@@ -244,40 +204,27 @@ logManager.scriptLoadingText = 'Loading script... (setup basic listeners)'
 
 bot.on('reconnecting', () => {
     statesManager.botLoadingState = 'Reconnecting'
-    System.Log('Reconnecting')
 })
 
 bot.on('disconnect', () => {
     statesManager.botLoadingState = 'Disconnect'
-    System.Log('Disconnect')
 })
 
 bot.on('resume', () => {
     statesManager.botLoadingState = 'Resume'
-    System.Log('Resume')
 })
 
 bot.on('error', error => {
     statesManager.botLoadingState = 'Error'
-    System.Log('Error: ' + error.message)
     LogError(error)
 })
 
 bot.on('debug', debug => {
-    Log(debug, 'DEBUG')
-    
     statesManager.ProcessDebugMessage(debug)
-    const translatedDebug = TranslateMessage(debug)
-
-    if (translatedDebug == null) return
-
-    if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
-        System.Log('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
-    }
 })
 
 bot.on('warn', warn => {
-    Log(warn, 'WARNING')
+    fs.appendFileSync( Path.join(CONFIG.paths.base, 'node.error.log'), warn + '\n', 'utf8')
     statesManager.botLoadingState = 'Warning'
 })
 
@@ -322,12 +269,10 @@ bot.on('raw', async event => {
 
 bot.on('close', () => {
     statesManager.botLoadingState = 'Close'
-    System.Log('Close')
 })
 
 bot.on('destroyed', () => {
     statesManager.botLoadingState = 'Destroyed'
-    System.Log('Destroyed')
 })
 
 bot.on('invalidSession', () => {
@@ -929,7 +874,6 @@ bot.on('clickMenu', async (button) => {
 })
 
 bot.once('ready', async () => {
-    System.Log('Bot is ready')
     statesManager.botLoadingState = 'Ready'
 
     const { Taxation } = require('./economy/tax')
@@ -1623,27 +1567,22 @@ async function processApplicationCommand(command, privateCommand) {
 
 logManager.scriptLoadingText = 'Loading script... (define some functions)'
 function StartBot() {
-    System.Log('Start bot...')
     bot.login(CONFIG.tokens.discord)
-        .then((token) => {
-            System.Log('Logged in')
+        .then(token => {
         })
-        .catch((error) => {
-            System.Log('Error: ' + error.message)
+        .catch(error => {
             LogError(error)
         })
 }
 
 function StopBot() {
     bot.destroy()
-    System.Log('Destroyed')
     botStopped = true
 }
 
 logManager.scriptLoadingText = 'Loading script... (Finishing up)'
 const endDateTime = new Date(Date.now())
 const ellapsedMilliseconds = endDateTime - startDateTime
-System.Log('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
 
 logManager.scriptLoadingText = ''
 

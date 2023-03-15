@@ -64,9 +64,10 @@ class StatesManager {
             Text: ''
         }
 
-        /** @type {{Text: string}} */
+        /** @type {{Text: string, Service: string}} */
         this.MVMReport = {
-            Text: ''
+            Text: '',
+            Service: ''
         }
 
         /** @type {{Text: string}} */

@@ -4,4 +4,4 @@ export type Result = {
     time: string
 }
 
-export function Get(): Promise<Result[]>
+export function Get(statesManager: import('../functions/statesManager').StatesManager): Promise<Result[]>

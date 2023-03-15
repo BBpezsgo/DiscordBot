@@ -21,10 +21,6 @@ process.on('uncaughtException', function (err) {
 
 var autoStartBot = true
 
-const System = require('./functions/systemLog')
-
-System.Start(false, true)
-
 const startDateTime = new Date(Date.now())
 
 const LogManager = require('./functions/log')
@@ -44,18 +40,11 @@ process.stdin.resume()
 process.stdin.on('data', function (b) {
     var s = b.toString('utf8')
     
-    if (logManager.CurrentlyPromt()) {
-        logManager.OnKeyDown(s)
-    }
-
     if (s === '\u0003') {
         if (botStopped == true) {
-            System.Log('Exit by user (terminal)')
-            System.Stop()
             process.stdin.pause()
             setTimeout(() => { process.exit() }, 500)
         } else {
-            System.Log('Destroy bot by user (terminal)')
             StopBot()
         }
     } else if (/^\u001b\[M/.test(s)) {
@@ -108,9 +97,6 @@ process.on('exit', function (code) {
     process.stdout.write('\x1b[?1005l')
     process.stdout.write('\x1b[?1003l')
     console.log('Exit with code ' + code)
-
-    System.Log('Exited with code ' + code)
-    System.Stop()
 })
 
 //#region NPM Packages and variables
@@ -724,8 +710,6 @@ async function GetOldDailyWeatherReport(channelId) {
 }
 
 bot.once('ready', async () => {
-    System.Log('Bot is ready')
-
     statesManager.botLoadingState = 'Ready'
     try {
         //DeleteCommands(bot)
@@ -1220,7 +1204,6 @@ async function processApplicationCommand(command) {
 }
 
 function StartBot() {
-    System.Log('Start bot...')
     bot.login(tokens.discord).catch((err) => {
         if (err == 'FetchError: request to https://discord.com/api/v9/gateway/bot failed, reason: getaddrinfo ENOTFOUND discord.com') {
             log(ERROR + ': Nem sikerült csatlakozni: discord.com nem található')
@@ -1237,7 +1220,6 @@ function StopBot() {
 
 const endDateTime = new Date(Date.now())
 const ellapsedMilliseconds = endDateTime - startDateTime
-System.Log('Scripts loaded in ' + ellapsedMilliseconds + 'ms')
 
 
 StartBot()

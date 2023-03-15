@@ -2,10 +2,7 @@ const Discord = require('discord.js')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const { StatesManager } = require('./statesManager')
-
 const LogError = require('./errorLog')
-const System = require('../functions/systemLog')
-const { TranslateMessage } = require('./translator')
 const LogManager = require('./log')
 
 module.exports = class DiscordBot {
@@ -51,51 +48,29 @@ module.exports = class DiscordBot {
         this.ID = '738030244367433770'
     }
 
-    /**
-     * @param {string} message
-     * @param {'DEBUG' | 'NORMAL' | 'WARNING' | 'ERROR'} messageType
-     */
-    Log(message, messageType = 'NORMAL') {
-        this.LogManager.LogMessage({ message: message, messageType })
-    }
-
     SetupListeners() {
         this.Client.on('reconnecting', () => {
             this.StatesManager.botLoadingState = 'Reconnecting'
-            System.Log('Reconnecting')
         })
 
         this.Client.on('disconnect', () => {
             this.StatesManager.botLoadingState = 'Disconnect'
-            System.Log('Disconnect')
         })
 
         this.Client.on('resume', () => {
             this.StatesManager.botLoadingState = 'Resume'
-            System.Log('Resume')
         })
 
         this.Client.on('error', error => {
             this.StatesManager.botLoadingState = 'Error'
-            System.Log('Error: ' + error.message)
             LogError(error)
         })
 
         this.Client.on('debug', debug => {
-            this.Log(debug, 'DEBUG')
-            
             this.StatesManager.ProcessDebugMessage(debug)
-            const translatedDebug = TranslateMessage(debug)
-
-            if (translatedDebug == null) return
-
-            if (translatedDebug.translatedText.startsWith('Heartbeat nyugtázva')) {
-                System.Log('Ping: ' + translatedDebug.translatedText.replace('Heartbeat nyugtázva: ', ''))
-            }
         })
 
         this.Client.on('warn', warn => {
-            this.Log(warn, 'WARNING')
             this.StatesManager.botLoadingState = 'Warning'
         })
 
@@ -141,12 +116,10 @@ module.exports = class DiscordBot {
 
         this.Client.on('close', () => {
             this.StatesManager.botLoadingState = 'Close'
-            System.Log('Close')
         })
 
         this.Client.on('destroyed', () => {
             this.StatesManager.botLoadingState = 'Destroyed'
-            System.Log('Destroyed')
         })
 
         this.Client.on('invalidSession', () => {
