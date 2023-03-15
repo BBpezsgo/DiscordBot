@@ -3,6 +3,7 @@ const fs = require('fs')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
+const LogError = require('./errorLog')
 
 /** @param {Message} message */
 function AutoReact(message) {
@@ -40,8 +41,8 @@ function AutoReact(message) {
                 }
             })
         }
-    } catch (err) {
-        console.log('  Error: ' + err.message)
+    } catch (error) {
+        LogError(error)
     }
 }
 

@@ -2879,10 +2879,7 @@ class WebInterfaceManager {
             const stream = require('stream')
             const streamPassThrough = new stream.PassThrough()
             stream.pipeline(readStream, streamPassThrough, (err) => {
-                if (err) {
-                    console.log(err)
-                    return res.status(404).send('Not Found')
-                }
+                if (err) return res.status(404).send('Not Found')
             })
             streamPassThrough.pipe(res)
         })

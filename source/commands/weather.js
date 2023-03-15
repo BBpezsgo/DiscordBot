@@ -387,7 +387,6 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
             }
         }
 
-        console.log(MetAlerts[0])
         if (MetAlerts[0] !== null) {
             if (MetAlerts[0].alerts.length > 0) {
                 description += '\n' + '\n🔔 **Riasztások:**\n'
