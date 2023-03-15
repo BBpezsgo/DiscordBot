@@ -1,7 +1,9 @@
 const Discord = require('discord.js')
 const fs = require('fs')
-const request = require("request")
+const Path = require("path")
 const { Color } = require('../functions/enums')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
 
 /**
  * @param {boolean} isMenu
@@ -136,19 +138,103 @@ class HangmanManager {
             }
         }
         return null
-    }    
+    }
+
+    /**
+     * @param {Discord.ButtonInteraction<Discord.CacheType>} e
+     */
+    OnButton(e) {
+        if (e.customId == 'hangmanStart') {
+            if (this.GetUserSettingsIndex(e.user.id) == null) {
+                e.reply({ content: '> **\\❌ Hiba: A beállításaid nem találhatók!**', ephemeral: true})
+                return true
+            }
+
+            const settings = this.userSettings[this.GetUserSettingsIndex(e.user.id)]
+            
+            var rawWordList = ''
+            if (settings.language == 'EN') {
+                rawWordList = fs.readFileSync(Path.join(CONFIG.paths.base, './word-list/english.txt'), 'utf-8')
+            } else if (settings.language == 'HU') {
+                rawWordList = fs.readFileSync(Path.join(CONFIG.paths.base, './word-list/hungarian.txt'), 'utf-8')
+            } else {
+                e.reply({ content: '> **\\❌ Hiba: Ismeretlen nyelv "' + settings.language + '"!**', ephemeral: true})
+                return true
+            }
+            var wordList = ['']
+            if (settings.language == 'EN') {
+                wordList = rawWordList.split('\n')
+            } else if (settings.language == 'HU') {
+                const wordListHU = rawWordList.split('\n')
+                for (let i = 0; i < wordListHU.length; i++) {
+                    const item = wordListHU[i]
+                    wordList.push(item.split(' ')[0])
+                }
+            }
+
+            const randomIndex = Math.floor(Math.random() * wordList.length)
+            const randomWord = wordList[randomIndex]
+
+            if (this.GetPlayerIndex(e.user.id) == null) {
+                this.players.push({ userId: e.user.id, word: randomWord, guessedLetters: [] })
+            } else {
+                this.players[this.GetPlayerIndex(e.user.id)] = { userId: e.user.id, word: randomWord, guessedLetters: [] }
+            }
+
+            CommandHangman(e, this, false)
+
+            return true
+        }
+
+        return false
+    }
+
+    /**
+     * @param {Discord.SelectMenuInteraction<Discord.CacheType>} e
+     */
+    OnSelectMenu(e) {
+        if (e.customId == 'hangmanLang') {
+            const languageSelected = e.values[0]
+            
+            if (this.GetUserSettingsIndex(e.user.id) == null) {
+                this.userSettings.push({ userId: e.user.id, difficulty: 'HARD', language: languageSelected })
+            } else {
+                this.userSettings[this.GetUserSettingsIndex(e.user.id)].language = languageSelected
+            }
+
+            CommandHangman(e, this, false)
+
+            return true
+        }
+
+        if (e.customId == 'hangmanDifficulty') {
+            const difficultySelected = e.values[0]
+            
+            if (this.GetUserSettingsIndex(e.user.id) == null) {
+                this.userSettings.push({ userId: e.user.id, difficulty: difficultySelected, language: 'HU' })
+            } else {
+                this.userSettings[this.GetUserSettingsIndex(e.user.id)].difficulty = difficultySelected
+            }
+            
+            CommandHangman(e, this, false)
+
+            return true
+        }
+
+        return false
+    }
 }
 
 /**
- * @param {Discord.Interaction} interaction
+ * @param {Discord.Interaction} e
  * @param {HangmanManager} manager
  */
-function CommandHangman(interaction, manager, isCommand) {
-    var isMenu = (manager.GetPlayerIndex(interaction.user.id) == null)
+function CommandHangman(e, manager, isCommand) {
+    var isMenu = (manager.GetPlayerIndex(e.user.id) == null)
     if (isCommand) {
-        interaction.reply(GetMessage(isMenu, manager, interaction.user))
+        e.reply(GetMessage(isMenu, manager, e.user))
     } else {
-        interaction.update(GetMessage(isMenu, manager, interaction.user))
+        e.update(GetMessage(isMenu, manager, e.user))
     }
 }
 

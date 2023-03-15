@@ -629,7 +629,7 @@ function OnSelectMenu(e, database) {
 
     if (e.customId.startsWith('shopMenu')) {
         e.update(CommandShop(e.channel, e.user, e.member, database, e.values[0], '', privateCommand))
-        return
+        return true
     }
 
     if (e.customId == 'shopBackpackColors') {
@@ -720,7 +720,7 @@ function OnSelectMenu(e, database) {
         }
         e.update(CommandShop(e.channel, e.user, e.member, database, 4, '', privateCommand))
 
-        return
+        return true
     }
 
     if (e.customId == 'shopNameColors') {
@@ -819,8 +819,10 @@ function OnSelectMenu(e, database) {
         }
 
         e.update(CommandShop(e.channel, e.user, e.member, database, 5, newColorRoleId, privateCommand))
-        return
+        return true
     }
+
+    return false
 }
 
 module.exports = { CommandShop, removeAllColorRoles, OnButtonClick, OnSelectMenu }

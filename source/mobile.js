@@ -534,11 +534,6 @@ bot.on('clickButton', async (button) => {
     button.reply.defer()
 })
 
-bot.on('clickMenu', async (menu) => {
-    menu.message.channel.send(menu.id)
-    menu.reply.defer()
-})
-
 bot.once('ready', async () => {
     statesManager.botLoadingState = 'Ready'
 

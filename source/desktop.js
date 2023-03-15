@@ -147,8 +147,6 @@ logManager.BlankScreen()
 const bot = new Discord.Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildVoiceStates ], partials: [ Discord.Partials.Channel ], presence: { activities: [{ name: 'Starting up...', type: ActivityType.Custom }] } })
 logManager.Destroy()
 
-const selfId = '738030244367433770'
-
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
 
@@ -317,38 +315,10 @@ bot.on('interactionCreate', async interaction => {
             }
         }
     } else if (interaction.isUserContextMenuCommand()) {
-        if (interaction.commandName == 'Megajándékozás') {
-            try {
-                const giftableMember = interaction.targetMember
-                if (database.dataBackpacks[interaction.user.id].gifts > 0) {
-                    if (giftableMember.id === interaction.user.id) {
-                        interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
-                    } else {
-                        if (database.dataBackpacks[giftableMember.id] != undefined && giftableMember.id != selfId) {
-                            database.dataBackpacks[giftableMember.id].getGift += 1
-                            database.dataBackpacks[interaction.user.id].gifts -= 1
-                            interaction.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
-                            giftableMember.send('> **\\✨ ' + interaction.user.username + ' megajándékozott! \\🎆**')
-                            database.SaveDatabase()
-                        } else {
-                            interaction.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
-                        }
-                    }
-                } else {
-                    if (giftableMember.id === interaction.user.id) {
-                        interaction.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true })
-                    } else {
-                        interaction.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true })
-                    }
-                }
-            } catch (error) {
-                interaction.reply({ content: '> **\\❗ ' + error.toString() + '**', ephemeral: true })
-            }
-        }
+        if (CommandGift.OnUserContextMenu(interaction, database)) return
     } else if (interaction.isCommand()) processApplicationCommand(interaction, privateCommand)
     else if (interaction.isButton()) {
-        const CommandRedditsave = require('./commands/redditsave')
-        if (CommandRedditsave.OnButtonClick(interaction)) return
+        if (require('./commands/redditsave').OnButtonClick(interaction)) return
         
         try {
             if (interaction.user.username !== interaction.message.embeds[0].author.name) {
@@ -357,275 +327,18 @@ bot.on('interactionCreate', async interaction => {
             }
         } catch (error) { }
 
-        let isOnPhone = false
-        let isInDebugMode = false
-        let playerIndex = 0
-
-        if (CommandShop.OnButtonClick(interaction, database)) {
-
-        }
-
-        if (CommandBackpack.OnButtonClick(interaction, database)) {
-            return
-        }
-
-        if (CommandGift.OnButtonClick(interaction, database)) {
-            return
-        }
-
-        if (interaction.component.customId.startsWith('game')) {
-            if (game.gameMap == null) {
-                interaction.reply('> \\❗ **Nincs létrehozva játék!**', true)
-            } else {
-                if (interaction.component.customId === 'gameW') {
-                    game.gameMap.players[playerIndex].direction = Direction.Up
-                    if (playerCanMoveToHere(game.gameMap.players[playerIndex].x, game.gameMap.players[playerIndex].y - 1, game.gameMap) === true) {
-                        game.gameMap.players[playerIndex].y -= 1
-                    }
-                    gameResetCameraPos(isOnPhone, interaction.user, game)
-
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-
-                } else if (interaction.component.customId === 'gameA') {
-                    game.gameMap.players[playerIndex].direction = Direction.Left
-                    if (playerCanMoveToHere(game.gameMap.players[playerIndex].x - 1, game.gameMap.players[playerIndex].y, game.gameMap) === true) {
-                        game.gameMap.players[playerIndex].x -= 1
-                    }
-                    gameResetCameraPos(isOnPhone, interaction.user, game)
-
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-
-                } else if (interaction.component.customId === 'gameS') {
-                    game.gameMap.players[playerIndex].direction = Direction.Down
-                    if (playerCanMoveToHere(game.gameMap.players[playerIndex].x, game.gameMap.players[playerIndex].y + 1, game.gameMap) === true) {
-                        game.gameMap.players[playerIndex].y += 1
-                    }
-                    gameResetCameraPos(isOnPhone, interaction.user, game)
-
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-
-                } else if (interaction.component.customId === 'gameD') {
-                    game.gameMap.players[playerIndex].direction = Direction.Right
-                    if (playerCanMoveToHere(game.gameMap.players[playerIndex].x + 1, game.gameMap.players[playerIndex].y, game.gameMap) === true) {
-                        game.gameMap.players[playerIndex].x += 1
-                    }
-                    gameResetCameraPos(isOnPhone, interaction.user, game)
-
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-
-                } else if (interaction.component.customId === 'gameHit') {
-                    /**
-                     * @type {MapPoint}
-                     */
-                    let mapPoint
-                    if (game.gameMap.players[playerIndex].direction === Direction.Up) {
-                        mapPoint = getMapPoint(game.gameMap.players[playerIndex].x, game.gameMap.players[playerIndex].y - 1, game.gameMap)
-                    } else if (game.gameMap.players[playerIndex].direction === Direction.Right) {
-                        mapPoint = getMapPoint(game.gameMap.players[playerIndex].x + 1, game.gameMap.players[playerIndex].y, game.gameMap)
-                    } else if (game.gameMap.players[playerIndex].direction === Direction.Down) {
-                        mapPoint = getMapPoint(game.gameMap.players[playerIndex].x, game.gameMap.players[playerIndex].y + 1, game.gameMap)
-                    } else if (game.gameMap.players[playerIndex].direction === Direction.Left) {
-                        mapPoint = getMapPoint(game.gameMap.players[playerIndex].x - 1, game.gameMap.players[playerIndex].y, game.gameMap)
-                    }
-
-                    if (mapPoint.object !== null) {
-                        /**
-                         * @type {MapObject}
-                         */
-                        let breakableObj
-                        breakableObj = mapPoint.object
-                        breakableObj.breakValue -= 1
-                        if (breakableObj.breakValue <= 0) {
-                            if (breakableObj.type === MapObjectType.bamboo) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 1)
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.blossom) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.cactus) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.cherryBlossom) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.hibiscus) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.igloo) {
-
-                            } else if (breakableObj.type === MapObjectType.mushroom) {
-
-                            } else if (breakableObj.type === MapObjectType.palm) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 3)
-                            } else if (breakableObj.type === MapObjectType.plant) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.rice) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 2)
-                            } else if (breakableObj.type === MapObjectType.rose) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.spruce) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 4)
-                            } else if (breakableObj.type === MapObjectType.sunflower) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.tanabataTree) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 2)
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            } else if (breakableObj.type === MapObjectType.tree) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Wood, 4)
-                            } else if (breakableObj.type === MapObjectType.tulip) {
-                                addItemToPlayer(game.gameMap.players[playerIndex], ItemType.Grass, 1)
-                            }
-                            mapPoint.object = null
-                        }
-                    }
-
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-
-                } else if (interaction.component.customId === 'gameUse') {
-
-                } else if (interaction.component.customId === 'gameSwitchPhone') {
-                    for (let i = 0; i < game.gameUserSettings.length; i++) {
-                        if (game.gameUserSettings[i].userId === interaction.user.id) {
-                            if (isOnPhone === true) {
-                                game.gameUserSettings[i].isOnPhone = false
-                            } else {
-                                game.gameUserSettings[i].isOnPhone = true
-                            }
-                        }
-                    }
-
-                    if (getGameUserSettings(interaction.user.id, game) !== null) {
-                        isOnPhone = getGameUserSettings(interaction.user.id, game).isOnPhone
-                    }
-
-                    gameResetCameraPos(isOnPhone, interaction.user, game)
-
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-                } else if (interaction.component.customId === 'gameSwitchDebug') {
-                    for (let i = 0; i < game.gameUserSettings.length; i++) {
-                        if (game.gameUserSettings[i].userId === interaction.user.id) {
-                            if (isInDebugMode === true) {
-                                game.gameUserSettings[i].isInDebugMode = false
-                            } else {
-                                game.gameUserSettings[i].isInDebugMode = true
-                            }
-                        }
-                    }
-
-                    if (getGameUserSettings(interaction.user.id, game) !== null) {
-                        isInDebugMode = getGameUserSettings(interaction.user.id, game).isInDebugMode
-                    }
-
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-                } else if (interaction.component.customId === 'gameRestart') {
-                    game.gameMap = createGame(50, 50)
-                    connectTogame(interaction.user, game)
-                    gameResetCameraPos(isOnPhone, interaction.user, game)
-
-                    resetGameMessage(interaction.user, interaction.message, isOnPhone, isInDebugMode, interaction, game)
-                }
-            }
-            return
-        }
-
-        if (interaction.component.customId.startsWith('market')) {
-            const values = CommandMarket.GetValues()
-            const money = database.dataBasic[interaction.user.id].money
-            const buyItem = interaction.component.customId.replace('market', '')
-            if (buyItem == 'TokenToMoney') {
-                if (database.dataBackpacks[interaction.user.id].quizTokens > 0) {
-                    database.dataBasic[interaction.user.id].money += Number.parseInt(values.token)
-                    database.dataBackpacks[interaction.user.id].quizTokens -= 1
-
-                    interaction.update(CommandMarket.OnCommand(database, database.dataMarket, interaction.user, privateCommand))
-                    database.SaveDatabase()
-                } else {
-                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
-                }
-            } else if (buyItem == 'TicketToMoney') {
-                if (database.dataBackpacks[interaction.user.id].tickets > 0) {
-                    database.dataBasic[interaction.user.id].money += Number.parseInt(values.coupon)
-                    database.dataBackpacks[interaction.user.id].tickets -= 1
-
-                    interaction.update(CommandMarket.OnCommand(database, database.dataMarket, interaction.user, privateCommand))
-                    database.SaveDatabase()
-                } else {
-                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
-                }
-            } else if (buyItem == 'JewelToMoney') {
-                if (database.dataBackpacks[interaction.user.id].jewel > 0) {
-                    database.dataBasic[interaction.user.id].money += Number.parseInt(values.jewel)
-                    database.dataBackpacks[interaction.user.id].jewel -= 1
-
-                    interaction.update(CommandMarket.OnCommand(database, database.dataMarket, interaction.user, privateCommand))
-                    database.SaveDatabase()
-                } else {
-                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
-                }
-            } else if (buyItem == 'MoneyToJewel') {
-                if (money >= Number.parseInt(database.dataMarket.prices.jewel)) {
-                    database.dataBasic[interaction.user.id].money -= Number.parseInt(values.jewel)
-                    database.dataBackpacks[interaction.user.id].jewel += 1
-
-                    interaction.update(CommandMarket.OnCommand(database, database.dataMarket, interaction.user, privateCommand))
-                    database.SaveDatabase()
-                } else {
-                    interaction.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
-                }
-            } else if (buyItem == 'Close') {
-                interaction.message.delete()
-            }
-            return
-        }
-
-        if (mailManager.OnButtonClick(interaction)) {
-
-        }
-
-        if (interaction.customId == 'hangmanStart') {
-            if (hangmanManager.GetUserSettingsIndex(interaction.user.id) == null) {
-                interaction.reply({ content: '> **\\❌ Hiba: A beállításaid nem találhatók!**', ephemeral: true})
-                return
-            }
-
-            const settings = hangmanManager.userSettings[hangmanManager.GetUserSettingsIndex(interaction.user.id)]
-            
-            var rawWordList = ''
-            if (settings.language == 'EN') {
-                rawWordList = fs.readFileSync(Path.join(CONFIG.paths.base, './word-list/english.txt'), 'utf-8')
-            } else if (settings.language == 'HU') {
-                rawWordList = fs.readFileSync(Path.join(CONFIG.paths.base, './word-list/hungarian.txt'), 'utf-8')
-            } else {
-                interaction.reply({ content: '> **\\❌ Hiba: Ismeretlen nyelv "' + settings.language + '"!**', ephemeral: true})
-                return
-            }
-            var wordList = ['']
-            if (settings.language == 'EN') {
-                wordList = rawWordList.split('\n')
-            } else if (settings.language == 'HU') {
-                const wordListHU = rawWordList.split('\n')
-                for (let i = 0; i < wordListHU.length; i++) {
-                    const item = wordListHU[i]
-                    wordList.push(item.split(' ')[0])
-                }
-            }
-
-            const randomIndex = Math.floor(Math.random() * wordList.length)
-            const randomWord = wordList[randomIndex]
-
-            if (hangmanManager.GetPlayerIndex(interaction.user.id) == null) {
-                hangmanManager.players.push({ userId: interaction.user.id, word: randomWord, guessedLetters: [] })
-            } else {
-                hangmanManager.players[hangmanManager.GetPlayerIndex(interaction.user.id)] = { userId: interaction.user.id, word: randomWord, guessedLetters: [] }
-            }
-
-            CommandHangman(interaction, hangmanManager, false)
-
-            return
-        }
+        if (CommandShop.OnButtonClick(interaction, database)) return
+        if (CommandBackpack.OnButtonClick(interaction, database)) return
+        if (CommandGift.OnButtonClick(interaction, database)) return
+        if (CommandMarket.OnButton(interaction, database)) return
+        if (mailManager.OnButtonClick(interaction)) return
+        if (hangmanManager.OnButton(interaction)) return
+        if (game.OnButton(interaction)) return
     } else if (interaction.isSelectMenu()) {
-        if (CommandShop.OnSelectMenu(interaction, database)) {
-
-        }
+        if (CommandShop.OnSelectMenu(interaction, database)) return
+        if (hangmanManager.OnSelectMenu(interaction)) return
 
         if (interaction.customId == 'userSettings') {
-
             const roles = {
                 szavazas: '795935996982198272',
                 quiz: '799342836931231775',
@@ -730,145 +443,8 @@ bot.on('interactionCreate', async interaction => {
 
             return
         }
-
-        if (interaction.customId == 'hangmanLang') {
-            const languageSelected = interaction.values[0]
-            
-            if (hangmanManager.GetUserSettingsIndex(interaction.user.id) == null) {
-                hangmanManager.userSettings.push({ userId: interaction.user.id, difficulty: 'HARD', language: languageSelected })
-            } else {
-                hangmanManager.userSettings[hangmanManager.GetUserSettingsIndex(interaction.user.id)].language = languageSelected
-            }
-
-            CommandHangman(interaction, hangmanManager, false)
-
-            return
-        }
-        if (interaction.customId == 'hangmanDifficulty') {
-            const difficultySelected = interaction.values[0]
-            
-            if (hangmanManager.GetUserSettingsIndex(interaction.user.id) == null) {
-                hangmanManager.userSettings.push({ userId: interaction.user.id, difficulty: difficultySelected, language: 'HU' })
-            } else {
-                hangmanManager.userSettings[hangmanManager.GetUserSettingsIndex(interaction.user.id)].difficulty = difficultySelected
-            }
-            
-            CommandHangman(interaction, hangmanManager, false)
-
-            return
-        }
-        
     } else if (interaction.isModalSubmit()) {
-        /** @type {Discord.ModalSubmitInteraction<Discord.CacheType>} */
-        const modalInteraction = interaction
-        
     }
-})
-bot.on('clickMenu', async (button) => {
-    try {
-        if (button.clicker.user.username === button.message.embeds[0].author.name) { } else {
-            button.reply.send('> \\❗ **Ez nem a tied!**', true)
-            return
-        }
-    } catch (error) { }
-
-    let isOnPhone = false
-    let isInDebugMode = false
-    let playerIndex = 0
-
-    try {
-
-        if (getGameUserSettings(button.clicker.user.id, game) !== null) {
-            isOnPhone = getGameUserSettings(button.clicker.user.id, game).isOnPhone
-        }
-
-        if (getGameUserSettings(button.clicker.user.id, game) !== null) {
-            isInDebugMode = getGameUserSettings(button.clicker.user.id, game).isInDebugMode
-        }
-    } catch (error) { }
-
-    try {
-        playerIndex = getPlayerIndex(button.clicker.user.id)
-    } catch (error) { }
-
-    if (button.id.startsWith('pollOption')) {
-        const optionIndex = button.id.replace('pollOption', '')
-        try {
-            /**
-             * @type {string[]}
-             */
-            const usersAreVoted = database.dataPolls.messages[button.message.id].userIds
-            if (usersAreVoted.includes(button.clicker.user.id)) {
-                if (button.reply.has) {
-                    button.reply.send('> \\❗ **Te már választottál egy opciót**', true)
-                } else {
-                    button.clicker.user.send('> \\❗ **Te már választottál egy opciót**')
-                }
-            } else {
-                database.dataPolls.messages[button.message.id].optionValues[optionIndex] += 1
-                database.dataPolls.messages[button.message.id].userIds.push(button.clicker.user.id)
-                database.SaveDatabase()
-            }
-        } catch (error) {
-            button.message.channel.send('> \\❗ **Hiba: ' + error.message + '**')
-        }
-        button.reply.defer()
-    } else if (button.id === 'pollFinish') {
-        try {
-            const savedMessageInfo = database.dataPolls.messages[button.message.id]
-            const title = savedMessageInfo.title
-            const texts = savedMessageInfo.optionTexts
-            const icons = savedMessageInfo.optionIcons
-            /**
-             * @type {number[]}
-             */
-            const values = savedMessageInfo.optionValues
-
-            let optionAllValue = 0
-            let optionMaxValue = 0
-            let optionMaxValueIndex = 0
-            for (let i = 0; i < values.length; i++) {
-                const value = values[i]
-                optionAllValue += value
-                if (optionMaxValue < value) {
-                    optionMaxValue = value
-                    optionMaxValueIndex = i
-                }
-            }
-
-            let optionText = ''
-            for (let i = 0; i < texts.length; i++) {
-                const optionPercent = (values[i] / optionAllValue) * 8
-                let bar = ''
-                if (i === optionMaxValueIndex) {
-                    for (let v = 0; v < 8; v++) {
-                        if (optionPercent > v) {
-                            bar += '🟦'
-                        } else {
-                            bar += '⬛'
-                        }
-                    }
-                } else {
-                    for (let v = 0; v < 8; v++) {
-                        if (optionPercent > v) {
-                            bar += '⬜'
-                        } else {
-                            bar += '⬛'
-                        }
-                    }
-                }
-
-                optionText += '> ' + icons[i] + ' ' + texts[i] + '\n>    ' + bar + '  ||' + ((values[i] / optionAllValue) * 100) + '%||\n'
-            }
-
-            button.reply.defer().then(() => {
-                button.message.edit(`**${title}**\n${optionText}`, { components: [] })
-            })
-
-        } catch (error) { }
-    }
-
-    button.reply.defer()
 })
 
 bot.once('ready', async () => {
@@ -885,9 +461,7 @@ bot.once('ready', async () => {
     const lastDay = database.dataBot.day
 
     try {
-        const { CreateCommands, DeleteCommands } = require('./functions/commands')
-        // DeleteCommands(bot)
-        // CreateCommands(bot, statesManager)
+        // require('./functions/commands')
     } catch (error) {
         console.error(error)
     }
@@ -902,8 +476,6 @@ bot.once('ready', async () => {
     DailyExchangeReport.TrySendReport(statesManager, bot, ChannelId.ProcessedNews)
 
     Taxation(database, lastDay)
-
-    // savePollDefaults(database)
 
     database.SaveDatabase()
     
@@ -947,11 +519,9 @@ bot.on('messageCreate', async msg => {
 
     const thisIsPrivateMessage = (message.channel.type === Discord.ChannelType.DM)
 
-    if (message.author.bot == true && thisIsPrivateMessage == false) { return }
-    const sender = message.author
+    if (message.author.bot === true && thisIsPrivateMessage === false) return
 
-    console.log(sender.id)
-    console.log(message.content)
+    const sender = message.author
 
     database.LoadDatabase()
 
@@ -1005,8 +575,7 @@ bot.on('messageCreate', async msg => {
     //#endregion
 
     if (message.content.startsWith('https://www.reddit.com/r/')) {
-        const CommandRedditsave = require('./commands/redditsave')
-        CommandRedditsave.Redditsave(message)
+        require('./commands/redditsave').Redditsave(message)
     }
 
     await newsManager.TryProcessMessage(message)
@@ -1034,7 +603,7 @@ bot.on('messageCreate', async msg => {
         } else if (message.content.toLowerCase().includes('nem')) {
             message.reply('...')
         }
-        delete listOfHelpRequiestUsers[listOfHelpRequiestUsers.indexOf(message.author.id)]
+        listOfHelpRequiestUsers.splice(listOfHelpRequiestUsers.indexOf(message.author.id), 1)
     } else {
         if (message.content.includes('<@!738030244367433770>')) {
             message.reply('Segítség kell?')
@@ -1584,4 +1153,4 @@ const ellapsedMilliseconds = endDateTime - startDateTime
 
 logManager.scriptLoadingText = ''
 
-if (autoStartBot) { StartBot() }
+if (autoStartBot) StartBot()

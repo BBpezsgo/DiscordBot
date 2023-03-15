@@ -1,6 +1,8 @@
 const Discord = require('discord.js')
 const { DatabaseManager } = require('../functions/databaseManager')
 
+const selfId = '738030244367433770'
+
 /**
  * @param {string} userID
  * @param {DatabaseManager} database
@@ -44,24 +46,27 @@ function OnButtonClick(e, database) {
         if (result === null) {
             e.reply({ content: '> \\🎀 Nincs ajándékod amit kinyithatnál!', ephemeral: true })
             e.message.edit(commandStore(e.user, privateCommand))
-        } else {
-            switch (result.type) {
-                case 'MONEY':
-                    {
-                        e.reply({ content: '> \\🎀 Kaptál **\\💵' + result.ammount + '** pénzt', ephemeral: true })
-                        e.message.edit(commandStore(e.user, privateCommand))
-                        break
-                    }
-                case 'XP':
-                    {
-                        e.reply({ content: '> \\🎀 Kaptál **\\🍺 ' + result.ammount + '** xp-t', ephemeral: true })
-                        e.message.edit(commandStore(e.user, privateCommand))
-                        break
-                    }
-                default:
-                    break
-            }
+
+            return true
         }
+
+        switch (result.type) {
+            case 'MONEY':
+                {
+                    e.reply({ content: '> \\🎀 Kaptál **\\💵' + result.ammount + '** pénzt', ephemeral: true })
+                    e.message.edit(commandStore(e.user, privateCommand))
+                    break
+                }
+            case 'XP':
+                {
+                    e.reply({ content: '> \\🎀 Kaptál **\\🍺 ' + result.ammount + '** xp-t', ephemeral: true })
+                    e.message.edit(commandStore(e.user, privateCommand))
+                    break
+                }
+            default:
+                break
+        }
+        
         return true
     }
 
@@ -80,30 +85,72 @@ function OnButtonClick(e, database) {
 function OnCommand(command, database) {
     try {
         const giftableMember = command.options.getUser('user')
-        if (database.dataBackpacks[command.user.id].gifts > 0) {
-            if (giftableMember.id === command.user.id) {
-                command.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
-            } else {
-                if (database.dataBackpacks[giftableMember.id] != undefined && giftableMember.id != selfId) {
-                    database.dataBackpacks[giftableMember.id].getGift += 1
-                    database.dataBackpacks[command.user.id].gifts -= 1
-                    command.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
-                    giftableMember.send('> **\\✨ ' + command.user.username + ' megajándékozott! \\🎆**')
-                    database.SaveDatabase()
-                } else {
-                    command.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
-                }
-            }
-        } else {
-            if (giftableMember.id === command.user.id) {
-                command.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true })
-            } else {
-                command.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true })
-            }
+        if (database.dataBackpacks[command.user.id].gifts <= 0) {
+            if (giftableMember.id === command.user.id)
+            { command.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true }) }
+            else
+            { command.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true }) }
+            return
         }
+
+        if (giftableMember.id === command.user.id) {
+            command.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad!**', ephemeral: true })
+            return
+        }
+        
+        if (!database.dataBackpacks[giftableMember.id] || giftableMember.id === selfId) {
+            command.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
+            return
+        }
+
+        database.dataBackpacks[giftableMember.id].getGift += 1
+        database.dataBackpacks[command.user.id].gifts -= 1
+        command.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
+        giftableMember.send('> **\\✨ ' + command.user.username + ' megajándékozott! \\🎆**')
+        database.SaveDatabase()
     } catch (error) {
         command.reply({ content: '> **\\❗ ' + error.toString() + '**', ephemeral: true })
     }
 }
 
-module.exports = { OnButtonClick, OnCommand, OpenGift }
+/**
+ * @param {Discord.UserContextMenuCommandInteraction<Discord.CacheType>} e
+ * @param {DatabaseManager} database
+ */
+function OnUserContextMenu(e, database) {
+    if (e.commandName !== 'Megajándékozás') return false
+
+    try {
+        /** @type {Discord.GuildMember} */
+        const giftableMember = e.targetMember
+        if (database.dataBackpacks[e.user.id].gifts <= 0) {
+            if (giftableMember.id === e.user.id)
+            { e.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true }) }
+            else
+            { e.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true }) }
+            return true
+        }
+
+        if (giftableMember.id === e.user.id) {
+            e.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
+            return true
+        }
+
+        if (!database.dataBackpacks[giftableMember.id] || giftableMember.id === selfId) {
+            e.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
+            return true
+        }
+
+        database.dataBackpacks[giftableMember.id].getGift += 1
+        database.dataBackpacks[e.user.id].gifts -= 1
+        e.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
+        giftableMember.send({ content: '> **\\✨ ' + e.user.username + ' megajándékozott! \\🎆**' })
+        database.SaveDatabase()
+    } catch (error) {
+        e.reply({ content: '> **\\❗ ' + error.toString() + '**', ephemeral: true })
+    }
+
+    return true
+}
+
+module.exports = { OnButtonClick, OnCommand, OnUserContextMenu, OpenGift }

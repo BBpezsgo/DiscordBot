@@ -90,4 +90,64 @@ function OnCommand(database, dataMarket, user, privateCommand = false) {
     return { embeds: [ newEmbed ], components: [ mainRow ], ephemeral: true }
 }
 
-module.exports = { GetValues, OnCommand }
+/**
+ * @param {Discord.ButtonInteraction<Discord.CacheType>} e
+ * @param {DatabaseManager} database
+ */
+function OnButton(e, database) {
+    const privateCommand = database.dataBasic[e.user.id].privateCommands
+
+    if (e.component.customId.startsWith('market')) {
+        const values = GetValues()
+        const money = database.dataBasic[e.user.id].money
+        const buyItem = e.component.customId.replace('market', '')
+        if (buyItem == 'TokenToMoney') {
+            if (database.dataBackpacks[e.user.id].quizTokens > 0) {
+                database.dataBasic[e.user.id].money += Number.parseInt(values.token)
+                database.dataBackpacks[e.user.id].quizTokens -= 1
+                database.SaveDatabase()
+
+                e.update(OnCommand(database, database.dataMarket, e.user, privateCommand))
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'TicketToMoney') {
+            if (database.dataBackpacks[e.user.id].tickets > 0) {
+                database.dataBasic[e.user.id].money += Number.parseInt(values.coupon)
+                database.dataBackpacks[e.user.id].tickets -= 1
+                database.SaveDatabase()
+
+                e.update(OnCommand(database, database.dataMarket, e.user, privateCommand))
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'JewelToMoney') {
+            if (database.dataBackpacks[e.user.id].jewel > 0) {
+                database.dataBasic[e.user.id].money += Number.parseInt(values.jewel)
+                database.dataBackpacks[e.user.id].jewel -= 1
+                database.SaveDatabase()
+
+                e.update(OnCommand(database, database.dataMarket, e.user, privateCommand))
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'MoneyToJewel') {
+            if (money >= Number.parseInt(database.dataMarket.prices.jewel)) {
+                database.dataBasic[e.user.id].money -= Number.parseInt(values.jewel)
+                database.dataBackpacks[e.user.id].jewel += 1
+                database.SaveDatabase()
+
+                e.update(OnCommand(database, database.dataMarket, e.user, privateCommand))
+            } else {
+                e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
+            }
+        } else if (buyItem == 'Close') {
+            e.message.delete()
+        }
+        return true
+    }
+
+    return false
+}
+
+module.exports = { GetValues, OnCommand, OnButton }

@@ -16,6 +16,167 @@ class Game {
         this.allGameMessages = []
     }
     
+    /**
+     * @param {Discord.ButtonInteraction<Discord.CacheType>} e
+     */
+    OnButton(e) {
+        if (!e.component.customId.startsWith('game')) return false
+
+        if (this.gameMap == null) {
+            e.reply('> \\❗ **Nincs létrehozva játék!**', true)
+            return true
+        }
+
+        let isOnPhone = false
+        let isInDebugMode = false
+        let playerIndex = 0
+        
+        if (e.component.customId === 'gameW') {
+            this.gameMap.players[playerIndex].direction = Direction.Up
+            if (playerCanMoveToHere(this.gameMap.players[playerIndex].x, this.gameMap.players[playerIndex].y - 1, this.gameMap) === true) {
+                this.gameMap.players[playerIndex].y -= 1
+            }
+            gameResetCameraPos(isOnPhone, e.user, this)
+
+            resetGameMessage(e.user, e.message, isOnPhone, isInDebugMode, e, this)
+
+        } else if (e.component.customId === 'gameA') {
+            this.gameMap.players[playerIndex].direction = Direction.Left
+            if (playerCanMoveToHere(this.gameMap.players[playerIndex].x - 1, this.gameMap.players[playerIndex].y, this.gameMap) === true) {
+                this.gameMap.players[playerIndex].x -= 1
+            }
+            gameResetCameraPos(isOnPhone, e.user, this)
+
+            resetGameMessage(e.user, e.message, isOnPhone, isInDebugMode, e, this)
+
+        } else if (e.component.customId === 'gameS') {
+            this.gameMap.players[playerIndex].direction = Direction.Down
+            if (playerCanMoveToHere(this.gameMap.players[playerIndex].x, this.gameMap.players[playerIndex].y + 1, this.gameMap) === true) {
+                this.gameMap.players[playerIndex].y += 1
+            }
+            gameResetCameraPos(isOnPhone, e.user, this)
+
+            resetGameMessage(e.user, e.message, isOnPhone, isInDebugMode, e, this)
+
+        } else if (e.component.customId === 'gameD') {
+            this.gameMap.players[playerIndex].direction = Direction.Right
+            if (playerCanMoveToHere(this.gameMap.players[playerIndex].x + 1, this.gameMap.players[playerIndex].y, this.gameMap) === true) {
+                this.gameMap.players[playerIndex].x += 1
+            }
+            gameResetCameraPos(isOnPhone, e.user, this)
+
+            resetGameMessage(e.user, e.message, isOnPhone, isInDebugMode, e, this)
+
+        } else if (e.component.customId === 'gameHit') {
+            /**
+             * @type {MapPoint}
+             */
+            let mapPoint
+            if (this.gameMap.players[playerIndex].direction === Direction.Up) {
+                mapPoint = getMapPoint(this.gameMap.players[playerIndex].x, this.gameMap.players[playerIndex].y - 1, this.gameMap)
+            } else if (this.gameMap.players[playerIndex].direction === Direction.Right) {
+                mapPoint = getMapPoint(this.gameMap.players[playerIndex].x + 1, this.gameMap.players[playerIndex].y, this.gameMap)
+            } else if (this.gameMap.players[playerIndex].direction === Direction.Down) {
+                mapPoint = getMapPoint(this.gameMap.players[playerIndex].x, this.gameMap.players[playerIndex].y + 1, this.gameMap)
+            } else if (this.gameMap.players[playerIndex].direction === Direction.Left) {
+                mapPoint = getMapPoint(this.gameMap.players[playerIndex].x - 1, this.gameMap.players[playerIndex].y, this.gameMap)
+            }
+
+            if (mapPoint.object !== null) {
+                /**
+                 * @type {MapObject}
+                 */
+                let breakableObj
+                breakableObj = mapPoint.object
+                breakableObj.breakValue -= 1
+                if (breakableObj.breakValue <= 0) {
+                    if (breakableObj.type === MapObjectType.bamboo) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Wood, 1)
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.blossom) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.cactus) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.cherryBlossom) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.hibiscus) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.igloo) {
+
+                    } else if (breakableObj.type === MapObjectType.mushroom) {
+
+                    } else if (breakableObj.type === MapObjectType.palm) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Wood, 3)
+                    } else if (breakableObj.type === MapObjectType.plant) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.rice) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 2)
+                    } else if (breakableObj.type === MapObjectType.rose) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.spruce) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Wood, 4)
+                    } else if (breakableObj.type === MapObjectType.sunflower) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.tanabataTree) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Wood, 2)
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    } else if (breakableObj.type === MapObjectType.tree) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Wood, 4)
+                    } else if (breakableObj.type === MapObjectType.tulip) {
+                        addItemToPlayer(this.gameMap.players[playerIndex], ItemType.Grass, 1)
+                    }
+                    mapPoint.object = null
+                }
+            }
+
+            resetGameMessage(e.user, e.message, isOnPhone, isInDebugMode, e, this)
+
+        } else if (e.component.customId === 'gameUse') {
+
+        } else if (e.component.customId === 'gameSwitchPhone') {
+            for (let i = 0; i < this.gameUserSettings.length; i++) {
+                if (this.gameUserSettings[i].userId === e.user.id) {
+                    if (isOnPhone === true) {
+                        this.gameUserSettings[i].isOnPhone = false
+                    } else {
+                        this.gameUserSettings[i].isOnPhone = true
+                    }
+                }
+            }
+
+            if (getGameUserSettings(e.user.id, this) !== null) {
+                isOnPhone = getGameUserSettings(e.user.id, this).isOnPhone
+            }
+
+            gameResetCameraPos(isOnPhone, e.user, this)
+
+            resetGameMessage(e.user, e.message, isOnPhone, isInDebugMode, e, this)
+        } else if (e.component.customId === 'gameSwitchDebug') {
+            for (let i = 0; i < this.gameUserSettings.length; i++) {
+                if (this.gameUserSettings[i].userId === e.user.id) {
+                    if (isInDebugMode === true) {
+                        this.gameUserSettings[i].isInDebugMode = false
+                    } else {
+                        this.gameUserSettings[i].isInDebugMode = true
+                    }
+                }
+            }
+
+            if (getGameUserSettings(e.user.id, this) !== null) {
+                isInDebugMode = getGameUserSettings(e.user.id, this).isInDebugMode
+            }
+
+            resetGameMessage(e.user, e.message, isOnPhone, isInDebugMode, e, this)
+        } else if (e.component.customId === 'gameRestart') {
+            this.gameMap = createGame(50, 50)
+            connectTogame(e.user, this)
+            gameResetCameraPos(isOnPhone, e.user, this)
+
+            resetGameMessage(e.user, e.message, isOnPhone, isInDebugMode, e, this)
+        }
+    
+        return true
+    }
 }
 
 const Discord = require('discord.js')

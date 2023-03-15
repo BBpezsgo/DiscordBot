@@ -676,11 +676,6 @@ bot.on('clickButton', async (button) => {
     button.reply.defer()
 })
 
-bot.on('clickMenu', async (menu) => {
-    menu.message.channel.send(menu.id)
-    menu.reply.defer()
-})
-
 /** @returns {Promise<Discord.Message>} */
 async function GetOldDailyWeatherReport(channelId) {
     /** @type {Discord.TextChannel} */

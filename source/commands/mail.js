@@ -10,7 +10,7 @@ class MailManager {
         this.database = database
     }
 
-    /** @param {number} userID @returns {number} */
+    /** @param {string} userID @returns {number} */
     GetCurrentlyEditingMailIndex(userID) {
         for (let i = 0; i < this.currentlyWritingEmails.length; i++) {
             const mail = this.currentlyWritingEmails[i]
