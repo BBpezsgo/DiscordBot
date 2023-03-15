@@ -224,21 +224,21 @@ bot.on('debug', debug => {
 })
 
 bot.on('warn', warn => {
-    fs.appendFileSync( Path.join(CONFIG.paths.base, 'node.error.log'), warn + '\n', 'utf8')
+    fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), warn + '\n', 'utf8')
     statesManager.botLoadingState = 'Warning'
 })
 
 bot.on('shardError', (error, shardID) => {
-    
+    LogError(error, { key: 'ShardID', value: shardID })
 })
 
 bot.on('invalidated', () => {
-    
+    statesManager.botLoadingState = 'Invalidated'
 })
 
 bot.on('shardDisconnect', (colseEvent, shardID) => {
     statesManager.Shard.IsLoading = true
-    statesManager.Shard.LoadingText = 'Lecsatlakozva'
+    statesManager.Shard.LoadingText = 'Disconnected'
 })
 
 bot.on('shardReady', (shardID) => {
@@ -256,19 +256,15 @@ bot.on('shardReady', (shardID) => {
 
 bot.on('shardReconnecting', (shardID) => {
     statesManager.Shard.IsLoading = true
-    statesManager.Shard.LoadingText = 'Újracsatlakozás...'
+    statesManager.Shard.LoadingText = 'Reconnecting...'
 })
 
 bot.on('shardResume', (shardID, replayedEvents) => {
     statesManager.Shard.IsLoading = false
 })
 
-bot.on('raw', async event => {
-    
-})
-
 bot.on('close', () => {
-    statesManager.botLoadingState = 'Close'
+    statesManager.botLoadingState = 'Closed'
 })
 
 bot.on('destroyed', () => {

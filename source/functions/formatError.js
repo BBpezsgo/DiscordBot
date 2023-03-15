@@ -1,6 +1,18 @@
+// @ts-check
+
 const { DiscordAPIError } = require("discord.js")
 
-function FormatError(error) {
+/**
+ * @param {any} error
+ * @param {{ key: string, value: any }[]} parameters
+ */
+function FormatError(error, ...parameters) { return FormatErrorYeah(error, parameters) }
+
+/**
+ * @param {any} error
+ * @param {{ key: string, value: any }[]} parameters
+ */
+function FormatErrorYeah(error, parameters) {
     var str = ''
     if (error instanceof DiscordAPIError) {
         str = error.name + ': ' + error.message
@@ -8,10 +20,12 @@ function FormatError(error) {
         str += `\n  Code: ${error.code}`
         str += `\n  Status: ${error.status}`
         str += `\n  URL: ${error.url}`
+        for (const parameter of parameters) str += `\n  ${parameter.key}: ${JSON.stringify(parameter.value)}`
         if (error.stack != undefined)
         { str += '\n' + error.stack }
     } else if (error instanceof Error) {
         str = error.name + ': ' + error.message
+        for (const parameter of parameters) str += `\n  ${parameter.key}: ${JSON.stringify(parameter.value)}`
         if (error.stack != undefined)
         { str += '\n' + error.stack }
     } else {
@@ -27,10 +41,11 @@ function FormatError(error) {
         } else {
             str = JSON.stringify(error)
         }
+        for (const parameter of parameters) str += `\n  ${parameter.key}: ${JSON.stringify(parameter.value)}`
         if (stack != undefined)
         { str += '\n' + stack }
     }
     return str
 }
 
-module.exports = { FormatError }
+module.exports = { FormatError, FormatErrorYeah }
