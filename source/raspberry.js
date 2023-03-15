@@ -281,13 +281,6 @@ bot.on('error', error => {
 
 bot.on('debug', debug => {
     statesManager.ProcessDebugMessage(debug)
-    const translatedDebug = TranslateMessage(debug)
-
-    if (translatedDebug == null) return
-
-    if (translatedDebug.secret == true) return
-
-    log(translatedDebug.messagePrefix + ': ' + translatedDebug.translatedText, translatedDebug)
 })
 
 bot.on('warn', warn => {

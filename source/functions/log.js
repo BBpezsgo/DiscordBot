@@ -332,25 +332,29 @@ class LogManager {
         if (this.loadingOverride == '') {
             if (this.bot !== undefined) {
                 txt += FixedWidth('┌──── Client', window.width)
-                txt += FixedWidth('│' + FixedWidth('Ready at:', 20) + GetTime(this.bot.readyAt), window.width) + '\n'
+                if (this.bot.readyAt) txt += FixedWidth('│' + FixedWidth('Ready at:', 20) + GetTime(this.bot.readyAt), window.width) + '\n'
                 var dfdfdf = new Date(0)
                 dfdfdf.setSeconds(this.bot.uptime / 1000)
                 dfdfdf.setHours(dfdfdf.getHours() - 1)
-                txt += FixedWidth('│' + FixedWidth('Uptime:', 20) + GetTime(dfdfdf), window.width) + '\n'
-                txt += FixedWidth('│' + FixedWidth('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width) + '\n'
+                if (dfdfdf !== '0:00:00') txt += FixedWidth('│' + FixedWidth('Uptime:', 20) + GetTime(dfdfdf), window.width) + '\n'
+                if (this.bot.ws.ping.toString() !== 'NaN') txt += FixedWidth('│' + FixedWidth('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width) + '\n'
                 txt += FixedWidth('│' + FixedWidth('WS State:', 20) + StateText(WsStatus[this.bot.ws.status]), window.width) + '\n'
                 if (this.bot.ws.shards.size == 0) {
-                    txt += FixedWidth('│' + FixedWidth('Shard State:', 20) + 'No shard', window.width) + '\n'
+                    txt += FixedWidth('│' + FixedWidth('Shard State:', 20) + CliColor.FgYellow + 'No shard' + CliColor.FgDefault, window.width) + '\n'
                 } else {
                     txt += FixedWidth('│' + FixedWidth('Shard State:', 20) + StateText(WsStatus[this.bot.ws.shards.first().status]), window.width) + '\n'
                 }   
             }
             
             if (this.statesManager !== undefined) {
-                txt += FixedWidth('│' + FixedWidth('Client State:', 20) + StateTextBot(this.statesManager.botLoadingState), window.width) + '\n'
+                if (this.statesManager.botLoadingState.length > 0) txt += FixedWidth('│' + FixedWidth('Client State:', 20) + StateTextBot(this.statesManager.botLoadingState), window.width) + '\n'
                 txt += FixedWidth('│' + FixedWidth('Timeouts:', 20) + timeout[this.statesManager.heartbeat] + ' ' + timeout[this.statesManager.hello], window.width) + '\n'
                 if (this.statesManager.Shard.IsLoading == true) {
-                    txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading Shard:', 20) + this.statesManager.Shard.LoadingText, window.width) + '\n'
+                    let shardText = this.statesManager.Shard.LoadingText
+                    if (this.statesManager.Shard.LoadingTextColor) {
+                        shardText = this.statesManager.Shard.LoadingTextColor + shardText + CliColor.FgDefault
+                    }
+                    txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' Loading Shard:', 20) + shardText, window.width) + '\n'
                 }
                 if (this.statesManager.Shard.Error.length > 0) {
                     txt += FixedWidth('│' + FixedWidth('Shard:', 20) + CliColor.FgRed + this.statesManager.Shard.Error + CliColor.FgDefault, window.width) + '\n'
@@ -409,7 +413,7 @@ class LogManager {
                         } else {
                             txt += FixedWidth('│' + FixedWidth('News:', 20) + `${CliColor.FgGreen}Done${CliColor.FgWhite}`, window.width) + '\n'
                         }
-                    } else if (this.statesManager.News.AllProcessed == false) {
+                    } else if (this.statesManager.News.AllProcessed === false) {
                         txt += FixedWidth('│' + FixedWidth(spinner[Math.round(this.loadingIndex)] + ' News:', 20) + 'Loading...', window.width) + '\n'
                     }
                     

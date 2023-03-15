@@ -239,6 +239,7 @@ bot.on('invalidated', () => {
 bot.on('shardDisconnect', (colseEvent, shardID) => {
     statesManager.Shard.IsLoading = true
     statesManager.Shard.LoadingText = 'Disconnected'
+    statesManager.Shard.LoadingTextColor = CliColor.FgRed
 })
 
 bot.on('shardReady', (shardID) => {
@@ -257,6 +258,7 @@ bot.on('shardReady', (shardID) => {
 bot.on('shardReconnecting', (shardID) => {
     statesManager.Shard.IsLoading = true
     statesManager.Shard.LoadingText = 'Reconnecting...'
+    statesManager.Shard.LoadingTextColor = null
 })
 
 bot.on('shardResume', (shardID, replayedEvents) => {
