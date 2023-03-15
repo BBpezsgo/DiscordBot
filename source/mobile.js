@@ -214,7 +214,8 @@ statesManager.botLoaded = true
 
 logManager.scriptLoadingText = 'Loading script... (create WebInterface instance)'
 
-const ws = new WebInterface('1234', GetAddress(), 5665, bot, logManager, null, StartBot, StopBot, statesManager, 'MOBILE')
+const wsExternal = new WebInterface('1234', GetAddress(), 5665, bot, null, null, StartBot, StopBot, statesManager, 'MOBILE')
+const wsInternal = new WebInterface('1234', '127.0.0.1', 5665, bot, null, null, StartBot, StopBot, statesManager, 'MOBILE')
 logManager.BlankScreen()
 
 
