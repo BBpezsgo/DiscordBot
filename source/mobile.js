@@ -247,6 +247,7 @@ bot.on('resume', () => {
 })
 
 bot.on('error', error => {
+    LogError(error)
     statesManager.botLoadingState = 'Error'
 })
 
@@ -259,7 +260,7 @@ bot.on('warn', warn => {
 })
 
 bot.on('shardError', (error, shardID) => {
-
+    LogError(error, { key: 'ShardID', value: shardID })
 })
 
 bot.on('invalidated', () => {
