@@ -1,11 +1,11 @@
 const fs = require('fs')
-const request = require("request")
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
 const Types = require('./Openweathermap')
 const { CityBekescsaba } = require('../commands/weatherFunctions')
 const tokens = require('../config.json').tokens
+const HTTP = require('../functions/http')
 
 const ReadFromCache = false
 const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
@@ -28,17 +28,17 @@ const OpenweathermapForecast = function() {
             }
         }
 
-        try {
-            request(URLs.Forecast, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.Forecast)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -53,9 +53,7 @@ const OpenweathermapForecast = function() {
                 data['fromCache'] = false
                 resolve(data)
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 
@@ -75,17 +73,17 @@ const OpenweathermapWeather = function() {
             }
         }
 
-        try {
-            request(URLs.Weather, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.Weather)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -101,9 +99,7 @@ const OpenweathermapWeather = function() {
                 data['fromCache'] = false
                 resolve(data)
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 
@@ -117,17 +113,17 @@ const OpenweathermapPollution = function() {
             }
         }
 
-        try {
-            request(URLs.Pollution, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.Pollution)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+                
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -140,9 +136,7 @@ const OpenweathermapPollution = function() {
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-pollution.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 

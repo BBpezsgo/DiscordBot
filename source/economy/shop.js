@@ -14,13 +14,16 @@ const ColorRoles = {
 	invisible: "850016786186371122"
 }
 
+const ThumbnailImageURL = 'https://em-content.zobj.net/thumbs/160/microsoft/319/shopping-cart_1f6d2.png'
+
  /**
  * @param {Discord.User} sender
  * @param {number} menuIndex 0: Main menu | 1: Basic | 2: Lucky cards | 3: Backpack colors | -1: None
  * @param {DatabaseManager} databaseManager
+ * @param {boolean} privateCommand
  * @returns {Discord.EmbedBuilder}
  */
-function getEmbedMessage(sender, menuIndex, databaseManager) {
+function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
     if (menuIndex == 0) {
         const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: sender.username, iconURL: sender.displayAvatarURL() })
@@ -39,8 +42,9 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                         '> \\🎨 Profil testreszabása'
                 }
             ])
-            .setFooter({ text: 'Bezárás: ❌' })
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
+            .setThumbnail(ThumbnailImageURL)
+
+        if (!privateCommand) embed.setFooter({ text: 'Bezárás: ❌' })
 
         return embed
     } else if (menuIndex == 1) {
@@ -62,9 +66,10 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                         '> \\🧻 WC papír   [\\💵 799]'
                 }
             ])
-            .setFooter({ text: 'Bezárás: ❌' })
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
+            .setThumbnail(ThumbnailImageURL)
     
+        if (!privateCommand) embed.setFooter({ text: 'Bezárás: ❌' })
+
         return embed
     } else if (menuIndex == 2) {
         const embed = new Discord.EmbedBuilder()
@@ -84,9 +89,10 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                         '> \\💴 Fáraók Kincse   [\\💵 6999]  10% hogy nyersz, főnyeremény: 1150 [' + databaseManager.dataBackpacks[sender.id].luckyCards.large + ' db]'
                 }
             ])
-            .setFooter({ text: 'Bezárás: ❌' })
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
+            .setThumbnail(ThumbnailImageURL)
     
+        if (!privateCommand) embed.setFooter({ text: 'Bezárás: ❌' })
+
         return embed
     } else if (menuIndex == 3) {
         const embed = new Discord.EmbedBuilder()
@@ -111,9 +117,10 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                         'Beállítások: `/settings`'
                 }
             ])
-            .setFooter({ text: 'Bezárás: ❌' })
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
+            .setThumbnail(ThumbnailImageURL)
     
+        if (!privateCommand) embed.setFooter({ text: 'Bezárás: ❌' })
+
         return embed
     } else if (menuIndex == 4) {
         let colorEmoji = '❔'
@@ -160,9 +167,10 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                         'Beállítások: `/settings`'
                 }
             ])
-            .setFooter({ text: 'Bezárás: ❌' })
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
+            .setThumbnail(ThumbnailImageURL)
     
+        if (!privateCommand) embed.setFooter({ text: 'Bezárás: ❌' })
+
         return embed
     } else if (menuIndex == 5) {
     
@@ -190,9 +198,10 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                         'Beállítások: `/settings`'
                 }
             ])
-            .setFooter({ text: 'Bezárás: ❌' })
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
+            .setThumbnail(ThumbnailImageURL)
     
+        if (!privateCommand) embed.setFooter({ text: 'Bezárás: ❌' })
+
         return embed
     } else if (menuIndex == -1) {
         const embed = new Discord.EmbedBuilder()
@@ -209,7 +218,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager) {
                     value: 'Hogy újra használhasd a boltot, használd a `/shop` parancsot!'
                 }
             ])
-            .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/281/convenience-store_1f3ea.png')
+            .setThumbnail(ThumbnailImageURL)
     
         return embed
     } else {
@@ -436,92 +445,109 @@ function CommandShop(channel, sender, senderMember, databaseManager, menuIndex =
             }
         ])
         if (menuIndex == 4) {
-            selectMenuBackpackColors.options[backpackColorIndex(databaseManager, sender.id)].default = true
+            selectMenuBackpackColors.options[backpackColorIndex(databaseManager, sender.id)].setDefault(true)
         }
     if (menuIndex == 5) {
         const RankIndex = (newColorRole == '') ? colorRankToIndex(senderMember) : colorRankToIndex2(newColorRole)
-        selectMenuNameColors.options[RankIndex].default = true
+        selectMenuNameColors.options[RankIndex].setDefault(true)
     }
     if (menuIndex > 0) {
-        selectMenu.options[Math.min(menuIndex, 3) - 1].default = true
+        selectMenu.options[Math.min(menuIndex, 3) - 1].setDefault(true)
     }
     if (menuIndex > 3) {
-        selectMenu2.options[menuIndex - 4].default = true
+        selectMenu2.options[menuIndex - 4].setDefault(true)
     }
-    const buttonExit = new ButtonBuilder()
-        .setLabel("❌")
-        .setCustomId("shopClose")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonBuyCrate = new ButtonBuilder()
-        .setLabel("🧱")
-        .setCustomId("shopBuyCrate")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonBuyGift = new ButtonBuilder()
-        .setLabel("🎁")
-        .setCustomId("shopBuyGift")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonBuyTicket = new ButtonBuilder()
-        .setLabel("🎟️")
-        .setCustomId("shopBuyTicket")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonBuyWC = new ButtonBuilder()
-        .setLabel("🧻")
-        .setCustomId("shopBuyWC")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonBuyLuckySmall = new ButtonBuilder()
-        .setLabel("💶")
-        .setCustomId("shopBuyLuckySmall")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonBuyLuckyMedium = new ButtonBuilder()
-        .setLabel("💷")
-        .setCustomId("shopBuyLuckyMedium")
-        .setStyle(Discord.ButtonStyle.Secondary)
-    const buttonBuyLuckyLarge = new ButtonBuilder()
-        .setLabel("💴")
-        .setCustomId("shopBuyLuckyLarge")
-        .setStyle(Discord.ButtonStyle.Secondary)
+    
+    /** @type {Discord.ActionRowBuilder<Discord.AnyComponentBuilder>[]} */
+    const components = []
 
-    if (!money >= 2099) { buttonBuyCrate.setDisabled(true) }
-    if (!money >= 3999) { buttonBuyGift.setDisabled(true) }
-    if (!money >= 8999) { buttonBuyTicket.setDisabled(true) }
-    if (!money >= 799) { buttonBuyWC.setDisabled(true) }
-    if (!money >= 1999) { buttonBuyLuckySmall.setDisabled(true) }
-    if (!money >= 3599) { buttonBuyLuckyMedium.setDisabled(true) }
-    if (!money >= 6999) { buttonBuyLuckyLarge.setDisabled(true) }
+    const rowSelectMenuPrimary = new ActionRowBuilder().addComponents(selectMenu)
+    const rowSelectMenuSecondary = new ActionRowBuilder().addComponents(selectMenu2)
 
-    const rowSecondary0 = new ActionRowBuilder()
-        .addComponents(buttonBuyCrate, buttonBuyGift, buttonBuyTicket, buttonBuyWC)
-    const rowSecondary1 = new ActionRowBuilder()
-        .addComponents(buttonBuyLuckySmall, buttonBuyLuckyMedium, buttonBuyLuckyLarge)
-    const rowSecondary2 = new ActionRowBuilder()
-        .addComponents(selectMenuBackpackColors)
-    const rowSecondary3 = new ActionRowBuilder()
-        .addComponents(selectMenuNameColors)
-    const rowSelectMenuPrimary = new ActionRowBuilder()
-        .addComponents(selectMenu)
-    const rowSelectMenuSecondary = new ActionRowBuilder()
-        .addComponents(selectMenu2)
-    const rowPrimary = new ActionRowBuilder()
-    if (privateCommand == false) {
-        rowPrimary.addComponents(buttonExit)
-    }
     if (menuIndex == -1) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], ephemeral:privateCommand }
+
     } else if (menuIndex == 0) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary], ephemeral:privateCommand }
+        components.push(rowSelectMenuPrimary)
     } else if (menuIndex == 1) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSecondary0, rowPrimary], ephemeral:privateCommand }
+        components.push(rowSelectMenuPrimary)
+        components.push(new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setLabel("🧱")
+                .setCustomId("shopBuyCrate")
+                .setStyle(Discord.ButtonStyle.Secondary)
+                .setDisabled(money < 2099),
+            new ButtonBuilder()
+                .setLabel("🎁")
+                .setCustomId("shopBuyGift")
+                .setStyle(Discord.ButtonStyle.Secondary)
+                .setDisabled(money < 3999),
+            new ButtonBuilder()
+                .setLabel("🎟️")
+                .setCustomId("shopBuyTicket")
+                .setStyle(Discord.ButtonStyle.Secondary)
+                .setDisabled(money < 8999),
+            new ButtonBuilder()
+                .setLabel("🧻")
+                .setCustomId("shopBuyWC")
+                .setStyle(Discord.ButtonStyle.Secondary)
+                .setDisabled(money < 799)
+        ))
     } else if (menuIndex == 2) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSecondary1, rowPrimary], ephemeral:privateCommand }
+        components.push(rowSelectMenuPrimary)
+        components.push(
+            new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setLabel("💶")
+                .setCustomId("shopBuyLuckySmall")
+                .setStyle(Discord.ButtonStyle.Secondary)
+                .setDisabled(money < 1999),
+            new ButtonBuilder()
+                .setLabel("💷")
+                .setCustomId("shopBuyLuckyMedium")
+                .setStyle(Discord.ButtonStyle.Secondary)
+                .setDisabled(money < 3599),
+            new ButtonBuilder()
+                .setLabel("💴")
+                .setCustomId("shopBuyLuckyLarge")
+                .setStyle(Discord.ButtonStyle.Secondary)
+                .setDisabled(money < 6999)
+        ))
     } else if (menuIndex == 3) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowPrimary], ephemeral:privateCommand }
+        components.push(rowSelectMenuPrimary)
+        components.push(rowSelectMenuSecondary)
     } else if (menuIndex == 4) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowSecondary2, rowPrimary], ephemeral:privateCommand }
+        components.push(rowSelectMenuPrimary)
+        components.push(rowSelectMenuSecondary)
+        components.push(new ActionRowBuilder().addComponents(
+            selectMenuBackpackColors
+        ))
     } else if (menuIndex == 5) {
-        return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowSelectMenuSecondary, rowSecondary3, rowPrimary], ephemeral:privateCommand }
+        components.push(rowSelectMenuPrimary)
+        components.push(rowSelectMenuSecondary)
+        components.push(new ActionRowBuilder().addComponents(
+            selectMenuNameColors
+        ))
+    } else {
+        components.push(rowSelectMenuPrimary)
     }
 
-    return { embeds: [getEmbedMessage(sender, menuIndex, databaseManager)], components: [rowSelectMenuPrimary, rowPrimary] }
+    if (privateCommand === false) {
+        components.push(
+            new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setLabel("❌")
+                        .setCustomId("shopClose")
+                        .setStyle(Discord.ButtonStyle.Secondary)
+                )
+        )
+    }
+
+    return {
+        embeds: [ getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) ],
+        components: components,
+        ephemeral: privateCommand,
+    }
 }
 
 /**

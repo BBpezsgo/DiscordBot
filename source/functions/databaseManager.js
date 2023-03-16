@@ -301,36 +301,43 @@ class DatabaseManager {
     UserstatsAddUserToMemory(user) { userstatsAddUserToMemory(this, user) }
 
     Fix() {
+        const FixNumber = function(anyValue) {
+            const str = (anyValue ?? 0).toString()
+            const num = Number.parseInt(str)
+            const clamped = Math.max(0, num)
+            return clamped
+        }
+
         let users = Object.keys(this.dataBackpacks)
         for (const user of users) {
-            this.dataBackpacks[user].crates = Number.parseInt((this.dataBackpacks[user].crates ?? 0).toString())
-            this.dataBackpacks[user].getGift = Number.parseInt((this.dataBackpacks[user].getGift ?? 0).toString())
-            this.dataBackpacks[user].gifts = Number.parseInt((this.dataBackpacks[user].gifts ?? 0).toString())
-            this.dataBackpacks[user].jewel = Number.parseInt((this.dataBackpacks[user].jewel ?? 0).toString())
-            this.dataBackpacks[user].luckyCards.large = Number.parseInt((this.dataBackpacks[user].luckyCards.large ?? 0).toString())
-            this.dataBackpacks[user].luckyCards.medium = Number.parseInt((this.dataBackpacks[user].luckyCards.medium ?? 0).toString())
-            this.dataBackpacks[user].luckyCards.small = Number.parseInt((this.dataBackpacks[user].luckyCards.small ?? 0).toString())
-            this.dataBackpacks[user].quizTokens = Number.parseInt((this.dataBackpacks[user].quizTokens ?? 0).toString())
-            this.dataBackpacks[user].tickets = Number.parseInt((this.dataBackpacks[user].tickets ?? 0).toString())
+            this.dataBackpacks[user].crates = FixNumber(this.dataBackpacks[user].crates)
+            this.dataBackpacks[user].getGift = FixNumber(this.dataBackpacks[user].getGift)
+            this.dataBackpacks[user].gifts = FixNumber(this.dataBackpacks[user].gifts)
+            this.dataBackpacks[user].jewel = FixNumber(this.dataBackpacks[user].jewel)
+            this.dataBackpacks[user].luckyCards.large = FixNumber(this.dataBackpacks[user].luckyCards.large)
+            this.dataBackpacks[user].luckyCards.medium = FixNumber(this.dataBackpacks[user].luckyCards.medium)
+            this.dataBackpacks[user].luckyCards.small = FixNumber(this.dataBackpacks[user].luckyCards.small)
+            this.dataBackpacks[user].quizTokens = FixNumber(this.dataBackpacks[user].quizTokens)
+            this.dataBackpacks[user].tickets = FixNumber(this.dataBackpacks[user].tickets)
         }
     
         users = Object.keys(this.dataBasic)
         for (const user of users) {
-            this.dataBasic[user].day = Number.parseInt((this.dataBasic[user].day ?? 0).toString())
-            this.dataBasic[user].money = Number.parseInt((this.dataBasic[user].money ?? 0).toString())
-            this.dataBasic[user].score = Number.parseInt((this.dataBasic[user].score ?? 0).toString())
+            this.dataBasic[user].day = FixNumber(this.dataBasic[user].day)
+            this.dataBasic[user].money = FixNumber(this.dataBasic[user].money)
+            this.dataBasic[user].score = FixNumber(this.dataBasic[user].score)
         }
     
-        this.dataBot.day = Number.parseInt((this.dataBot.day ?? 0).toString())
+        this.dataBot.day = FixNumber(this.dataBot.day)
     
         users = Object.keys(this.dataUserstats)
         for (const user of users) {
-            this.dataUserstats[user].chars = Number.parseInt((this.dataUserstats[user].chars ?? 0).toString())
-            this.dataUserstats[user].commands = Number.parseInt((this.dataUserstats[user].commands ?? 0).toString())
-            this.dataUserstats[user].memes = Number.parseInt((this.dataUserstats[user].memes ?? 0).toString())
-            this.dataUserstats[user].messages = Number.parseInt((this.dataUserstats[user].messages ?? 0).toString())
-            this.dataUserstats[user].musics = Number.parseInt((this.dataUserstats[user].musics ?? 0).toString())
-            this.dataUserstats[user].youtubevideos = Number.parseInt((this.dataUserstats[user].youtubevideos ?? 0).toString())
+            this.dataUserstats[user].chars = FixNumber(this.dataUserstats[user].chars)
+            this.dataUserstats[user].commands = FixNumber(this.dataUserstats[user].commands)
+            this.dataUserstats[user].memes = FixNumber(this.dataUserstats[user].memes)
+            this.dataUserstats[user].messages = FixNumber(this.dataUserstats[user].messages)
+            this.dataUserstats[user].musics = FixNumber(this.dataUserstats[user].musics)
+            this.dataUserstats[user].youtubevideos = FixNumber(this.dataUserstats[user].youtubevideos)
         }
     }
 }

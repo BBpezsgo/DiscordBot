@@ -4,6 +4,7 @@ const { CityBekescsaba } = require('../commands/weatherFunctions')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
+const HTTP = require('../functions/http')
 
 const URLs = {
     Mars: {
@@ -12,8 +13,6 @@ const URLs = {
     },
     Satellite: `https://api.nasa.gov/planetary/earth/assets?lon=${CityBekescsaba.Lon}&lat=${CityBekescsaba.Lat}&date=2014-02-01&dim=0.15&api_key=${tokens.nasa}`
 }
-
-const request = require("request")
 
 const ReadFromCache = false
 const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
@@ -28,17 +27,17 @@ const NasaMarsWeather = function() {
             }
         }
 
-        try {
-            request(URLs.Mars.Weather, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.Mars.Weather)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+                
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -51,9 +50,7 @@ const NasaMarsWeather = function() {
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-weather.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 
@@ -67,17 +64,17 @@ const NasaMarsWeeklyImage = () => {
             }
         }
 
-        try {
-            request(URLs.Mars.WeeklyImage, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.Mars.WeeklyImage)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+                
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -90,9 +87,7 @@ const NasaMarsWeeklyImage = () => {
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-image.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 

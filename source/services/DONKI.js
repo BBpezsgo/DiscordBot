@@ -2,6 +2,7 @@ const fs = require('fs')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
+const HTTP = require('../functions/http')
 
 const URLs = {
     GST: 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/GST',
@@ -9,8 +10,6 @@ const URLs = {
     FLR: 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR',
     Notifications: 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/notifications'
 }
-
-const request = require("request")
 
 const ReadFromCache = false
 const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
@@ -27,17 +26,17 @@ function GST(fromCache = false) {
             }
         }
 
-        try {
-            request(URLs.GST, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.GST)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -50,9 +49,7 @@ function GST(fromCache = false) {
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/gst.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 
@@ -68,17 +65,17 @@ function IPS(fromCache = false) {
             }
         }
 
-        try {
-            request(URLs.IPS, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.IPS)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+                
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -91,9 +88,7 @@ function IPS(fromCache = false) {
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/ips.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 
@@ -109,17 +104,17 @@ function FLR(fromCache = false) {
             }
         }
 
-        try {
-            request(URLs.FLR, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.FLR)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+                
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -132,9 +127,7 @@ function FLR(fromCache = false) {
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/flr.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 
@@ -150,17 +143,17 @@ function Notifications(fromCache = false) {
             }
         }
 
-        try {
-            request(URLs.Notifications, function (err, res, body) {
-                if (err) {
-                    reject('**HTTP Error:** ' + err)
-                    return
-                }
+        HTTP.Get(URLs.Notifications)
+            .then(result => {
+                const res = result.res
+                const body = result.data
+
                 if (res.statusCode !== 200) {
                     reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
                     return
                 }
-                if (body === undefined || body == null) {
+                
+                if (!body) {
                     reject(`**HTTP Error:** No body recived`)
                     return
                 }
@@ -173,9 +166,7 @@ function Notifications(fromCache = false) {
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/notifications.json'), body, { encoding: 'utf-8' })
                 resolve(JSON.parse(body))
             })
-        } catch (err) {
-            reject('**HTTP Requiest Error:** ' + err)
-        }
+            .catch(error => reject('**HTTP Error:** ' + error))
     })
 }
 

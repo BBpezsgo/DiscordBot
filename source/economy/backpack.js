@@ -58,37 +58,37 @@ function GetEmbed(e, database, privateCommand) {
         .setLabel("🧱")
         .setCustomId("openCrate")
         .setStyle(Discord.ButtonStyle.Primary)
+        .setDisabled(crates <= 0)
     const buttonDayCrate = new Discord.ButtonBuilder()
         .setLabel("🧰")
         .setCustomId("openDayCrate")
         .setStyle(Discord.ButtonStyle.Primary)
+        .setDisabled((Math.floor(dayCrates)) <= 0)
     const buttonLuckyCardSmall = new Discord.ButtonBuilder()
         .setLabel("💶")
         .setCustomId("useLuckyCardSmall")
         .setStyle(Discord.ButtonStyle.Secondary)
+        .setDisabled(smallLuckyCard <= 0)
     const buttonLuckyCardMedium = new Discord.ButtonBuilder()
         .setLabel("💷")
         .setCustomId("useLuckyCardMedium")
         .setStyle(Discord.ButtonStyle.Secondary)
+        .setDisabled(mediumLuckyCard <= 0)
     const buttonLuckyCardLarge = new Discord.ButtonBuilder()
         .setLabel("💴")
         .setCustomId("useLuckyCardLarge")
         .setStyle(Discord.ButtonStyle.Secondary)
+        .setDisabled(largeLuckyCard <= 0)
     const buttonOpenGift = new Discord.ButtonBuilder()
         .setLabel("🎀")
         .setCustomId("openGift")
         .setStyle(Discord.ButtonStyle.Primary)
+        .setDisabled(getGifts <= 0)
     const buttonSendGift = new Discord.ButtonBuilder()
         .setLabel("🎁")
         .setCustomId("sendGift")
         .setStyle(Discord.ButtonStyle.Secondary)
-    if (!crates > 0) { buttonCrate.setDisabled(true) }
-    if (!(Math.floor(dayCrates)) > 0) { buttonDayCrate.setDisabled(true) }
-    if (!smallLuckyCard > 0) { buttonLuckyCardSmall.setDisabled(true) }
-    if (!mediumLuckyCard > 0) { buttonLuckyCardMedium.setDisabled(true) }
-    if (!largeLuckyCard > 0) { buttonLuckyCardLarge.setDisabled(true) }
-    if (!getGifts > 0) { buttonOpenGift.setDisabled(true) }
-    if (!gifts > 0) { buttonSendGift.setDisabled(true) }
+        .setDisabled(gifts <= 0)
     const rowPrimary = new Discord.ActionRowBuilder()
         .addComponents(buttonCrate, buttonDayCrate, buttonLuckyCardSmall, buttonLuckyCardMedium, buttonLuckyCardLarge)
     const rowSecondary = new Discord.ActionRowBuilder()
@@ -171,7 +171,7 @@ function OnButtonClick(e, database) {
             database.dataBasic[e.user.id].day = database.dataBot.day
         }
 
-        e.message.edit(GetEmbed(e, database, privateCommand))
+        e.ed(GetEmbed(e, database, privateCommand))
 
         database.SaveDatabase()
         return true
