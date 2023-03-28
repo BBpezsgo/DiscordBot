@@ -5,6 +5,7 @@ const tokens = require('../config.json').tokens
 const fs = require('fs')
 const { CityBekescsaba } = require('../commands/weatherFunctions')
 const Types = require('./AccuWeather')
+const HTTP = require('../functions/http')
 
 const URLs = {
     Forecast: {
@@ -25,83 +26,86 @@ const URLs = {
     CurrentConditions: `http://dataservice.accuweather.com/currentconditions/v1/${CityBekescsaba.AccuWeatherData.Key}?apikey=${tokens.accuweather}&metric=true&details=true`
 }
 
-const request = require("request")
-
 const ReadFromCache = false
 const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
 
 /** @param {Types.ServiceCallback<any>} callback */
 const AccuWeatherForecast = function(callback) {
-    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
-    if (ReadFromCache) {
-        if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather.json'))) {
-            callback(JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather.json'), { encoding: 'utf-8' })))
-            return
+    return new Promise((resolve, reject) => {
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
+        if (ReadFromCache || fromCache) {
+            if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/accu-current.json'))) {
+                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-forecast.json'), 'utf-8'))
+                cached.cache = true
+                resolve(cached)
+                return
+            }
         }
-    }
 
-    try {
-        request(URLs.Forecast.Day1, function (err, res, body) {
-            if (err) {
-                callback(undefined, '**HTTP Error:** ' + err)
-                return
-            }
-            if (res.statusCode !== 200) {
-                callback(undefined, `**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
-                return
-            }
-            if (body === undefined || body == null) {
-                callback(undefined, `**HTTP Error:** No body recived`)
-                return
-            }
+        HTTP.Get(URLs.Forecast.Daily.Day1)
+            .then(result => {
+                const res = result.res
+                const body = result.data
 
-            var headersText = ''
-            for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
-            { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-headers.txt'), headersText, { encoding: 'utf-8' })
-            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather.json'), body, { encoding: 'utf-8' })
-            callback(JSON.parse(body))
-        })
-    } catch (err) {
-        callback(undefined, '**HTTP Requiest Error:** ' + err)
-    }
+                if (res.statusCode !== 200) {
+                    reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
+                    return
+                }
+
+                if (!body) {
+                    reject(`**HTTP Error:** No body recived`)
+                    return
+                }
+
+                var headersText = ''
+                for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
+                { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-forecast-headers.txt'), headersText, 'utf-8')
+
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-forecast.json'), body, "utf-8")
+                resolve(JSON.parse(body))
+            })
+            .catch(error => reject('**HTTP Error:** ' + error))
+    })
 }
 
-/** @param {Types.ServiceCallback<any>} callback */
-const AccuWeatherCurrent = function(callback) {
-    if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
-    if (ReadFromCache) {
-        if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-current.json'))) {
-            callback(JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-current.json'), { encoding: 'utf-8' })))
-            return
+const AccuWeatherCurrent = function() {
+    return new Promise((resolve, reject) => {
+        if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
+        if (ReadFromCache || fromCache) {
+            if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/accu-current.json'))) {
+                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-current.json'), 'utf-8'))
+                cached.cache = true
+                resolve(cached)
+                return
+            }
         }
-    }
 
-    try {
-        request(URLs.CurrentConditions, function (err, res, body) {
-            if (err) {
-                callback(undefined, '**HTTP Error:** ' + err)
-                return
-            }
-            if (res.statusCode !== 200) {
-                callback(undefined, `**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
-                return
-            }
-            if (body === undefined || body == null) {
-                callback(undefined, `**HTTP Error:** No body recived`)
-                return
-            }
+        HTTP.Get(URLs.CurrentConditions)
+            .then(result => {
+                const res = result.res
+                const body = result.data
 
-            var headersText = ''
-            for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
-            { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-current-headers.txt'), headersText, { encoding: 'utf-8' })
-            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-weather-current.json'), body, { encoding: 'utf-8' })
-            callback(JSON.parse(body))
-        })
-    } catch (err) {
-        callback(undefined, '**HTTP Requiest Error:** ' + err)
-    }
+                if (res.statusCode !== 200) {
+                    reject(`**HTTP Error ${res.statusCode}:** ${res.statusMessage}`)
+                    return
+                }
+
+                if (!body) {
+                    reject(`**HTTP Error:** No body recived`)
+                    return
+                }
+
+                var headersText = ''
+                for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
+                { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-current-headers.txt'), headersText, 'utf-8')
+
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-current.json'), body, "utf-8")
+                resolve(JSON.parse(body))
+            })
+            .catch(error => reject('**HTTP Error:** ' + error))
+    })
 }
 
 module.exports = {

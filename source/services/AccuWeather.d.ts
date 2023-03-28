@@ -79,4 +79,4 @@ export type ServiceCallback<T> = ( result: T | undefined, error: string | undefi
 export type ServiceCacheCallback<T> = ( isCache: boolean, result: T | undefined, error: string | undefined ) => void
 
 export function AccuWeatherForecast(callback: ServiceCallback<object>): void
-export function AccuWeatherCurrent(callback: ServiceCallback<AccuWeather.CurrentResult[]>): void
+export function AccuWeatherCurrent(): Promise<AccuWeather.CurrentResult[]>

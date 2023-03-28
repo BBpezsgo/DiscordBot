@@ -1,7 +1,5 @@
 const Discord = require('discord.js')
-const fs = require('fs')
 const { DatabaseManager } = require('../functions/databaseManager.js')
-const request = require("request")
 const GetUserColor = require('./userColor')
 
 const roles = {
