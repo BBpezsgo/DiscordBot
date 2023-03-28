@@ -27,7 +27,7 @@ async function CreateNews(message) {
         return null
     }
 
-    if (message.author.id == '726127512521932880' && message.content.startsWith('https://www.youtube.com/watch?v=')) {
+    if (message.content.startsWith('https://www.youtube.com/watch?v=')) {
         const info = await ytdl.getInfo(message.content)
         const vidInfo = info.videoDetails
 
@@ -36,8 +36,7 @@ async function CreateNews(message) {
             channelIconUrl = info.videoDetails.author.thumbnails[0].url
         }
 
-        const embedYt = new Discord.EmbedBuilder()
-        embedYt
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: info.videoDetails.author.name, url: info.videoDetails.author.channel_url, iconURL: channelIconUrl })
             .setTitle(vidInfo.title)
             .setURL(vidInfo.video_url)
@@ -45,8 +44,7 @@ async function CreateNews(message) {
             .setImage(`https://i.ytimg.com/vi/${vidInfo.videoId}/maxresdefault.jpg`)
             .setColor('#ff0000')
             .setTimestamp(Date.parse(vidInfo.uploadDate))
-
-        return new NewsMessage(embedYt, '', message)
+        return new NewsMessage(embed, '', message)
     }
 
     let role = ''
@@ -62,7 +60,7 @@ async function CreateNews(message) {
         
         var NewsContent = message.content.trim()
         
-        /** @type {null | "Entertainment" | "General News" | "PC News" | "Console News"} */
+        /** @type {null | string} */
         var NewsType = null
         if (NewsContent.startsWith('@')) {
             NewsType = NewsContent.split('\n')[0].trim().substring(1).trim()
@@ -213,7 +211,7 @@ async function CreateNews(message) {
             }
         }
         if (message.attachments.size > 0) {
-            embed.image.url = message.attachments.at(0).url
+            embed.setImage(message.attachments.at(0).url)
         }
     }
 
@@ -247,9 +245,7 @@ class NewsManager {
 
         this.statesManager.News.LoadingText = 'Fetch news channel...'
         client.channels.fetch(NewsIncomingChannel, { force: true })
-            .then((c) => {
-                /** @type {Discord.GuildTextBasedChannel | null} */
-                const channel = c
+            .then(/** @param {Discord.GuildTextBasedChannel | null} channel */ channel => {
                 this.statesManager.News.LoadingText = 'Fetch news messages...'
                 channel.messages.fetch()
                     .then((messages) => {
@@ -283,16 +279,16 @@ class NewsManager {
         const DeleteRawNewsMessages = true
 
         if (this.listOfNews.length > 0) {
-            /** @type {Discord.GuildTextBasedChannel | undefined} */
+            /** @type {Discord.GuildTextBasedChannel} */ 
             const newsChannel = client.channels.cache.get(NewsProcessedChannel)
 
             const newsMessage = this.listOfNews.shift()
-            if (newsMessage == null || newsMessage == undefined) { return }
+            if (!newsMessage) { return }
             const embed = newsMessage.embed
             this.statesManager.News.LoadingText2 = 'Send copy of news message...'
-            /** @type {Discord.GuildTextBasedChannel | null} */
+            /** @type {Discord.GuildTextBasedChannel} */
             const newsTestChannel = client.channels.cache.get('1010110583800078397')
-            if (newsTestChannel != null) {
+            if (newsTestChannel) {
                 newsTestChannel.send({
                     tts: newsMessage.message.tts,
                     content: newsMessage.message.content,

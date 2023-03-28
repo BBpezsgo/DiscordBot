@@ -38,7 +38,7 @@ const ProcessData = function(data) {
         var price2 = null
         var errorOccured = false
         try {
-            url = item.querySelector('div:nth-child(1) > a').getAttribute('href')
+            url = item?.querySelector('div:nth-child(1) > a')?.getAttribute('href')
         } catch (error) {
             errorOccured = true
             LogError(error)
@@ -93,7 +93,7 @@ const ProcessData = function(data) {
         fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/tesco/errorLiS/' + Date.now() + '.html'), i_.outerHTML, 'utf-8')
 
         result.push({
-            url: 'https://bevasarlas.tesco.hu' + url,
+            url: (url) ? ('https://bevasarlas.tesco.hu' + url) : null,
             imageUrl: (imageUrl === null) ? null : imageUrl.split(' ')[0],
             name: name,
             price: price,

@@ -3,7 +3,7 @@ const {
     Color,
     ChannelId
 } = require('../functions/enums.js')
-const { ActionRowBuilder, ButtonBuilder, GatewayIntentBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActivityType } = require('discord.js')
+const Types = require('./quiz')
 
 /**@param {number} days @returns {number} */
 function DaysToMilliseconds(days) {
@@ -11,55 +11,100 @@ function DaysToMilliseconds(days) {
 }
 
 /**
+ * @param {string} imageURL
+ * @param {string} titleText
+ * @param {string} listOfOptionText
+ * @param {string} listOfOptionEmojis
+ * @returns {Types.Quiz}
+ */
+function GenerateQuiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, imageURL = undefined) {
+    /** @type {Types.Quiz} */
+    const result = {
+        Question: titleText,
+        ImageURL: imageURL,
+        Reward: {
+            Score: addXpValue,
+            Token: addToken,
+        },
+        Penalty: {
+            Score: removeXpValue,
+            Token: removeToken,
+        },
+        Options: [],
+        EndsAt: Date.now() + DaysToMilliseconds(2)
+    }
+
+    const optionEmojis = listOfOptionEmojis.toString().split(';')
+    const optionTexts = listOfOptionText.toString().split(';')
+
+    for (let i = 0; i < optionEmojis.length; i++) {
+        result.Options.push({
+            Text: optionTexts[i],
+            Emoji: optionEmojis[i],
+        })
+    }
+
+    return result
+}
+
+/**
  * @param {Discord.Client} client
- * @param {Discord.MessageAttachment} image
+ * @param {any} image
  * @param {string} titleText
  * @param {string} listOfOptionText
  * @param {string} listOfOptionEmojis
  */
 async function Quiz(client, titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image = undefined) {
-    const optionEmojis = listOfOptionEmojis.toString().split(';')
-    const optionTexts = listOfOptionText.toString().split(';')
-    let optionText = ''
-    for (let i = 0; i < optionTexts.length; i++) {
-        optionText += `> ${optionEmojis[i]}  ${optionTexts[i].trim()}\n`
-    }
-
-    const dateNow = Date.now() + DaysToMilliseconds(2)
-
-    const embed = new Discord.EmbedBuilder()
-        .setColor(Color.Pink)
-        .setTitle('Quiz!')
-        .setDescription(
-            `\\✔️  **${addXpValue}\\🍺** és **${addToken}\\🎫**\n` +
-            `\\❌ **-${removeXpValue}\\🍺** és **-${removeToken}\\🎫**\n` +
-            `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
-        )
-        .addFields([{
-            name: titleText,
-            value: optionText
-        }])
-        .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
-        .setFooter({ text: "Vége:" })
-        .setTimestamp(dateNow)
-    if (image != undefined) {
-        embed.setImage(image.url)
-    }
+    const quiz = GenerateQuiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image?.url)
+    
+    const embed = GetEmbed(quiz)
 
     /** @type {Discord.GuildTextBasedChannel} */
     const quizChannel = client.channels.cache.get(ChannelId.Quiz)
     const sentQuiz = await quizChannel.send({ embeds: [embed] })
     if (sentQuiz) {
         await sentQuiz.react('🎯')
-        for (let i = 0; i < optionEmojis.length; i++) {
-            if (optionEmojis[i].includes('<')) {
-                await sentQuiz.react(optionEmojis[i].split(':')[2].replace('>', ''))
+        for (let i = 0; i < quiz.Options.length; i++) {
+            const emoji = quiz.Options[i].Emoji
+            if (emoji.includes('<')) {
+                await sentQuiz.react(emoji.split(':')[2].replace('>', ''))
             } else {
-                await sentQuiz.react(optionEmojis[i])
+                await sentQuiz.react(emoji)
             }
         }  
         await quizChannel.send('> <@&799342836931231775>')      
     }
+}
+
+/**
+ * @param {Types.Quiz} quiz
+ */
+function GetEmbed(quiz) {
+    let optionText = ''
+    for (let i = 0; i < quiz.Options.length; i++) {
+        optionText += `> ${quiz.Options[i].Emoji}  ${quiz.Options[i].Text.trim()}\n`
+    }
+
+    const embed = new Discord.EmbedBuilder()
+        .setColor(Color.Pink)
+        .setTitle('Quiz!')
+        .setDescription(
+            `\\✔️  **${quiz.Reward.Score}\\🍺** és **${quiz.Penalty.Token}\\🎫**\n` +
+            `\\❌ **-${quiz.Penalty.Score}\\🍺** és **-${quiz.Penalty.Token}\\🎫**\n` +
+            `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
+        )
+        .addFields([{
+            name: quiz.Question,
+            value: optionText
+        }])
+        .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/282/direct-hit_1f3af.png')
+        .setFooter({ text: "Vége:" })
+        .setTimestamp(quiz.EndsAt)
+    if (quiz.ImageURL) {
+        embed.setImage(quiz.ImageURL)
+    }
+
+    return embed
 }
 
 /**
@@ -145,5 +190,5 @@ async function QuizDone(client, quizMessageId, correctIndex) {
 module.exports = {
     Quiz,
     QuizDone,
-    HasQuizStreakRole
+    HasQuizStreakRole,
 }

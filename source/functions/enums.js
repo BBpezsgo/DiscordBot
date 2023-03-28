@@ -37,18 +37,32 @@ const SHARD = '[' + CliColor.FgMagenta + 'SHARD' + CliColor.BgBlack + '' + CliCo
 const DEBUG = '[' + CliColor.FgBlack + 'DEBUG' + CliColor.BgBlack + '' + CliColor.FgWhite + ']'
 const DONE = '[' + CliColor.FgGreen + 'DONE' + CliColor.BgBlack + '' + CliColor.FgWhite + ']'
 
+const { ColorResolvable } = require('discord.js')
+
 const Color = {
+    /** @type {ColorResolvable} */
     Error: "#ed4245",
+    /** @type {ColorResolvable} */
     ErrorLight: "#f57531",
+    /** @type {ColorResolvable} */
     Warning: "#faa81a",
+    /** @type {ColorResolvable} */
     Done: "#3ba55d",
+    /** @type {ColorResolvable} */
     White: "#dcddde",
+    /** @type {ColorResolvable} */
     Silver: "#b9bbbe",
+    /** @type {ColorResolvable} */
     Gray: "#8e9297",
+    /** @type {ColorResolvable} */
     DimGray: "#72767d",
+    /** @type {ColorResolvable} */
     Highlight: "#5865f2",
+    /** @type {ColorResolvable} */
     Purple: "#9b59b6",
+    /** @type {ColorResolvable} */
     Pink: "#e91e63",
+    /** @type {ColorResolvable} */
     DarkPink: "#ad1457"
 }
 

@@ -1,5 +1,5 @@
 type SearchResult = {
-    url: string
+    url?: string
     imageUrl: string
     name: string
     price: string
