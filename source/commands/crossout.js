@@ -1,31 +1,11 @@
+// @ts-check
+
 const Discord = require('discord.js')
 const { Color } = require('../functions/enums')
+const LogError = require('../functions/errorLog')
 const CrossoutDB = require('../services/crossoutdb')
 
-function lbl(txt) {
-    return '**`' + txt + '`**'
-}
-
-/** @param {string} key @param {CrossoutDB.SearchResult} data */
-function GetObjectFromKey(key, data) {
-    const dataList = data.sortedStats
-    if (!dataList) { return null }
-    for (let i = 0; i < dataList.length; i++) {
-        const dataElement = dataList[i]
-        if (dataElement.key == key) {
-            return dataElement
-        }
-    }
-    return null
-}
-
-/** @param {string} key @param {CrossoutDB.SearchResult} data @param {(result: CrossoutDB.SearchResultStat) => void} callback */
-function TryGetKey(key, data, callback) {
-    const result = GetObjectFromKey(key, data)
-    if (result) {
-        callback(result)
-    }
-}
+function lbl(txt) { return '**`' + txt + '`**' }
 
 /**@param {number} val @param {number} width Width in characters @param {number} max */
 function ProgressBar(val, width, max = 100) {
@@ -42,220 +22,357 @@ function ProgressBar(val, width, max = 100) {
     return bar
 }
 
-/** @param {Discord.CommandInteraction<Discord.CacheType>} command */
-function CrossoutTest(command, searchName, privateCommand) {
-    CrossoutDB.SearchFor(searchName)
+/**
+ * @param {Discord.CommandInteraction<Discord.CacheType>} command
+ * @param {string | CrossoutDB.SearchOptions} searchName
+ */
+function GetItem(command, searchName) {
+    GetItemEmbed(searchName)
+        .then(result => command.editReply(result))
         .catch(error => {
-            command.editReply({ content: '> \\❌ **Requiest error:** ' + error.toString() })
-        })
-        .then(result => {
-            if (!result) {
-                command.editReply({ content: '> \\❌ **Nem található ilyen tárgy**' })
+            if (typeof error === 'string') {
+                command.editReply(error)
                 return
             }
-
-            const embed = new Discord.EmbedBuilder()
-                .setColor(Color.Warning)
-                .setAuthor({name: 'Crossout DB', iconURL: 'https://crossoutdb.com/favicon.ico', url: 'https://crossoutdb.com/'})
-                .setThumbnail('https://crossoutdb.com' + result.imagePath)
-                .setTitle(result.name)
-                .setDescription(
-                    lbl(result.rarityName) + '  ' +
-                    lbl(result.categoryName) + '  ' +
-                    lbl(result.typeName) + '  ' +
-                    lbl(result.faction) + '  ' + '\n\n' +
-                    result.description.replace(/\<br\>/g, '\n')
-                )
-                .addFields([{
-                    name: '⚖️ Market',
-                    value:
-                        '\\👥 Sell Offers: ' + result.sellOffers + '\n' +
-                        '\\💲 Sell Price: ' + result.formatSellPrice + ' 🅒\n' +
-                        '\\👥 Buy Orders: ' + result.buyOrders + '\n' +
-                        '\\💲 Buy Price: ' + result.formatBuyPrice + ' 🅒\n' +
-                        '\\🎭 Popularity: ' + result.popularity
-                }])
-            if (result.craftingResultAmount > 0) {
-                embed.addFields([{
-                    name: '🛠️ Crafting ' + result.craftingResultAmount + 'x',
-                    value:
-                        '\\💲 Crafting Cost (Sell): ' + result.formatCraftingSellSum + ' 🅒\n' +
-                        '\\💲 Crafting Cost (Buy): ' + result.formatCraftingBuySum + ' 🅒'
-                }])
-            }
-            if (result.sortedStats != undefined && result.sortedStats != null) {
-                var statsBuilder = ''
-
-                const statIcons = {
-                    'StatPercentDamageRating': '\\💥 ',
-                    'StatPercentRangeRating': '\\☄️ ',
-                    'StatPercentAccuracyRating': '\\🎯 ',
-                    'StatPercentOverheatRating': '\\🔥 ',
-                    'StatAmmo': '\\🧰 ',
-                    'StatAmmoMultiplier': '\\🧰 ',
-                    'StatStructure': '\\🛡️ ',
-                    'StatEnergyDrain': '\\⚡ ',
-                    'StatPower': '\\⚡ ',
-                    'StatPowerScore': '\\⚙️ ',
-                    'StatPercentFireRateRating': '\\⏱️ ',
-
-                    'StatBlastDamage': '\\🧨 ',
-                    'StatBlastImpulse': '\\🧨 ',
-                    'StatBlastRadius': '\\🧨 ',
-
-                    'StatSpreadStatic': '\\💫 ',
-                    'StatMaximumSpreadStatic': '\\💫 ',
-                    
-                    'StatRecoil': '\\🥊 ',
-                    'StatRequiredLevel': '\\🏅 ',
-
-                    'StatProjectileVelocity': '\\🥏 ',
-                    'StatBallisticImpulse': '\\🥏 ',
-                    'StatBallisticDamage': '\\🥏 ',
-                }
-                const statPrefix = {
-                    'StatAmmoMultiplier': '+',
-                    'StatEngineSpeedMultiplier': '+',
-                    'StatMassLimit': '+',
-                }
-                const statSuffix = {
-                    'StatPercentDamageRating': '%',
-                    'StatPercentRangeRating': '%',
-                    'StatPercentAccuracyRating': '%',
-                    'StatPercentOverheatRating': '%',
-                    'StatAmmo': 'pts',
-                    'StatAmmoMultiplier': '%',
-                    'StatStructure': 'pts',
-                    'StatEnergyDrain': 'pts',
-                    'StatPower': 'pts',
-                    'StatEngineSpeedMultiplier': '%',
-                    'StatMassLimit': 'kg',
-                    'StatMass': 'kg',
-                }
-                const statHide = [
-                    'StatHeatIncrease',
-                    'StatMaximumHeat',
-                    'StatGunDepression',
-                    'StatGunElevation',
-                    'StatSpreadMoving',
-                    'StatMaximumSpreadMoving',
-                    'StatSpreadIncrease',
-                    'StatSpreadDecrese',
-                    'StatSpreadRotationIncrease',
-
-                ]
-
-                result.sortedStats.sort((a, b) => a.stat.order - b.stat.order)
-
-                result.sortedStats.forEach(stat => {
-                    if (stat.value === 0 || statHide.includes(stat.key)) { return }
-
-                    if (statIcons[stat.key])
-                    { statsBuilder += statIcons[stat.key] }
-
-                    statsBuilder += stat.stat.name
-
-                    if (stat.stat.showProgressBar) {
-                        statsBuilder += '\n'
-                        statsBuilder += ProgressBar(stat.value, 16) + '  ' + stat.value + '%'
-                    } else {
-                        statsBuilder += ': '
-
-                        if (statPrefix[stat.key])
-                        { statsBuilder += statPrefix[stat.key] }
-
-                        statsBuilder += stat.value
-
-                        if (stat.stat.showPercentage)
-                        {  statsBuilder += ' %'}
-                        else if (statSuffix[stat.key])
-                        { statsBuilder += ' ' + statSuffix[stat.key] }
-                    }
-                    statsBuilder += '\n'
-                })
-
-                /*
-                TryGetKey('StatPercentDamageRating', result, (stat) => {
-                    statsBuilder +=
-                    '\\💥 Damage:\n' + ProgressBar(stat.value, 16) + '  ' + stat.value + '%'
-                    +'\n'
-                })
-                TryGetKey('StatPercentFireRateRating', result, (stat) => {
-                    statsBuilder +=
-                    'FireRate:\n' + ProgressBar(stat.value, 16) + '  ' + stat.value + '%'
-                    +'\n'
-                })
-                TryGetKey('StatPercentRangeRating', result, (stat) => {
-                    statsBuilder +=
-                    '\\☄️ Range:\n' + ProgressBar(stat.value, 16) + '  ' + stat.value + '%'
-                    +'\n'
-                })
-                TryGetKey('StatPercentAccuracyRating', result, (stat) => {
-                    statsBuilder +=
-                    '\\🎯 Accuracy:\n' + ProgressBar(stat.value, 16) + '  ' + stat.value + '%'
-                    +'\n'
-                })
-                TryGetKey('StatPercentOverheatRating', result, (stat) => {
-                    statsBuilder +=
-                    '\\🔥 Overheat:\n' + ProgressBar(stat.value, 16) + '  ' + stat.value + '%'
-                    +'\n'
-                })
-                TryGetKey('StatAmmo', result, (stat) => {
-                    statsBuilder +=
-                    '\\🧰 Ammo: ' + stat.value + ' pcs'
-                    +'\n'
-                })
-                TryGetKey('StatStructure', result, (stat) => {
-                    statsBuilder +=
-                    '\\🛡️ Structure: ' + stat.value + ' pts'
-                    +'\n'
-                })
-                TryGetKey('StatEnergyDrain', result, (stat) => {
-                    statsBuilder +=
-                    '\\⚡ EnergyDrain: ' + stat.value
-                    +'\n'
-                })
-                TryGetKey('StatMass', result, (stat) => {
-                    statsBuilder +=
-                    'Mass: ' + stat.value + ' kg'
-                    +'\n'
-                })
-                TryGetKey('StatPowerScore', result, (stat) => {
-                    statsBuilder +=
-                    'Power Score: ' + stat.value
-                    +'\n'
-                })
-                TryGetKey('StatMaximumDeployablesUnits', result, (stat) => {
-                    statsBuilder +=
-                    'Maximum Deployable Units: ' + stat.value
-                    +'\n'
-                })
-                TryGetKey('StatEngineSpeedMultiplier', result, (stat) => {
-                    statsBuilder +=
-                    'Max. Speed: ' + stat.value
-                    +'\n'
-                })
-                TryGetKey('StatEnginePowerMultiplier', result, (stat) => {
-                    statsBuilder +=
-                    'Power: ' + stat.value
-                    +'\n'
-                })
-                TryGetKey('StatMassLimit', result, (stat) => {
-                    statsBuilder +=
-                    'Mass Limit: +' + stat.value + ' kg'
-                    +'\n'
-                })
-                */
-
-                embed.addFields([{
-                    name: '📊 Stats',
-                    value: statsBuilder
-                }])
-            }
-            embed.setTimestamp(new Date(result.timestamp))
-
-            command.editReply({ embeds: [embed] })
+            command.editReply({ content: '> \\❌ **Error:** ' + error.toString() })
+            LogError(error)
         })
 }
 
-module.exports = { CrossoutTest }
+/**
+ * @param {string | number | CrossoutDB.SearchOptions} options
+ * @returns {Promise<Discord.BaseMessageOptions>}
+ */
+function GetItemEmbed(options) {
+    /** @returns {Discord.BaseMessageOptions} */
+    const GetItemEmbed_ = function(/** @type {CrossoutDB.Item<CrossoutDB.ItemStats[]>} */ item) {
+        const embed = new Discord.EmbedBuilder()
+            .setColor(Color.Warning)
+            .setAuthor({name: 'Crossout DB', iconURL: 'https://crossoutdb.com/img/crossoutdb_logo_compact.png', url: 'https://crossoutdb.com/'})
+            .setThumbnail('https://crossoutdb.com' + item.imagePath)
+            .setTitle(item.name)
+            .setDescription(
+                lbl(item.rarityName) + '  ' +
+                lbl(item.categoryName) + '  ' +
+                lbl(item.typeName) + '  ' +
+                lbl(item.faction) + '  ' + '\n\n' +
+                item.description.replace(/\<br\>/g, '\n')
+            )
+            .addFields([{
+                name: '⚖️ Market',
+                value:
+                    `\\💲 Sell Price: ${item.formatSellPrice} 🅒 (\\👥 ${item.sellOffers} Offers)\n` +
+                    `\\💲 Buy Price: ${item.formatBuyPrice} 🅒 (\\👥 ${item.buyOrders} Orders)\n` +
+                    `\\🎭 Popularity: ${item.popularity}`
+            }])
+        if (item.craftingResultAmount > 0) {
+            embed.addFields([{
+                name: '🛠️ Crafting ' + item.craftingResultAmount + 'x',
+                value:
+                    '\\💲 Crafting Cost (Sell): ' + item.formatCraftingSellSum + ' 🅒\n' +
+                    '\\💲 Crafting Cost (Buy): ' + item.formatCraftingBuySum + ' 🅒'
+            }])
+        }
+        if (item.sortedStats != undefined && item.sortedStats != null) {
+            var statsBuilder = ''
+
+            const statIcons = {
+                'StatPercentDamageRating': '\\💥 ',
+                'StatPercentRangeRating': '\\☄️ ',
+                'StatPercentAccuracyRating': '\\🎯 ',
+                'StatPercentOverheatRating': '\\🔥 ',
+                'StatAmmo': '\\🧰 ',
+                'StatAmmoMultiplier': '\\🧰 ',
+                'StatStructure': '\\🛡️ ',
+                'StatEnergyDrain': '\\⚡ ',
+                'StatPower': '\\⚡ ',
+                'StatPowerScore': '\\⚙️ ',
+                'StatPercentFireRateRating': '\\⏱️ ',
+
+                'StatBlastDamage': '\\🧨 ',
+                'StatBlastImpulse': '\\🧨 ',
+                'StatBlastRadius': '\\🧨 ',
+
+                'StatSpreadStatic': '\\💫 ',
+                'StatMaximumSpreadStatic': '\\💫 ',
+                
+                'StatRecoil': '\\🥊 ',
+                'StatRequiredLevel': '\\🏅 ',
+
+                'StatProjectileVelocity': '\\🥏 ',
+                'StatBallisticImpulse': '\\🥏 ',
+                'StatBallisticDamage': '\\🥏 ',
+
+                'StatMass': '\\🗜️ ',
+                'StatTonnageAdd': '\\🗜️ ',
+
+                'StatSolidSurfaceTraction': '\\🛞 ',
+                'StatDenseSurfaceTraction': '\\🛞 ',
+                'StatCrumblySurfaceTraction': '\\🛞 ',
+
+                'StatEngineSpeedMultiplier': '\\🚗 ',
+                'StatEnginePowerMultiplier': '\\🚗 ',
+            }
+            const statPrefix = {
+                'StatAmmoMultiplier': '+',
+                'StatEngineSpeedMultiplier': '+',
+                'StatEnginePowerMultiplier': '+',
+                'StatMassLimit': '+',
+                'StatTonnageAdd': '+',
+            }
+            const statSuffix = {
+                'StatPercentDamageRating': '%',
+                'StatPercentRangeRating': '%',
+                'StatPercentAccuracyRating': '%',
+                'StatPercentOverheatRating': '%',
+                'StatAmmo': 'pts',
+                'StatAmmoMultiplier': '%',
+                'StatStructure': 'pts',
+                'StatEnergyDrain': 'pts',
+                'StatPower': 'pts',
+                'StatEngineSpeedMultiplier': '%',
+                'StatEnginePowerMultiplier': '%',
+                'StatMassLimit': 'kg',
+                'StatMass': 'kg',
+                'StatTonnageAdd': 'kg',
+            }
+            const statHide = [
+                'StatHeatIncrease',
+                'StatMaximumHeat',
+                'StatGunDepression',
+                'StatGunElevation',
+                'StatSpreadMoving',
+                'StatMaximumSpreadMoving',
+                'StatSpreadIncrease',
+                'StatSpreadDecrese',
+                'StatSpreadRotationIncrease',
+            ]
+
+            const statEnums = {
+                'tires_behaviour.good_epic': 'Good (Epic)',
+                'tires_behaviour.normal_epic': 'Normal (Epic)',
+                'tires_behaviour.bad_epic': 'Bad (Epic)',
+            }
+
+            const statMultiply = {
+                'StatEnginePowerMultiplier': 100,
+            }
+
+            item.sortedStats.sort((a, b) => a.stat.order - b.stat.order)
+
+            for (const stat of item.sortedStats) {
+                if (stat.value === 0 || statHide.includes(stat.key)) { continue }
+
+                if (statIcons[stat.key])
+                { statsBuilder += statIcons[stat.key] }
+
+                statsBuilder += stat.stat.name
+
+                if (stat.stat.showProgressBar) {
+                    statsBuilder += '\n'
+                    statsBuilder += ProgressBar(stat.value, 16) + '  ' + stat.value + '%'
+                } else {
+                    statsBuilder += ': '
+
+                    if (statPrefix[stat.key]) if (statPrefix[stat.key] !== '+' || stat.value >= 0)
+                    { statsBuilder += statPrefix[stat.key] }
+
+                    if (statEnums[stat.value])
+                    { statsBuilder += statEnums[stat.value] }
+                    else if (statMultiply[stat.key])
+                    { statsBuilder += stat.value * statMultiply[stat.key] }
+                    else
+                    { statsBuilder += stat.value }
+
+                    if (stat.stat.showPercentage)
+                    { statsBuilder += ' %'}
+                    else if (statSuffix[stat.key])
+                    { statsBuilder += ' ' + statSuffix[stat.key] }
+                }
+                statsBuilder += '\n'
+            }
+
+            embed.addFields([{
+                name: '📊 Stats',
+                value: statsBuilder
+            }])
+        }
+        embed.setTimestamp(new Date(item.timestamp))
+
+        const row = new Discord.ActionRowBuilder()
+            .addComponents(new Discord.ButtonBuilder({
+                style: Discord.ButtonStyle.Secondary,
+                customId: `CrossoutDbGetItem-${item.id}`,
+                label: 'Refresh',
+                emoji: '🔄',
+            }))
+            .addComponents(new Discord.ButtonBuilder({
+                style: Discord.ButtonStyle.Primary,
+                customId: `CrossoutDbGetItemRecipe-${item.id}`,
+                label: 'Recipe',
+            }))
+
+        return {
+            embeds: [ embed ],
+            // @ts-ignore
+            components: [ row ],
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        if (typeof options === 'number') {
+            CrossoutDB.GetItem(options)
+                .catch(error => {
+                    reject('> \\❌ **Requiest error:** ' + error.toString())
+                })
+                .then(result => {
+                    if (!result) {
+                        reject('> \\❌ **Nem található ilyen tárgy**')
+                        return
+                    }
+                
+                    resolve(GetItemEmbed_(result))
+                })
+            return
+        }
+        CrossoutDB.GetItems(options)
+            .catch(error => {
+                reject('> \\❌ **Requiest error:** ' + error.toString())
+            })
+            .then(rawResult => {
+                if (!rawResult) {
+                    reject('> \\❌ **Nem található ilyen tárgy**')
+                    return
+                }
+                if (rawResult.length === 0) {
+                    reject('> \\❌ **Nem található ilyen tárgy**')
+                    return
+                }
+                resolve(GetItemEmbed_(rawResult[0]))
+            })
+    })
+}
+
+/**
+ * @param {number} itemID
+ * @returns {Promise<Discord.BaseMessageOptions>}
+ */
+function GetRecipeEmbed(itemID) {
+    return new Promise((resolve, reject) => {
+        CrossoutDB.GetRecipe(itemID)
+            .catch(error => {
+                reject('> \\❌ **Requiest error:** ' + error.toString())
+            })
+            .then(result => {
+                if (!result) {
+                    reject('> \\❌ **No content recived**')
+                    return
+                }
+    
+                const recipe = result.recipe
+                const item = recipe.item
+    
+                const embed = new Discord.EmbedBuilder()
+                    .setColor(Color.Warning)
+                    .setAuthor({name: 'Crossout DB', iconURL: 'https://crossoutdb.com/img/crossoutdb_logo_compact.png', url: 'https://crossoutdb.com/'})
+                    .setThumbnail('https://crossoutdb.com' + item.imagePath)
+                    .setTitle(item.name)
+                    .setDescription(
+                        lbl(item.rarityName) + '  ' +
+                        lbl(item.categoryName) + '  ' +
+                        lbl(item.typeName) + '  ' +
+                        lbl(item.faction) + '\n' +
+                        `${
+                            item.craftVsBuy === 'Buy' ? 'You should buy it' :
+                            item.craftVsBuy === 'cRAFT' ? 'You should CRAFT it' :
+                            ''
+                        }`
+                    )
+    
+                embed.addFields({
+                    inline: false,
+                    name: `🛠️ Crafting ${recipe.number}x`,
+                    value:
+                        `\\💲 Crafting Cost (Sell): ${recipe.sumBuyFormat} 🅒\n` +
+                        `\\💲 Crafting Cost (Buy): ${recipe.sumSellFormat} 🅒`
+                })
+    
+                const benches = [ 447 ]
+    
+                for (const ingredient of recipe.ingredients) {
+                    if (benches.includes(ingredient.item.id)) {
+                        embed.addFields({
+                            inline: true,
+                            name: `Bench Cost`,
+                            value: `${ingredient.item.formatBuyPrice} 🅒`
+                        })
+                        continue
+                    }
+    
+                    embed.addFields({
+                        inline: true,
+                        name: `${ingredient.item.name} ${ingredient.number}x`,
+                        value: `${ingredient.formatBuyPriceTimesNumber} 🅒`
+                    })
+                }
+    
+                embed.setTimestamp(new Date(item.timestamp))
+    
+                const row = new Discord.ActionRowBuilder()
+                    .addComponents(new Discord.ButtonBuilder({
+                        style: Discord.ButtonStyle.Secondary,
+                        customId: `CrossoutDbGetItemRecipe-${item.id}`,
+                        label: 'Refresh',
+                        emoji: '🔄',
+                    }))
+                    .addComponents(new Discord.ButtonBuilder({
+                        style: Discord.ButtonStyle.Primary,
+                        customId: `CrossoutDbGetItem-${item.id}`,
+                        label: 'Item',
+                    }))
+    
+                resolve({
+                    embeds: [ embed ],
+                    // @ts-ignore
+                    components: [ row ],
+                })
+            })
+    })
+}
+
+/**
+ * @param {Discord.ButtonInteraction<Discord.CacheType>} e
+ * @param {boolean} ephemeral
+ */
+function OnButton(e, ephemeral) {
+    if (e.customId.startsWith('CrossoutDbGetItemRecipe')) {
+        GetRecipeEmbed(Number.parseInt(e.customId.split('-')[1]))
+            .then(result => e.update(result))
+            .catch(error => {
+                if (typeof error === 'string') {
+                    e.reply({ content: error.toString(), ephemeral })
+                    return
+                }
+                e.reply({ content: '> \\❌ **Error:** ' + error.toString(), ephemeral })
+                LogError(error)
+            })
+        return true
+    }
+    if (e.customId.startsWith('CrossoutDbGetItem')) {
+        GetItemEmbed(Number.parseInt(e.customId.split('-')[1]))
+            .then(result => e.update(result))
+            .catch(error => {
+                if (typeof error === 'string') {
+                    e.reply({ content: error, ephemeral })
+                    return
+                }
+                e.reply({ content: '> \\❌ **Error:** ' + error.toString(), ephemeral })
+                LogError(error)
+            })
+        return true
+    }
+
+    return false
+}
+
+module.exports = { GetItem, OnButton }

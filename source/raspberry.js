@@ -126,7 +126,7 @@ const CommandHelp = require('./commands/help')
 
 
 logManager.Loading("Loading commands", 'crossout')
-const { CrossoutTest } = require('./commands/crossout')
+const Crossout = require('./commands/crossout')
 logManager.Loading("Loading commands", 'redditsave')
 const CommandRedditsave = require('./commands/redditsave')
 logManager.Loading("Loading commands", 'fonts')
@@ -1038,7 +1038,7 @@ async function processApplicationCommand(command) {
 
     if (command.commandName === `crossout`) {
         command.deferReply().then(() => {
-            CrossoutTest(command, command.options.getString('search'))
+            Crossout.GetItem(command, command.options.getString('search'))
         })
     }
 

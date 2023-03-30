@@ -286,7 +286,7 @@ bot.on('presenceUpdate', (oldPresence, newPresence) => {
 //#endregion
 
 logManager.scriptLoadingText = 'Loading script... (setup client listeners)'
-bot.on('interactionCreate', async interaction => {
+bot.on(Discord.Events.InteractionCreate, async interaction => {
     if (interaction.member === undefined)
     { database.SaveUserToMemoryAll(interaction.user, interaction.user.username) }
     else
@@ -319,13 +319,13 @@ bot.on('interactionCreate', async interaction => {
     } else if (interaction.isCommand()) processApplicationCommand(interaction, privateCommand)
     else if (interaction.isButton()) {
         if (require('./commands/redditsave').OnButtonClick(interaction)) return
-        
-        try {
-            if (interaction.user.username !== interaction.message.embeds[0].author.name) {
-                interaction.reply({ content: '> \\❗ **Ez nem a tied!**', ephemeral: true })
-                return
-            }
-        } catch (error) { }
+        const Crossout = require('./commands/crossout')
+        if (Crossout.OnButton(interaction, privateCommand)) return
+    
+        if (interaction.user.username !== interaction.message.embeds[0].author.name) {
+            interaction.reply({ content: '> \\❗ **Ez nem a tied!**', ephemeral: true })
+            return
+        }
 
         if (CommandShop.OnButtonClick(interaction, database)) return
         if (CommandBackpack.OnButtonClick(interaction, database)) return
@@ -924,9 +924,9 @@ async function processApplicationCommand(command, privateCommand) {
     }
 
     if (command.commandName === `crossout`) {
-        const { CrossoutTest } = require('./commands/crossout')
+        const Crossout = require('./commands/crossout')
         command.deferReply({ ephemeral: privateCommand }).then(() => {
-            CrossoutTest(command, command.options.getString('search'), privateCommand)
+            Crossout.GetItem(command, command.options.getString('search'), privateCommand)
         })
         return
     }

@@ -601,9 +601,9 @@ module.exports = class DiscordBot {
         }
     
         if (command.commandName === `crossout`) {
-            const { CrossoutTest } = require('./commands/crossout')
+            const Crossout = require('./commands/crossout')
             command.deferReply({ ephemeral: privateCommand }).then(() => {
-                CrossoutTest(command, command.options.getString('search'), privateCommand)
+                Crossout.GetItem(command, command.options.getString('search'), privateCommand)
             })
             return
         }

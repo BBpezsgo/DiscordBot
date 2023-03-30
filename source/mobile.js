@@ -692,9 +692,9 @@ async function processApplicationCommand(command) {
     }
 
     if (command.commandName === `crossout`) {
-        const { CrossoutTest } = require('./commands/crossout')
+        const Crossout = require('./commands/crossout')
         command.deferReply().then(() => {
-            CrossoutTest(command, command.options.getString('search'))
+            Crossout.GetItem(command, command.options.getString('search'))
         })
     }
 
