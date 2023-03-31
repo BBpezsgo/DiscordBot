@@ -5,7 +5,7 @@ const XML = require('xml2js')
 const CONFIG = require('../config.json')
 const Path = require('path')
 
-const ReadFromCache = true
+const ReadFromCache = false
 const ForceReadFromCache = false
 
 const Currencies = [
@@ -104,7 +104,7 @@ function Parse(data, callback) {
 function Download(callback) {
     if (ReadFromCache) {
         if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/currency-data.xml')) && (fs.existsSync(Path.join(CONFIG.paths.base, './cache/currency-date.txt')) || ForceReadFromCache)) {
-            const cacheDate = ForceReadFromCache ? Number.parseInt(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/currency-date.txt'), 'utf8')) : 0
+            const cacheDate = ForceReadFromCache ? 0 : Number.parseInt(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/currency-date.txt'), 'utf8'))
             const difference = Date.now() - cacheDate
             if (difference > (1000 * 60 * 60 * 24)) {
                 callback(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/currency-data.xml'), 'utf8'), undefined, true)

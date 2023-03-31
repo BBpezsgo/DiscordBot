@@ -23,7 +23,8 @@ function GetEmbed(data) {
         .setAuthor({ name: data.sender, url: 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', iconURL: icon })
         .setTitle('Árfolyam')
         .setDescription('💶 Euró árfolyam\nKövetkező frissítés ' + `<t:${ToUnix(Service.GetNextUpdate(new Date(Date.now())))}:R>`)
-    
+        .setTimestamp(Date.parse(data.time))
+
     const currencyInInterest = [
         Service.Currency.HUF,
         Service.Currency.USD,
@@ -76,12 +77,16 @@ async function GetOldReport(statesManager, channel) {
     for (let i = 0; i < messages.size; i++) {
         statesManager.ExchangeReport.Text = `Search old Exchange report message (Loop messages ${i}/${messages.size})...`
         const msg = messages.at(i)
-        const message = await msg.fetch()
-        if (message.embeds.length == 1) {
-            if (message.embeds[0].title == 'Árfolyam') {
-                statesManager.ExchangeReport.Text = 'Old report message found'
-                return message
+        try {
+            const message = await msg.fetch()
+            if (message.embeds.length == 1) {
+                if (message.embeds[0].title == 'Árfolyam') {
+                    statesManager.ExchangeReport.Text = 'Old report message found'
+                    return message
+                }
             }
+        } catch (error) {
+            LogError(error, { key: 'MessageID', value: msg.id }, { key: 'ChannelID', value: channel.id })
         }
     }
 
@@ -106,7 +111,7 @@ async function TrySendReport(statesManager, client, channelID) {
 
     if (oldReport === null || oldReport === undefined) {
         await SendReport(channel, statesManager)
-    } else if (new Date(oldReport.createdTimestamp).getDate() != new Date(Date.now()).getDate()) {
+    } else if (new Date(oldReport.createdTimestamp).getDate() !== new Date(Date.now()).getDate()) {
         statesManager.ExchangeReport.Text = 'Delete old Exchange report message...'
         await oldReport.delete()
         await SendReport(channel, statesManager)

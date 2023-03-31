@@ -180,12 +180,16 @@ async function GetOldDailyWeatherReport(statesManager, channel) {
     for (let i = 0; i < messages.size; i++) {
         statesManager.WeatherReport.Text = `Search old weather report message (Loop messages ${i}/${messages.size})...`
         const msg = messages.at(i)
-        const message = await msg.fetch()
-        if (message.embeds.length == 1) {
-            if (message.embeds[0].title == 'Napi időjárás jelentés') {
-                statesManager.WeatherReport.Text = 'Old report message found'
-                return message
+        try {
+            const message = await msg.fetch()
+            if (message.embeds.length == 1) {
+                if (message.embeds[0].title == 'Napi időjárás jelentés') {
+                    statesManager.WeatherReport.Text = 'Old report message found'
+                    return message
+                }
             }
+        } catch (error) {
+            LogError(error, { key: 'MessageID', value: msg.id }, { key: 'ChannelID', value: channel.id })
         }
     }
 
