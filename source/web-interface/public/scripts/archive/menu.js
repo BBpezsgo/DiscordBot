@@ -5,8 +5,6 @@ const str_menu =
     cache:                          "Cache",
     cacheEmojis:                    "Emojis",
     cacheUsers:                     "Users",
-    cacheChannels:                  "Channels",
-    cacheServers:                   "Servers",
     application:                    "Application",
     commands:                       "Commands",
     process:                        "Account",

@@ -189,7 +189,7 @@
 			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
 		</div>
 	</div>
-	<div id="content">
+	<div id="content" style="position:relative">
 
         <h1>Moderating</h1>
 
@@ -242,33 +242,33 @@
                         </td>
                     </tr>
                     <tr>
-                        <td width="25%" class="Item">Created at:</td>
+                        <td width="25%" class="Item">Created At:</td>
                         <td colspan="2">
                             {{server.createdAt}}
                         </td>
                     </tr>
                     <tr>
-                        <td width="25%" class="Item">Member count:</td>
+                        <td width="25%" class="Item">Member Count:</td>
                         <td colspan="2">
                             {{server.memberCount}}
                         </td>
                     </tr>
                     <tr>
-                        <td width="25%" class="Item">Nsfw level:</td>
+                        <td width="25%" class="Item">NSFW Level:</td>
                         <td colspan="2">
                             {{server.nsfwLevel}}
                         </td>
                     </tr>
                     <tr>
-                        <td width="25%" class="Item">Mfa level:</td>
+                        <td width="25%" class="Item">MFA Level:</td>
                         <td colspan="2">
                             {{server.mfaLevel}}
                         </td>
                     </tr>
                     <tr>
-                        <td width="25%" class="Item">Verification level:</td>
+                        <td width="25%" class="Item">Verification Level:</td>
                         <td colspan="2">
-                            {{server.verificationLevel}}
+                            <img width="16" height="16" src="/dcbot/images/shield-{{server.verificationLevel}}.png">
                         </td>
                     </tr>
                     <tr>
@@ -293,6 +293,12 @@
                         <td width="25%" class="Item">Verified:</td>
                         <td colspan="2">
                             <img width="16" height="16" src="/images/bool-{{server.verified}}.png">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Joined At:</td>
+                        <td colspan="2">
+                            {{server.joinedAt}}
                         </td>
                     </tr>
                 </tbody>
@@ -347,7 +353,7 @@
                                 {{/if}}
                             </div>
 
-                            <span title="{{#if nickname}}Nickname{{else}}Username{{/if}}">{{#if nickname}}{{nickname}}{{else}}{{user.username}}{{/if}}</span>{{#if user.discriminator}}<span style="color: #999;" title="Discriminator">#{{user.discriminator}}</span>{{/if}}
+                            <span onclick="UserPopup('{{id}}', event, 'content')" style="cursor:pointer" title="{{#if nickname}}Nickname{{else}}Username{{/if}}">{{#if nickname}}{{nickname}}{{else}}{{user.username}}{{/if}}</span>{{#if user.discriminator}}<span style="color: #999;" title="Discriminator">#{{user.discriminator}}</span>{{/if}}
                             
                             {{#if user.bot}}<span class="tag">BOT</span>{{/if}}
                             {{#if user.system}}<span class="tag">System</span>{{/if}}
@@ -593,6 +599,7 @@
     </div>
     
     <script src="/scripts/functions.js"></script>
+    <script src="/scripts/user-popup.js"></script>
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="/scripts/loadEffect.js"></script>
 </body>

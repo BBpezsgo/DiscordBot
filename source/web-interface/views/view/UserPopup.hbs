@@ -1,0 +1,153 @@
+<div id="user-popup">
+    <style>
+        #user-popup {
+            position: absolute;
+            background-color: #222;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: #0008 0px 0px 4px;
+        }
+
+        .up-banner {
+            background-color: royalblue;
+            width: 100%;
+            height: 60px;
+            margin-bottom: 32px;
+            border-radius: 8px 8px 0px 0px;
+        }
+
+        .up-avatar {
+            border-radius: 32px;
+            width: 64px;
+            height: 64px;
+            background-color: #222;
+            position: relative;
+            top: 32px;
+            left: 16px;
+            overflow: hidden;
+        }
+
+        .up-content {
+            margin: 8px;
+            background-color: #000;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        .up-name {
+            font-size: 20px;
+        }
+
+        .up-name .tag {
+            font-size: 12px;
+        }
+    </style>
+    <div class="up-banner"{{#if this.hexAccentColor}} style="background-color: #{{this.hexAccentColor}};"{{/if}}>
+        <div class="up-avatar">
+            <img src="{{avatarUrlBig}}" width="64" height="64">
+        </div>
+    </div>
+    <div class="up-content">
+        <span class="up-name">
+            <span style="font-weight:bold" title="{{#if nickname}}Nickname{{else}}Username{{/if}}">{{#if nickname}}{{nickname}}{{else}}{{username}}{{/if}}</span>{{#if discriminator}}<span style="color:#999;font-weight:bold" title="Discriminator">#{{discriminator}}</span>{{/if}}
+
+            {{#if bot}}<span class="tag">BOT</span>{{/if}}
+            {{#if system}}<span class="tag">System</span>{{/if}}
+
+            {{#if flags.HypeSquadOnlineHouse1}}
+            <span class="user-badge">
+                <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">
+            </span>
+            {{/if}}
+
+            {{#if flags.HypeSquadOnlineHouse2}}
+            <span class="user-badge">
+                <img src="https://static.wikia.nocookie.net/discord/images/2/27/Hypesquad_brilliance_badge.png">
+            </span>
+            {{/if}}
+
+            {{#if flags.HypeSquadOnlineHouse3}}
+            <span class="user-badge">
+                <img src="https://static.wikia.nocookie.net/discord/images/c/ca/Hypesquad_balance_badge.png">
+            </span>
+            {{/if}}
+            
+            {{#if flags.Staff}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/Discord-staff.png">
+            </span>
+            {{/if}}
+            
+            {{#if flags.BugHunterLevel1}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/Bug_hunter_badge.png">
+            </span>
+            {{/if}}
+            
+            {{#if flags.BugHunterLevel2}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/Bug_buster_badge.png">
+            </span>
+            {{/if}}
+            
+            {{#if flags.CertifiedModerator}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/Discord_Certified_Moderator.png">
+            </span>
+            {{/if}}
+            
+            {{#if flags.Partner}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/DiscordPartnerBadge.svg">
+            </span>
+            {{/if}}
+            
+            {{#if false}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/Early_supporter_badge.png">
+            </span>
+            {{/if}}
+            
+            {{#if false}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/HypeSquad_Event_Badge.png">
+            </span>
+            {{/if}}
+            
+            {{#if false}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/New_badge.svg">
+            </span>
+            {{/if}}
+            
+            {{#if false}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/Nitro_badge.png">
+            </span>
+            {{/if}}
+            
+            {{#if false}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/SupportsCommandsBadge.png">
+            </span>
+            {{/if}}
+            
+            {{#if VerifiedDeveloper}}
+            <span class="user-badge">
+                <img src="/dcbot/images/userBadges/Verified_developer_badge.png">
+            </span>
+            {{/if}}
+
+            {{#if cache}}
+            <img src="/images/offline.png" width="12" height="12" title="From Cache" alt="Cache Icon" style="transform: translateY(2px); opacity: 50%;">
+            {{/if}}
+
+            {{#if haveDatabase}}
+            <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
+            {{/if}}
+        </span>
+        <p>ID: {{id}}</p>
+        <p>Created At: {{createdAt}}</p>
+        <button class="btn-fetch" onclick="Post('/User/Fetch?id=738030244367433770', event, () => { Reload() })" title="Fetch"></button>
+    </div>
+</div>

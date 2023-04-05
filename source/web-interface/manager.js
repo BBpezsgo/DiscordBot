@@ -53,12 +53,6 @@ const HandlebarsHelpers = {
         if (this.done !== true) {
             return options.fn(this)
         }
-    },
-    'helperMissing': function() {
-        /** @type {Handlebars.HelperOptions} */
-        const options = arguments[arguments.length - 1]
-        const args = Array.prototype.slice.call(arguments, 0, arguments.length - 1)
-        return new Handlebars.SafeString("Missing: " + options.name + "(" + args + ")")
     }
 }
 
@@ -298,16 +292,19 @@ class WebInterfaceManager {
         this.archiveModeratingSearchedServerId = ''
         this.archiveModeratingSearchedChannelId = ''
 
+        this.viewUserMessagedId = ''
+
         this.commandsDeleting = false
         this.commandsCreating = false
         this.commandsCreatingPercent = 0.0
     }
 
     /** @param {Discord.User} user */
-    Get_UserJson(user) {        
+    Get_UserJson(user) {
         const userJson = {
             defaultAvatarUrl: user.defaultAvatarURL,
             avatarUrlSmall: user.avatarURL({ size: 16 }),
+            avatarUrlMedium: user.avatarURL({ size: 32 }),
             avatarUrlBig: user.avatarURL({ size: 128 }),
             id: user.id,
             flags: {
@@ -910,6 +907,134 @@ class WebInterfaceManager {
         this.RenderPage(req, res, 'ModeratingSearch', { servers: this.Get_ServersCache(), searchError: searchError })
     }
 
+    RenderPage_DirectMessages(req, res) {
+        if (this.viewUserMessagedId.length > 0) {
+            const user = this.client.users.cache.get(this.viewUserMessagedId)
+            if (user) {
+                const c = user.dmChannel
+                let channelJson = c ? {
+                    id: c.id,
+                    name: user.username,
+                    createdAt: GetDate(c.createdAt),
+                } : {
+                    name: user.username,
+                }
+                
+
+                /** @type {{id:string;createdAtTimestamp:number}[]} */
+                const messages = []
+
+                if (user.dmChannel) {
+                    const cTxt = c
+
+                    cTxt.messages.cache.forEach((message) => {
+                        const attachments = message.attachments.toJSON()
+                        const attachmentsResult = []
+                        for (const attachment of attachments) {
+                            attachmentsResult.push({
+                                contentType: attachment.contentType,
+                                description: attachment.description,
+                                height: attachment.height,
+                                width: attachment.width,
+                                id: attachment.id,
+                                name: attachment.name,
+                                spoiler: attachment.spoiler,
+                                url: attachment.url,
+                            })
+                        }
+
+                        const reactions = message.reactions.cache.toJSON()
+                        const reactionsResult = []
+                        for (const reaction of reactions) {
+                            reactionsResult.push({
+                                count: reaction.count,
+                                url: reaction.emoji.url,
+                                name: reaction.emoji.name,
+                                me: reaction.me,
+                            })
+                        }
+
+                        const embedsResult = []
+                        for (const embed of message.embeds) {
+                            embedsResult.push({
+                                color: embed.hexColor,
+                                author: embed.author,
+                                description: (new ContentParser.Parser(embed.description)).result,
+                                footer: embed.footer,
+                                image: embed.image,
+                                thumbnail: embed.thumbnail,
+                                url: embed.url,
+                                title: (new ContentParser.Parser(embed.title)).result,
+                                fields: embed.fields.map(field => {
+                                    return {
+                                        name: (new ContentParser.Parser(field.name)).result,
+                                        value: (new ContentParser.Parser(field.value)).result,
+                                        inline: field.inline,
+                                    }
+                                }),
+                            })
+                        }
+
+                        messages.push({
+                            content: this.GetHandlebarsMessage(message),
+                            reactions: reactionsResult,
+                            attachments: attachmentsResult,
+                            embeds: embedsResult,
+                            id: message.id,
+                            position: message.position,
+                            applicationId: message.applicationId,
+                            cleanContent: message.cleanContent,
+                            tts: message.tts,
+                            // content: message.content,
+                            createdAt: GetDate(message.createdAt),
+                            createdAtTimestamp: message.createdAt.getTime(),
+                            crosspostable: message.crosspostable,
+                            deletable: message.deletable,
+                            editable: message.editable,
+                            editedAt: GetDate(message.editedAt),
+                            nonce: message.nonce,
+                            partial: message.partial,
+                            pinnable: message.pinnable,
+                            pinned: message.pinned,
+                            system: message.system,
+                            type: message.type,
+                            types: {
+                                AutoModerationAction: message.type === MessageType.AutoModerationAction,
+                                Call: message.type === MessageType.Call,
+                                ChannelFollowAdd: message.type === MessageType.ChannelFollowAdd,
+                                ChannelIconChange: message.type === MessageType.ChannelIconChange,
+                                ChannelNameChange: message.type === MessageType.ChannelNameChange,
+                                ChannelPinnedMessage: message.type === MessageType.ChannelPinnedMessage,
+                                ChatInputCommand: message.type === MessageType.ChatInputCommand,
+                                ContextMenuCommand: message.type === MessageType.ContextMenuCommand,
+                                Default: message.type === MessageType.Default,
+                                GuildBoost: message.type === MessageType.GuildBoost,
+                                GuildBoostTier1: message.type === MessageType.GuildBoostTier1,
+                                GuildBoostTier2: message.type === MessageType.GuildBoostTier2,
+                                GuildBoostTier3: message.type === MessageType.GuildBoostTier3,
+                                RecipientRemove: message.type === MessageType.RecipientRemove,
+                                RecipientAdd: message.type === MessageType.RecipientAdd,
+                                GuildInviteReminder: message.type === MessageType.GuildInviteReminder,
+                                Reply: message.type === MessageType.Reply,
+                                ThreadCreated: message.type === MessageType.ThreadCreated,
+                                ThreadStarterMessage: message.type === MessageType.ThreadStarterMessage,
+                                UserJoin: message.type === MessageType.UserJoin,
+                            },
+                            url: message.url,
+                            author: this.Get_UserJson(message.author)
+                        })
+                    })
+
+                    messages.sort((a, b) => { return a.createdAtTimestamp - b.createdAtTimestamp })
+                }
+                this.RenderPage(req, res, 'UserMessages',  { users: this.Get_UsersCache(), channel: channelJson, messages })
+                return
+            }
+        }
+
+        this.RenderPage(req, res, 'CacheUsers',  { users: this.Get_UsersCache() })
+    }
+
     RenderPage_ModeratingGuildSearch(req, res, searchError) {
         if (this.moderatingSearchedServerId.length === 0) {
             this.RenderPage_ModeratingSearch(req, res, 'No server selected')
@@ -944,20 +1069,15 @@ class WebInterfaceManager {
             joinedAt: GetDate(g.joinedAt),
 
             memberCount: g.memberCount,
-            nsfwLevel: g.nsfwLevel,
-            // nameAcronym: '-',
-            mfaLevel: g.mfaLevel,
+            nsfwLevel: NsfwLevel[g.nsfwLevel],
+            mfaLevel: MFALevel[g.mfaLevel],
             verificationLevel: g.verificationLevel,
-            splash: g.splash,
 
             available: g.available,
             large: g.large,
 
             membersNotFetched: g.memberCount - g.members.cache.size,
             membersNotVisible: null,
-
-            // partnered: g.partnered,
-            // verified: g.verified,
         }
 
         const emojis = []
@@ -1423,20 +1543,24 @@ class WebInterfaceManager {
             res.render('view/Menu')
         })
 
+        this.app.get('/dcbot/user-popup.html', (req, res) => {
+            this.client.users.fetch(req.query.id)
+            .then(user => {
+                res.render('view/UserPopup', this.Get_UserJson(user))
+            })
+            .catch((error) => res.status(500).send(error))
+        })
+
         this.app.get('/dcbot/view/status.html', (req, res) => {
             this.RenderPage_Status(req, res)
         })
 
         this.app.get('/dcbot/view/cache-users.html', (req, res) => {
-            this.RenderPage(req, res, 'CacheUsers', { users: this.Get_UsersCache() })
+            this.RenderPage_DirectMessages(req, res)
         })
 
         this.app.get('/dcbot/view/cache-channels.html', (req, res) => {
             this.RenderPage_CacheChannels(req, res)
-        })
-
-        this.app.get('/dcbot/view/cache-servers.html', (req, res) => {
-            this.RenderPage(req, res, 'CacheServers', { servers: this.Get_ServersCache() })
         })
 
         this.app.get('/dcbot/view/cache-emojis.html', (req, res) => {
@@ -2013,29 +2137,26 @@ class WebInterfaceManager {
             const channel = this.client.channels.cache.get(req.body.channel)
 
             if (channel === undefined) {
-                this.RenderPage_Moderating(req, res)
-                return
-                res.status(200).send({ message: `Unknown channel (channel: ${req.body.channel})` })
+                res.status(200).send({ message: `Channel '${req.body.channel}' not found` })
             }
 
-            if (channel.type !== Discord.ChannelType.GuildText) {
-                this.RenderPage_Moderating(req, res)
-                return
+            if (channel.type === Discord.ChannelType.GuildText) {
+                channel.send({ content: req.body.content, tts: req.body.tts })
+                    .finally(() => {                        
+                        this.RenderPage_Moderating(req, res)
+                    })
                 return
             }
 
-            channel.send({ content: req.body.content, tts: req.body.tts })
-                .then(() => {
-                    return
-                    res.status(200).send({ message: 'ok' })
-                })
-                .catch((error) => {
-                    return
-                    res.status(200).send({ message: 'Failed to send message', error: error })
-                })
-                .finally(() => {                        
-                    this.RenderPage_Moderating(req, res)
-                })
+            if (channel.type === Discord.ChannelType.DM) {
+                channel.send({ content: req.body.content, tts: req.body.tts })
+                    .finally(() => {                        
+                        this.RenderPage_DirectMessages(req, res)
+                    })
+                return
+            }
+
+            res.status(200).send({ message: `Invalid channel type` })
         })
 
         this.app.post('/Message/Fetch', (req, res) => {
@@ -2119,7 +2240,7 @@ class WebInterfaceManager {
 
             this.client.channels.fetch(channelID)
                 .then((channel) => {
-                    if (channel.type !== Discord.ChannelType.GuildText) {
+                    if (channel.type !== Discord.ChannelType.GuildText && channel.type !== Discord.ChannelType.DM) {
                         res.status(400).send({ error: 'Invalid channel type' })
                         return
                     }
@@ -2301,6 +2422,52 @@ class WebInterfaceManager {
                 this.RenderPage_ModeratingGuildSearch(req, res, '')
             } else {
                 this.RenderPage_ModeratingSearch(req, res, 'Server not found')
+            }
+        })
+
+        this.app.post('/dcbot/view/UserMessages/Back', (req, res) => {
+            this.viewUserMessagedId = ''
+            this.RenderPage_DirectMessages(req, res)
+        })
+
+        this.app.post('/dcbot/view/UserMessages/Search', (req, res) => {
+            const id = req.query.id ?? req.body.id
+            if (this.client.users.cache.has(id)) {
+                this.viewUserMessagedId = id
+
+                this.RenderPage_DirectMessages(req, res, '')
+            } else {
+                this.RenderPage_DirectMessages(req, res, 'User not found')
+            }
+        })
+
+
+        this.app.post('/UserMessages/Create', (req, res) => {
+            if (this.client.users.cache.has(this.viewUserMessagedId)) {
+                this.client.users.cache.get(this.viewUserMessagedId).createDM()
+                    .then(() => {
+                        res.status(200).send({ message: 'ok' })
+                    })
+                    .catch(error => {
+                        res.status(500).send({ error })
+                    })
+            } else {
+                res.status(500).send({ error: `User '${this.viewUserMessagedId}' not found` })
+            }
+        })
+
+
+        this.app.post('/UserMessages/Delete', (req, res) => {
+            if (this.client.users.cache.has(this.viewUserMessagedId)) {
+                this.client.users.cache.get(this.viewUserMessagedId).deleteDM()
+                    .then(() => {
+                        res.status(200).send({ message: 'ok' })
+                    })
+                    .catch(error => {
+                        res.status(500).send({ error })
+                    })
+            } else {
+                res.status(500).send({ error: `User '${this.viewUserMessagedId}' not found` })
             }
         })
 

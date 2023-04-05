@@ -1,108 +1,3 @@
-const MenuList = [
-    {
-        url: "Status",
-        displayLevel: 0,
-        directoryLevel: 0,
-        name: str_menu.status,
-    },
-    {
-        url: "Process",
-        displayLevel: 0,
-        directoryLevel: 0,
-        name: str_menu.process,
-    },
-    {
-        url: "LogError",
-        displayLevel: 0,
-        directoryLevel: 1,
-        name: str_menu.log,
-    },
-    {
-        url: "LogError",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.logErrors,
-    },
-    {
-        url: "LogSystem",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.logSystem,
-    },
-    {
-        url: "LogHandlebars",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.logHandlebars,
-    },
-    {
-        url: "CacheEmojis",
-        displayLevel: 0,
-        directoryLevel: 1,
-        name: str_menu.cache,
-    },
-    {
-        url: "CacheEmojis",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.cacheEmojis,
-    },
-    {
-        url: "CacheUsers",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.cacheUsers,
-    },
-    {
-        url: "CacheChannels",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.cacheChannels,
-    },
-    {
-        url: "CacheServers",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.cacheServers,
-    },
-    {
-        url: "Application",
-        displayLevel: 0,
-        directoryLevel: 1,
-        name: str_menu.application,
-    },
-    {
-        url: "Application",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.application,
-    },
-    {
-        url: "ApplicationCommands",
-        displayLevel: 0,
-        directoryLevel: 2,
-        name: str_menu.commands,
-    },
-    {
-        url: "Moderating",
-        displayLevel: 0,
-        directoryLevel: 0,
-        name: str_menu.moderating,
-    },
-    {
-        url: "Database",
-        displayLevel: 0,
-        directoryLevel: 0,
-        name: str_menu.database,
-    },
-    {
-        url: "Testing",
-        displayLevel: 0,
-        directoryLevel: 0,
-        name: str_menu.testing,
-    }
-]
-
 const menuList = new Array(
     //	url							display	level			string
     //	url:	url to visite when click on this menu item. it's not full path, but only filename.
@@ -120,12 +15,6 @@ const menuList = new Array(
     // "log-handlebars", 0, 2, str_menu.logHandlebars,
     "---", 0, 0, "---",
 
-    // Cache
-    "cache-emojis", 0, 1, str_menu.cache,
-    "cache-emojis", 0, 2, str_menu.cacheEmojis,
-    "cache-users", 0, 2, str_menu.cacheUsers,
-    "cache-channels", 0, 2, str_menu.cacheChannels,
-    "cache-servers", 0, 2, str_menu.cacheServers,
     // Application
     "application", 0, 1, str_menu.application,
     "application", 0, 2, str_menu.application,
@@ -138,7 +27,9 @@ const menuList = new Array(
     // Database
     "database", 0, 0, str_menu.database,
 
-    // "---", 0, 0, "---",
+    "---", 0, 0, "---",
+
+    "cache-users", 0, 0, str_menu.cacheUsers,
 
     // Testing
     // "testing", 0, 0, str_menu.testing,
@@ -205,7 +96,7 @@ function menuDisplay() {
             newOL.id = `hr${i}`
             document.getElementsByTagName('menu')[0].appendChild(newOL)
         } else {
-            const haveIcon = ['application','cache-emojis','database','log-error','moderating','process','status','testing'].includes(menuList[n])
+            const haveIcon = ['application','cache-emojis','database','log-error','moderating','process','status','testing','cache-users'].includes(menuList[n])
 
             const newOL = document.createElement('ol')
             newOL.id = `ol${i}`
@@ -251,11 +142,6 @@ function menuDisplay() {
     }
 
     GetGuilds(guilds => {
-        if (guilds.length > 0) {
-            const newOL = document.createElement('hr')
-            newOL.id = `hr${i}`
-            document.getElementsByTagName('menu')[0].appendChild(newOL)
-        }
         guilds.forEach(guild => {
             const newOL = document.createElement('ol')
             newOL.id = `guild-ol${guild.id}`
