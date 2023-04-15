@@ -11,4 +11,5 @@ export type Config = {
         base: string
         webInterface: string
     }
+    firebase: import('firebase/app').FirebaseOptions
 }
