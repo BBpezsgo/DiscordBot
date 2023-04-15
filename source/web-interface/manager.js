@@ -1654,6 +1654,10 @@ class WebInterfaceManager {
             this.RenderPage_ModeratingSearch(req, res, '')
         })
 
+        this.app.get('/dcbot/view/firebase.html', (req, res) => {
+            this.RenderPage(req, res, 'Firebase')
+        })
+
         this.app.get('/dcbot/view/database.html', (req, res) => {
             if (this.database == null || this.database == undefined) {
                 this.RenderPage(req, res, 'DatabaseNotSupported')

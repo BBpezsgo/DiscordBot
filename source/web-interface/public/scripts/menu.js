@@ -1,39 +1,62 @@
-const menuList = new Array(
-    //	url							display	level			string
-    //	url:	url to visite when click on this menu item. it's not full path, but only filename.
-    //		if it's not null, must be one and only; else if it's null, that means it has branches, and the actual url is the one of its first visitable branches.
-    //	display: must be 0. 
-    //	directory level: 0: directory has no branches;  1: directory level 1;  2:level 2;   and so on
-    
-    // Status
-    "status", 0, 0, str_menu.status,
-    // Process
-    "process", 0, 0, str_menu.process,
-    // Logs
-    "log-error", 0, 0, str_menu.logErrors,
-    // "log-system", 0, 2, str_menu.logSystem,
-    // "log-handlebars", 0, 2, str_menu.logHandlebars,
-    "---", 0, 0, "---",
+// @ts-check
 
-    // Application
-    "application", 0, 1, str_menu.application,
-    "application", 0, 2, str_menu.application,
-    "application-commands", 0, 2, str_menu.commands,
-    // Moderating
-    // "moderating", 0, 0, str_menu.moderating,
-
-    "---", 0, 0, "---",
-
-    // Database
-    "database", 0, 0, str_menu.database,
-
-    "---", 0, 0, "---",
-
-    "cache-users", 0, 0, str_menu.cacheUsers,
-
-    // Testing
-    // "testing", 0, 0, str_menu.testing,
-)
+/**
+ * @type {('-' |
+ * {
+ *   id: string
+ *   displayName: string
+ *   index?: number
+ *   childs?: {
+ *     id: string
+ *     displayName: string
+ *     index?: number
+ *     parentIndex?: number
+ *   }[]
+ * })[]}
+ */
+const items = [
+    {
+        id: 'status',
+        displayName: str_menu.status,
+    },
+    {
+        id: 'process',
+        displayName: str_menu.process,
+    },
+    {
+        id: 'log-error',
+        displayName: str_menu.logErrors,
+    },
+    '-',
+    {
+        id: 'application',
+        displayName: str_menu.application,
+        childs: [
+            {
+                id: 'application',
+                displayName: str_menu.application,
+            },
+            {
+                id: 'application-commands',
+                displayName: str_menu.commands,
+            },
+        ],
+    },
+    '-',
+    {
+        id: 'database',
+        displayName: str_menu.database,
+    },
+    {
+        id: 'firebase',
+        displayName: str_menu.firebase,
+    },
+    '-',
+    {
+        id: 'cache-users',
+        displayName: str_menu.cacheUsers,
+    }
+]
 
 /** @param {(result: { id: string, iconUrl: string, name: string }[]) => void} callback */
 function GetGuilds(callback) {
@@ -46,99 +69,98 @@ function GetGuilds(callback) {
 var map = new Array()
 
 function menuInit() {
-    for (var n = 0; n < menuList.length; n += 4) {
-        menuList[n + 1] = 1
-    }
-        
-    n = menuList.length - 4;
-    var url = "";
-    var level = 0;
-    while (n >= 0) {
-        if (menuList[n + 1] == 1 && menuList[n + 2] > 0) {
-            url = menuList[n];
-            level = menuList[n + 2];
+    let index = -1
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (typeof item === 'string') continue
+        index++
+        item.index = index
+        if (item.childs) for (let j = 0; j < item.childs.length; j++) {
+            const child = item.childs[j]
+            index++
+            child.parentIndex = item.index
+            child.index = index
+            item.childs[j] = child
         }
-        else if (menuList[n + 2] > 0 && menuList[n + 2] < level) {
-            menuList[n] = url;
-            menuList[n + 1] = 1;
-            level = menuList[n + 2];
-        }
-        n -= 4;
+        items[i] = item
     }
 }
 
+/**
+ * @param {{
+*     id: string
+ *    displayName: string
+ *    index?: number
+ *    childs?: {
+ *        id: string;
+ *        displayName: string
+ *        index?: number
+ *    }[]
+ * }} item
+ */
+function AddElement(item) {
+    let display = 'block'
+    let className = "dot1"
+
+    const haveIcon = ['application','cache-emojis','database','firebase','log-error','moderating','process','status','testing','cache-users'].includes(item.id)
+
+    const newOL = document.createElement('ol')
+    newOL.id = `ol${item.index}`
+    newOL.className = className
+    newOL.style.display = display
+    newOL.onclick = (e) => {
+        newA.click()
+    }
+    document.getElementsByTagName('menu')[0].appendChild(newOL)
+
+    if (haveIcon) {
+        const newIMG = document.createElement('img')
+        newIMG.src = `/images/menu-icons/${item.id}.svg`
+        newOL.appendChild(newIMG)
+    }
+
+    const newA = document.createElement('a')
+    newA.id = `a${item.index}`
+    newA.href = `/dcbot/view/${item.id}.html`
+    newA.target = 'mainFrame'
+    newA.className = 'L1'
+    newA.setAttribute('data', `${item.index}`)
+    newA.onclick = (e) => {
+        /** @type {HTMLElement} */
+        const target = e.target
+        const index = Number.parseInt(target.getAttribute('data'))
+        doClick(index)
+    }
+    newOL.title = item.displayName
+    newOL.appendChild(newA)
+
+    if (item.id === 'log-error') {
+        const newIMG = document.createElement('div')
+        newIMG.id = 'status-icon-error'
+        newIMG.className = 'status-icon'
+        newOL.appendChild(newIMG)
+    }
+
+    if (item.childs) for (let i = 0; i < item.childs.length; i++) {
+        const child = item.childs[i]
+        const childOL = AddElement(child)
+        childOL.style.display = 'none'
+    }
+
+    return newOL
+}
+
 function menuDisplay() {
-    var i = 0;
-    var className;
-    for (var n = 0; n < menuList.length; n += 4) {
-        if (menuList[n + 1] != 1) {
-            continue;
-        }
-        if (menuList[n + 2] == 0) {
-            className = "dot1";
-            display = "block";
-        } else if ((menuList[n + 2] > 0) && (menuList[n + 4 + 2] > menuList[n + 2])) {
-            className = "plus";
-            if (menuList[n + 2] == 1) {
-                display = "block";
-            }
-            else {
-                display = "none";
-            }
-        } else {
-            className = "dot2";
-            display = "none";
-        }
-        var power = (menuList[n + 2] > 0) ? (menuList[n + 2] - 1) : 0;
-        
-        if (menuList[n] === '---') {
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (typeof item === 'string') {
             const newOL = document.createElement('hr')
             newOL.id = `hr${i}`
             document.getElementsByTagName('menu')[0].appendChild(newOL)
-        } else {
-            const haveIcon = ['application','cache-emojis','database','log-error','moderating','process','status','testing','cache-users'].includes(menuList[n])
-
-            const newOL = document.createElement('ol')
-            newOL.id = `ol${i}`
-            newOL.className = className
-            newOL.style.display = display
-            newOL.onclick = (e) => {
-                newA.click()
-            }
-            document.getElementsByTagName('menu')[0].appendChild(newOL)
-
-            if (haveIcon) {
-                const newIMG = document.createElement('img')
-                newIMG.src = `/images/menu-icons/${menuList[n]}.svg`
-                newOL.appendChild(newIMG)
-            }
-
-            const newA = document.createElement('a')
-            newA.id = `a${i}`
-            newA.href = `/dcbot/view/${menuList[n]}.html`
-            newA.target = 'mainFrame'
-            newA.className = 'L1'
-            newA.setAttribute('data', `${i}-${n}`)
-            newA.onclick = (e) => {
-                /** @type {HTMLAnchorElement} */
-                const target = e.target
-                doClick(Number.parseInt(target.getAttribute('data').split('-')[0]), Number.parseInt(menuList[target.getAttribute('data').split('-')[1]]))
-            }
-            newOL.title = menuList[n + 3]
-            newOL.appendChild(newA)
-
-            if (menuList[n] === 'log-error') {
-                const newIMG = document.createElement('div')
-                newIMG.id = 'status-icon-error'
-                newIMG.className = 'status-icon'
-                newOL.appendChild(newIMG)
-            }
+            continue
         }
 
-        //added by zqq,07.11.1
-        //map.push(menuList[n+2]);
-        map[map.length] = menuList[n + 2];
-        i++;
+        AddElement(item)
     }
 
     GetGuilds(guilds => {
@@ -164,8 +186,7 @@ function menuDisplay() {
             newA.onclick = (e) => {
                 collapseAll()
                 UnselectAll()
-
-                /** @type {HTMLAnchorElement} */
+                /** @type {HTMLElement} */
                 const target = e.target
                 const guild = target.getAttribute('data').split('-')[1]
                 document.getElementById('guild-ol' + guild).classList.add('selected')
@@ -186,88 +207,102 @@ function UnselectAll() {
 }
 
 function collapseAll() {
-    const l = menuList.length / 4 //document.getElementsByTagName('ol').length
-    for (var i = 0; i < l; i++) {
+    for (var i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (typeof item === 'string') continue
+        if (!item.childs) continue
+        for (let j = 0; j < item.childs.length; j++) {
+            const child = item.childs[j]
+            try { document.getElementById('ol' + child.index).style.display = "none" }
+            catch (error) { }
+        }
         try {
-            if (map[i] > 1) {
-                document.getElementById('ol' + i).style.display = "none";
-            }
-            if (document.getElementById('ol' + i).classList.contains("minus")) {
-                document.getElementById('ol' + i).className = "plus";
+            if (document.getElementById('ol' + item.index).classList.contains("minus")) {
+                document.getElementById('ol' + item.index).className = "plus"
             }
         } catch (ex) {
             continue
         }
     }
     for (var i = 0; i < document.links.length; i++) {
-        document.links[i].className = "L1";
+        document.links[i].className = "L1"
     }
 }
 
-function expandBranch(n) {
-    var branch;
-    var l = 0;
-    var index;
-    while (l != 1) {
-        branch = document.getElementById('ol' + n);
-        l = map[n];
-        index = n;
-        if (branch.classList.contains("plus")) {
-            branch.className = "minus";
-        }
-        else {
-            while (1) {
-                if (map[index] != l - 1)
-                    index--;
-                else
-                    break;
-            }
-            branch = document.getElementById('ol' + index);
-            branch.className = "minus";
-        }
-        n = index;
-        l = map[n];
-        while (1) {
-            index++;
-            if (index >= map.length) {
-                break;
-            }
-            branch = document.getElementById('ol' + index);
-            if (map[index] == (l + 1)) {
-                branch.style.display = "block";
-            }
-            else if (map[index] <= l) {
-                break;
-            }
+/** @param {number} i */
+function expandBranch(i) {
+    const item = GetItem(i)
+    if (!item) return
+    if (typeof item === 'string') return
+    if (!item.childs) return
+    for (let j = 0; j < item.childs.length; j++) {
+        const child = item.childs[j]
+        document.getElementById('ol' + child.index).style.display = 'block'
+    }
+}
+
+/**
+ * @returns {({
+ *  id: string
+ *  displayName: string
+ *  index?: number
+ *  parentIndex?: undefined
+ *  childs?: {
+ *   id: string
+ *   displayName: string
+ *   index?: number
+ *   parentIndex?: number
+ *  }[]
+ * } | {
+ *   id: string
+ *   displayName: string
+ *   index?: number
+ *   parentIndex?: number
+ *   childs?: undefined
+ *  })}
+ * @param {number} index
+ */
+function GetItem(index) {
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (typeof item === 'string') continue
+        if (item.index === index) return item
+        if (item.childs) for (let j = 0; j < item.childs.length; j++) {
+            const child = item.childs[j]
+            if (child.index === index) return child
         }
     }
 }
 
-/** @param {number} n @param {string} menuName */
-function doClick(n, menuName) {
-    collapseAll();
-    UnselectAll();
+/** @param {number} i */
+function doClick(i) {
+    const item = GetItem(i)
+    if (!item) return
+    if (typeof item === 'string') return
+
+    collapseAll()
+    UnselectAll()
     
-    const obj = document.getElementById('ol' + n);
+    const obj = document.getElementById('ol' + item.index);
     if (obj.classList.contains("plus")) {
-        document.getElementById('a' + (n + 1)).className = "L2";
+        document.getElementById('a' + (item.index + 1)).className = "L2"
+    } else {
+        document.getElementById('a' + item.index).className = "L2";
     }
-    else {
-        document.getElementById('a' + n).className = "L2";
-    }
-    if (map[n] > 0) {
-        expandBranch(n);
+    console.log('[Menu]', `doClick`, item)
+    if (item.childs) {
+        expandBranch(item.index)
+        document.getElementById('ol' + (item.index + 1)).classList.add('selected')
+    } else if (item.parentIndex) {
+        expandBranch(item.parentIndex)
+        document.getElementById('ol' + item.index).classList.add('selected')
+    } else {
+        document.getElementById('ol' + item.index).classList.add('selected')
     }
 
-    if (!UrlExists(document.getElementById('a' + n).href)) {
+    if (!UrlExists(document.getElementById('a' + item.index).href)) {
         parent.window.frames["mainFrame"].src = ""
         parent.window.frames["mainFrame"].document.body.innerHTML = Page404
-    }
-
-    if (map[n] == 1) {
-        document.getElementById('ol' + (n + 1)).classList.add('selected')
-    } else {
-        document.getElementById('ol' + n).classList.add('selected')
     }
 }
 
@@ -282,17 +317,20 @@ const Page404 =
     `    </tbody>` +
     `</table>`
 
+/**
+ * @param {string | URL} url
+ */
 function UrlExists(url) {
     try {
-        var http = new XMLHttpRequest();
-        http.open('HEAD', url, false);
-        http.send();
+        var http = new XMLHttpRequest()
+        http.open('HEAD', url, false)
+        http.send()
         if (http.status != 404) {
-            return true;
+            return true
         } else {
-            return false;
+            return false
         }
     } catch (error) {
-        return false;
+        return false
     }
 }

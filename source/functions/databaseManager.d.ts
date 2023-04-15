@@ -164,5 +164,7 @@ export class DatabaseManager {
     UserstatsAddUserToMemory(user: Discord.User)
 
     Fix()
+
+    Upload()
 }
 

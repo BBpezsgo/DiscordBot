@@ -5,7 +5,7 @@
   "main": "./source/desktop.js",
   "repository": "https://github.com/BBpezsgo/DiscordBot",
   "scripts": {
-    "test": "node ./source/tests/test.js",
+    "test": "node ./source/tests/test2.js",
     "build": "tsc --project tsconfig.json",
     "desktop": "npm run build && node --enable-source-maps --trace-warnings dist/desktop.js",
     "mobile": "npm run build && node --enable-source-maps --trace-warnings dist/mobile.js",
@@ -25,6 +25,7 @@
     "express": "^4.18.2",
     "express-formidable": "^1.2.0",
     "express-handlebars": "^7.0.2",
+    "firebase": "^9.19.1",
     "fs": "latest",
     "handlebars": "^4.7.7",
     "jsdom": "^21.1.1",

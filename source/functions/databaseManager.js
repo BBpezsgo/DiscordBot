@@ -2,6 +2,7 @@ const Discord = require('discord.js')
 const fs = require('fs')
 const { StatesManager } = require('../functions/statesManager')
 const { userstatsSendMeme, userstatsSendMusic, userstatsSendYoutube, userstatsSendMessage, userstatsSendChars, userstatsSendCommand, userstatsAddUserToMemory } = require('../economy/userstats.js')
+const LogError = require('./errorLog')
 
 function IsAnything(obj) {
     if (obj == undefined) { return false }
@@ -338,6 +339,35 @@ class DatabaseManager {
             this.dataUserstats[user].messages = FixNumber(this.dataUserstats[user].messages)
             this.dataUserstats[user].musics = FixNumber(this.dataUserstats[user].musics)
             this.dataUserstats[user].youtubevideos = FixNumber(this.dataUserstats[user].youtubevideos)
+        }
+    }
+
+    async Upload() {
+        const database = new (require('../services/firebase'))()
+        const users = Object.keys(this.dataBasic)
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i]
+            const path = '/users/' + user + '/'
+            const data = {
+                ...this.dataBasic[user],
+            }
+            try { await database.Set(path, data) }
+            catch (error) { LogError(error) }
+            
+            if (this.dataBackpacks[user]) try { await database.Set(path + 'backpack', this.dataBackpacks[user]) }
+            catch (error) { LogError(error) }
+            
+            if (this.dataBusinesses[user]) try { await database.Set(path + 'business', this.dataBusinesses[user]) }
+            catch (error) { LogError(error) }
+            
+            if (this.dataMail[user]) try { await database.Set(path + 'mail', this.dataMail[user]) }
+            catch (error) { LogError(error) }
+            
+            if (this.dataStickers[user]) try { await database.Set(path + 'stickers', this.dataStickers[user]) }
+            catch (error) { LogError(error) }
+            
+            if (this.dataUserstats[user]) try { await database.Set(path + 'stats', this.dataUserstats[user]) }
+            catch (error) { LogError(error) }
         }
     }
 }

@@ -362,6 +362,7 @@ input[type="buttonBigL"]:disabled {
 	padding: 0px 4px;
 	border-radius: 4px;
 	user-select: none;
+	color: var(--text-primary);
 }
 
 .tag:not(:last-child) {
@@ -992,12 +993,16 @@ body.ctxpanel{display:flex;align-items:stretch;margin:0px;overflow:hidden;height
 	color: #989aa2;
 }
 
-.user-menuitem:hover {
+.user-menuitem.disabled {
+	cursor: default;
+}
+
+.user-menuitem:not(.disabled):hover {
 	background-color: #36373d;
 	color: var(--text-primary);
 }
 
-.user-menuitem:active {
+.user-menuitem:not(.disabled):active {
 	background-color: #3b3d44;
 }
 
