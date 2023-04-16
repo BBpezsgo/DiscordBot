@@ -1,7 +1,8 @@
-const https = require('https')
 const fs = require('fs')
+const Path = require('path')
+/** @type {import('../config').Config} */
+const CONFIG = require('../config.json')
 const Discord = require('discord.js')
-const { MessageAttachment, EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
 
 /**@param {string} str */
 function StringToArray(str) {

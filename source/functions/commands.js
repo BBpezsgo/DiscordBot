@@ -105,6 +105,11 @@ function GenerateGuildCommands() {
         .addStringOption(commandTescoSub)
     generatedCommands.push(commandTesco.toJSON())
     
+    const commandQuizdone = new SlashCommandBuilder()
+        .setName('quizdone')
+        .setDescription('Quiz befejezése')
+    generatedCommands.push(commandQuizdone.toJSON())
+    
     const commandCrateSub = new SlashCommandIntegerOption()
         .setName('darab')
         .setDescription('Ládák mennyisége')

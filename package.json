@@ -2,7 +2,6 @@
   "name": "discord-bot",
   "version": "1.0.0",
   "description": "A discord.js application",
-  "main": "./source/desktop.js",
   "repository": "https://github.com/BBpezsgo/DiscordBot",
   "scripts": {
     "test": "node ./source/tests/test2.js",
@@ -10,9 +9,6 @@
     "desktop": "npm run build && node --enable-source-maps --trace-warnings dist/desktop.js",
     "mobile": "npm run build && node --enable-source-maps --trace-warnings dist/mobile.js",
     "start-mobile": "cd source && node mobile.js",
-    "start-desktop-startup": "cd source && node desktop.js invisible system",
-    "start-desktop-user": "cd source && node desktop.js visible user",
-    "start-raspberry": "node ./source/raspberry",
     "check": "depcheck",
     "lint": "eslint ."
   },

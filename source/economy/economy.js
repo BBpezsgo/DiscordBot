@@ -31,7 +31,7 @@ class Economy {
      * @param {number} ammount
      * @param {Discord.GuildTextBasedChannel} notifyChannel
      */
-    AddScore(user, ammount, notifyChannel) {
+    AddScore(user, ammount, notifyChannel = null) {
         const oldScore = this.database.dataBasic[user.id].score
         this.database.dataBasic[user.id].score += ammount
         const newScore = this.database.dataBasic[user.id].score
@@ -74,24 +74,27 @@ class Economy {
             }
     
             this.database.dataBasic[user.id].money += addMoney
-            const embed = new Discord.EmbedBuilder()
-                .setAuthor({ name: user.displayName, iconURL: user.displayAvatarURL() })
-                .setTitle('Szintet léptél!')
-                .addFields([
-                    {
-                        name: 'Rang',
-                        value: '\\' + rank.toString() + '  (' + rankName + ')',
-                        inline: true
-                    },
-                    {
-                        name: 'Jutalmad',
-                        value: addMoney.toString() + '\\💵',
-                        inline: true
-                    }
-                ])
-                .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/clinking-beer-mugs_1f37b.png')
-                .setColor(Discord.Colors.Blurple)
-            notifyChannel.send({ embeds: [embed] })
+
+            if (notifyChannel) {
+                const embed = new Discord.EmbedBuilder()
+                    .setAuthor({ name: user.displayName, iconURL: user.displayAvatarURL() })
+                    .setTitle('Szintet léptél!')
+                    .addFields([
+                        {
+                            name: 'Rang',
+                            value: '\\' + rank.toString() + '  (' + rankName + ')',
+                            inline: true
+                        },
+                        {
+                            name: 'Jutalmad',
+                            value: addMoney.toString() + '\\💵',
+                            inline: true
+                        }
+                    ])
+                    .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/209/clinking-beer-mugs_1f37b.png')
+                    .setColor(Discord.Colors.Blurple)
+                notifyChannel.send({ embeds: [embed] })
+            }
         }
     
         this.database.SaveDatabase()

@@ -6,7 +6,7 @@ chcp 65001 >nul
 Rem Start the script
 title Running - Discord BOT
 echo Execute node script...
-npm run start-desktop-user
+node desktop-entry.js visible user
 
 title Stopped - Discord BOT
 timeout 1 /nobreak >nul

@@ -5,7 +5,7 @@ chcp 65001 >nul
 
 Rem Start the script
 title Running [Invisible] - Discord BOT
-node desktop.js invisible system
+node desktop-entry.js invisible system
 
 title Stopped [Invisible] - Discord BOT
 timeout 1 /nobreak >nul

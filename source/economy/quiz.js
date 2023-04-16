@@ -4,6 +4,7 @@ const {
     ChannelId
 } = require('../functions/enums.js')
 const Types = require('./quiz')
+const LogError = require('../functions/errorLog.js')
 
 /**@param {number} days @returns {number} */
 function DaysToMilliseconds(days) {
@@ -89,8 +90,8 @@ function GetEmbed(quiz) {
         .setColor(Color.Pink)
         .setTitle('Quiz!')
         .setDescription(
-            `\\✔️  **${quiz.Reward.Score}\\🍺** és **${quiz.Penalty.Token}\\🎫**\n` +
-            `\\❌ **-${quiz.Penalty.Score}\\🍺** és **-${quiz.Penalty.Token}\\🎫**\n` +
+            `☑️  **${quiz.Reward.Score}🍺** és **${quiz.Penalty.Token}🎫**\n` +
+            `❌ **-${quiz.Penalty.Score}🍺** és **-${quiz.Penalty.Token}🎫**\n` +
             `Ha van **\`Quiz - Answer Streak\`** rangod, bejelölheted a 🎯 opciót is, hogy a fenti értékek számodra megduplázódjanak.`
         )
         .addFields([{
@@ -187,8 +188,195 @@ async function QuizDone(client, quizMessageId, correctIndex) {
     })
 }
 
+/**
+ * @param {Discord.Client} client
+ */
+async function GetLastQuizMessage(client) {
+    /**@type {Discord.GuildTextBasedChannel} */
+    const channel = client.channels.cache.get(ChannelId.Quiz)
+    const messages = await channel.messages.fetch({ limit: 3 })
+    for (let i = 0; i < messages.size; i++) {
+        const message = messages.at(i)
+        if (message.embeds.length !== 1) { continue }
+        const embed = message.embeds[0]
+        if (embed.title !== 'Quiz!') { continue }
+
+        return message
+    }
+    return null
+}
+
+/**
+ * @param {Discord.Client} client
+ */
+async function GetLastQuiz(client) {
+    const message = await GetLastQuizMessage(client)
+    const embed = message.embeds[0]
+
+    const awardAdd0 = embed.description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
+    const awardAdd1 = embed.description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
+    const awardRemove0 = embed.description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
+    const awardRemove1 = embed.description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
+    const optionsRaw = embed.fields[0].value.trim().split('\n')
+    const options = []
+    for (let j = 0; j < optionsRaw.length; j++) {
+        const optionRaw = optionsRaw[j].substring(2)
+        const left = optionRaw.split('  ')[0]
+        const right = optionRaw.split('  ')[1]
+        options.push({
+            Emoji: left,
+            Text: right,
+        })
+    }
+
+    /** @type {Types.SendedQuiz} */
+    const quiz = {
+        EndsAt: embed.timestamp,
+        Question: embed.fields[0].name,
+        Reward: {
+            Score: Number.parseInt(awardAdd0),
+            Token: Number.parseInt(awardAdd1),
+        },
+        Penalty: {
+            Score: Number.parseInt(awardRemove0),
+            Token: Number.parseInt(awardRemove1),
+        },
+        Options: options,
+        MessageID: message.id,
+    }
+
+    return quiz
+}
+
+/**
+ * @param {Discord.Client} client
+ * @param {number} correctAnswer
+ */
+async function GetLastFinishedQuiz(client, correctAnswer = null) {
+    const message = await GetLastQuizMessage(client)
+    /** @type {Types.FinishedQuiz} */
+    const quiz = await GetLastQuiz(client)
+    quiz.Reactions = [ ]
+    
+    const partialMultiplyReaction = message.reactions.resolve('🎯')
+    const multiplyReaction = await partialMultiplyReaction.fetch()
+    const usersWantToMultiply = await multiplyReaction.users.fetch()
+
+    for (let j = 0; j < quiz.Options.length; j++) {
+        const option = quiz.Options[j]
+        const partialReaction = message.reactions.resolve(option.Emoji)
+        const reaction = await partialReaction.fetch()
+        const users = await reaction.users.fetch()
+        for (let k = 0; k < users.size; k++) {
+            const user = users.at(k)
+            if (user.bot) { continue }
+            const hasAnswerStreak = (await message.guild.members.fetch(user.id)).roles.cache.hasAny(
+                '929443006627586078',
+                '929443558040166461',
+                '929443627527180288',
+                '929443673077329961'
+            )
+            quiz.Reactions.push({
+                Reaction: reaction.emoji.name,
+                User: {
+                    ID: user.id,
+                    Name: user.username,
+                    AnswerStreak: hasAnswerStreak,
+                    WantToMultiply: usersWantToMultiply.has(user.id),
+                }
+            })
+        }
+    }
+
+    if (correctAnswer !== null) {
+        quiz.Correct = quiz.Options[correctAnswer]
+    } else {
+        quiz.Correct = null
+    }
+
+    return quiz
+}
+
+/**
+ * @param {Discord.Client} client
+ * @param {Discord.ChatInputCommandInteraction<Discord.CacheType>} command
+ */
+async function QuizDoneTest(client, command) {
+    const quiz = await GetLastFinishedQuiz(client)
+
+    const selectMenuOptions = []
+    for (let i = 0; i < quiz.Options.length; i++) {
+        const option = quiz.Options[i]
+        selectMenuOptions.push(
+            new Discord.StringSelectMenuOptionBuilder()
+                .setEmoji(option.Emoji)
+                .setLabel(option.Text)
+                .setValue(i.toString())
+        )
+    }
+
+    command.reply({
+        content: '```json\n' + JSON.stringify(quiz, null, ' ') + '\n```',
+        components: [
+            new Discord.ActionRowBuilder()
+                .addComponents(
+                    new Discord.StringSelectMenuBuilder()
+                        .setCustomId('quizdone-correct-answer')
+                        .setPlaceholder('Helyes válasz')
+                        .setMinValues(1)
+                        .setMaxValues(1)
+                        .setDisabled(false)
+                        .addOptions(selectMenuOptions)
+                )
+        ]
+    })
+}
+
+/**
+ * @param {Discord.StringSelectMenuInteraction<Discord.CacheType>} e
+ */
+function OnSelectMenu(e) {
+    if (e.customId !== 'quizdone-correct-answer') return false
+    GetLastFinishedQuiz(e.client, Number.parseInt(e.values[0]))
+        .then(async quiz => {
+            let finalText = '**A helyes válasz: ' + quiz.Correct.Emoji + ' ' + quiz.Correct.Text + '**'
+
+            const usersReacted = [ ]
+            for (let i = 0; i < quiz.Reactions.length; i++) {
+                const reaction = quiz.Reactions[i]
+                if (usersReacted.includes(reaction.User.ID)) { continue }
+                if (reaction.Reaction === quiz.Correct.Emoji) {
+                    if (reaction.User.AnswerStreak && reaction.User.WantToMultiply) {
+                        finalText += '\n> <@!' + reaction.User.ID + '> nyert ' + (parseInt(quiz.Reward.Score) * 2) + ' \uD83C\uDF7At és ' + (parseInt(quiz.Reward.Token) * 2) + ' 🎫t'
+                    } else {
+                        finalText += '\n> <@!' + reaction.User.ID + '> nyert ' + (quiz.Reward.Score) + ' \uD83C\uDF7At és ' + (quiz.Reward.Token) + ' 🎫t'
+                    }
+                } else {
+                    if (reaction.User.AnswerStreak && reaction.User.WantToMultiply) {
+                        finalText += '\n> <@!' + reaction.User.ID + '> veszített ' + (parseInt(quiz.Penalty.Score) * 2) + ' \uD83C\uDF7At és ' + (parseInt(quiz.Penalty.Token) * 2) + ' 🎫t'
+                    } else {
+                        finalText += '\n> <@!' + reaction.User.ID + '> veszített ' + (quiz.Penalty.Score) + ' \uD83C\uDF7At és ' + (quiz.Penalty.Token) + ' 🎫t'
+                    }
+                }
+            }
+
+            /** @type {Discord.GuildTextBasedChannel} */
+            const channel = e.client.channels.cache.get(ChannelId.Quiz)
+            channel.send(finalText)
+                .then(() => {
+                    e.reply('Ok')
+                })
+                .catch(LogError)
+        })
+        .catch(LogError)
+
+    return true
+}
+
 module.exports = {
     Quiz,
     QuizDone,
     HasQuizStreakRole,
+    QuizDoneTest,
+    OnSelectMenu,
 }

@@ -5,7 +5,7 @@ chcp 65001 >nul
 
 Rem Start the script
 title Running - Discord BOT
-node desktop.js visible system
+node desktop-entry.js visible system
 
 title Stopped - Discord BOT
 Rem Read exitdata.txt file

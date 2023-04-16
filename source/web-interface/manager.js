@@ -2352,7 +2352,7 @@ class WebInterfaceManager {
             this.RenderPage_ModeratingSearch(req, res, '')
         })
 
-        this.app.post('/dcbot/view/ApplicationCommands.html/Fetch', (req, res) => {
+        this.app.post('/view/Commands/Fetch', (req, res) => {
             this.client.application.commands.fetch().finally(()=> {
                 this.client.guilds.cache.get('737954264386764812').commands.fetch().finally(() => {
                     this.RenderPage_Commands(req, res)
@@ -2360,7 +2360,7 @@ class WebInterfaceManager {
             })
         })
 
-        this.app.post('/dcbot/view/ApplicationCommands.html/DeleteAll', (req, res) => {
+        this.app.post('/view/Commands/DeleteAll', (req, res) => {
             this.commandsDeleting = true
             DeleteCommandsSync(this.client, this.statesManager, (percent) => {
                 this.commandsDeletingPercent = percent
@@ -2370,7 +2370,7 @@ class WebInterfaceManager {
             this.RenderPage_Commands(req, res)
         })
 
-        this.app.post('/dcbot/view/ApplicationCommands.html/Createall', (req, res) => {
+        this.app.post('/view/Commands/Createall', (req, res) => {
             this.commandsCreating = true
             CreateCommandsSync(this.client, this.statesManager, (percent) => {
                 this.commandsCreatingPercent = percent

@@ -34,27 +34,29 @@
                 <tbody>
                     <tr>
                         <td>
-                            <form action="/dcbot/view/ApplicationCommands.html/Fetch" method="post"
+                            <form action="/view/Commands/Fetch" method="post"
                                 style="margin-left: 5px; display: inline-block;"
                                 onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
                                 <input type="submit" value="Fetch">
                             </form>
-                            <form action="/view/Applicationcommands/DeleteAll" method="post"
+                            <form action="/view/Commands/DeleteAll" method="post"
                                 style="margin-left: 5px; display: inline-block;"
                                 onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; document.getElementById('deletingProgressPanel').style.display = 'inline-block'; refreshCreatingProgressBar = true;"
                                 class="show-invert-{{deleting}}">
                                 <input type="submit" value="Delete All">
                             </form>
+                            <div id="lbl-error-post-delete"></div>
                             <div id="deletingProgressPanel" class="show-{{deleting}}">
                                 <label for="deletingProgress">Deleting...</label>
                                 <progress id="deletingProgress" value="{{deletingPercent}}" max="1"></progress>
                             </div>
-                            <form action="/view/Applicationcommands/Createall" method="post"
+                            <form action="/view/Commands/Createall" method="post"
                                 style="margin-left: 5px; display: inline-block;"
                                 onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; document.getElementById('creatingProgressPanel').style.display = 'inline-block'; refreshCreatingProgressBar = true;"
                                 class="show-invert-{{creating}}">
                                 <input type="submit" value="Create All">
                             </form>
+                            <div id="lbl-error-post-create"></div>
                             <div id="creatingProgressPanel" class="show-{{creating}}">
                                 <label for="creatingProgress">Creating...</label>
                                 <progress id="creatingProgress" value="{{creatingPercent}}" max="1"></progress>
@@ -194,6 +196,7 @@
     </script>
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
     <script src="/scripts/loadEffect.js"></script>
+    <script src="/scripts/functions.js"></script>
 </body>
 
 </html>

@@ -588,7 +588,7 @@ bot.on('messageCreate', async msg => {
 
     if (message.content.length > 2) {
         if (thisIsPrivateMessage === false) {
-            economy.AddScore(message.member, calculateAddXp(message).total, message.channel)
+            economy.AddScore(message.member, calculateAddXp(message).total)
         }
     }
 

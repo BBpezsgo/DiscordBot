@@ -316,9 +316,10 @@ module.exports = class DiscordBot {
             if (this.Mails.OnButtonClick(interaction)) return
             if (this.HangmanManager.OnButton(interaction)) return
             if (this.Game.OnButton(interaction)) return
-        } else if (interaction.isSelectMenu()) {
+        } else if (interaction.isStringSelectMenu()) {
             if (CommandShop.OnSelectMenu(interaction, this.Database)) return
             if (this.HangmanManager.OnSelectMenu(interaction)) return
+            if (QuizManager.OnSelectMenu(interaction)) return
     
             if (interaction.customId == 'userSettings') {
                 const roles = {
@@ -506,7 +507,7 @@ module.exports = class DiscordBot {
     
         if (message.content.length > 2) {
             if (thisIsPrivateMessage === false) {
-                this.Economy.AddScore(message.member, calculateAddXp(message).total, message.channel)
+                this.Economy.AddScore(message.member, calculateAddXp(message).total)
             }
         }
     
@@ -768,6 +769,12 @@ module.exports = class DiscordBot {
                 .catch((error) => {
                     command.editReply({ content: '> \\❗ **Hiba: ' + error.toString() + '**', ephemeral: true })
                 })
+            this.Database.UserstatsSendCommand(command.user)
+            return
+        }
+    
+        if (command.commandName === 'quizdone') {
+            await QuizManager.QuizDoneTest(this.Client, command)
             this.Database.UserstatsSendCommand(command.user)
             return
         }

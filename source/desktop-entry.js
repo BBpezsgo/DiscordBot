@@ -9,7 +9,6 @@ const fs = require('fs')
 const Path = require('path')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
-const { StatesManager } = require('./functions/statesManager')
 process.on('uncaughtException', (error, origin) => {
     fs.appendFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), 'CRASH\n', { encoding: 'utf-8' })
     LogError(error, { key: 'Origin', value: origin })
