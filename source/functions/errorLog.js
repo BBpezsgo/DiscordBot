@@ -5,7 +5,7 @@ const CONFIG = require('../config.json')
 const Path = require('path')
 
 /**
- * @param {Error} error
+ * @param {any} error
  * @param {{ key: string, value: any }[]} parameters
  */
 function LogError(error, ...parameters) {

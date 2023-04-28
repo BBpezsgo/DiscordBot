@@ -1,3 +1,5 @@
+Error.stackTraceLimit = 128
+
 const Discord = require('discord.js')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')

@@ -213,10 +213,45 @@ async function GetLastQuiz(client) {
     const message = await GetLastQuizMessage(client)
     const embed = message.embeds[0]
 
-    const awardAdd0 = embed.description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '')
-    const awardAdd1 = embed.description.split('\n')[0].replace('✔️', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '')
-    const awardRemove0 = embed.description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[0].replace('🍺', '').replace('-', '')
-    const awardRemove1 = embed.description.split('\n')[1].replace('❌', '').replace(/\\/g, '').trimStart().replace(/\*/g, '').replace(' és ', '|').split('|')[1].replace('🎫', '').replace('-', '')
+    const lines = embed.description.split('\n')
+
+    let firstLine = lines[0]
+    let secondLine = lines[1]
+
+    const CleanLine = function(line) {
+        return line
+            .replace(':ballot_box_with_check:', '')
+            .replace(':x:', '')
+            .replace(/\\/g, '')
+            .replace(/\*/g, '')
+            .replace(':beer:', '')
+            .replace(':ticket:', '')
+            .replace('☑️', '')
+            .replace('❌', '')
+            .replace('🍺', '')
+            .replace('🎫', '')
+            .trim()
+    }
+
+    firstLine = CleanLine(firstLine)
+    secondLine = CleanLine(secondLine)
+
+    let Debug = {
+        FirstLine: lines[0],
+        SecondLine: lines[1],
+        
+        FirstLineCleaned: firstLine,
+        SecondLineCleaned: secondLine,
+        
+        FirstLineSplitted: firstLine.replace(' és ', '|').split('|'),
+        SecondLineSplitted: secondLine.replace(' és ', '|').split('|'),
+    }
+
+    const awardAdd0 = firstLine.replace(' és ', '|').split('|')[0]
+    const awardAdd1 = firstLine.replace(' és ', '|').split('|')[1]
+    const awardRemove0 = secondLine.replace(' és ', '|').split('|')[0].replace('-', '')
+    const awardRemove1 = secondLine.replace(' és ', '|').split('|')[1].replace('-', '')
+    
     const optionsRaw = embed.fields[0].value.trim().split('\n')
     const options = []
     for (let j = 0; j < optionsRaw.length; j++) {
@@ -231,6 +266,7 @@ async function GetLastQuiz(client) {
 
     /** @type {Types.SendedQuiz} */
     const quiz = {
+        Debug,
         EndsAt: embed.timestamp,
         Question: embed.fields[0].name,
         Reward: {
@@ -302,6 +338,8 @@ async function GetLastFinishedQuiz(client, correctAnswer = null) {
  * @param {Discord.ChatInputCommandInteraction<Discord.CacheType>} command
  */
 async function QuizDoneTest(client, command) {
+    command.deferReply()
+
     const quiz = await GetLastFinishedQuiz(client)
 
     const selectMenuOptions = []
@@ -315,7 +353,7 @@ async function QuizDoneTest(client, command) {
         )
     }
 
-    command.reply({
+    command.editReply({
         content: '```json\n' + JSON.stringify(quiz, null, ' ') + '\n```',
         components: [
             new Discord.ActionRowBuilder()
@@ -337,6 +375,11 @@ async function QuizDoneTest(client, command) {
  */
 function OnSelectMenu(e) {
     if (e.customId !== 'quizdone-correct-answer') return false
+    if (e.deferred) {
+        LogError("Interaction already deferred (quiz.OnSelectMenu)")
+        return
+    }
+    e.deferReply()
     GetLastFinishedQuiz(e.client, Number.parseInt(e.values[0]))
         .then(async quiz => {
             let finalText = '**A helyes válasz: ' + quiz.Correct.Emoji + ' ' + quiz.Correct.Text + '**'
@@ -364,7 +407,7 @@ function OnSelectMenu(e) {
             const channel = e.client.channels.cache.get(ChannelId.Quiz)
             channel.send(finalText)
                 .then(() => {
-                    e.reply('Ok')
+                    e.editReply('Ok')
                 })
                 .catch(LogError)
         })

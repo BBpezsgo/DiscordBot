@@ -1,3 +1,4 @@
+Error.stackTraceLimit = 128
 console.log('The script is executing!')
 
 process.title = "Discord BOT"
