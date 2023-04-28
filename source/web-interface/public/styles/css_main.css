@@ -1082,3 +1082,27 @@ body.ctxpanel{display:flex;align-items:stretch;margin:0px;overflow:hidden;height
 .channel-menuitem.nested-show {
 	display: block !important;
 }
+
+.backup-button {
+	border: 1px solid #fff0 !important;
+	background-image: url(/images/backup.png) !important;
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+    background-color: transparent !important;
+	width: 24px !important;
+	height: 24px !important;
+    color: transparent !important;
+    padding: unset !important;
+    min-width: unset !important;
+    border-radius: 50% !important;
+    transition: unset !important;
+    cursor: pointer;
+	opacity: 60%;
+}
+.backup-button:hover {
+	opacity: 80%;
+}
+.backup-button:active {
+	opacity: 100%;
+}

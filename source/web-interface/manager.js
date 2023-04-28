@@ -1209,7 +1209,7 @@ class WebInterfaceManager {
                     }
                 case 'EMOJI':
                     {
-                        const parsedEmoji = Discord.parseEmoji(element.data)
+                        const parsedEmoji = Discord.parseEmoji(result[i].data)
                         var details = {
                             id: parsedEmoji.id,
                             animated: parsedEmoji.animated,

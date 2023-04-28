@@ -130,7 +130,7 @@
             </table>
             {{/each}}
             {{#each groups}}
-            <table class="channel-menuitem{{#if selected}} channel-menuitem-selected{{/if}}" style="cursor:unset" onclick="OnCaretClick('{{this.id}}')">
+            <table class="channel-menuitem {{#if selected}} channel-menuitem-selected{{/if}}" style="cursor:unset" onclick="OnCaretClick('{{this.id}}')">
                 <tr>
                     <td style="padding:0 2px;word-break:break-all; width: 16px;">
                         <div class="caret" style="pointer-events:none;" id="{{this.id}}"></div>

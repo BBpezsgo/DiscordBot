@@ -20,7 +20,19 @@ ul,
 }
 
 .caret::before {
-    content: url('/images/folder-close.png');
+    content: '';
+
+    mask-image: url('/images/folder-close.png');
+    mask-size: 100%;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: url('/images/folder-close.png');
+    -webkit-mask-size: 100%;
+    -webkit-mask-repeat: no-repeat;
+
+    background-color: #ddc55a;
+    width: 16px;
+    height: 16px;
+
     color: black;
     display: inline-block;
     margin-right: 6px;
@@ -30,7 +42,8 @@ ul,
 }
 
 .caret-down::before {
-    content: url('/images/folder-open.png');
+    mask-image: url('/images/folder-open.png');
+    -webkit-mask-image: url('/images/folder-open.png');
 }
 
 .nested {
@@ -72,7 +85,19 @@ ul,
 }
 
 .data-file::before {
-    content: url('/images/file.png');
+    content: '';
+
+    mask-image: url('/images/file.png');
+    mask-size: 100%;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: url('/images/file.png');
+    -webkit-mask-size: 100%;
+    -webkit-mask-repeat: no-repeat;
+
+    width: 16px;
+    height: 16px;
+
+    background-color: #b6b6b6;
     color: black;
     display: inline-block;
     margin-right: 6px;
