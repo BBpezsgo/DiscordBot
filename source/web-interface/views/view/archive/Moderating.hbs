@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <link href="/styles/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/styles/css_main.css" rel="stylesheet" type="text/css">
+    <link href="/styles/tree.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/scripts/commonNew.js" type="text/javascript"></script>
+    <script language="javascript" src="/scripts/tree.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        .material-icons {
+            font-size: 1.2em;
+            transform: translate(0px, 3px);
+            user-select: none;
+        }
+
+        a:hover .material-icons::after {
+            content: '';
+            display: block;
+            width: 1em;
+            height: 1px;
+            background-color: currentColor;
+            transform: translateY(-2px);
+        }
+
+        img.badge {
+            display: inline-block;
+            transform: translateY(4px);
+        }
+
+        .channel-menuitem:not(.channel-menuitem-selected) .btn-view-channel {
+            opacity: 0%;
+        }
+
+        .channel-menuitem:not(.channel-menuitem-selected):hover .btn-view-channel {
+            opacity: 50%;
+        }
+
+        .btn-view-channel {
+            float: right;
+            background-image: url('/images/settings.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            min-width: 20px !important;
+            background-color: unset !important;
+            opacity: 50%;
+        }
+
+        .btn-view-channel:hover {
+            opacity: 70% !important;
+        }
+
+        .btn-view-channel:active {
+            opacity: 100% !important;
+        }
+
+        .caret::before {
+            content: '>';
+            color: currentColor;
+            display: inline-block;
+            position: relative;
+            top: -2px;
+            left: 4px;
+            font-weight: 1000;
+            transition: transform 200ms;
+            transform-origin: 4px 9px;
+        }
+
+        .caret-down::before {
+            content: '>' !important;
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+
+<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+	<div style="width: 250px;" id="context-menubar">
+        <div id="server-panel">
+            <style>
+                #server-panel table, #server-panel tr, #server-panel td {
+                    border: 0px;
+                    margin: 0px;
+                    padding: 0px;
+                }
+            </style>
+            <table cellspacing="0" style="position: relative; top: 10px; left: 8px;">
+                <tr>
+                    <td style="user-select: none">
+                        <img src="data:image/png;charset=utf-8;base64,{{server.iconData}}" width="32" height="32" style="border-radius: 16px; margin-right: 4px">
+                    </td>
+                    <td style="color: #f3f4f5; font-weight: 700; font-size: 14px;">
+                        {{server.name}}
+                    </td>
+                </tr>
+            </table>
+        </div>
+		<div id="context-menubar-content" style="overflow-x: hidden;">
+            {{#each singleChannels}}
+            <table class="channel-menuitem
+            {{#if selected}}
+            channel-menuitem-selected
+            {{/if}}
+            "
+            {{#if selected}}
+            {{else}}
+            onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()"
+            {{/if}}>
+                <tr>
+                    <td style="width:24px">
+                        <img src="/dcbot/images/{{this.typeUrl}}.png" width="24" height="24" title="{{this.typeText}}">
+                    </td>
+                    <td style="font-size: 14px; font-weight: 600;">
+                        <span>{{this.name}}</span>
+                    </td>
+                    <td style="display: none;">
+                        <form action="/archived/view/moderating/Server/Search" method="post" id="view-channel-{{this.id}}"
+                            style="margin: 0;"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                            <input type="text" name="id" value="{{this.id}}">
+                            <input type="submit" value="View">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            {{/each}}
+            {{#each groups}}
+            <table class="channel-menuitem {{#if selected}} channel-menuitem-selected{{/if}}" style="cursor:unset" onclick="OnCaretClick('{{this.id}}')">
+                <tr>
+                    <td style="padding:0 2px;word-break:break-all; width: 16px;">
+                        <div class="caret caret-down" style="pointer-events:none;" id="{{this.id}}"></div>
+                    </td>
+                    <td style="font-size: 14px; font-weight: 600;">
+                        {{this.name}}
+                    </td>
+                    <td style="padding:0 2px;word-break:break-all">
+                        <form action="/archived/view/moderating/Server/Search" method="post"
+                            style="margin: 0;"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                            <input type="submit" value="" class="btn-view-channel">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            {{#each channels}}
+            <table class="channel-menuitem
+            {{#if selected}}
+            channel-menuitem-selected
+            {{/if}}
+            nested {{this.parentId}} nested-show"
+            {{#if selected}}
+            {{else}}
+            onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()"
+            {{/if}}>
+                <tr>
+                    <td style="width:24px">
+                        <img src="/dcbot/images/{{this.typeUrl}}.png" width="24" height="24" title="{{this.typeText}}">
+                    </td>
+                    <td style="font-size: 14px; font-weight: 600;">
+                        <span>{{this.name}}</span>
+                        {{#if nsfw}}<span class="tag">NSFW</span>{{/if}}
+                        {{#if isAfk}}<span class="tag">AFK</span>{{/if}}
+                    </td>
+                    <td style="display: none;">
+                        <form action="/archived/view/moderating/Server/Search" method="post" style="margin: 0" id="view-channel-{{this.id}}"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                            <input type="submit" value="View">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            {{/each}}
+            {{/each}}
+		</div>
+		<div id="bot-status-panel">
+			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
+		</div>
+	</div>
+    <style>
+        #content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow-y: unset;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #content > #messages-container {
+	        flex: 1 1 100%;
+            overflow-y: scroll;
+        }
+
+        #content > #channel-panel {
+            box-shadow: #0008 0px 1px 1px;
+            flex: 0 0 53px;
+            overflow: hidden;
+        }
+
+        #content > #send-message {
+            flex: 0 0 53px;
+        }
+    </style>
+	<div id="content">
+        <div id="channel-panel">
+            <form action="/archived/view/moderating/Server/Back" method="post"
+                style="display: inline-block; margin-right: 20px;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                <input type="submit" value="" class="btn-tool btn-tool-back">
+            </form>
+
+            <h1 style="display:inline-block">{{channel.name}}</h1>
+        </div>
+
+        <style>
+            .message-container {
+                display: block;
+                margin: 0px;
+                margin-top: 16px;
+                padding: 2px 8px;
+
+                display: grid;
+                grid-template-columns: 64px auto;
+            }
+
+            .message-container:hover {
+                background-color: #2e3035;
+            }
+
+            .message-container .message-actions {
+                display: inline-block;
+                opacity: 0%;
+                pointer-events: none;
+                float: right;
+                position: relative;
+                top: -24px;
+                border: 1px solid #27282b;
+                background-color: #313338;
+                border-radius: 5px;
+                white-space: nowrap;
+                direction: rtl;
+                user-select: none;
+                overflow: hidden;
+            }
+
+            .message-container:hover .message-actions {
+                opacity: 100%;
+                pointer-events: all;
+            }
+
+            .message-container .message-actions:hover {
+                box-shadow: #0004 0px 2px 2px;
+            }
+
+            .message-container .message-actions > * {
+                background-color: transparent;
+                border-radius: unset;
+                padding: 0px;
+                width: 32px;
+                height: 32px;
+                min-width: unset;
+                display: inline-block;
+                transition-duration: unset;
+            }
+            .message-container .message-actions > *:hover {
+                background-color: #37383e;
+            }
+
+            .message-container .message-actions > *:active {
+                background-color: #3c3e43;
+            }
+
+            .message-container .message-actions > * > img {
+                opacity: 50%;
+            }
+
+            .message-container .message-actions > *:hover > img {
+                opacity: 70%;
+            }
+
+            .message-container .message-actions > *:active > img {
+                opacity: 90%;
+            }
+
+            .message-container .message-actions > *:active > * {
+                transform: translateY(1px);
+            }
+        </style>
+
+        <div id="messages-container">            
+            <style>
+                .text-spoiler {
+                    border-radius: 3px;
+                    background-color: #46484c;
+                    transition: color 200ms, background-color 200ms;
+                }
+                .text-spoiler.text-spoiler-hidden {
+                    color: transparent;
+                    user-select: none;
+                    cursor: pointer;
+                    background-color: #1e1f22;
+                }
+                .text-spoiler.text-spoiler-hidden:hover {
+                    background-color: #212226;
+                }
+
+                .text-content-block {
+                    border: none;
+                    border-left: 4px solid #4e5058;
+                    padding-left: 10px;
+                }
+
+                .text-content-smallcode {
+                    background-color: #1e1f22;
+                    border-radius: 2px;
+                    font-family: monospace;
+                    font-weight: 600;
+                    padding: 1px 2px;
+                }
+            </style>
+
+            <style>
+                .reaction-container {
+                    user-select: none;
+                }
+                .reaction-container>.reaction {
+                    display: inline-block;
+                    height: 24px;
+                    min-width: 40px;
+                    background-color: #2b2d31;
+                    border-radius: 8px;
+                    padding: 3px;
+                    margin-top: 8px;
+                    margin-right: 2px;
+                }
+                .reaction-container>.reaction>img {
+                    display: inline-block;
+                    margin-left: 2px;
+                }
+                .reaction-container>.reaction>span:first-child:not(:last-child) {
+                    display: inline-block;
+                    margin-left: 2px;
+                    width: 16px;
+                    height: 16px;
+                }
+                .reaction-container>.reaction>span:last-child {
+                    font-weight: bolder;
+                    float: right;
+                    padding-right: 6px;
+                }
+
+                .reaction-container>.reaction-me {
+                    background-color: #373a54;
+                    outline: 1px solid #5865f2;
+                }
+            </style>
+
+            <style>
+                .embed-container>.embed {
+                    background-color: #2b2d31;
+                    border-radius: 3px;
+                    display: block;
+                    padding: 12px;
+                    border: none;
+                    border-left: 4px solid #1e1f22;
+                    max-width: 60%;
+                    margin-top: 8px;
+                }
+
+                .embed-container>.embed>.embed-title {
+                    font-size: 16px;
+                    text-decoration: none;
+                    cursor: default;
+                    color: #fff;
+                    font-weight: bold;
+                }
+
+                .embed-container>.embed>.embed-title.embed-title-link {
+                    text-decoration: underline;
+                    cursor: pointer;
+                    color: var(--primary);
+                }
+
+                .embed-container>.embed>.embed-author>a {
+                    font-size: 14px;
+                    font-weight: bold;
+                    position: relative;
+                    top: -6px;
+                    text-decoration: none;
+                    cursor: default;
+                    color: #fff;
+                }
+                
+                .embed-container>.embed>.embed-author>a:link {
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+                
+                .embed-container>.embed>.embed-author>img {
+                    display: inline-block;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    margin-right: 8px;
+                }
+
+                .embed-container>.embed>.embed-thumbnail {
+                    float: right;
+                    border-radius: 6px;
+                }
+                
+                .embed-container>.embed>.embed-image {
+                    border-radius: 4px;
+                    max-width: 100%;
+                }
+                
+                .embed-container>.embed>.embed-footer {
+                    font-size: 12px;
+                }
+                
+                .embed-container>.embed>.embed-field-container {
+                    display: block;
+                }
+                
+                .embed-container>.embed>.embed-field-container>.embed-field {
+                    display: block;
+                    margin: 8px 8px 8px 0px;
+                }
+                
+                .embed-container>.embed>.embed-field-container>.embed-field>.embed-field-name {
+                    display: block;
+                    font-weight: bold;
+                    font-size: 13px;
+                }
+            </style>
+
+            <style>
+                .message-container .tag {
+                    font-size: 9px;
+                    padding: 1px 5px;
+                    font-weight: 600;
+                }
+            </style>
+
+            {{#each messages}}
+            <div class="message-container">
+                <div>
+                    <img src="data:image/png;charset=utf-8;base64,{{author.avatarData}}" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                </div>
+                <div>
+                    <div class="message-actions"></div>
+                    <div>
+                        <span class="tooltiptext" style="font-weight:bold;font-size:16px;">{{author.username}}</span>
+                        <span style="color:#aaa; cursor: default;">{{this.createdAt}}</span>
+                    </div>
+                    <div>
+                        {{#with this.content}}{{> content}}{{/with}}
+
+                        {{#if this.attachment}}
+                        <div style="display:block;">
+                            {{#switch this.contentType}}
+                                {{#case 'image/jpeg'}}
+                                <img src="{{this.url}}"height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
+                                {{/case}}
+
+                                {{#case 'video/mp4'}}
+                                <video src="{{this.url}}" height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;" controls>
+                                {{/case}}
+
+                                {{#casedefault}}
+                                <span>{{this.contentType}}</span>
+                                {{/casedefault}}
+                            {{/switch}}
+                            <a href="{{../attachment}}" target="_blank"><i class="material-icons">open_in_new</i></a>
+                        </div>
+                        {{/if}}
+                    </div>
+
+                    <div class="embed-container"></div>
+
+                    <div class="reaction-container"></div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                if (window.location.href.includes('#noReload')) { return }
+                const objDiv = document.getElementById("messages-container")
+                objDiv.scrollTop = objDiv.scrollHeight
+            })
+        </script>
+        
+        <style>
+            div#send-message {
+                padding: 16px;
+            }
+
+            div#send-message > form {
+                background-color: #383a40;
+                border-radius: 8px;
+                padding: 4px;
+            }
+
+            div#send-message > form textarea {
+                background-color: #383a40;
+                display: inline-block;
+                border: none;
+                font-size: 16px;
+                font-family: "Arial", "Helvetica", "Geneva", "Swiss", "SunSans-Regular", "sans-serif";
+            }
+
+            div#send-message > form textarea:focus {
+                outline: none;
+            }
+        </style>
+	</div>
+    
+    <script src="/scripts/functions.js"></script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
+    <script src="/scripts/loadEffect.js"></script>
+</body>
+
+</html>

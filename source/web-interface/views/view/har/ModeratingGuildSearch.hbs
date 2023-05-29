@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+	<link href="/styles/css-vars.css" rel="stylesheet" type="text/css">
+    <link href="/styles/css_main.css" rel="stylesheet" type="text/css">
+    <link href="/styles/tree.css" rel="stylesheet" type="text/css">
+    <script language="javascript" src="/scripts/commonNew.js" type="text/javascript"></script>
+    <script language="javascript" src="/scripts/tree.js" type="text/javascript"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        .material-icons {
+            font-size: 1.2em;
+            transform: translate(0px, 3px);
+            user-select: none;
+        }
+
+        a:hover .material-icons::after {
+            content: '';
+            display: block;
+            width: 1em;
+            height: 1px;
+            background-color: currentColor;
+            transform: translateY(-2px);
+        }
+
+        img.badge {
+            display: inline-block;
+            transform: translateY(4px);
+        }
+
+        .channel-menuitem:not(.channel-menuitem-selected) .btn-view-channel {
+            opacity: 0%;
+        }
+
+        .channel-menuitem:not(.channel-menuitem-selected):hover .btn-view-channel {
+            opacity: 50%;
+        }
+
+        .channel-menuitem.channel-menuitem-group {
+            width: calc(100% - 16px);
+            max-width: calc(100% - 16px);
+            height: 16px;
+            border-radius: unset;
+            margin: 4px;
+            cursor: pointer;
+            user-select: none;
+            color: #989aa2;
+        }
+
+        .channel-menuitem.channel-menuitem-group:hover {
+            background-color: unset;
+            color: var(--text-primary);
+        }
+
+        .channel-menuitem.channel-menuitem-group:hover {
+            background-color: unset;
+        }
+
+        .btn-view-channel {
+            float: right;
+            background-image: url('/images/settings.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            min-width: 20px !important;
+            background-color: unset !important;
+            opacity: 50%;
+        }
+
+        .btn-view-channel:hover {
+            opacity: 70% !important;
+        }
+
+        .btn-view-channel:active {
+            opacity: 100% !important;
+        }
+
+        .caret::before {
+            background-image: url('/images/expand2.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+
+            content: '';
+            display: inline-block;
+            top: 4px;
+            font-weight: 1000;
+            transition: transform 200ms;
+            width: 16px;
+            height: 16px;
+        }
+
+        .caret-down::before {
+            content: '' !important;
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+
+<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+	<div style="width: 250px;" id="context-menubar">
+        <div id="server-panel">
+            <style>
+                #server-panel table, #server-panel tr, #server-panel td {
+                    border: 0px;
+                    margin: 0px;
+                    padding: 0px;
+                }
+            </style>
+            <table cellspacing="0" style="position: relative; top: 10px; left: 8px;">
+                <tr>
+                    <td style="user-select: none">
+                        <img src="{{server.iconUrlSmall}}" width="32" height="32" style="border-radius: 16px; margin-right: 4px">
+                    </td>
+                    <td style="color: #f3f4f5; font-weight: 700; font-size: 14px;">
+                        {{server.name}}
+                    </td>
+                </tr>
+            </table>
+        </div>
+		<div id="context-menubar-content" style="overflow-x: hidden;">
+            {{#each singleChannels}}
+            <table class="channel-menuitem" onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">
+                <tr>
+                    <td style="width:24px">
+                        <img src="/dcbot/images/{{this.typeUrl}}.png" width="24" height="24" title="{{this.typeText}}">
+                    </td>
+                    <td style="font-size: 14px; font-weight: 600;">
+                        <span>{{this.name}}</span>
+                    </td>
+                    <td style="display: none;">
+                        <form action="/har/view/moderating/Server/Search" method="post" id="view-channel-{{this.id}}"
+                            style="margin: 0;"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(Reload, 1000);">
+                            <input type="text" name="id" value="{{this.id}}">
+                            <input type="submit" value="View">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            {{/each}}
+            {{#each groups}}
+            <table class="channel-menuitem channel-menuitem-group" style="cursor:unset" onclick="OnCaretClick('{{this.id}}')">
+                <tr>
+                    <td style="padding:0 2px;word-break:break-all; width: 16px;">
+                        <div class="caret caret-down" style="pointer-events:none;" id="{{this.id}}"></div>
+                    </td>
+                    <td style="font-size: 12px; height: 12px; text-transform: uppercase; font-weight: 600;">
+                        {{this.name}}
+                    </td>
+                    <td style="padding:0 2px;word-break:break-all">
+                        <form action="/har/view/moderating/Server/Search" method="post"
+                            style="margin: 0;"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(Reload, 1000);">
+                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                            <input type="submit" value="" class="btn-view-channel">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            {{#each channels}}
+            <table class="channel-menuitem nested {{this.parentId}} nested-show"  onclick="event.target.style.pointerEvents='none';event.target.style.opacity='50%'; document.getElementById('view-channel-{{this.id}}').querySelector('input[type=submit]').click()">
+                <tr>
+                    <td style="width:24px">
+                        <img src="/dcbot/images/{{this.typeUrl}}.png" width="24" height="24" title="{{this.typeText}}">
+                    </td>
+                    <td style="font-size: 14px; font-weight: 600;">
+                        <span>{{this.name}}</span>
+                        {{#if nsfw}}<span class="tag">NSFW</span>{{/if}}
+                        {{#if isAfk}}<span class="tag">AFK</span>{{/if}}
+                    </td>
+                    <td style="display: none;">
+                        <form action="/har/view/moderating/Server/Search" method="post" style="margin: 0" id="view-channel-{{this.id}}"
+                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                            <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                            <input type="submit" value="View">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            {{/each}}
+            {{/each}}
+		</div>
+		<div id="bot-status-panel">
+			<iframe src="/dcbot/BotStatusPanel" style="width:100%;height:100%;border:0px;"></iframe>
+		</div>
+	</div>
+	<div id="content" style="position:relative">
+
+        <h1>Moderating</h1>
+
+        <div class="container loading-effect">
+            <!--
+            <form action="/dcbot/view/Moderating.html/Back" method="post"
+                style="display: inline-block; margin-right: 10px;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                <input type="submit" value="" class="btn-tool btn-tool-back">
+            </form>
+            -->
+            <h2 style="display: inline-block; transform: translateY(4px);">
+                <span style="color: #aaa">Guild</span>
+                <div class="tooltip" style="transform: translateY(10px);">
+                    <img class="server-icon circle-32" src="{{server.iconUrlSmall}}" width="32" height="32" title="{{server.nameAcronym}}" style="border-radius: 32px;">
+                    <span class="tooltiptext" style="font-weight: normal;">
+                        <img src="{{server.iconUrlLarge}}" alt="Ennek a szervernek nincs ikonja">
+                    </span>
+                </div>
+                {{server.name}}
+            </h2>
+            <table id="autoWidth" style="width: 598px;">
+                <tbody>
+                    <tr>
+                        <td width="25%" class="Item">ID:</td>
+                        <td colspan="2">
+                            {{server.id}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Member Count:</td>
+                        <td colspan="2">
+                            {{server.memberCount}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">NSFW Level:</td>
+                        <td colspan="2">
+                            {{server.nsfw_level}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">MFA Level:</td>
+                        <td colspan="2">
+                            {{server.verification_level}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" class="Item">Verification Level:</td>
+                        <td colspan="2">
+                            <img width="16" height="16" src="/dcbot/images/shield-{{server.verification_level}}.png">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {{#if searchError}}
+        <div style="color: red">
+            {{searchError}}
+        </div>
+        {{/if}}
+
+        {{#if emojis}}
+        <div class="container loading-effect">
+            <h2>Emojis</h2>
+            <table class="datas" border="1" align="center" width="100%" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td class="ListM">
+                            <b>Emoji</b>
+                        </td>
+                        <td class="ListM" style="width: 100%;">
+                            <b>Name</b>
+                        </td>
+                        <td class="ListM">
+                            <b>ID</b>
+                        </td>
+                        <td class="ListM">
+                            <b>Aval.</b>
+                        </td>
+                    </tr>
+                    {{#each emojis}}
+                    <tr>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            <div class="tooltip">
+                                <img src="data:image/png;charset=utf-8;base64,{{imageData}}" width="16" height="16">
+                                <span class="tooltiptext">
+                                    <img src="data:image/png;charset=utf-8;base64,{{imageData}}">
+                                </span>
+                            </div>
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            {{name}}
+                            {{#if animated}}<img width="16" height="16" class="miniicon" src="/images/video.png">{{/if}}
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            {{id}}
+                        </td>
+                        <td style="padding:0 2 0 2;word-break:break-all">
+                            <img width="16" height="16" src="/images/bool-{{available}}.png">
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{/if}}
+
+    </div>
+    
+    <script src="/scripts/functions.js"></script>
+    <script src="/scripts/user-popup.js"></script>
+    <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>
+    <script src="/scripts/loadEffect.js"></script>
+</body>
+
+</html>

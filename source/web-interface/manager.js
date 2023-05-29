@@ -29,6 +29,8 @@ const Key = require('../key')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
+const ArchiveBrowser = require('../functions/archive-browser')
+const HarBrowser = require('../functions/har-discord-browser')
 
 /** @type {Handlebars.HelperDeclareSpec} */
 const HandlebarsHelpers = {
@@ -368,6 +370,32 @@ class WebInterfaceManager {
             userJson['cache'] = false
             users.push(userJson)
         })
+
+        const archivedUsers = ArchiveBrowser.Users()
+
+        for (const archivedUser of archivedUsers) {
+            var found = false
+            for (let j = 0; j < users.length; j++) {
+                const user = users[j]
+                if (user.id == archivedUser.id) {
+                    found = true
+                    break
+                }
+            }
+            if (!found) {
+                const userJson = {
+                    id: archivedUser.id,
+                    avatarUrlSmall: archivedUser.user.avatar ? `https://cdn.discordapp.com/avatars/${archivedUser.id}/${archivedUser.user.avatar}.webp?size=16` : null,
+                    avatarUrlMedium: archivedUser.user.avatar ? `https://cdn.discordapp.com/avatars/${archivedUser.id}/${archivedUser.user.avatar}.webp?size=32` : null,
+                    avatarUrlLarge: archivedUser.user.avatar ? `https://cdn.discordapp.com/avatars/${archivedUser.id}/${archivedUser.user.avatar}.webp` : null,
+                    discriminator: archivedUser.user.discriminator,
+                    username: archivedUser.user.username,
+                }
+                userJson['cache'] = false
+                userJson['archived'] = true
+                users.push(userJson)
+            }
+        }
 
         const usersSaved = CacheManager.GetUsers(this.client)
 
@@ -898,13 +926,13 @@ class WebInterfaceManager {
         this.RenderPage(req, res, 'DatabaseSearch', { users: users, searchError: searchError, bot: bot, info: info })
     }
 
-    RenderPage_ModeratingSearch(req, res, searchError) {
+    RenderPage_ModeratingError(req, res, searchError) {
         if (this.moderatingSearchedServerId.length > 0) {
-            this.RenderPage_ModeratingGuildSearch(req, res, '')
+            this.RenderPage_ModeratingGuildSearch(req, res, searchError)
             return
         }
 
-        this.RenderPage(req, res, 'ModeratingSearch', { servers: this.Get_ServersCache(), searchError: searchError })
+        this.RenderPage(req, res, 'ModeratingError', { servers: this.Get_ServersCache(), searchError: searchError })
     }
 
     RenderPage_DirectMessages(req, res) {
@@ -976,7 +1004,7 @@ class WebInterfaceManager {
                         }
 
                         messages.push({
-                            content: this.GetHandlebarsMessage(message),
+                            content: this.GetHandlebarsMessage(message.content),
                             reactions: reactionsResult,
                             attachments: attachmentsResult,
                             embeds: embedsResult,
@@ -1037,14 +1065,14 @@ class WebInterfaceManager {
 
     RenderPage_ModeratingGuildSearch(req, res, searchError) {
         if (this.moderatingSearchedServerId.length === 0) {
-            this.RenderPage_ModeratingSearch(req, res, 'No server selected')
+            this.RenderPage_ModeratingError(req, res, 'No server selected')
             return
         }
 
         const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
 
         if (!g) {
-            this.RenderPage_ModeratingSearch(req, res, 'No server selected')
+            this.RenderPage_ModeratingError(req, res, 'No server selected')
             return
         }
 
@@ -1150,11 +1178,227 @@ class WebInterfaceManager {
         this.RenderPage(req, res, 'ModeratingGuildSearch', { server: guild, members: members, groups: this.Get_ChannelsInGuild(g).groups, singleChannels: this.Get_ChannelsInGuild(g).singleChannels, searchError: searchError, emojis: emojis })
     }
 
+    RenderPage_Archived_ModeratingGuildSearch(req, res, searchError) {
+        if (this.moderatingSearchedServerId.length === 0) {
+            this.RenderPage_ModeratingError(req, res, 'No archived server selected')
+            return
+        }
+
+        ArchiveBrowser.Servers()
+            .then(guilds => {
+                /** @type {ArchiveBrowser.ArchivedGuild} */
+                const g = guilds[this.moderatingSearchedServerId]
+        
+                if (!g) {
+                    this.RenderPage_ModeratingError(req, res, `Archived server \"${this.moderatingSearchedServerId}\" not found`)
+                    return
+                }
+        
+                const guild = {
+                    iconData:
+                        g.IconPath ?
+                        (Buffer.from(fs.readFileSync(g.IconPath))).toString('base64') :
+                        null,
+        
+                    name: g.name,
+                    id: g.id,
+                }
+        
+                const emojis = []
+                g.Emojis?.forEach((emoji) => {
+                    emojis.push({
+                        animated: emoji.animated,
+                        author: emoji.user_id,
+                        available: emoji.available,
+                        id: emoji.id,
+                        managed: emoji.managed,
+                        name: emoji.name,
+                        requiresColons: emoji.require_colons,
+                        roles: emoji.roles,
+                        imageData:
+                            emoji.image_path ?
+                            (Buffer.from(fs.readFileSync(emoji.image_path))).toString('base64') :
+                            null,
+                    })
+                })
+        
+                /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
+                const GetTypeUrl = (type) => {
+                    if (type == Discord.ChannelType.GuildText) {
+                        return 'text'
+                    }
+                    if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
+                        return 'voice'
+                    }
+                }
+        
+                /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
+                const GetTypeText = (type) => {
+                    if (type == Discord.ChannelType.GuildText) {
+                        return 'Text channel'
+                    }
+                    if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
+                        return 'Voice channel'
+                    }
+                }
+        
+                const groups = []
+                /**
+                 * @type {{
+                 *   id: string
+                 *   name: string
+                 *   position: number
+                 * }[]}
+                 */
+                const singleChannels = []
+        
+                g.Channels?.forEach(channel => {
+                    if (channel.type === Discord.ChannelType.GuildCategory) {
+                        const channels = []
+        
+                        for (let i = 0; i < g.Channels.length; i++) {
+                            const child = g.Channels[i]
+                            if (child.parent_id === channel.id) {
+                                const newChannel = {
+                                    id: child.id,
+                                    position: child.position,
+                                    name: child.name,
+                                    nsfw: child.nsfw,
+                                    type: child.type,
+                                    parentId: child.parent_id,
+                                    typeText: GetTypeText(child.type),
+                                    typeUrl: GetTypeUrl(child.type),
+                                }
+                
+                                channels.push(newChannel)
+                            }
+                        }
+                        
+                        channels.sort(function(a, b) { return a.position - b.position })
+        
+                        const newGroup = {
+                            id: channel.id,
+                            name: channel.name,
+                            channels: channels,
+                        }
+        
+                        groups.push(newGroup)
+                    } else if (channel.parent_id == null) {
+                        const newChannel = {
+                            id: channel.id,
+                            position: channel.position,
+                            name: channel.name,
+                            nsfw: channel.nsfw,
+                            type: channel.type,
+                            parentId: channel.parent_id,
+                            typeText: GetTypeText(channel.type),
+                            typeUrl: GetTypeUrl(channel.type),
+                        }
+        
+                        singleChannels.push(newChannel)
+                    }
+                });
+        
+                singleChannels.sort(function(a, b) { return a.position - b.position })
+        
+                res.render('view/archive/ModeratingGuildSearch', {
+                    server: guild,
+                    searchError: searchError,
+                    singleChannels: singleChannels,
+                    groups: groups,
+                    emojis: emojis,
+                })
+            })
+            .catch(LogError)
+    }
+
+    RenderPage_HAR_ModeratingGuildSearch(req, res, searchError) {
+        if (this.moderatingSearchedServerId.length === 0) {
+            this.RenderPage_ModeratingError(req, res, 'No HAR server selected')
+            return
+        }
+
+        const guilds = HarBrowser.Guilds()
+
+        const g = guilds[this.moderatingSearchedServerId]
+
+        if (!g) {
+            this.RenderPage_ModeratingError(req, res, `HAR server \"${this.moderatingSearchedServerId}\" not found`)
+            return
+        }
+
+        const guild = {
+            iconUrlLarge: `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp`,
+            iconUrlSmall: `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=64`,
+            name: g.name,
+            id: g.id,
+            description: g.description,
+            nsfw_level: g.nsfw_level,
+            nsfw: g.nsfw,
+            verification_level: g.verification_level,
+            memberCount: g.memberCount,
+        }
+
+        /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
+        const GetTypeUrl = (type) => {
+            if (type == Discord.ChannelType.GuildText) {
+                return 'text'
+            }
+            if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
+                return 'voice'
+            }
+        }
+
+        /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
+        const GetTypeText = (type) => {
+            if (type == Discord.ChannelType.GuildText) {
+                return 'Text channel'
+            }
+            if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
+                return 'Voice channel'
+            }
+        }
+
+        const groups = []
+        /**
+            * @type {{
+            *   id: string
+            *   name: string
+            *   position: number
+            * }[]}
+            */
+        const singleChannels = []
+
+        for (const channelId in g.channels) {
+            const channel = g.channels[channelId]
+            if (channel.type === Discord.ChannelType.GuildCategory) {
+                groups.push(channel)
+            } else {
+                const newChannel = {
+                    id: channel.id,
+                    name: channel.name,
+                    type: channel.type,
+                    typeText: GetTypeText(channel.type),
+                    typeUrl: GetTypeUrl(channel.type),
+                }
+
+                singleChannels.push(newChannel)
+            }
+        }
+
+        res.render('view/har/ModeratingGuildSearch', {
+            server: guild,
+            searchError: searchError,
+            singleChannels: singleChannels,
+            groups: groups,
+        })
+    }
+
     /**
-     * @param {Discord.Message} message
+     * @param {string} content
      */
-    GetHandlebarsMessage(message) {
-        const result = (new ContentParser.Parser(message.content)).result
+    GetHandlebarsMessage(content) {
+        const result = (new ContentParser.Parser(content)).result
 
         var attachmentCounter = 0
         for (let i = 0; i < result.length; i++) {
@@ -1250,14 +1494,14 @@ class WebInterfaceManager {
 
     RenderPage_Moderating(req, res) {
         if (this.moderatingSearchedServerId.length === 0) {
-            this.RenderPage_ModeratingSearch(req, res, 'No server selected')
+            this.RenderPage_ModeratingError(req, res, 'No server selected')
             return
         }
 
         const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
 
         if (!g) {
-            this.RenderPage_ModeratingSearch(req, res, 'No server selected')
+            this.RenderPage_ModeratingError(req, res, 'No server selected')
             return
         }
 
@@ -1377,7 +1621,7 @@ class WebInterfaceManager {
                 }
 
                 messages.push({
-                    content: this.GetHandlebarsMessage(message),
+                    content: this.GetHandlebarsMessage(message.content),
                     reactions: reactionsResult,
                     attachments: attachmentsResult,
                     embeds: embedsResult,
@@ -1438,6 +1682,310 @@ class WebInterfaceManager {
         { if (channel.id === singleChannels[i].id) { singleChannels[i].selected = true; break } }
 
         this.RenderPage(req, res, 'Moderating', { server: guild, channel: channel, messages: messages, groups: channelGroups, singleChannels: singleChannels })
+    }
+
+    RenderPage_Archived_Moderating(req, res) {
+        if (this.moderatingSearchedServerId.length === 0) {
+            this.RenderPage_ModeratingError(req, res, 'No archived server selected')
+            return
+        }
+
+        ArchiveBrowser.Servers()
+            .then(guilds => {
+                /** @type {ArchiveBrowser.ArchivedGuild} */
+                const g = guilds[this.moderatingSearchedServerId]
+        
+                if (!g) {
+                    this.RenderPage_ModeratingError(req, res, `Archived server \"${this.moderatingSearchedServerId}\" not found`)
+                    return
+                }
+        
+                if (this.moderatingSearchedChannelId.length === 0) {
+                    this.RenderPage_Archived_ModeratingGuildSearch(req, res, 'No archived channel selected')
+                    return
+                }
+        
+                /** @type {ArchiveBrowser.ArchivedChannel} */
+                let c = undefined
+        
+                g.Channels?.forEach(channel => {
+                    if (channel.id == this.moderatingSearchedChannelId) {
+                        c = channel
+                    }
+                })
+        
+                if (!c) {
+                    this.RenderPage_Archived_ModeratingGuildSearch(req, res, `Archived channel \"${this.moderatingSearchedChannelId}\" not found`)
+                    return
+                }
+        
+                const guild = {
+                    iconData:
+                        g.IconPath ?
+                        (Buffer.from(fs.readFileSync(g.IconPath))).toString('base64') :
+                        null,
+        
+                    name: g.name,
+                    id: g.id,
+                }
+        
+                const channel = {
+                    id: c.id,
+                    name: c.name,
+                    nsfw: c.nsfw,
+                    topic: c.topic,
+                    type: c.type,
+                    rate_limit_per_user: c.rate_limit_per_user,
+                }
+
+                const accountData = ArchiveBrowser.Account()
+        
+                /** @type {{id:string;createdAtTimestamp:number}[]} */
+                const messages = []
+        
+                if (c.messages && c.messages.length > 0) {
+                    c.messages.forEach(message => {                
+                        messages.push({
+                            content: this.GetHandlebarsMessage(message.content),
+                            attachment: message.attachment,
+                            id: message.id,
+                            createdAt: message.date,
+                            createdAtTimestamp: Date.parse(message.date),
+                            author: accountData,
+                        })
+                    })
+        
+                    messages.sort((a, b) => { return a.createdAtTimestamp - b.createdAtTimestamp })
+                }
+        
+                /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
+                const GetTypeUrl = (type) => {
+                    if (type == Discord.ChannelType.GuildText) {
+                        return 'text'
+                    }
+                    if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
+                        return 'voice'
+                    }
+                }
+        
+                /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
+                const GetTypeText = (type) => {
+                    if (type == Discord.ChannelType.GuildText) {
+                        return 'Text channel'
+                    }
+                    if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
+                        return 'Voice channel'
+                    }
+                }
+        
+                const groups = []
+                /**
+                 * @type {{
+                 *   id: string
+                 *   name: string
+                 *   position: number
+                 * }[]}
+                 */
+                const singleChannels = []
+        
+                g.Channels?.forEach(channel => {
+                    if (channel.type === Discord.ChannelType.GuildCategory) {
+                        const channels = []
+        
+                        for (let i = 0; i < g.Channels.length; i++) {
+                            const child = g.Channels[i]
+                            if (child.parent_id === channel.id) {
+                                const newChannel = {
+                                    id: child.id,
+                                    position: child.position,
+                                    name: child.name,
+                                    nsfw: child.nsfw,
+                                    type: child.type,
+                                    parentId: child.parent_id,
+                                    typeText: GetTypeText(child.type),
+                                    typeUrl: GetTypeUrl(child.type),
+                                }
+                
+                                channels.push(newChannel)
+                            }
+                        }
+                        
+                        channels.sort(function(a, b) { return a.position - b.position })
+        
+                        const newGroup = {
+                            id: channel.id,
+                            name: channel.name,
+                            channels: channels,
+                        }
+        
+                        groups.push(newGroup)
+                    } else if (channel.parent_id == null) {
+                        const newChannel = {
+                            id: channel.id,
+                            position: channel.position,
+                            name: channel.name,
+                            nsfw: channel.nsfw,
+                            type: channel.type,
+                            parentId: channel.parent_id,
+                            typeText: GetTypeText(channel.type),
+                            typeUrl: GetTypeUrl(channel.type),
+                        }
+        
+                        singleChannels.push(newChannel)
+                    }
+                });
+        
+                singleChannels.sort(function(a, b) { return a.position - b.position })
+        
+                for (let i = 0; i < groups.length; i++)
+                { if (channel.id === groups[i].id) { groups[i].selected = true; break } }
+                for (let i = 0; i < singleChannels.length; i++)
+                { if (channel.id === singleChannels[i].id) { singleChannels[i].selected = true; break } }
+        
+                res.render('view/archive/Moderating', {
+                    server: guild,
+                    singleChannels: singleChannels,
+                    groups: groups,
+                    messages: messages,
+                })
+            })
+            .catch(LogError)
+    }
+
+    RenderPage_HAR_Moderating(req, res) {
+        if (this.moderatingSearchedServerId.length === 0) {
+            this.RenderPage_ModeratingError(req, res, 'No HAR server selected')
+            return
+        }
+
+        const guilds = HarBrowser.Guilds()
+        const channels = HarBrowser.Load().channels
+
+        const g = guilds[this.moderatingSearchedServerId]
+
+        if (!g) {
+            this.RenderPage_ModeratingError(req, res, `HAR server \"${this.moderatingSearchedServerId}\" not found`)
+            return
+        }
+
+        if (this.moderatingSearchedChannelId.length === 0) {
+            this.RenderPage_HAR_ModeratingGuildSearch(req, res, 'No HAR channel selected')
+            return
+        }
+
+        let channelMessages = undefined
+
+        for (const channelId in channels) {
+            const channel = channels[channelId]
+            if (channel.id == this.moderatingSearchedChannelId) {
+                channelMessages = channel
+                break
+            }
+        }
+
+        if (!channelMessages) {
+            this.RenderPage_HAR_ModeratingGuildSearch(req, res, `HAR channel \"${this.moderatingSearchedChannelId}\" not found`)
+            return
+        }
+
+        const guild = {
+            iconData:
+                g.IconPath ?
+                (Buffer.from(fs.readFileSync(g.IconPath))).toString('base64') :
+                null,
+
+            name: g.name,
+            id: g.id,
+        }
+
+        const channel = {
+            id: this.moderatingSearchedChannelId,
+        }
+
+        /** @type {{id:string;createdAtTimestamp:number}[]} */
+        const messages = []
+
+        if (channelMessages && channelMessages.length > 0) {
+            channelMessages.forEach(message => {                
+                messages.push({
+                    content: this.GetHandlebarsMessage(message.content),
+                    attachments: message.attachments,
+                    id: message.id,
+                    createdAt: GetTime(new Date(Date.parse(message.timestamp))),
+                    createdAtTimestamp: Date.parse(message.timestamp),
+                    author: message.author,
+                })
+            })
+
+            messages.sort((a, b) => { return a.createdAtTimestamp - b.createdAtTimestamp })
+        }
+
+        /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
+        const GetTypeUrl = (type) => {
+            if (type == Discord.ChannelType.GuildText) {
+                return 'text'
+            }
+            if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
+                return 'voice'
+            }
+        }
+
+        /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
+        const GetTypeText = (type) => {
+            if (type == Discord.ChannelType.GuildText) {
+                return 'Text channel'
+            }
+            if (type == Discord.ChannelType.GuildStageVoice || type == Discord.ChannelType.GuildVoice) {
+                return 'Voice channel'
+            }
+        }
+
+        const groups = []
+        /**
+         * @type {{
+         *   id: string
+         *   name: string
+         *   position: number
+         * }[]}
+         */
+        const singleChannels = []
+
+        for (const channelId in g.channels) {
+            const channel = g.channels[channelId]
+            if (channel.type === Discord.ChannelType.GuildCategory) {
+                const channels = []
+
+                const newGroup = {
+                    id: channel.id,
+                    name: channel.name,
+                    channels: channels,
+                }
+
+                groups.push(newGroup)
+            } else {
+                const newChannel = {
+                    id: channel.id,
+                    name: channel.name,
+                    type: channel.type,
+                    typeText: GetTypeText(channel.type),
+                    typeUrl: GetTypeUrl(channel.type),
+                }
+
+                singleChannels.push(newChannel)
+            }
+        }
+
+        for (let i = 0; i < groups.length; i++)
+        { if (channel.id === groups[i].id) { groups[i].selected = true; break } }
+        for (let i = 0; i < singleChannels.length; i++)
+        { if (channel.id === singleChannels[i].id) { singleChannels[i].selected = true; break } }
+
+        res.render('view/har/Moderating', {
+            server: guild,
+            singleChannels: singleChannels,
+            groups: groups,
+            messages: messages,
+        })
     }
 
     RenderPage_Commands(req, res) {
@@ -1651,7 +2199,7 @@ class WebInterfaceManager {
         })
 
         this.app.get('/dcbot/view/moderating.html', (req, res) => {
-            this.RenderPage_ModeratingSearch(req, res, '')
+            this.RenderPage_ModeratingError(req, res, '')
         })
 
         this.app.get('/dcbot/view/firebase.html', (req, res) => {
@@ -1889,7 +2437,40 @@ class WebInterfaceManager {
                     name: guild.name,
                 })
             })
+            
+            const harGuilds = HarBrowser.Guilds()
+            for (const harGuildId in harGuilds) {
+                const harGuild = harGuilds[harGuildId]
+                guilds.push({
+                    id: harGuild.id,
+                    name: harGuild.name,
+                    iconUrl: `https://cdn.discordapp.com/icons/${harGuild.id}/${harGuild.icon}.webp?size=64`,
+                    HAR: true,
+                })
+            }
             res.status(200).send(JSON.stringify(guilds))
+        })
+
+        this.app.get('/archived/guilds.json', (req, res) => {
+            const result = []
+
+            ArchiveBrowser.Servers()
+                .then(servers => {
+                    for (const id in servers) {
+                        const server = servers[id]
+                        result.push({
+                            id: server.id,
+                            name: server.name,
+                            iconData:
+                                server.IconPath ?
+                                (Buffer.from(fs.readFileSync(server.IconPath))).toString('base64') :
+                                null
+                        })
+                    }
+        
+                    res.status(200).send(JSON.stringify(result))
+                })
+                .catch(LogError)
         })
 
         const GetTitle = () => {
@@ -2340,16 +2921,16 @@ class WebInterfaceManager {
                 if (channel.type === Discord.ChannelType.GuildText) {
                     channel.send({ content: req.body.content, tts: req.body.tts })
                         .then(() => {
-                            this.RenderPage_ModeratingSearch(req, res, '')
+                            this.RenderPage_ModeratingError(req, res, '')
                         })
                         .catch((err) => {
-                            this.RenderPage_ModeratingSearch(req, res, '')
+                            this.RenderPage_ModeratingError(req, res, '')
                         })
                     return
                 }
             }
 
-            this.RenderPage_ModeratingSearch(req, res, '')
+            this.RenderPage_ModeratingError(req, res, '')
         })
 
         this.app.post('/view/Commands/Fetch', (req, res) => {
@@ -2413,7 +2994,7 @@ class WebInterfaceManager {
 
                 this.RenderPage_ModeratingGuildSearch(req, res, '')
             } else {
-                this.RenderPage_ModeratingSearch(req, res, 'Server not found')
+                this.RenderPage_ModeratingError(req, res, `Server \"${serverId}\" not found`)
             }
         })
 
@@ -2425,7 +3006,36 @@ class WebInterfaceManager {
 
                 this.RenderPage_ModeratingGuildSearch(req, res, '')
             } else {
-                this.RenderPage_ModeratingSearch(req, res, 'Server not found')
+                this.RenderPage_ModeratingError(req, res, `Server \"${serverId}\" not found`)
+            }
+        })
+
+        this.app.get('/archived/view/moderating/Search', (req, res) => {
+            const serverId = req.query.id
+
+            ArchiveBrowser.Servers()
+                .then(guilds => {
+                    if (guilds[serverId]) {
+                        this.moderatingSearchedServerId = serverId
+        
+                        this.RenderPage_Archived_ModeratingGuildSearch(req, res, '')
+                    } else {
+                        this.RenderPage_ModeratingError(req, res, `Archived server \"${serverId}\" not found`)
+                    }
+                })
+                .catch(LogError)
+        })
+
+        this.app.get('/har/view/moderating/Search', (req, res) => {
+            const serverId = req.query.id
+
+            const guilds = HarBrowser.Guilds()
+            if (guilds[serverId]) {
+                this.moderatingSearchedServerId = serverId
+
+                this.RenderPage_HAR_ModeratingGuildSearch(req, res, '')
+            } else {
+                this.RenderPage_ModeratingError(req, res, `HAR server \"${serverId}\" not found`)
             }
         })
 
@@ -2441,7 +3051,7 @@ class WebInterfaceManager {
 
                 this.RenderPage_DirectMessages(req, res, '')
             } else {
-                this.RenderPage_DirectMessages(req, res, 'User not found')
+                this.RenderPage_DirectMessages(req, res, `User \"${id}\" not found`)
             }
         })
 
@@ -2478,13 +3088,19 @@ class WebInterfaceManager {
         this.app.post('/dcbot/view/Moderating.html/Back', (req, res) => {
             this.moderatingSearchedServerId = ''
 
-            this.RenderPage_ModeratingSearch(req, res, '')
+            this.RenderPage_ModeratingError(req, res, '')
         })
 
         this.app.post('/dcbot/view/Moderating.html/Server/Back', (req, res) => {
             this.moderatingSearchedChannelId = ''
 
             this.RenderPage_ModeratingGuildSearch(req, res, '')
+        })
+
+        this.app.post('/archived/view/moderating/Server/Back', (req, res) => {
+            this.moderatingSearchedChannelId = ''
+
+            this.RenderPage_Archived_ModeratingGuildSearch(req, res, '')
         })
 
         this.app.post('/dcbot/view/Moderating.html/Server/Search', (req, res) => {
@@ -2495,8 +3111,54 @@ class WebInterfaceManager {
 
                 this.RenderPage_Moderating(req, res)
             } else {
-                this.RenderPage_ModeratingSearch(req, res, 'Channel not found')
+                this.RenderPage_ModeratingError(req, res, 'Channel not found')
             }
+        })
+
+        this.app.post('/archived/view/moderating/Server/Search', (req, res) => {
+            const channelId = req.body.id
+
+            ArchiveBrowser.Servers()
+                .then(servers => {
+                    for (const id in servers) {
+                        /** @type {ArchiveBrowser.ArchivedGuild} */
+                        const server = servers[id]
+                        if (server.Channels) {
+                            for (let i = 0; i < server.Channels.length; i++) {
+                                const channel = server.Channels[i]
+                                
+                                if (channelId == channel.id) {
+                                    this.moderatingSearchedChannelId = channelId
+                    
+                                    this.RenderPage_Archived_Moderating(req, res)
+                                    return
+                                }
+                            }
+                        }
+                    }
+                    this.RenderPage_Archived_ModeratingGuildSearch(req, res, `Archived channel \"${channelId}\" not found`)
+                })
+                .catch(LogError)
+        })
+
+        this.app.post('/har/view/moderating/Server/Search', (req, res) => {
+            const channelId = req.body.id
+
+            const guilds = HarBrowser.Guilds()
+            for (const id in guilds) {
+                const guild = guilds[id]
+                for (const _channelId in guild.channels) {
+                    const channel = guild.channels[_channelId]
+                    
+                    if (channelId == channel.id) {
+                        this.moderatingSearchedChannelId = channelId
+        
+                        this.RenderPage_HAR_Moderating(req, res)
+                        return
+                    }
+                }
+            }
+            this.RenderPage_HAR_ModeratingGuildSearch(req, res, `HAR channel \"${channelId}\" not found`)
         })
 
         this.app.post('/dcbot/view/Database.html/Search', (req, res) => {
@@ -2509,7 +3171,7 @@ class WebInterfaceManager {
 
                 this.RenderPage_Database(req, res, userId)
             } else {
-                this.RenderPage_DatabaseSearch(req, res, 'User not found')
+                this.RenderPage_DatabaseSearch(req, res, `User \"${userId}\" not found`)
             }
         })
 
@@ -2525,7 +3187,7 @@ class WebInterfaceManager {
 
                 this.RenderPage_Database(req, res, userId)
             } else {
-                this.RenderPage_DatabaseSearch(req, res, 'User not found')
+                this.RenderPage_DatabaseSearch(req, res, `User \"${userId}\" not found`)
             }
         })
 
@@ -2901,145 +3563,6 @@ class WebInterfaceManager {
             }
             RenderStartpage(req, res, userId, userHash, false, {})
         })
-    }
-
-
-    RenderArchivePage_ModeratingSearch(req, res, error) {
-        const index = JSON.parse(fs.readFileSync(archivePath + 'servers/' + 'index.json', { encoding: 'utf-8' }))
-            
-        const guildList = fs.readdirSync(archivePath + 'servers/')
-        const guilds = []
-        for (let i = 0; i < guildList.length; i++) {
-            const guildID = guildList[i]
-            try {
-                guilds.push(JSON.parse(fs.readFileSync(archivePath + 'servers/' + guildID + '/guild.json', { encoding: 'utf-8' })))
-            } catch (err) { }
-        }
-
-        const channelList = fs.readdirSync(archivePath + 'messages/')
-        const channelsIndex = JSON.parse(fs.readFileSync(archivePath + 'messages/' + 'index.json', { encoding: 'utf-8' }))
-        const dms = []
-        for (let i = 0; i < channelList.length; i++) {
-            const channelID = channelList[i]
-            try {
-                const channel = JSON.parse(fs.readFileSync(archivePath + 'messages/' + channelID + '/channel.json', { encoding: 'utf-8' }))
-                channel.data = channelsIndex[channelID]
-                if (channel.guild === undefined) {
-                    dms.push(channel)
-                }
-            } catch (err) { }
-        }
-
-        res.render('archive/views/ModeratingSearch', { servers: guilds, dms: dms, error: error })
-    }
-
-    RenderArchivePage_ModeratingGuildSearch(req, res, error) {
-        const guildList = fs.readdirSync(archivePath + 'servers/')
-        var guild = {}
-        for (let i = 0; i < guildList.length; i++) {
-            const guildID = guildList[i]
-            if (guildID !== this.archiveModeratingSearchedServerId) { continue }
-            try {
-                var guild_ = JSON.parse(fs.readFileSync(archivePath + 'servers/' + guildID + '/guild.json', { encoding: 'utf-8' }))
-                guild = guild_
-            } catch (err) { }
-            break
-        }
-
-        const channelList = fs.readdirSync(archivePath + 'messages/')
-        const channelsIndex = JSON.parse(fs.readFileSync(archivePath + 'messages/' + 'index.json', { encoding: 'utf-8' }))
-        const channels = []
-        for (let i = 0; i < channelList.length; i++) {
-            const channelID = channelList[i]
-            if (fs.existsSync(archivePath + 'messages/' + channelID + '/channel.json')) {
-                const channel = JSON.parse(fs.readFileSync(archivePath + 'messages/' + channelID + '/channel.json', { encoding: 'utf-8' }))
-                channel.data = channelsIndex[channelID]
-                if (channel.guild !== undefined) {
-                    if (channel.guild.id == this.archiveModeratingSearchedServerId) {
-                        channels.push(channel)
-                    }
-                }
-            }
-        }
-
-        res.render('archive/views/ModeratingGuildSearch', { guild: guild, channels: channels, error: error })
-    }
-
-    RenderArchivePage_Moderating(req, res, error) {
-        var guild = undefined
-        if (this.archiveModeratingSearchedServerId.length > 0) {
-            const guildList = fs.readdirSync(archivePath + 'servers/')
-            for (let i = 0; i < guildList.length; i++) {
-                const guildID = guildList[i]
-                if (guildID !== this.archiveModeratingSearchedServerId) { continue }
-                try {
-                    var guild_ = JSON.parse(fs.readFileSync(archivePath + 'servers/' + guildID + '/guild.json', { encoding: 'utf-8' }))
-                    guild = guild_
-                } catch (err) { }
-                break
-            }
-        }
-
-        const channelList = fs.readdirSync(archivePath + 'messages/')
-        const channelsIndex = JSON.parse(fs.readFileSync(archivePath + 'messages/' + 'index.json', { encoding: 'utf-8' }))
-        var channel = {}
-        for (let i = 0; i < channelList.length; i++) {
-            const channelID = channelList[i]
-            if (channelID !== this.archiveModeratingSearchedChannelId) { continue }
-            if (fs.existsSync(archivePath + 'messages/' + channelID + '/channel.json')) {
-                const channel_ = JSON.parse(fs.readFileSync(archivePath + 'messages/' + channelID + '/channel.json', { encoding: 'utf-8' }))
-                if (this.archiveModeratingSearchedServerId.length === 0 && channel_.guild === undefined) {
-                    channel = channel_
-                    channel.data = channelsIndex[channelID]
-                    break
-                } else if (channel_.guild !== undefined) {
-                    if (channel_.guild.id == this.archiveModeratingSearchedServerId) {
-                        channel = channel_
-                        channel.data = channelsIndex[channelID]
-                        break
-                    }
-                }
-            }
-        }
-
-        const userData = JSON.parse(fs.readFileSync(archivePath + 'account/' + 'user.json', { encoding: 'utf-8' }))
-
-        const csv = require('csv')
-
-        const messages = []
-
-        const self = this
-        if (fs.existsSync(archivePath + 'messages/' + channel.id + '/messages.csv')) {
-            fs.createReadStream(archivePath + 'messages/' + channel.id + '/messages.csv')
-                .pipe(csv.parse({ delimiter: ",", from_line: 2 }))
-                .on('data', function (row) {
-                    if (row.length > 3) {
-                        messages.push({
-                            id: row[0],
-                            date: row[1],
-                            content: self.ParseMessageContentToHandlebars(self.ParseMessageContent(row[2] + '')),
-                            attachment: row[3],
-                            author: {
-                                id: userData.id,
-                                username: userData.username,
-                                discriminator: userData.discriminator,
-                                avatarUrlSmall: `/archive/data/user/avatar.png`,
-                                avatarUrlBig: `/archive/data/user/avatar.png`
-                            }
-                        })
-                    } else {
-                        messages.push({  })
-                    }
-                })
-                .on('end', () => {
-                    res.render('archive/views/Moderating', { guild: guild, channel: channel, messages: messages, error: error })
-                })
-                .on('error', (err) => {
-                    res.render('archive/views/Moderating', { guild: guild, channel: channel, messages: messages, error: error })
-                })
-        } else {
-            res.render('archive/views/Moderating', { guild: guild, channel: channel, messages: messages, error: error })
-        }
     }
     RegisterArchiveBrowserRoots() {
         this.app.get('/archive', (req, res) => {

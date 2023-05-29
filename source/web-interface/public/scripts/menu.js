@@ -58,10 +58,18 @@ const items = [
     }
 ]
 
-/** @param {(result: { id: string, iconUrl: string, name: string }[]) => void} callback */
+/** @param {(result: { id: string, iconUrl: string, name: string, HAR?: boolean }[]) => void} callback */
 function GetGuilds(callback) {
     var xmlHttp =  new XMLHttpRequest()
     xmlHttp.open('GET', '/dcbot/guilds.json')
+    xmlHttp.onloadend = (e) => { if (xmlHttp.status == 200) callback(JSON.parse(xmlHttp.responseText)) }
+    xmlHttp.send(null)
+}
+
+/** @param {(result: { id: string, iconData: string, name: string }[]) => void} callback */
+function GetArchivedGuilds(callback) {
+    var xmlHttp =  new XMLHttpRequest()
+    xmlHttp.open('GET', '/archived/guilds.json')
     xmlHttp.onloadend = (e) => { if (xmlHttp.status == 200) callback(JSON.parse(xmlHttp.responseText)) }
     xmlHttp.send(null)
 }
@@ -127,6 +135,7 @@ function AddElement(item) {
     newA.setAttribute('data', `${item.index}`)
     newA.onclick = (e) => {
         /** @type {HTMLElement} */
+        // @ts-ignore
         const target = e.target
         const index = Number.parseInt(target.getAttribute('data'))
         doClick(index)
@@ -179,20 +188,77 @@ function menuDisplay() {
         
             const newA = document.createElement('a')
             newA.id = `guild-a${guild.id}`
-            newA.href = `/dcbot/view/Moderating.html/Search?id=${guild.id}`
+            if (!guild.HAR) {
+                newA.href = `/dcbot/view/Moderating.html/Search?id=${guild.id}`
+                newA.onclick = (e) => {
+                    collapseAll()
+                    UnselectAll()
+                    /** @type {HTMLElement} */
+                    // @ts-ignore
+                    const target = e.target
+                    const guild = target.getAttribute('data').split('-')[1]
+                    document.getElementById('guild-ol' + guild).classList.add('selected')
+                }
+            } else {
+                newA.href = `/har/view/moderating/Search?id=${guild.id}`
+                newA.onclick = (e) => {
+                    collapseAll()
+                    UnselectAll()
+                    /** @type {HTMLElement} */
+                    // @ts-ignore
+                    const target = e.target
+                    const guild = target.getAttribute('data').split('-')[1]
+                    document.getElementById('guild-ol' + guild).classList.add('selected')
+                }
+                const newIcon = document.createElement('div')
+                newIcon.className = 'chrome-icon'
+                newIcon.title = 'Loaded from HAR data'
+                newOL.appendChild(newIcon)
+            }
+            newA.setAttribute('data', `guild-${guild.id}`)
             newA.target = 'mainFrame'
             newA.className = 'L1'
-            newA.setAttribute('data', `guild-${guild.id}`)
-            newA.onclick = (e) => {
-                collapseAll()
-                UnselectAll()
-                /** @type {HTMLElement} */
-                const target = e.target
-                const guild = target.getAttribute('data').split('-')[1]
-                document.getElementById('guild-ol' + guild).classList.add('selected')
-            }
             newOL.title = guild.name
             newOL.appendChild(newA)
+        })
+
+        GetArchivedGuilds(guilds => {
+            guilds.forEach(guild => {
+                const newOL = document.createElement('ol')
+                newOL.id = `guild-ol${guild.id}`
+                newOL.className = 'dot1'
+                newOL.style.display = 'block'
+                if (guild.iconData) newOL.style.backgroundImage = 'url(data:image/jpeg;charset=utf-8;base64,' + guild.iconData + ')'
+                newOL.style.backgroundPosition = 'center'
+                newOL.style.backgroundSize = 'cover'
+                newOL.onclick = (e) => {
+                    newA.click()
+                }
+                document.getElementsByTagName('menu')[0].appendChild(newOL)
+            
+                const newA = document.createElement('a')
+                newA.id = `guild-a${guild.id}`
+                newA.href = `/archived/view/moderating/Search?id=${guild.id}`
+                newA.target = 'mainFrame'
+                newA.className = 'L1'
+                newA.setAttribute('data', `guild-${guild.id}`)
+                newA.onclick = (e) => {
+                    collapseAll()
+                    UnselectAll()
+                    /** @type {HTMLElement} */
+                    // @ts-ignore
+                    const target = e.target
+                    const guild = target.getAttribute('data').split('-')[1]
+                    document.getElementById('guild-ol' + guild).classList.add('selected')
+                }
+                newOL.title = guild.name
+                newOL.appendChild(newA)
+            
+                const newIcon = document.createElement('div')
+                newIcon.className = 'archived-icon'
+                newIcon.title = 'Loaded from user-exported data'
+                newOL.appendChild(newIcon)
+            })
         })
     })
 }
@@ -300,12 +366,14 @@ function doClick(i) {
         document.getElementById('ol' + item.index).classList.add('selected')
     }
 
+    // @ts-ignore
     if (!UrlExists(document.getElementById('a' + item.index).href)) {
         parent.window.frames["mainFrame"].src = ""
         parent.window.frames["mainFrame"].document.body.innerHTML = Page404
     }
 }
 
+// @ts-ignore
 const Page404 =
     `<table id="autoWidth" style="width: 100%;">` +
     `    <tbody>` +

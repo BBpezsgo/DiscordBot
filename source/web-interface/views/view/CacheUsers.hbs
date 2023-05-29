@@ -89,6 +89,11 @@
                         
                         {{#if bot}}<span class="tag">BOT</span>{{/if}}
                         {{#if system}}<span class="tag">System</span>{{/if}}
+                        
+                        {{#if archived}}
+                            <img src="/images/archived.png" width="12" height="12" title="Loaded from user-exported data" style="transform: translateY(2px); opacity: 50%;">
+                        {{/if}}
+
                         {{#if flags.HypeSquadOnlineHouse1}}
                         <span class="user-badge">
                             <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">
