@@ -6,6 +6,7 @@ const CONFIG = require('./config.json')
 const { StatesManager } = require('./functions/statesManager')
 const LogError = require('./functions/errorLog')
 const LogManager = require('./functions/log')
+const ImageCache = require('./functions/image-cache')
 const { DatabaseManager } = require('./functions/databaseManager')
 const { GatewayIntentBits, ButtonBuilder, ActionRowBuilder } = require('discord.js')
 const fs = require('fs')
@@ -265,12 +266,16 @@ module.exports = class DiscordBot {
         } catch (err) {
             LogError(err)
         }
-    
+
+        ImageCache.DownloadEverything(this.Client)
+
         this.Database.dataBot.day = dayOfYear
     }
 
     /** @param {Discord.Interaction<Discord.CacheType>} interaction */
     async OnInteraction(interaction) {
+        ImageCache.DownloadEverything(this.Client)
+
         if (interaction.member === undefined)
         { this.Database.SaveUserToMemoryAll(interaction.user, interaction.user.username) }
         else
@@ -436,6 +441,7 @@ module.exports = class DiscordBot {
      * @param {Discord.Message<boolean>} message
      */
     async OnMessage(message) {
+        ImageCache.DownloadEverything(this.Client)
         CacheManager.SaveUsers(this.Client)
         
         const thisIsPrivateMessage = (message.channel.type === Discord.ChannelType.DM)

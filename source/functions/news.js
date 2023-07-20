@@ -188,7 +188,7 @@ async function CreateNews(message) {
                 content = content.replace(line, '')
             }
         }
-        embed.setDescription(content.trim())
+        if (content && content.trim().length > 0) embed.setDescription(content.trim())
 
         if (message.embeds.length == 1) {
             const embed2 = message.embeds[0]

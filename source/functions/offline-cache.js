@@ -3,6 +3,7 @@ const fs = require('fs')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
+const ImageCache = require('./image-cache')
 
 function TryGetUser(id) {
     if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/'))) { return undefined }

@@ -73,22 +73,21 @@
 
 {{#case 'URL'}}
 {{#if this.attachmentID}}
-<span class="message-attachment" onclick="ToggleAttachment('{{../id}}-{{this.attachmentID}}')"><i
-        class="material-icons">link</i>Linked attachment</span>
+<!--<span class="message-attachment" onclick="ToggleAttachment('{{../id}}-{{this.attachmentID}}')"><i class="material-icons">link</i>Linked attachment</span>-->
 {{else}}
 <a href="{{this.data}}" target="_blank">{{this.data}}<i class="material-icons">open_in_new</i></a>
 {{/if}}
 {{/case}}
 
 {{#case 'IMG'}}
-<div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:none;">
+<div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:block;">
     <img src="{{this.data}}" style="display: block; max-height: 256px;">
     <a href="{{this.data}}" target="_blank"><i class="material-icons">open_in_new</i></a>
 </div>
 {{/case}}
 
 {{#case 'VIDEO'}}
-<div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:none;">
+<div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:block;">
     <video src="{{this.data}}" style="display: block; max-height: 256px;" controls>
         <a href="{{this.data}}" target="_blank"><i class="material-icons">open_in_new</i></a>
 </div>

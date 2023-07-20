@@ -1,36 +1,9 @@
-
-const str_menu =
-{
-    status:                         "Startpage",
-    cache:                          "Cache",
-    cacheEmojis:                    "Emojis",
-    cacheUsers:                     "Users",
-    application:                    "Application",
-    commands:                       "Commands",
-    process:                        "Account",
-    testing:                        "Testing",
-    database:                       "Database",
-    moderating:                     "Moderating",
-    log:                            "Log",
-    logErrors:                      "Errors",
-    logSystem:                      "System",
-    logHandlebars:                  "Handlebars",
-}
-
 var menuList = new Array(
-    //	url							display	level			string
-    //	url:	url to visite when click on this menu item. it's not full path, but only filename.
-    //		if it's not null, must be one and only; else if it's null, that means it has branches, and the actual url is the one of its first visitable branches.
-    //	display: must be 0. 
-    //	directory level: 0: directory has no branches;  1: directory level 1;  2:level 2;   and so on
-    
     "Startpage", 0, 0, 'Startpage',
     "---", 0, 0, "---",
     "Account", 0, 1, "Account",
     "Account", 0, 2, "User",
     "Applications", 0, 2, 'Applications',
-    "---", 0, 0, "---",
-    "Moderating", 0, 0, "Moderating"
 );
 
 var map = new Array();

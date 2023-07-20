@@ -294,7 +294,22 @@
             }
         </style>
 
-        <div id="messages-container">            
+        <div id="messages-container">
+            <script>
+                function ToggleAttachment(id) {
+                    const attachment = document.getElementById('msg-attachment-' + id)
+                    if (attachment.style.display === 'none') {
+                        attachment.style.display = 'block'
+                    } else {
+                        const videoElement = attachment.querySelector('video')
+                        if (videoElement) {
+                            videoElement.pause()
+                        }
+                        attachment.style.display = 'none'
+                    }
+                }
+            </script>     
+
             <style>
                 .text-spoiler {
                     border-radius: 3px;
@@ -455,7 +470,9 @@
                     <img src="data:image/png;charset=utf-8;base64,{{author.avatarData}}" width="42" height="42" title="Avatar" style="border-radius: 50%;">
                 </div>
                 <div>
-                    <div class="message-actions"></div>
+                    <div class="message-actions">
+
+                    </div>
                     <div>
                         <span class="tooltiptext" style="font-weight:bold;font-size:16px;">{{author.username}}</span>
                         <span style="color:#aaa; cursor: default;">{{this.createdAt}}</span>
@@ -464,28 +481,37 @@
                         {{#with this.content}}{{> content}}{{/with}}
 
                         {{#if this.attachment}}
-                        <div style="display:block;">
-                            {{#switch this.contentType}}
+                        {{this}}
+                        <div id="msg-attachment-{{this.id}}-1" style="display:block;">
+                            {{#switch this.attachment.contentType}}
                                 {{#case 'image/jpeg'}}
-                                <img src="{{this.url}}"height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
+                                <img src="{{this.attachment.url}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
+                                {{/case}}
+
+                                {{#case 'image/png'}}
+                                <img src="{{this.attachment.url}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
                                 {{/case}}
 
                                 {{#case 'video/mp4'}}
-                                <video src="{{this.url}}" height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;" controls>
+                                <video src="{{this.attachment.url}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;" controls>
                                 {{/case}}
 
                                 {{#casedefault}}
-                                <span>{{this.contentType}}</span>
+                                <span style="color: #888;">{{this.attachment.contentType}}</span>
                                 {{/casedefault}}
                             {{/switch}}
-                            <a href="{{../attachment}}" target="_blank"><i class="material-icons">open_in_new</i></a>
+                            <a href="{{this.attachment.url}}" target="_blank"><i class="material-icons">open_in_new</i></a>
                         </div>
                         {{/if}}
                     </div>
 
-                    <div class="embed-container"></div>
+                    <div class="embed-container">
 
-                    <div class="reaction-container"></div>
+                    </div>
+
+                    <div class="reaction-container">
+
+                    </div>
                 </div>
             </div>
             {{/each}}

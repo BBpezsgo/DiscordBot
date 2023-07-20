@@ -176,7 +176,7 @@
                     </td>
                     <td style="display: none;">
                         <form action="/har/view/moderating/Server/Search" method="post" style="margin: 0" id="view-channel-{{this.id}}"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                            >
                             <input type="text" name="id" value="{{this.id}}" style="display: none;">
                             <input type="submit" value="View">
                         </form>
@@ -220,30 +220,30 @@
                             {{server.id}}
                         </td>
                     </tr>
+                    {{#if server.memberCount}}
                     <tr>
                         <td width="25%" class="Item">Member Count:</td>
                         <td colspan="2">
                             {{server.memberCount}}
                         </td>
                     </tr>
+                    {{/if}}
+                    {{#if server.nsfw_level}}
                     <tr>
                         <td width="25%" class="Item">NSFW Level:</td>
                         <td colspan="2">
                             {{server.nsfw_level}}
                         </td>
                     </tr>
-                    <tr>
-                        <td width="25%" class="Item">MFA Level:</td>
-                        <td colspan="2">
-                            {{server.verification_level}}
-                        </td>
-                    </tr>
+                    {{/if}}
+                    {{#if verification_level}}
                     <tr>
                         <td width="25%" class="Item">Verification Level:</td>
                         <td colspan="2">
                             <img width="16" height="16" src="/dcbot/images/shield-{{server.verification_level}}.png">
                         </td>
                     </tr>
+                    {{/if}}
                 </tbody>
             </table>
         </div>

@@ -15,15 +15,31 @@
             margin: 0px;
             padding: 0px;
         }
+
+        #div-status {
+            display: inline-block;
+            position: absolute;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            border: 3px solid #232428;
+            background-color: #232428;
+            top: 24px;
+            left: 24px;
+        }
     </style>
+    <script src="/scripts/ws.js"></script>
 </head>
 <body>
     <table cellspacing="0">
         <tr>
             <td rowspan="2" style="user-select: none">
-                <img src="{{avatar}}" width="32" height="32" style="border-radius: 16px; margin-right: 4px">
+                <img src="{{avatar}}" width="32" height="32" id="img-avatar" style="border-radius: 16px; margin-right: 4px">
+                <div id="div-status">
+
+                </div>
             </td>
-            <td style="color: #f3f4f5; font-weight: 700; font-size: 14px;">
+            <td style="color: #f3f4f5; font-weight: 700; font-size: 14px;" id="lbl-username">
                 {{username}}
             </td>
         </tr>
@@ -33,5 +49,32 @@
             </td>
         </tr>
     </table>
+
+    <script defer>
+        const ws = window.WSC()
+        ws.addEventListener('bot-user-status', function(e) {
+            const data = e.detail
+
+            if (data.username) {
+                document.getElementById('lbl-username').innerText = data.username
+            }
+            
+            if (data.username) {
+                document.getElementById('img-avatar').src = data.avatarUrl
+            }
+
+            if (data.status) {
+                if (data.status === 'online') {
+                    document.getElementById('div-status').style.backgroundColor = '#26a25a'
+                } else if (data.status === 'idle') {
+                    document.getElementById('div-status').style.backgroundColor = '#ebaf37'
+                } else if (data.status === 'invisible') {
+                    document.getElementById('div-status').style.backgroundColor = '#80848e'
+                } else {
+                    document.getElementById('div-status').style.backgroundColor = '#ee4346'
+                }
+            }
+        })
+    </script>
 </body>
 </html>

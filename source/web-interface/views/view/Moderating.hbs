@@ -735,7 +735,6 @@
                         {{#with this.content}}{{> content}}{{/with}}
 
                         {{#each this.attachments}}
-                        <!--<span class="message-attachment" onclick="ToggleAttachment('{{this.id}}')"><i class="material-icons">insert_drive_file</i>Attachment</span>-->
                         <div id="msg-attachment-{{this.id}}" style="display:block;">
                             {{#switch this.contentType}}
                                 {{#case 'image/jpeg'}}

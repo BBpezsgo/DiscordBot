@@ -125,69 +125,7 @@
                         </div>
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all;">
-                        {{#each this.content}}
-                        {{#if this.text}}
-                        {{this.text}}
-                        {{/if}}
-
-                        {{#if this.user}}
-                        {{#if this.userData}}
-                        <span class="mention">@<img width="16" height="16" style="display: inline; transform: translate(2px, 3px); border-radius: 50%;" src="{{this.userData.avatarURL}}"> {{this.userData.username}}</span>
-                        {{else}}
-                        <span class="mention-clickable" onclick="event.target.classList.add('mention-spinner'); Post('/User/Fetch?id={{this.user}}',event,()=>{event.target.classList.remove('mention-spinner')})" title="Click to fetch user">User {{this.user}}</span>
-                        {{/if}}
-                        {{/if}}
-
-                        {{#if this.channel}}
-                        {{#if this.channelData}}
-                        <span class="mention">#{{this.channelData.name}}</span>
-                        {{else}}
-                        <span class="mention">Channel {{this.channel}}</span>
-                        {{/if}}
-                        {{/if}}
-
-                        {{#if this.emoji}}
-                        {{#if this.emoji.url}}
-                        <img width="16" height="16" style="display: inline-block;" src="{{this.emoji.url}}" alt="{{this.emoji.name}}">
-                        {{else}}
-                        <img width="16" height="16" style="display: inline-block;" src="https://cdn.discordapp.com/emojis/{{this.emoji.id}}.png" alt="{{this.emoji.id}}">
-                        {{/if}}
-                        {{/if}}
-
-                        {{#if this.ping}}
-                        <span class="mention">{{this.ping}}</span>
-                        {{/if}}
-
-                        {{#if this.url}}
-                        {{#if this.attachmentID}}
-                        <span class="message-attachment" onclick="ToggleAttachment('{{../id}}-{{this.attachmentID}}')"><i class="material-icons">link</i>Linked attachment</span>
-                        {{else}}
-                        <a href="{{this.url}}" target="_blank">{{this.url}}<i class="material-icons">open_in_new</i></a>
-                        {{/if}}
-                        {{/if}}
-
-                        {{#if this.img}}
-                        <div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:none;">
-                            <img src="{{this.img}}" style="display: block; max-height: 256px;">
-                            <a href="{{this.img}}" target="_blank"><i class="material-icons">open_in_new</i></a>
-                        </div>
-                        {{/if}}
-
-                        {{#if this.video}}
-                        <div id="msg-attachment-{{../id}}-{{this.attachmentID}}" style="display:none;">
-                            <video src="{{this.video}}" style="display: block; max-height: 256px;" controls>
-                            <a href="{{this.video}}" target="_blank"><i class="material-icons">open_in_new</i></a>
-                        </div>
-                        {{/if}}
-
-                        {{/each}}
-
-                        {{#if this.attachment}}
-                        <span class="message-attachment" onclick="ToggleAttachment('{{id}}')"><i class="material-icons">insert_drive_file</i>Attachment</span>
-                        <div id="msg-attachment-{{id}}" style="display:none;">
-                            <a href="{{this.attachment}}" target="_blank"><i class="material-icons">open_in_new</i></a>
-                        </div>
-                        {{/if}}
+                        {{#with this.content}}{{> content}}{{/with}}
                     </td>
                     <td style="padding:0 2 0 2;word-break:break-all;vertical-align: top;">
                         {{this.id}}

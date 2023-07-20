@@ -355,7 +355,7 @@ function doClick(i) {
     } else {
         document.getElementById('a' + item.index).className = "L2";
     }
-    console.log('[Menu]', `doClick`, item)
+    // console.log('[Menu]', `doClick`, item)
     if (item.childs) {
         expandBranch(item.index)
         document.getElementById('ol' + (item.index + 1)).classList.add('selected')

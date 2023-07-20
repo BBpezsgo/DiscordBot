@@ -11,22 +11,23 @@ module.exports = async (command) => {
     await command.deferReply()
     Tesco.SearchFor(command.options.get('search').value)
         .then(async searchResult => {
-            if (searchResult.result === undefined) {
+            const result = searchResult.result
+            if (!result) {
                 await command.editReply({ content: `> \\❌ Recived nothing` })
                 return
             }
         
-            if (searchResult.result.length === 0) {
+            if (result.products.length === 0) {
                 await command.editReply({ content: `> \\❌ No results` })
                 return
             }
 
             if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/tesco/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/tesco/'), { recursive: true }) }
-            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/tesco/result.json'), JSON.stringify(searchResult.result, null, ' '), 'utf-8')
+            fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/tesco/result.json'), JSON.stringify(result, null, ' '), 'utf-8')
             
             /** @type {(Discord.APIEmbed | Discord.JSONEncodable<Discord.APIEmbed>)[]} */
             const embeds = []
-            searchResult.result.forEach(item => {
+            result.products.forEach(item => {
                 try {
                     if (embeds.length < 5) {
                         const embed = new EmbedBuilder()
@@ -58,6 +59,12 @@ module.exports = async (command) => {
                     LogError(error)
                 }
             })
+
+            var content = 'Categories:'
+            for (const category of result.categories) {
+                content += `\n> ${category.name} (${category.size})`
+            }
+
             await command.editReply({ embeds: embeds })
         })
         .catch(async error => {

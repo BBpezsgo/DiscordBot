@@ -37,7 +37,11 @@ export type ArchivedMessage = null | {
     id: string
     date: string
     content: string
-    attachment: string
+    attachment: {
+        contentType: string
+        url: string
+        raw: any
+    }
 }
 
 export type ArchivedMessageChannel = ArchivedGuildMessageChannel | ArchivedMessageChannel2 | ArchivedMessageChannel3

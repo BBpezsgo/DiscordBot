@@ -2,9 +2,14 @@ const HAR = require('./har')
 const fs = require('fs')
 const Types = require('./har-discord-browser')
 const Path = require('path')
+const ImageCache = require('./image-cache')
+
+const RESULT_PATH = 'C:/Users/bazsi/Documents/GitHub/DiscordBot/source/cache/har/'
+const INPUT_PATH = 'C:/Users/bazsi/Documents/GitHub/DiscordBot/source/hars'
+const MANUAL_PATH = 'C:/Users/bazsi/Documents/GitHub/DiscordBot/source/manual-data/'
 
 function GetEntries() {
-    const folder = 'C:/Users/bazsi/Documents/GitHub/DiscordBot/source/hars'
+    const folder = INPUT_PATH
     const files = fs.readdirSync(folder, { withFileTypes: true })
 
     const entries = []
@@ -36,7 +41,8 @@ function Load() {
 
             if (!channels[channel]) {
                 channels[channel] = {
-                    messages: []
+                    messages: [],
+                    id: channel,
                 }
             }
 
@@ -81,17 +87,35 @@ function Load() {
         }
     }
 
+    for (const invitation of invites) {
+        if (invitation.guild && invitation.channel) {
+            if (channels[invitation.channel.id]) {
+                channels[invitation.channel.id].guild_id = invitation.guild.id
+                channels[invitation.channel.id].name = invitation.channel.name
+                channels[invitation.channel.id].type = invitation.channel.type
+            }
+        }
+    }
+
     const result = {
         channels: channels,
         invitations: invites,
     }
 
-    fs.writeFileSync('C:/Users/bazsi/Documents/GitHub/DiscordBot/source/cache/har/result.json', JSON.stringify(result, null, ' '), 'utf-8')
+    fs.writeFileSync(RESULT_PATH + 'result.json', JSON.stringify(result, null, ' '), 'utf-8')
 
     return result
 }
 
-function Invitations() {
+function Invitations(cache = true) {
+    if (cache && fs.existsSync(RESULT_PATH + 'discord/invites.json')) {
+        try {
+            const raw = fs.readFileSync(RESULT_PATH + 'discord/invites.json', 'utf-8')
+            const parsed = JSON.parse(raw)
+            return parsed
+        } catch (error) { }
+    }
+
     const entries = GetEntries()
 
     const invites = []
@@ -117,10 +141,22 @@ function Invitations() {
         }
     }
 
+    if (!fs.existsSync(RESULT_PATH + 'discord/invites.json'))
+    { fs.mkdirSync(RESULT_PATH + 'discord/', { recursive: true }) }
+    fs.writeFileSync(RESULT_PATH + 'discord/invites.json', JSON.stringify(invites, null, ' '), 'utf-8')
+
     return invites
 }
 
-function Guilds() {
+function Guilds(cache = true) {
+    if (cache && fs.existsSync(RESULT_PATH + 'discord/guilds.json')) {
+        try {
+            const raw = fs.readFileSync(RESULT_PATH + 'discord/guilds.json', 'utf-8')
+            const parsed = JSON.parse(raw)
+            return parsed
+        } catch (error) { }
+    }
+
     const invitations = Invitations()
 
     const guilds = { }
@@ -140,7 +176,20 @@ function Guilds() {
         }
     }
 
+    if (fs.existsSync(MANUAL_PATH + 'guilds.json')) {
+        const raw = fs.readFileSync(MANUAL_PATH + 'guilds.json', 'utf-8')
+        const parsed = JSON.parse(raw)
+        for (const id in parsed) {
+            if (guilds[id]) continue
+            guilds[id] = parsed[id]
+        }
+    }
+
+    if (!fs.existsSync(RESULT_PATH + 'discord/guilds.json'))
+    { fs.mkdirSync(RESULT_PATH + 'discord/', { recursive: true }) }
+    fs.writeFileSync(RESULT_PATH + 'discord/guilds.json', JSON.stringify(guilds, null, ' '), 'utf-8')
+
     return guilds
 }
 
-module.exports = { Load, Guilds }
+module.exports = { Load, Guilds, Invitations }

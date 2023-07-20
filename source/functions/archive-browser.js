@@ -2,6 +2,7 @@ const fs = require('fs')
 const Types = require('./archive-browser')
 const Path = require('path')
 const CSV = require('csv')
+const LogError = require('./errorLog')
 
 const ARCHIVE_PATH = 'D:/Mappa/Discord/DiscordOldData/'
 
@@ -85,7 +86,7 @@ function Guilds() {
     return result
 }
 
-/** @returns {Promise<Types.ArchivedMessage[]>} */
+/** @returns {Promise<{id: string, date: string, content: string, attachment: string}[]>} */
 function ParseMessages(path) {
     return new Promise((resolve, reject) => {
         const messages = []
@@ -121,7 +122,48 @@ async function Messages() {
         /** @type {Types.ArchivedMessage[]} */
         let messages = []
         if (fs.existsSync(Path.join(ARCHIVE_PATH, 'messages', channelId, 'messages.csv'))) {
-            messages = await ParseMessages(Path.join(ARCHIVE_PATH, 'messages', channelId, 'messages.csv'))
+            const rawMessages = await ParseMessages(Path.join(ARCHIVE_PATH, 'messages', channelId, 'messages.csv'))
+            for (let i = 0; i < rawMessages.length; i++) {
+                if (!rawMessages[i].attachment || rawMessages[i].attachment.length == 0) {
+                    rawMessages[i].attachment = null
+                    continue
+                }
+                if (rawMessages[i].attachment.trim().length == 0) {
+                    rawMessages[i].attachment = null
+                    continue
+                }
+
+                let attachment = {
+                    contentType: '',
+                    url: rawMessages[i].attachment,
+                    raw: JSON.stringify(rawMessages[i].attachment, null, ' ')
+                }
+
+                let url = null
+                try {
+                    url = new URL(rawMessages[i].attachment)
+                } catch (error) { }
+
+                const extname = url ? Path.extname(url.pathname).toLowerCase().trim() : ''
+                switch (extname) {
+                    case '.mp4':
+                        attachment.contentType = 'video/mp4'
+                        break
+                    case '.jpg':
+                        attachment.contentType = 'image/jpeg'
+                        break
+                    case '.png':
+                        attachment.contentType = 'image/png'
+                        break
+                    default:
+                        attachment.contentType = extname
+                        break
+                }
+                if (url) attachment.url = url.toString()
+
+                rawMessages[i].attachment = attachment
+            }
+            messages = rawMessages
         }
 
         channel.messages = messages

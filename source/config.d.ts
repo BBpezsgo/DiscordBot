@@ -6,6 +6,7 @@ export type Config = {
         openweathermap: string
         nasa: string
         accuweather: string
+        "newsdata.io": string
     }
     paths: {
         base: string

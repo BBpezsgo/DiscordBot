@@ -35,11 +35,11 @@ function LogRaw(message) {
 /**
  * @param {{
  *  type: 'NORMAL' | 'ERROR' | 'CLIENT_ERROR' | 'CONNECT' | 'REQUIEST' | 'BLOCKED';
- *  IP: string;
- *  url: string;
- *  method: string;
- *  message: string;
- *  helperMessage: string;
+ *  IP?: string;
+ *  url?: string;
+ *  method?: string;
+ *  message?: string;
+ *  helperMessage?: string;
  * }} message
  */
 function HbLog(message) {

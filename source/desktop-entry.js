@@ -34,10 +34,10 @@ ConsoleUtilities.on('onKeyDown', key => {
     }
 })
 ConsoleUtilities.Listen()
-ConsoleUtilities.EnableMouse()
+// ConsoleUtilities.EnableMouse()
 
 process.on('exit', (code, a) => {
-    ConsoleUtilities.DisableMouse()
+    // ConsoleUtilities.DisableMouse()
     console.log('Exit with code ' + code)
 })
 

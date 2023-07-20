@@ -82,9 +82,19 @@ export type CollectedGuild = {
     }
 }
 
+export type Channel = {
+    messages: Message[],
+    id: string,
+    guild_id?: string,
+    name?: string
+    type?: number
+}
+
 export function Load(): {
-    channels: { [key: string]: Message[] }
+    channels: { [key: string]: Channel }
     invitations: Invitation[]
 }
 
-export function Guilds(): { [key: string]: CollectedGuild }
+export function Guilds(cache: boolean = true): { [key: string]: CollectedGuild }
+
+export function Invitations(cache: boolean = true): Invitation[]

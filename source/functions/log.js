@@ -2,7 +2,7 @@ const { GetTime, GetDataSize, Capitalize } = require('../functions/functions')
 const { WsStatus } = require('../functions/enums')
 
 /** @type {boolean} */
-const enabled = true
+let enabled = false
 
 const CliColor = {
     FgBlack: "\x1b[30m",
