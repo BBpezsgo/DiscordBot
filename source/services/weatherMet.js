@@ -167,7 +167,7 @@ function ProcessCountyData(data) {
                 alerts.push({
                     typeIcon: Cell0.querySelector('img').src.split('/')[3],
                     degreeIcon: Cell1.querySelector('img').src.split('/')[3],
-                    Name: Cell2.textContent
+                    Name: Cell2.textContent,
                 })
             } catch (e) { }
         }

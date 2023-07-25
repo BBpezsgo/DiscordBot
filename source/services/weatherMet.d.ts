@@ -70,7 +70,7 @@ export type CountyID  =
     'Veszprem' |
     'Zala'
 
-export function GetMainAlerts(page: Page): Promise<ResultMain[]>
-export function GetCountyAlerts(countyID: CountyID, day: CountyDays): Promise<ResultCounty>
-export function GetMainWeather(forceDownload = false): Promise<ResultMainWeather>
-export function GetSnowReport(forceDownload = false): Promise<ResultSnowReport>
+export function GetMainAlerts(page: Page): Promise<MET.ResultMain[]>
+export function GetCountyAlerts(countyID: CountyID, day: CountyDays): Promise<MET.ResultCounty>
+export function GetMainWeather(forceDownload = false): Promise<MET.ResultMainWeather>
+export function GetSnowReport(forceDownload = false): Promise<MET.ResultSnowReport>

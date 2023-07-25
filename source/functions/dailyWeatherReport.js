@@ -6,6 +6,7 @@ const LogError = require('./errorLog')
 const Discord = require('discord.js')
 const SunCalc = require('suncalc')
 const Openweathermap = require('../services/Openweathermap')
+const Met = require('../services/weatherMet')
 
 const EmojiPrefix = ''
 
@@ -140,6 +141,59 @@ function GetEmbed(weatherData, isCache) {
 }
 
 /**
+ * @param {{alerts:Met.MET.ResultCounty,day:'today'|'tomorrow'}[]} alerts
+ * @returns {Discord.EmbedBuilder}
+ */
+function GetAlertEmbed(alerts) {
+    if (alerts.length <= 0) { return null }
+
+    const embed = new Discord.EmbedBuilder()
+        .setColor('#00AE86')
+        .setAuthor({ name: 'met.hu', url: 'https://met.hu/idojaras/veszelyjelzes/', iconURL: 'https://met.hu/android-chrome-96x96.png' })
+        .setTitle('Vészjelzések')
+
+    for (const day of alerts) {
+        if (day.alerts.alerts.length <= 0)
+        { continue }
+
+        const dayName = {
+            'today': 'Ma',
+            'tomorrow': 'Holnap',
+        }[day.day] ?? day.day
+
+        let stringBuilder = ''
+        
+        stringBuilder += `> **Kiadva:** <t:${ToUnix(day.alerts.kiadva)}:R>\n`
+
+        for (const alert of day.alerts.alerts) {
+            const typeIcon = {
+                'ts1.gif': '🌩️',
+                'ts3.gif': '🌩️',
+                'rainstorm1.gif': '🌊',
+                'hotx1.gif': '🌡️',
+            }[alert.typeIcon] ?? alert.typeIcon
+                
+            const degreeIcon = {
+                'w1.gif': '1',
+                'w2.gif': '2',
+                'w3.gif': '3',
+            }[alert.degreeIcon] ?? alert.degreeIcon
+
+            stringBuilder += `${typeIcon} ${alert.Name} ${degreeIcon}\n`
+        }
+        embed.addFields({
+            name: dayName,
+            value: stringBuilder,
+            inline: false
+        })
+    }
+
+    embed.setTimestamp(Date.now())
+    
+    return embed
+}
+
+/**
  * @param {Discord.TextChannel} channel
  * @param {StatesManager} statesManager
  */
@@ -156,11 +210,31 @@ async function SendReport(channel, statesManager) {
     statesManager.WeatherReport.Text = 'Get weather data...'
     Openweathermap.OpenweathermapForecast()
         .then(async result => {
-            const embed = GetEmbed(result, result.fromCache)    
+            /** @type {{alerts:Met.MET.ResultCounty,day:'today'|'tomorrow'}[]} */
+            const alerts = [ ]
+
+            try { alerts.push({
+                alerts: await Met.GetCountyAlerts('Bekes', 'Today'),
+                day: 'today',
+            }) }
+            catch (error) { }
+
+            try { alerts.push({
+                alerts: await Met.GetCountyAlerts('Bekes', 'Tomorrow'),
+                day: 'tomorrow',
+            }) }
+            catch (error) { }
+
+            const embed = GetEmbed(result, result.fromCache)
+            const alertEmbed = GetAlertEmbed(alerts)
             statesManager.WeatherReport.Text = 'Delete loading message...'
             await loadingMessage.delete()
             statesManager.WeatherReport.Text = 'Send report message...'
-            await channel.send({ content: '<@&978665941753806888>', embeds: [embed] })
+            if (alertEmbed) {
+                await channel.send({ content: '<@&978665941753806888>', embeds: [ embed, alertEmbed ] })
+            } else {
+                await channel.send({ content: '<@&978665941753806888>', embeds: [ embed ] })
+            }
             statesManager.WeatherReport.Text = ''
         })
         .catch(async error => {
@@ -182,7 +256,7 @@ async function GetOldDailyWeatherReport(statesManager, channel) {
         const msg = messages.at(i)
         try {
             const message = await msg.fetch()
-            if (message.embeds.length == 1) {
+            if (message.embeds.length > 0) {
                 if (message.embeds[0].title == 'Napi időjárás jelentés') {
                     statesManager.WeatherReport.Text = 'Old report message found'
                     return message
