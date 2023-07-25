@@ -135,8 +135,7 @@
                     </td>
                     <td style="display: none;">
                         <form action="/har/view/moderating/Server/Search" method="post" id="view-channel-{{this.id}}"
-                            style="margin: 0;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(Reload, 1000);">
+                            style="margin: 0;">
                             <input type="text" name="id" value="{{this.id}}">
                             <input type="submit" value="View">
                         </form>
@@ -192,8 +191,6 @@
 	</div>
 	<div id="content" style="position:relative">
 
-        <h1>Moderating</h1>
-
         <div class="container loading-effect">
             <!--
             <form action="/dcbot/view/Moderating.html/Back" method="post"
@@ -211,6 +208,7 @@
                     </span>
                 </div>
                 {{server.name}}
+                <span style="color: #aaa">details</span>
             </h2>
             <table id="autoWidth" style="width: 598px;">
                 <tbody>
@@ -236,11 +234,19 @@
                         </td>
                     </tr>
                     {{/if}}
-                    {{#if verification_level}}
+                    {{#if server.verification_level}}
                     <tr>
                         <td width="25%" class="Item">Verification Level:</td>
                         <td colspan="2">
                             <img width="16" height="16" src="/dcbot/images/shield-{{server.verification_level}}.png">
+                        </td>
+                    </tr>
+                    {{/if}}
+                    {{#if server.features}}
+                    <tr>
+                        <td width="25%" class="Item">Features:</td>
+                        <td colspan="2">
+                            {{server.features}}
                         </td>
                     </tr>
                     {{/if}}

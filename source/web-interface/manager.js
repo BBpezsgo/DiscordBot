@@ -65,6 +65,9 @@ const HandlebarsHelpers = {
         if (this.done !== true) {
             return options.fn(this)
         }
+    },
+    'json': function(/** @type {Handlebars.HelperOptions} */ context) {
+        return JSON.stringify(context)
     }
 }
 
@@ -575,15 +578,9 @@ class WebInterfaceManager {
         }
 
         const guild = {
+            ...g,
             iconUrlLarge: `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp`,
             iconUrlSmall: `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=64`,
-            name: g.name,
-            id: g.id,
-            description: g.description,
-            nsfw_level: g.nsfw_level,
-            nsfw: g.nsfw,
-            verification_level: g.verification_level,
-            memberCount: g.memberCount,
         }
 
         /** @param {Discord.ChannelType.GuildText | Discord.ChannelType.DM | Discord.ChannelType.GuildVoice | Discord.ChannelType.GroupDM | Discord.ChannelType.GuildNews | Discord.ChannelType.GuildNewsThread | Discord.ChannelType.GuildPublicThread | Discord.ChannelType.GuildPrivateThread | Discord.ChannelType.GuildStageVoice} type */
@@ -616,9 +613,7 @@ class WebInterfaceManager {
                 groups.push(channel)
             } else {
                 const newChannel = {
-                    id: channel.id,
-                    name: channel.name,
-                    type: channel.type,
+                    ...channel,
                     typeText: GetTypeText(channel.type),
                     typeUrl: GetTypeUrl(channel.type),
                 }
@@ -629,7 +624,7 @@ class WebInterfaceManager {
 
         res.render('view/har/ModeratingGuildSearch', {
             server: guild,
-            searchError: searchError,
+            searchError: searchError ?? 'No error',
             singleChannels: singleChannels,
             groups: groups,
         })
@@ -814,15 +809,19 @@ class WebInterfaceManager {
 
         const guilds = HarBrowser.Guilds()
         const channels = HarBrowser.Load().channels
-
+        
         const g = guilds[this.moderatingSearchedServerId]
 
         if (!g) {
+            console.log(`[HAR]: Server ${this.moderatingSearchedServerId} not found`)
+
             this.RenderPage_ModeratingError(res, `HAR server \"${this.moderatingSearchedServerId}\" not found`)
             return
         }
 
         if (this.moderatingSearchedChannelId.length === 0) {
+            console.log(`[HAR]: No channel selected`)
+
             this.RenderPage_HAR_ModeratingGuildSearch(req, res, 'No HAR channel selected')
             return
         }
@@ -840,16 +839,22 @@ class WebInterfaceManager {
 
         if (!channelData) {
             for (const channelId in g.channels) {
-                if (!channels[channelId]) continue
-                const channel = channels[channelId]
+                const channel = g.channels[channelId]
                 if (channel.id == this.moderatingSearchedChannelId) {
-                    channelData = channel
+                    channelData = {
+                        guild_id: g.id,
+                        id: channelId,
+                        messages: [],
+                        name: channel.name,
+                        type: channel.type,
+                    }
                     break
                 }
             }
         }
 
         if (!channelData) {
+            console.log(`[HAR]: Channel ${this.moderatingSearchedChannelId} not found`)
             this.RenderPage_HAR_ModeratingGuildSearch(req, res, `HAR channel \"${this.moderatingSearchedChannelId}\" not found (2)`)
             return
         }
@@ -861,9 +866,9 @@ class WebInterfaceManager {
                 // @ts-ignore
                 (Buffer.from(fs.readFileSync(g.IconPath))).toString('base64') :
                 null,
-
             name: g.name,
             id: g.id,
+            icon: g.icon,
         }
 
         const channel = {
@@ -873,9 +878,56 @@ class WebInterfaceManager {
         /** @type {{id:string;createdAtTimestamp:number}[]} */
         const messages = []
 
+        /** @type {HarBrowser.User[]} */
+        const members = []
+
         if (channelData.messages && channelData.messages.length > 0) {
-            channelData.messages.forEach(message => {                
+            channelData.messages.forEach(message => {  
+                const attachments = message.attachments
+                const attachmentsResult = []
+                for (const attachment of attachments) {
+                    attachmentsResult.push({
+                        contentType: Path.extname(attachment.filename),
+                        height: attachment.height,
+                        width: attachment.width,
+                        id: attachment.id,
+                        name: attachment.filename,
+                        url: attachment.url,
+                    })
+                }
+
+                const embedsResult = []
+                for (const embed of message.embeds) {
+
+                    let fieldsResult = null
+                    if (embed.fields) {
+                        fieldsResult = []
+                        for (const field of embed.fields) {
+                            fieldsResult.push({
+                                name: Utils.GetHandlebarsMessage(this.client, field.name, this.moderatingSearchedServerId),
+                                value: Utils.GetHandlebarsMessage(this.client, field.value, this.moderatingSearchedServerId),
+                                inline: field.inline,
+                            })
+                        }
+                    }
+
+                    Discord.resolveColor
+                    embedsResult.push({
+                        ...embed,
+                        color: undefined,
+                        author: embed.author,
+                        description: Utils.GetHandlebarsMessage(this.client, embed.description, this.moderatingSearchedServerId),
+                        footer: undefined,
+                        image: undefined,
+                        thumbnail: embed.thumbnail,
+                        url: embed.url,
+                        title: Utils.GetHandlebarsMessage(this.client, embed.title, this.moderatingSearchedServerId),
+                        fields: fieldsResult,
+                    })
+                }
+              
                 messages.push({
+                    ...message,
                     // @ts-ignore
                     content: Utils.GetHandlebarsMessage(this.client, message.content),
                     attachments: message.attachments,
@@ -883,7 +935,19 @@ class WebInterfaceManager {
                     createdAt: GetTime(new Date(Date.parse(message.timestamp))),
                     createdAtTimestamp: Date.parse(message.timestamp),
                     author: message.author,
+                    embeds: embedsResult,
                 })
+
+                let memberAdded = false
+                for (const member of members) {
+                    if (member.id == message.author.id) {
+                        memberAdded = true
+                        break
+                    }
+                }
+                if (!memberAdded) {
+                    members.push(message.author)
+                }
             })
 
             messages.sort((a, b) => { return a.createdAtTimestamp - b.createdAtTimestamp })
@@ -951,6 +1015,7 @@ class WebInterfaceManager {
         // @ts-ignore
         { if (channel.id === singleChannels[i].id) { singleChannels[i].selected = true; break } }
 
+        console.log(`[HAR]: Send page "Moderating" ...`)
         res.render('view/har/Moderating', {
             server: guild,
             singleChannels: singleChannels,
@@ -959,6 +1024,7 @@ class WebInterfaceManager {
             channel: {
                 name: channelData.name,
             },
+            members: members,
         })
     }
 
@@ -1035,7 +1101,10 @@ class WebInterfaceManager {
         this.app.post('/har/view/moderating/Server/Search', (req, res) => {
             const channelId = req.body.id ?? req.query.id
 
+            console.log(`[HAR]: Search channel ${channelId}`)
+
             const guilds = HarBrowser.Guilds()
+            
             if (guilds[this.moderatingSearchedServerId]) {
                 const guild = guilds[this.moderatingSearchedServerId]
                 for (const _channelId in guild.channels) {
@@ -1043,6 +1112,8 @@ class WebInterfaceManager {
                     if (channelId == channel.id) {
                         this.moderatingSearchedChannelId = channelId
         
+                        console.log(`[HAR]: Channel ${channelId} found: `, channel)
+
                         this.RenderPage_HAR_Moderating(req, res)
                         return
                     }

@@ -64,10 +64,8 @@ function Load() {
                     }
                 }
             } else {
-                console.log(apiPath)
+                console.log(method)
             }
-        } else if (apiPath === 'science') {
-
         } else if (apiPath.startsWith('invites')) {
             const inviteID = apiPath.replace('invites/', '')
             /** @type {Types.Invitation} */
@@ -83,7 +81,17 @@ function Load() {
             }
         } else if (apiPath.startsWith('users')) {
             const userId = apiPath.split('/')[1]
-            // console.log(JSON.parse(entry.response.content.text))
+            const userPath = apiPath.substring(userId.length + 'users'.length + 2)
+        } else if (apiPath === 'science') {
+        } else if (apiPath === 'auth/login') {
+        } else if (apiPath === 'auth/mfa/totp') {
+        } else if (apiPath === 'creator-monetization/marketing/nag-activate/eligibility') {
+        } else if (apiPath === 'applications/detectable') {
+        } else if (apiPath.startsWith('guilds')) {
+            const guildId = apiPath.split('/')[1]
+            const guildPath = apiPath.substring(guildId.length + 'guilds'.length + 2)
+        } else {
+            
         }
     }
 
@@ -157,7 +165,7 @@ function Guilds(cache = true) {
         } catch (error) { }
     }
 
-    const invitations = Invitations()
+    const invitations = Invitations(cache)
 
     const guilds = { }
     

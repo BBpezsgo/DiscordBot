@@ -44,31 +44,24 @@ export type ArchivedMessage = null | {
     }
 }
 
-export type ArchivedMessageChannel = ArchivedGuildMessageChannel | ArchivedMessageChannel2 | ArchivedMessageChannel3
+export type ArchivedMessageChannel = ArchivedGuildMessageChannel | ArchivedBaseMessageChannel | ArchivedMessageChannel3
 
-
-export type ArchivedGuildMessageChannel = {
+export type ArchivedBaseMessageChannel = {
     id: string
     type: number
+    messages: ArchivedMessage[]
+}
+
+export type ArchivedGuildMessageChannel = ArchivedBaseMessageChannel & {
     name: string
     guild: {
         id: string
         name: string
     }
-    messages: ArchivedMessage[]
 }
 
-export type ArchivedMessageChannel2 = {
-    id: string
-    type: number
-    messages: ArchivedMessage[]
-}
-
-export type ArchivedMessageChannel3 = {
-    id: string
-    type: number
+export type ArchivedMessageChannel3 = ArchivedBaseMessageChannel & {
     recipients: string[]
-    messages: ArchivedMessage[]
 }
 
 export type ArchivedGuild = {

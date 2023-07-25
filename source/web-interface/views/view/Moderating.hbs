@@ -80,8 +80,8 @@
 </head>
 
 <body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
-	<div style="width: 250px;" id="context-menubar">
-        <div id="server-panel">
+	<div style="width: 240px;" id="context-menubar">
+        <div id="server-panel" onclick="document.getElementById('server-menu').classList.toggle('server-menu-visible')">
             <style>
                 #server-panel table, #server-panel tr, #server-panel td {
                     border: 0px;
@@ -99,6 +99,15 @@
                     </td>
                 </tr>
             </table>
+        </div>
+        <div id="server-menu">
+            <div>
+                Bruh
+            </div>
+            <hr>
+            <div>
+                hello
+            </div>
         </div>
 		<div id="context-menubar-content" style="overflow-x: hidden;">
             {{#each singleChannels}}
@@ -211,7 +220,7 @@
 	<div id="content">
         <div id="channel-panel">
             <form action="/dcbot/view/Moderating.html/Server/Back" method="post"
-                style="display: inline-block; margin-right: 20px;"
+                style="display: inline-block; margin-right: 20px; position: relative; top: -6px;"
                 onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                 <input type="submit" value="" class="btn-tool btn-tool-back">
             </form>
@@ -374,6 +383,7 @@
         </div>
         -->
         
+        <!--
         <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
             onsubmit="
                 event.preventDefault()
@@ -390,6 +400,7 @@
             <input type="number" name="count" value="" id="fetch-count" required min="1" max="20">
             <input type="submit" value="Fetch More">
         </form>
+        -->
         <!--
         <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
             onsubmit="
@@ -694,7 +705,13 @@
 
                 {{else}}
                 <div>
-                    <img src="{{author.avatarUrlBig}}" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                    <img
+                    {{#if author.avatarUrlBig}}
+                    src="{{author.avatarUrlBig}}"
+                    {{else}}
+                    src="{{author.defaultAvatarUrl}}"
+                    {{/if}}
+                    width="42" height="42" title="Avatar" style="border-radius: 50%;">
                 </div>
                 <div>
                     <div class="message-actions">
@@ -756,43 +773,7 @@
 
                     <div class="embed-container">
                         {{#each embeds}}
-                        <div class="embed" style="{{#if this.color}}border-left-color:{{this.color}};{{/if}}{{#if this.thumbnail.url}}min-height:130px;{{/if}}">
-                            {{#if this.thumbnail.url}}
-                            <img src="{{this.thumbnail.url}}" height="100" class="embed-thumbnail">
-                            {{/if}}
-                            {{#if this.author}}
-                            <div class="embed-author">
-                                <img src="{{this.author.iconURL}}">
-                                <a{{#if this.author.url}} href="{{this.author.url}}"{{/if}} target="_blank">
-                                    {{this.author.name}}
-                                </a>
-                            </div>
-                            {{/if}}
-                            <a{{#if this.url}} href="{{this.url}}"{{/if}} target="_blank" class="embed-title {{#if this.url}}embed-title-link{{/if}}">
-                                {{#with this.title}}{{> content}}{{/with}}
-                            </a>
-                            <p class="embed-description">
-                                {{#with this.description}}{{> content}}{{/with}}
-                            </p>
-                            <div class="embed-field-container">
-                                {{#each this.fields}}
-                                <div class="embed-field"{{#if this.inline}} style="display:inline-block"{{/if}}>
-                                    <div class="embed-field-name">
-                                        {{#with this.name}}{{> content}}{{/with}}
-                                    </div>
-                                    <div class="embed-field-value">
-                                        {{#with this.value}}{{> content}}{{/with}}
-                                    </div>
-                                </div>
-                                {{/each}}
-                            </div>
-                            {{#if this.image}}
-                            <img src="{{this.image.url}}" class="embed-image">
-                            {{/if}}
-                            <div class="embed-footer">
-                                {{this.footer.text}}
-                            </div>
-                        </div>
+                        {{#with this}}{{> embed}}{{/with}}
                         {{/each}}
                     </div>
 
@@ -871,6 +852,169 @@
             </form>
         </div>
 	</div>
+
+    <div style="width: 240px;" id="users-menubar">
+        <table cellspacing="0" style="position: relative; top: 10px; left: 8px; padding-bottom: 16px;">
+            <tr>
+                <td style="color: #f3f4f5; font-weight: 700; font-size: 14px;">
+                    Members
+                </td>
+            </tr>
+        </table>
+        <style>
+            .user-status {
+                display: inline-block;
+                position: absolute;
+                width: 11px;
+                height: 11px;
+                border-radius: 50%;
+                border: 3px solid #2b2d31;
+                background-color: #2b2d31;
+                top: 20px;
+                left: 20px;
+            }
+        </style>
+        {{#each members}}
+        <table class="channel-menuitem channel-menuitem-notinteractive">
+            <tr>
+                <td style="width:32px">
+                    {{#if avatarUrlMedium}}
+                    <div class="tooltip">
+                        <img src="{{this.avatarUrlMedium}}" width="32" height="32" title="Avatar" style="border-radius: 16px;">
+                        {{#if status}}
+                        <div class="user-status">
+                            
+                        </div>
+                        {{/if}}
+                        <span class="tooltiptext">
+                            <img src="{{this.avatarUrlBig}}">
+                        </span>
+                    </div>      
+                    {{else}}
+                    <img src="{{this.defaultAvatarUrl}}" width="32" height="32" title="Default avatar" style="border-radius: 16px;">
+                    {{/if}}
+                </td>
+                <td style="font-size: 14px; font-weight: 600; max-width: 70px; overflow: hidden;">
+                    {{#if this.displayName}}
+                    <span title="Display Name">{{this.displayName}}</span>
+                    {{else}}
+                    <span title="Username">{{this.username}}</span>
+                    {{/if}}
+                    
+                    {{#if bot}}<span class="tag">BOT</span>{{/if}}
+                    {{#if system}}<span class="tag">System</span>{{/if}}
+                    
+                    {{#if archived}}
+                        <img src="/images/archived.png" width="12" height="12" title="Loaded from user-exported data" style="transform: translateY(2px); opacity: 50%;">
+                    {{/if}}
+
+                    {{#if flags.HypeSquadOnlineHouse1}}
+                    <span class="user-badge">
+                        <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">
+                    </span>
+                    {{/if}}
+
+                    {{#if flags.HypeSquadOnlineHouse2}}
+                    <span class="user-badge">
+                        <img src="https://static.wikia.nocookie.net/discord/images/2/27/Hypesquad_brilliance_badge.png">
+                    </span>
+                    {{/if}}
+
+                    {{#if flags.HypeSquadOnlineHouse3}}
+                    <span class="user-badge">
+                        <img src="https://static.wikia.nocookie.net/discord/images/c/ca/Hypesquad_balance_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.Staff}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Discord-staff.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.BugHunterLevel1}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Bug_hunter_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.BugHunterLevel2}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Bug_buster_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.CertifiedModerator}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Discord_Certified_Moderator.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.Partner}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/DiscordPartnerBadge.svg">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Early_supporter_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/HypeSquad_Event_Badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/New_badge.svg">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Nitro_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/SupportsCommandsBadge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if VerifiedDeveloper}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Verified_developer_badge.png">
+                    </span>
+                    {{/if}}
+
+                    {{#if cache}}
+                    <img src="/images/offline.png" width="12" height="12" title="From Cache" alt="Cache Icon" style="transform: translateY(2px); opacity: 50%;">
+                    {{/if}}
+
+                    {{#if haveDatabase}}
+                    <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
+                    {{/if}}
+                </td>
+                <td style="width: 24px;">
+                    <button class="btn-fetch" onclick="Post('/User/Fetch?id={{id}}', event, () => { Reload() })" title="Fetch"></button>
+                </td>
+                <td style="display: none;">
+                    <form action="/dcbot/view/UserMessages/Search" method="post" id="view-user-{{this.id}}"
+                        style="margin: 0;"
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                        <input type="text" name="id" value="{{this.id}}">
+                        <input type="submit" value="View">
+                    </form>
+                </td>
+            </tr>
+        </table>
+        {{/each}}
+    </div>
     
     <script src="/scripts/functions.js"></script>
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>

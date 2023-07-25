@@ -1,4 +1,4 @@
-export type ParserElementType = 'TEXT' | 'URL' | 'PING' | 'EMOJI' | 'CHANNEL' | 'USER' | 'IMG' | 'VIDEO' | 'ROLE' | 'BR' | 'SPOILER' | 'BOLD' | 'ITALIC' | 'BLOCK' | 'SMALLCODE'
+export type ParserElementType = 'TEXT' | 'URL' | 'PING' | 'EMOJI' | 'CHANNEL' | 'USER' | 'IMG' | 'VIDEO' | 'ROLE' | 'BR' | 'SPOILER' | 'BOLD' | 'ITALIC' | 'BLOCK' | 'SMALLCODE' | 'URL_LABEL'
 
 export type ParserElement<T = ParserElementType> = {
     type: T

@@ -41,8 +41,8 @@
 {{#if this.details.url}}
 <img width="16" height="16" style="display: inline-block;" src="{{this.details.url}}" alt="{{this.details.name}}">
 {{else}}
-<img width="16" height="16" style="display: inline-block;" src="https://cdn.discordapp.com/emojis/{{this.data}}.png"
-    alt="{{this.data}}">
+<!--<img width="16" height="16" style="display: inline-block;" src="https://cdn.discordapp.com/emojis/{{this.data}}.png"
+    alt="{{this.data}}">-->
 {{/if}}
 {{/case}}
 
@@ -69,6 +69,10 @@
 
 {{#case 'SMALLCODE'}}
 <span class="text-content-smallcode">{{this.data}}</span>
+{{/case}}
+
+{{#case 'URL_LABEL'}}
+<a href="#" target="_blank">{{this.data}}<i class="material-icons">open_in_new</i></a>
 {{/case}}
 
 {{#case 'URL'}}

@@ -92,7 +92,7 @@
             <table cellspacing="0" style="position: relative; top: 10px; left: 8px;">
                 <tr>
                     <td style="user-select: none">
-                        <img src="data:image/png;charset=utf-8;base64,{{server.iconData}}" width="32" height="32" style="border-radius: 16px; margin-right: 4px">
+                        <img src="https://cdn.discordapp.com/icons/{{server.id}}/{{server.icon}}.webp?size=64" width="32" height="32" style="border-radius: 16px; margin-right: 4px">
                     </td>
                     <td style="color: #f3f4f5; font-weight: 700; font-size: 14px;">
                         {{server.name}}
@@ -452,7 +452,15 @@
             {{#each messages}}
             <div class="message-container">
                 <div>
+                    {{#if author.avatarData}}
                     <img src="data:image/png;charset=utf-8;base64,{{author.avatarData}}" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                    {{else}}
+                    {{#if author.avatar}}
+                    <img src="https://cdn.discordapp.com/avatars/{{author.id}}/{{author.avatar}}.webp?size=128" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                    {{else}}
+                    <img src="https://cdn.discordapp.com/embed/avatars/0.png" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                    {{/if}}
+                    {{/if}}
                 </div>
                 <div>
                     <div class="message-actions"></div>
@@ -483,9 +491,24 @@
                         {{/if}}
                     </div>
 
-                    <div class="embed-container"></div>
+                    <div class="embed-container">
+                        {{#each embeds}}
+                        {{#with this}}{{> embed}}{{/with}}
+                        {{/each}}
+                    </div>
 
-                    <div class="reaction-container"></div>
+                    <div class="reaction-container">
+                        {{#each reactions}}
+                        <div class="reaction{{#if me}} reaction-me{{/if}}"{{#if this.emoji.url}}{{else}} style="position:relative;top:-2px"{{/if}}>
+                            {{#if this.emoji.url}}
+                            <img src="{{this.emoji.url}}" width="16" height="16">
+                            {{else}}
+                            <span>{{this.emoji.name}}</span>
+                            {{/if}}
+                            <span>{{this.count}}</span>
+                        </div>
+                        {{/each}}
+                    </div>
                 </div>
             </div>
             {{/each}}
@@ -523,6 +546,153 @@
             }
         </style>
 	</div>
+
+    <div style="width: 240px;" id="users-menubar">
+        <table cellspacing="0" style="position: relative; top: 10px; left: 8px; padding-bottom: 16px;">
+            <tr>
+                <td style="color: #f3f4f5; font-weight: 700; font-size: 14px;">
+                    Members
+                </td>
+            </tr>
+        </table>
+        <style>
+            .user-status {
+                display: inline-block;
+                position: absolute;
+                width: 11px;
+                height: 11px;
+                border-radius: 50%;
+                border: 3px solid #2b2d31;
+                background-color: #2b2d31;
+                top: 20px;
+                left: 20px;
+            }
+        </style>
+        {{#each members}}
+        <table class="channel-menuitem channel-menuitem-notinteractive">
+            <tr>
+                <td style="width:32px">
+                    {{#if avatar}}
+                    <div class="tooltip">
+                        <img src="https://cdn.discordapp.com/avatars/{{this.id}}/{{this.avatar}}.webp?size=32" width="32" height="32" title="Avatar" style="border-radius: 16px;">
+                        <span class="tooltiptext">
+                            <img src="https://cdn.discordapp.com/avatars/{{this.id}}/{{this.avatar}}.webp?size=128">
+                        </span>
+                    </div>      
+                    {{else}}
+                    <img src="https://cdn.discordapp.com/embed/avatars/0.png" width="32" height="32" title="Default avatar" style="border-radius: 16px;">
+                    {{/if}}
+                </td>
+                <td style="font-size: 14px; font-weight: 600; max-width: 70px; overflow: hidden;">
+                    {{#if this.displayName}}
+                    <span title="Display Name">{{this.displayName}}</span>
+                    {{else}}
+                    <span title="Username">{{this.username}}</span>
+                    {{/if}}
+                    
+                    {{#if bot}}<span class="tag">BOT</span>{{/if}}
+                    {{#if system}}<span class="tag">System</span>{{/if}}
+                    
+                    {{#if archived}}
+                        <img src="/images/archived.png" width="12" height="12" title="Loaded from user-exported data" style="transform: translateY(2px); opacity: 50%;">
+                    {{/if}}
+
+                    {{#if flags.HypeSquadOnlineHouse1}}
+                    <span class="user-badge">
+                        <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">
+                    </span>
+                    {{/if}}
+
+                    {{#if flags.HypeSquadOnlineHouse2}}
+                    <span class="user-badge">
+                        <img src="https://static.wikia.nocookie.net/discord/images/2/27/Hypesquad_brilliance_badge.png">
+                    </span>
+                    {{/if}}
+
+                    {{#if flags.HypeSquadOnlineHouse3}}
+                    <span class="user-badge">
+                        <img src="https://static.wikia.nocookie.net/discord/images/c/ca/Hypesquad_balance_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.Staff}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Discord-staff.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.BugHunterLevel1}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Bug_hunter_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.BugHunterLevel2}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Bug_buster_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.CertifiedModerator}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Discord_Certified_Moderator.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if flags.Partner}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/DiscordPartnerBadge.svg">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Early_supporter_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/HypeSquad_Event_Badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/New_badge.svg">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Nitro_badge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if false}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/SupportsCommandsBadge.png">
+                    </span>
+                    {{/if}}
+                    
+                    {{#if VerifiedDeveloper}}
+                    <span class="user-badge">
+                        <img src="/dcbot/images/userBadges/Verified_developer_badge.png">
+                    </span>
+                    {{/if}}
+
+                    {{#if cache}}
+                    <img src="/images/offline.png" width="12" height="12" title="From Cache" alt="Cache Icon" style="transform: translateY(2px); opacity: 50%;">
+                    {{/if}}
+
+                    {{#if haveDatabase}}
+                    <img src="/images/database2.svg" width="12" height="12" title="Has Database" alt="Database Icon" style="transform: translateY(2px); opacity: 50%;">
+                    {{/if}}
+                </td>
+            </tr>
+        </table>
+        {{/each}}
+    </div>
     
     <script src="/scripts/functions.js"></script>
     <script>function Reload(){if(location.href.includes('#noReload')){location.reload()}else{location.href+='#noReload';location.reload()};}</script>

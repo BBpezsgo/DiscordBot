@@ -15,6 +15,7 @@ const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
 const ArchiveBrowser = require('../functions/archive-browser')
 const HarBrowser = require('../functions/har-discord-browser')
 const ContentParser = require('./content-parser')
+const URL = require('node:url')
 
 /**
  * @param {Discord.User} user
@@ -457,7 +458,6 @@ function GetHandlebarsMessage(client, content, serverID = undefined) {
         switch (result[i].type) {
             case 'URL':
                 {
-                    const URL = require('node:url')
                     const url = URL.parse(result[i].data)
                     if (url.path.toLowerCase().endsWith('.png') ||
                     url.path.toLowerCase().endsWith('.jpg') ||
@@ -479,6 +479,14 @@ function GetHandlebarsMessage(client, content, serverID = undefined) {
                             attachmentID: attachmentCounter
                         })
                     }
+                    break
+                }
+            case 'URL_LABEL':
+                {
+                    result.push({
+                        type: 'URL_LABEL',
+                        data: result[i].data,
+                    })
                     break
                 }
             case 'USER':
@@ -522,9 +530,7 @@ function GetHandlebarsMessage(client, content, serverID = undefined) {
                 }
             case 'ROLE':
                 {
-                    // @ts-ignore
                     if (serverID && serverID.length > 0) {
-                        // @ts-ignore
                         const guild = client.guilds.cache.get(serverID)
                         if (!guild) break
                         if (guild.roles.cache.has(result[i].data)) {

@@ -477,30 +477,58 @@
                         <span class="tooltiptext" style="font-weight:bold;font-size:16px;">{{author.username}}</span>
                         <span style="color:#aaa; cursor: default;">{{this.createdAt}}</span>
                     </div>
+                    <style>
+                        .message-attachment-file {
+                            border-radius: 8px;
+                            font-size: 14px;
+                            color: #bcc3cb;
+                            background-color: #2b2d31;
+                            padding: 4px 6px;
+                            border: 1px solid #232428;
+                            display: inline-block;
+                        }
+
+                        .message-attachment-file > a {
+                            color: inherit;
+                            font-size: 17px;
+                        }
+
+                        .message-attachment-file > a:hover > i::after {
+                            display: none;
+                        }
+
+                        .message-attachment-file > a:hover {
+                            color: #d2dae4;
+                        }
+                    </style>
                     <div>
                         {{#with this.content}}{{> content}}{{/with}}
 
                         {{#if this.attachment}}
-                        {{this}}
                         <div id="msg-attachment-{{this.id}}-1" style="display:block;">
                             {{#switch this.attachment.contentType}}
                                 {{#case 'image/jpeg'}}
                                 <img src="{{this.attachment.url}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
+                                <a href="{{this.attachment.url}}" target="_blank"><i class="material-icons">open_in_new</i></a>
                                 {{/case}}
 
                                 {{#case 'image/png'}}
                                 <img src="{{this.attachment.url}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
+                                <a href="{{this.attachment.url}}" target="_blank"><i class="material-icons">open_in_new</i></a>
                                 {{/case}}
 
                                 {{#case 'video/mp4'}}
                                 <video src="{{this.attachment.url}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;" controls>
+                                <a href="{{this.attachment.url}}" target="_blank"><i class="material-icons">open_in_new</i></a>
                                 {{/case}}
 
                                 {{#casedefault}}
-                                <span style="color: #888;">{{this.attachment.contentType}}</span>
+                                <div class="message-attachment-file">
+                                    <span>{{this.attachment.contentType}}</span>
+                                    <a href="{{this.attachment.url}}" target="_blank" title="Download file"><i class="material-icons">download</i></a>
+                                </div>
                                 {{/casedefault}}
                             {{/switch}}
-                            <a href="{{this.attachment.url}}" target="_blank"><i class="material-icons">open_in_new</i></a>
                         </div>
                         {{/if}}
                     </div>

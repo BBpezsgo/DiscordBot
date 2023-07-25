@@ -1908,6 +1908,20 @@ class WebInterfaceHandlebarsManager {
             viewable: c.viewable,
         }
 
+        const members = []
+
+        /** @type {Discord.BaseGuildTextChannel} */
+        // @ts-ignore
+        const __c = c
+        __c.members.forEach(member => {
+            members.push({
+                displayHexColor: member.displayHexColor,
+                displayName: member.displayName,
+                status: member.presence?.status,
+                ...Utils.UserJson(member.user),
+            })
+        })
+
         /** @type {{id:string;createdAtTimestamp:number}[]} */
         const messages = []
 
@@ -1915,6 +1929,23 @@ class WebInterfaceHandlebarsManager {
             const cTxt = c
 
             cTxt.messages.cache.forEach((message) => {
+                let memberAdded = false
+                for (const member of members) {
+                    if (member.id == message.author.id) {
+                        memberAdded = true
+                        break
+                    }
+                }
+
+                if (!memberAdded) {
+                    members.push({
+                        displayHexColor: message.member?.displayHexColor,
+                        displayName: message.member?.displayName,
+                        status: message.member?.presence?.status,
+                        ...Utils.UserJson(message.author),
+                    })
+                }
+
                 const attachments = message.attachments.toJSON()
                 const attachmentsResult = []
                 for (const attachment of attachments) {
@@ -1946,16 +1977,16 @@ class WebInterfaceHandlebarsManager {
                     embedsResult.push({
                         color: embed.hexColor,
                         author: embed.author,
-                        description: (new ContentParser.Parser(embed.description)).result,
+                        description: Utils.GetHandlebarsMessage(this.client, embed.description, this.moderatingSearchedServerId),
                         footer: embed.footer,
                         image: embed.image,
                         thumbnail: embed.thumbnail,
                         url: embed.url,
-                        title: (new ContentParser.Parser(embed.title)).result,
+                        title: Utils.GetHandlebarsMessage(this.client, embed.title, this.moderatingSearchedServerId),
                         fields: embed.fields.map(field => {
                             return {
-                                name: (new ContentParser.Parser(field.name)).result,
-                                value: (new ContentParser.Parser(field.value)).result,
+                                name: Utils.GetHandlebarsMessage(this.client, field.name, this.moderatingSearchedServerId),
+                                value: Utils.GetHandlebarsMessage(this.client, field.value, this.moderatingSearchedServerId),
                                 inline: field.inline,
                             }
                         }),
@@ -2025,7 +2056,7 @@ class WebInterfaceHandlebarsManager {
         // @ts-ignore
         { if (channel.id === singleChannels[i].id) { singleChannels[i].selected = true; break } }
 
-        res.render(`view/Moderating`, { server: guild, channel: channel, messages: messages, groups: channelGroups, singleChannels: singleChannels })
+        res.render(`view/Moderating`, { server: guild, channel: channel, messages: messages, groups: channelGroups, singleChannels: singleChannels, members: members })
     }
     
     RenderPage_Commands(req, res) {

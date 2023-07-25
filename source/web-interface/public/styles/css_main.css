@@ -1034,10 +1034,65 @@ body.ctxpanel{display:flex;align-items:stretch;margin:0px;overflow:hidden;height
 	user-select: none;
 }
 
+#users-menubar {
+	background-color: #2b2d31;
+	margin-left: 4px;
+}
+
 #server-panel {
 	box-shadow: #0008 0px 1px 1px;
 	flex: 0 0 53px;
 	overflow: hidden;
+	cursor: pointer;
+	transition: background-color 100ms;
+}
+
+#server-panel:hover {
+	background-color: #36373d;
+}
+
+#server-panel table, #server-panel tr, #server-panel td {
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+}
+
+#server-menu {
+	background-color: #111214;
+	box-shadow: #0004 4px 4px 4px;
+	border-radius: 4px;
+	padding: 9px;
+	width: 250px;
+	user-select: none;
+	display: none;
+}
+
+#server-menu > div {
+	color: #b5bac1;
+	font-weight: 500;
+	font-size: 14px;
+	padding: 6px 8px;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+#server-menu > hr {
+	border-style: solid;
+	border-color: #2e2f34;
+}
+
+#server-menu > div:hover {
+	background-color: #4a54c1;
+	color: #fff;
+}
+
+#server-menu > div:active {
+	background-color: #3f47a2;
+	color: #fff;
+}
+
+#server-menu.server-menu-visible {
+	display: block;
 }
 
 .channel-menuitem {
@@ -1046,17 +1101,20 @@ body.ctxpanel{display:flex;align-items:stretch;margin:0px;overflow:hidden;height
 	height: 32px;
 	border-radius: 5px;
 	margin: 4px;
-	cursor: pointer;
 	user-select: none;
 	color: #989aa2;
 }
 
-.channel-menuitem:hover {
+.channel-menuitem:not(.channel-menuitem-notinteractive) {
+	cursor: pointer;
+}
+
+.channel-menuitem:not(.channel-menuitem-notinteractive):hover {
 	background-color: #36373d;
 	color: var(--text-primary);
 }
 
-.channel-menuitem:active {
+.channel-menuitem:not(.channel-menuitem-notinteractive):active {
 	background-color: #3b3d44;
 }
 
