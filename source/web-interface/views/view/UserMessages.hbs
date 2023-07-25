@@ -234,6 +234,8 @@
             </form>
 
             <h1 style="display:inline-block">{{channel.name}}</h1>
+            {{#if channel.archived}}
+            {{else}}
             {{#if channel.id}}
             <form action="/UserMessages/Delete" method="post" style="margin: 0; display: inline-block;"
                 onsubmit="
@@ -253,8 +255,10 @@
             {{/if}}
             <p style="color: #b32d2d;" id="create-dm-error"></p>
             <p style="color: #b32d2d;" id="delete-dm-error"></p>
+            {{/if}}
         </div>
 
+        <!--
         {{#if channel.id}}
         <form action="/Message/Fetch" method="post" style="margin: 0; display: inline-block;"
             onsubmit="
@@ -273,6 +277,7 @@
             <input type="submit" value="Fetch More">
         </form>
         {{/if}}
+        -->
         
         <p style="color: #b32d2d;" id="fetch-msg-error"></p>
 
@@ -352,6 +357,8 @@
         </style>
 
         <div id="messages-container">
+            {{#if channel.archived}}
+            {{else}}
             {{#if channel.id}}
             <form action="/Message/FetchMoreSimple" method="post" style="margin: 0; display: inline-block; width: 100%; text-align: center;"
                 onsubmit="
@@ -361,6 +368,7 @@
                 <input type="submit" value="Load More Messages" class="button-secondary">
             </form>
             <p style="color: #b32d2d;" id="fetch-msg-error-2"></p>
+            {{/if}}
             {{/if}}
 
             <script>
@@ -569,7 +577,11 @@
 
                 {{else}}
                 <div>
+                    {{#if author.avatarData}}
+                    <img src="data:image/png;charset=utf-8;base64,{{author.avatarData}}" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                    {{else}}
                     <img src="{{author.avatarUrlBig}}" width="42" height="42" title="Avatar" style="border-radius: 50%;">
+                    {{/if}}
                 </div>
                 <div>
                     <div class="message-actions">
@@ -589,10 +601,12 @@
                         </button>
                         {{/if}}
                         {{/if}}
+                        {{#if url}}
                         <button onclick="document.getElementById('message-link-{{id}}').click()">
                             <img src="/images/link.png" title="Message Link">
                         </button>
                         <a href="{{url}}" style="display:none" target="_blank" title="Link" id="message-link-{{id}}"></a>
+                        {{/if}}
                     </div>
                     <div>
                         <span class="tooltiptext" style="font-weight:bold;font-size:16px;">{{author.username}}</span>
@@ -612,6 +626,10 @@
                         {{#each this.attachments}}
                         <div id="msg-attachment-{{this.id}}" style="display:block;">
                             {{#switch this.contentType}}
+                                {{#case 'image/png'}}
+                                <img src="{{this.url}}"height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
+                                {{/case}}
+
                                 {{#case 'image/jpeg'}}
                                 <img src="{{this.url}}"height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
                                 {{/case}}
@@ -697,6 +715,8 @@
             })
         </script>
         
+        {{#if channel.archived}}
+        {{else}}
         <style>
             div#send-message {
                 padding: 16px;
@@ -747,6 +767,7 @@
                 <p style="color: #f00" id="send-message-error"></p>
             </form>
         </div>
+        {{/if}}
 	</div>
     
     <script src="/scripts/functions.js"></script>

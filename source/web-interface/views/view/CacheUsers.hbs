@@ -190,9 +190,8 @@
                         <button class="btn-fetch" onclick="Post('/User/Fetch?id={{id}}', event, () => { Reload() })" title="Fetch"></button>
                     </td>
                     <td style="display: none;">
-                        <form action="/dcbot/view/UserMessages/Search" method="post" id="view-user-{{this.id}}"
-                            style="margin: 0;"
-                            onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                        <form action="/dcbot/view/UserMessages/Search" method="get" id="view-user-{{this.id}}"
+                            style="margin: 0">
                             <input type="text" name="id" value="{{this.id}}">
                             <input type="submit" value="View">
                         </form>
@@ -221,7 +220,16 @@
             </form>
             <p style="color: #b32d2d;" id="fetch-user-error"></p>
         </div>
-    
+
+        {{#if errorMessage}}
+        <div class="container loading-effect">
+            <h2>Error</h2>
+            <p style="color: #f00; font-weight: bold;">
+                {{errorMessage}}
+            </p>
+        </div>
+        {{/if}}
+
     </div>
 
     <script src="/scripts/functions.js"></script>

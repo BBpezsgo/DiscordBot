@@ -1122,16 +1122,52 @@ class WebInterfaceHandlebarsManager {
         })
 
         this.app.post('/dcbot/view/UserMessages/Search', (req, res) => {
+            this.viewUserMessagedId = ''
             const id = req.query.id ?? req.body.id
+
             if (this.client.users.cache.has(id)) {
                 this.viewUserMessagedId = id
-
                 this.RenderPage_DirectMessages(req, res, '')
-            } else {
-                this.RenderPage_DirectMessages(req, res, `User \"${id}\" not found`)
+
+                return
             }
+            
+            const archivedUsers = ArchiveBrowser.Users()
+            for (const archivedUser of archivedUsers) {
+                if (archivedUser.id === id) {
+                    this.viewUserMessagedId = id
+                    this.RenderPage_DirectMessages(req, res, '')
+
+                    return
+                }
+            }
+
+            this.RenderPage_DirectMessages(req, res, `User \"${id}\" not found`)
         })
 
+        this.app.get('/dcbot/view/UserMessages/Search', (req, res) => {
+            this.viewUserMessagedId = ''
+            const id = req.query.id ?? req.body.id
+
+            if (this.client.users.cache.has(id)) {
+                this.viewUserMessagedId = id
+                this.RenderPage_DirectMessages(req, res, '')
+
+                return
+            }
+            
+            const archivedUsers = ArchiveBrowser.Users()
+            for (const archivedUser of archivedUsers) {
+                if (archivedUser.id === id) {
+                    this.viewUserMessagedId = id
+                    this.RenderPage_DirectMessages(req, res, '')
+
+                    return
+                }
+            }
+
+            this.RenderPage_DirectMessages(req, res, `User \"${id}\" not found`)
+        })
 
         this.app.post('/UserMessages/Create', (req, res) => {
             if (this.client.users.cache.has(this.viewUserMessagedId)) {
@@ -1576,6 +1612,7 @@ class WebInterfaceHandlebarsManager {
     RenderPage_DirectMessages(req, res, errorMessage) {
         if (this.viewUserMessagedId.length > 0) {
             const user = this.client.users.cache.get(this.viewUserMessagedId)
+
             if (user) {
                 const c = user.dmChannel
                 let channelJson = c ? {
@@ -1692,15 +1729,92 @@ class WebInterfaceHandlebarsManager {
                         })
                     })
 
-                    messages.sort((a, b) => { return a.createdAtTimestamp - b.createdAtTimestamp })
+                    messages.sort((a, b) => a.createdAtTimestamp - b.createdAtTimestamp)
                 }
 
-                res.render(`view/UserMessages`, { users: Utils.UsersCache(this.client), channel: channelJson, messages })
+                res.render(`view/UserMessages`, { users: Utils.UsersCache(this.client), channel: channelJson, messages, errorMessage })
+                return
+            }
+
+            console.log(`[ArchiveBrowser]: Search user ${this.viewUserMessagedId} ...`)
+            const archivedUsers = ArchiveBrowser.Users()
+            for (const archivedUser of archivedUsers) {
+                if (archivedUser.id !== this.viewUserMessagedId)
+                { continue }
+
+                console.log(`[ArchiveBrowser]: User ${this.viewUserMessagedId} found`, archivedUser)
+                
+                console.log(`[ArchiveBrowser]: Search DM channel ...`)
+
+                ArchiveBrowser.Messages()
+                    .then(/** @param {ArchiveBrowser.ArchivedMessageChannel3[]} archivedChannels */ archivedChannels => {
+                        for (const  archivedChannel of archivedChannels) {
+                            if (!archivedChannel.recipients)
+                            { continue }
+                            if (!archivedChannel.recipients.includes(archivedUser.id))
+                            { continue }
+
+                            console.log(`[ArchiveBrowser]: DM channel found`, archivedChannel)
+
+                            let channelJson = archivedChannel ? {
+                                id: archivedChannel.id,
+                                name: archivedUser.nickname,
+                                archived: true,
+                            } : {
+                                name: archivedUser.nickname,
+                                archived: true,
+                            }
+
+                            const archivedAccount = ArchiveBrowser.Account()
+                            
+                            /** @type {{id:string;createdAtTimestamp:number}[]} */
+                            const messages = []
+
+                            for (const message of archivedChannel.messages) {
+                                
+                                const attachmentsResult = []
+                                if (message.attachment) {
+                                    attachmentsResult.push({
+                                        contentType: message.attachment.contentType,
+                                        url: message.attachment.url,
+                                        raw: message.attachment.raw,
+                                    })
+                                }
+
+                                messages.push({
+                                    // @ts-ignore
+                                    content: Utils.GetHandlebarsMessage(this.client, message.content),
+                                    reactions: [],
+                                    attachments: attachmentsResult,
+                                    embeds: [],
+                                    id: message.id,
+                                    cleanContent: message.content,
+                                    createdAt: message.date,
+                                    createdAtTimestamp: Date.parse(message.date),
+                                    author: {
+                                        id: archivedAccount.id,
+                                        discriminator: archivedAccount.discriminator,
+                                        username: archivedAccount.username,
+                                        flags: archivedAccount.flags,
+                                        avatarData: archivedAccount.avatarData,
+                                    },
+                                })
+                            }
+
+                            messages.sort((a, b) => a.createdAtTimestamp - b.createdAtTimestamp)
+
+                            res.render(`view/UserMessages`, { users: Utils.UsersCache(this.client), channel: channelJson, messages, errorMessage })
+
+                            return
+                        }
+                    })
+                    .catch(LogError)
+
                 return
             }
         }
 
-        res.render(`view/CacheUsers`, { users: Utils.UsersCache(this.client) })
+        res.render(`view/CacheUsers`, { users: Utils.UsersCache(this.client), errorMessage })
     }
 
     RenderPage_ModeratingGuildSearch(req, res, searchError) {
