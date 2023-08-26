@@ -168,9 +168,12 @@ function GetAlertEmbed(alerts) {
         for (const alert of day.alerts.alerts) {
             const typeIcon = {
                 'ts1.gif': '🌩️',
+                'ts2.gif': '🌩️',
                 'ts3.gif': '🌩️',
-                'rainstorm1.gif': '🌊',
+                'rainstorm1.gif': '🌧️',
+                'rainstorm2.gif': '🌊',
                 'hotx1.gif': '🌡️',
+                'hotx2.gif': '🌡️',
             }[alert.typeIcon] ?? alert.typeIcon
                 
             const degreeIcon = {
@@ -179,7 +182,7 @@ function GetAlertEmbed(alerts) {
                 'w3.gif': '3',
             }[alert.degreeIcon] ?? alert.degreeIcon
 
-            stringBuilder += `${typeIcon} ${alert.Name} ${degreeIcon}\n`
+            stringBuilder += `> ${typeIcon} ${alert.Name} ${degreeIcon}\n`
         }
         embed.addFields({
             name: dayName,

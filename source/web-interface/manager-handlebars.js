@@ -1362,7 +1362,7 @@ class WebInterfaceHandlebarsManager {
             const view = req.query.view
 
             if (view == 'default' || view == null || view == undefined) {
-                res.render('default', { title: GetTitle() })
+                res.render('default', { title: 'Stjórnandius' })
             } else {
                 res.status(404).send("Not found")
             }

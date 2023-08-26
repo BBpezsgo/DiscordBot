@@ -19,7 +19,7 @@ class WSC extends EventTarget {
         const self = this
         this.WS.addEventListener('message', function(e) {
             if (!e) { return }
-            console.log('[WS]: Message from server: ' + e.data, e)
+            // console.log('[WS]: Message from server: ' + e.data, e)
             const data = JSON.parse(e.data)
             if (!data.type) { return }
             if (typeof data.type !== 'string') { return }
