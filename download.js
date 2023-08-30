@@ -57,7 +57,7 @@ const CliColor = {
     BgCyan: "\x1b[46m",
     BgWhite: "\x1b[47m",
 
-    FgDefault: '\033[37m'
+    FgDefault: '\x1b[37m'
 }
 
 /**

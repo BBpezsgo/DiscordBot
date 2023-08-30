@@ -6,9 +6,7 @@
   "scripts": {
     "test": "node ./source/tests/test.js",
     "build": "tsc --project tsconfig.json",
-    "desktop": "npm run build && node --enable-source-maps --trace-warnings dist/desktop.js",
-    "mobile": "npm run build && node --enable-source-maps --trace-warnings dist/mobile.js",
-    "start-mobile": "cd source && node mobile.js",
+    "start": "cd source && node --trace-warnings entry.js",
     "check": "depcheck",
     "lint": "eslint ."
   },

@@ -268,32 +268,32 @@ class WebInterfaceManager {
         this.wss.on('listening', () => {
             const wssAddress = this.wss.address()
             if (typeof wssAddress === 'string') {
-                console.log('[WSS]: Listening on ' + wssAddress)
+                console.log('[WebSocketServer]: Listening on ' + wssAddress)
             } else {
-                console.log('[WSS]: Listening on ' + wssAddress.address + ':' + wssAddress.port + ' (' + wssAddress.family + ')')
+                console.log('[WebSocketServer]: Listening on ' + wssAddress.address + ':' + wssAddress.port + ' (' + wssAddress.family + ')')
             }
         })
         this.wss.on('close', () => {
-            console.log('[WSS]: Closed')
+            console.log('[WebSocketServer]: Closed')
         })
         this.wss.on('error', (error) => {
-            console.error('[WSS]: Error ', error)
+            console.error('[WebSocketServer]: Error ', error)
         })
         this.wss.on('connection', req => {
             req.on('message', (data) => {
-                console.log('[WSS]: received: ' + data.toString('utf8'))
+                console.log('[WebSocketServer]: received: ' + data.toString('utf8'))
             })
             req.on('close', (code, reason) => {
-                console.log('[WSS]: Client "' + req.url + '" closed (' + code + ') (' + reason + ')')
+                console.log('[WebSocketServer]: Client "' + req.url + '" closed (' + code + ') (' + reason + ')')
             })
             req.on('error', (error) => {
-                console.error('[WSS]: Client "' + req.url + '" error', error)
+                console.error('[WebSocketServer]: Client "' + req.url + '" error', error)
             })
             req.on('ping', (data) => {
-                console.error('[WSS]: Client "' + req.url + '" ping', data.toString('utf8'))
+                console.error('[WebSocketServer]: Client "' + req.url + '" ping', data.toString('utf8'))
             })
             req.on('pong', (data) => {
-                console.error('[WSS]: Client "' + req.url + '" pong', data.toString('utf8'))
+                console.error('[WebSocketServer]: Client "' + req.url + '" pong', data.toString('utf8'))
             })
         })
 
@@ -321,7 +321,7 @@ class WebInterfaceManager {
         this.wssStatusInterval = setInterval(() => WssBroadcastStatus(this), 500)
 
         this.server.on('error', (err) => {
-            console.error('[WEBSERVER]: Error', err)
+            console.error('[WebServer]: Error', err)
             if (err.message.startsWith('listen EADDRNOTAVAIL: address not available')) {
                 this.statesManager.WebInterface[this.ID].Error = 'Address not available'
             } else {
@@ -372,9 +372,9 @@ class WebInterfaceManager {
         this.server.on('listening', () => {
             const webserverAddress = this.server.address()
             if (typeof webserverAddress === 'string') {
-                console.log('[WEBSERVER]: Listening on ' + webserverAddress)
+                console.log('[WebServer]: Listening on ' + webserverAddress)
             } else {
-                console.log('[WEBSERVER]: Listening on ' + webserverAddress.address + ':' + webserverAddress.port + ' (' + webserverAddress.family + ')')
+                console.log('[WebServer]: Listening on ' + webserverAddress.address + ':' + webserverAddress.port + ' (' + webserverAddress.family + ')')
             }
         })
 

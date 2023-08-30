@@ -13,13 +13,13 @@ class WSC extends EventTarget {
         this.WS = new WebSocket(this.URL)
         
         this.WS.addEventListener('open', function(e) {
-            console.log('[WS]: Open')
+            console.log('[WebSocket]: Open')
         })
         
         const self = this
         this.WS.addEventListener('message', function(e) {
             if (!e) { return }
-            // console.log('[WS]: Message from server: ' + e.data, e)
+            // console.log('[WebSocket]: Message from server: ' + e.data, e)
             const data = JSON.parse(e.data)
             if (!data.type) { return }
             if (typeof data.type !== 'string') { return }
@@ -27,11 +27,11 @@ class WSC extends EventTarget {
         })
         
         this.WS.addEventListener('error', function(e) {
-            console.error('[WS]: Error', e)
+            console.error('[WebSocket]: Error', e)
         })
         
         this.WS.addEventListener('close', function(e) {
-            console.log('[WS]: Closed', e)
+            console.log('[WebSocket]: Closed', e)
         })
     }
 }

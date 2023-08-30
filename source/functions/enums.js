@@ -6,7 +6,7 @@ const ChannelId = {
     ProcessedNews: "746266528508411935"
 }
 
-const fontColor = '\033[37m'
+const fontColor = '\x1b[37m'
 
 const CliColor = {
     FgBlack: "\x1b[30m",

@@ -1,5 +1,3 @@
-Error.stackTraceLimit = 128
-
 const Discord = require('discord.js')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
@@ -44,9 +42,6 @@ const { calculateAddXp } = require('./economy/xpFunctions')
 module.exports = class DiscordBot {
     /**
      * @param {'DESKTOP' | 'MOBILE'} platform
-     * @param {StatesManager} statesManager
-     * @param {LogManager} logManager
-     * @param {DatabaseManager | null} database
      */
     constructor(platform) {
         try {
@@ -155,13 +150,8 @@ module.exports = class DiscordBot {
         this.Client.on('shardReady', (shardID) => {
             const mainGuild = this.Client.guilds.cache.get('737954264386764812')
             const quizChannel = mainGuild.channels.cache.get('799340273431478303')
-            if (quizChannel) {
+            if (quizChannel && quizChannel.isTextBased()) {
                 quizChannel.messages.fetch()
-            } else {
-                this.Client.channels.fetch('799340273431478303')
-                    .then((channel) => {
-                        channel.messages.fetch()
-                    })
             }
             this.StatesManager.Shard.IsLoading = false
         })
@@ -255,7 +245,7 @@ module.exports = class DiscordBot {
             channelsWithSettings.forEach(channelWithSettings => {
                 this.Client.channels.fetch(channelWithSettings)
                     .then((chn) => {
-                        chn.messages.fetch({ limit: 10 })
+                        if (chn.isTextBased()) chn.messages.fetch({ limit: 10 })
                             .then(async (messages) => {
                                 messages.forEach(message => {
                                     AutoReact(message)
@@ -276,10 +266,10 @@ module.exports = class DiscordBot {
     async OnInteraction(interaction) {
         ImageCache.DownloadEverything(this.Client)
 
-        if (interaction.member === undefined)
-        { this.Database.SaveUserToMemoryAll(interaction.user, interaction.user.username) }
-        else
+        if (interaction.member)
         { this.Database.SaveUserToMemoryAll(interaction.user, interaction.member.displayName) }
+        else
+        { this.Database.SaveUserToMemoryAll(interaction.user, interaction.user.username) }
     
         const privateCommand = this.Database.dataBasic[interaction.user.id].privateCommands
         if (interaction.isMessageContextMenuCommand()) {

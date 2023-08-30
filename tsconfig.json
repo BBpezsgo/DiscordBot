@@ -14,7 +14,9 @@
         "emitDecoratorMetadata": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "allowJs": true
+        "allowJs": true,
+        "checkJs": true,
+        "resolveJsonModule": true
     },
     "include": [ "source", "source/config.json" ],
     "exclude": [ "dist", "node_modules" ]
