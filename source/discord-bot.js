@@ -266,7 +266,7 @@ module.exports = class DiscordBot {
     async OnInteraction(interaction) {
         ImageCache.DownloadEverything(this.Client)
 
-        if (interaction.member)
+        if (interaction.member && interaction.member instanceof Discord.GuildMember)
         { this.Database.SaveUserToMemoryAll(interaction.user, interaction.member.displayName) }
         else
         { this.Database.SaveUserToMemoryAll(interaction.user, interaction.user.username) }
@@ -339,71 +339,80 @@ module.exports = class DiscordBot {
                 var newColorRoleId = ''
     
                 try {
+                    const memberRoles = interaction.member.roles
+                    if (Array.isArray(memberRoles)) {
+                        interaction.channel.send({ content: '> \\❗ **Error: Bruh**' })
+                        return
+                    }
+                    if (!(interaction.member instanceof Discord.GuildMember)) {
+                        interaction.channel.send({ content: '> \\❗ **Error: Bruh**' })
+                        return
+                    }
                     if (selectedIndex == 'szavazas') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.szavazas) == true) {
-                            await interaction.member.roles.remove(roles.szavazas)
+                        if (memberRoles.cache.some(role => role.id === roles.szavazas) == true) {
+                            await memberRoles.remove(roles.szavazas)
                         } else {
-                            await interaction.member.roles.add(roles.szavazas)
+                            await memberRoles.add(roles.szavazas)
                         }
                     } else if (selectedIndex == 'quiz') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.quiz) == true) {
-                            await interaction.member.roles.remove(roles.quiz)
+                        if (memberRoles.cache.some(role => role.id === roles.quiz) == true) {
+                            await memberRoles.remove(roles.quiz)
                         } else {
-                            await interaction.member.roles.add(roles.quiz)
+                            await memberRoles.add(roles.quiz)
                         }
                     } else if (selectedIndex == 'crossoutBejelentes') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.crossoutBejelentes) == true) {
-                            await interaction.member.roles.remove(roles.crossoutBejelentes)
+                        if (memberRoles.cache.some(role => role.id === roles.crossoutBejelentes) == true) {
+                            await memberRoles.remove(roles.crossoutBejelentes)
                         } else {
-                            await interaction.member.roles.add(roles.crossoutBejelentes)
+                            await memberRoles.add(roles.crossoutBejelentes)
                         }
                     } else if (selectedIndex == 'crossoutBejelentesPC') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.crossoutBejelentesPC) == true) {
-                            await interaction.member.roles.remove(roles.crossoutBejelentesPC)
+                        if (memberRoles.cache.some(role => role.id === roles.crossoutBejelentesPC) == true) {
+                            await memberRoles.remove(roles.crossoutBejelentesPC)
                         } else {
-                            await interaction.member.roles.add(roles.crossoutBejelentesPC)
+                            await memberRoles.add(roles.crossoutBejelentesPC)
                         }
                     } else if (selectedIndex == 'crossoutBejelentesKonzol') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.crossoutBejelentesKonzol) == true) {
-                            await interaction.member.roles.remove(roles.crossoutBejelentesKonzol)
+                        if (memberRoles.cache.some(role => role.id === roles.crossoutBejelentesKonzol) == true) {
+                            await memberRoles.remove(roles.crossoutBejelentesKonzol)
                         } else {
-                            await interaction.member.roles.add(roles.crossoutBejelentesKonzol)
+                            await memberRoles.add(roles.crossoutBejelentesKonzol)
                         }
                     } else if (selectedIndex == 'crossoutEgyeb') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.crossoutEgyeb) == true) {
-                            await interaction.member.roles.remove(roles.crossoutEgyeb)
+                        if (memberRoles.cache.some(role => role.id === roles.crossoutEgyeb) == true) {
+                            await memberRoles.remove(roles.crossoutEgyeb)
                         } else {
-                            await interaction.member.roles.add(roles.crossoutEgyeb)
+                            await memberRoles.add(roles.crossoutEgyeb)
                         }
                     } else if (selectedIndex == 'ingyenesJatek') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.ingyenesJatek) == true) {
-                            await interaction.member.roles.remove(roles.ingyenesJatek)
+                        if (memberRoles.cache.some(role => role.id === roles.ingyenesJatek) == true) {
+                            await memberRoles.remove(roles.ingyenesJatek)
                         } else {
-                            await interaction.member.roles.add(roles.ingyenesJatek)
+                            await memberRoles.add(roles.ingyenesJatek)
                         }
                     } else if (selectedIndex == 'warzone') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.warzone) == true) {
-                            await interaction.member.roles.remove(roles.warzone)
+                        if (memberRoles.cache.some(role => role.id === roles.warzone) == true) {
+                            await memberRoles.remove(roles.warzone)
                         } else {
-                            await interaction.member.roles.add(roles.warzone)
+                            await memberRoles.add(roles.warzone)
                         }
                     } else if (selectedIndex == 'minecraft') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.minecraft) == true) {
-                            await interaction.member.roles.remove(roles.minecraft)
+                        if (memberRoles.cache.some(role => role.id === roles.minecraft) == true) {
+                            await memberRoles.remove(roles.minecraft)
                         } else {
-                            await interaction.member.roles.add(roles.minecraft)
+                            await memberRoles.add(roles.minecraft)
                         }
                     } else if (selectedIndex == 'napiIdojaras') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.napiIdojaras) == true) {
-                            await interaction.member.roles.remove(roles.napiIdojaras)
+                        if (memberRoles.cache.some(role => role.id === roles.napiIdojaras) == true) {
+                            await memberRoles.remove(roles.napiIdojaras)
                         } else {
-                            await interaction.member.roles.add(roles.napiIdojaras)
+                            await memberRoles.add(roles.napiIdojaras)
                         }
                     } else if (selectedIndex == 'electricityReport') {
-                        if (interaction.member.roles.cache.some(role => role.id === roles.electricityReport) == true) {
-                            await interaction.member.roles.remove(roles.electricityReport)
+                        if (memberRoles.cache.some(role => role.id === roles.electricityReport) == true) {
+                            await memberRoles.remove(roles.electricityReport)
                         } else {
-                            await interaction.member.roles.add(roles.electricityReport)
+                            await memberRoles.add(roles.electricityReport)
                         }
                     } else if (selectedIndex == 'privateCommands') {
                         if (privateCommand == true) {
@@ -414,9 +423,7 @@ module.exports = class DiscordBot {
                         this.Database.SaveDatabase()
                     }
                     await interaction.member.fetch()
-                    setTimeout(() => {
-                        interaction.update(CommandSettings(this.Database, interaction.member, privateCommand))
-                    }, 1500)
+                    await interaction.update(CommandSettings(this.Database, interaction.member, privateCommand))
                 } catch (error) {
                     interaction.channel.send({ content: '> \\❗ **Error: ' + error + '**' })
                 }
@@ -536,6 +543,7 @@ module.exports = class DiscordBot {
     async OnCommand(command, privateCommand) {
         const isDm = command.guild == null
     
+        /*
         if (command.commandName == `test`) {
             const modal = new ModalBuilder()
                 .setCustomId('myModal')
@@ -569,16 +577,17 @@ module.exports = class DiscordBot {
     
             return;
         }
+        */
     
         if (command.commandName === `handlebars` || command.commandName === `webpage`) {
             const { GetHash } = require('./economy/userHashManager')
-            const row = new ActionRowBuilder()
             const button = new ButtonBuilder()
                 .setLabel('Weboldal')
                 .setStyle(Discord.ButtonStyle.Link)
                 .setURL('http://bbpezsgo.ddns.net:5665/public?user=' + GetHash(command.user.id))
-            row.addComponents(button)
-            command.reply({ components: [row], ephemeral: true })
+            const row = new ActionRowBuilder()
+                .addComponents(button)
+                await command.reply({ components: [ row ], ephemeral: true })
             return
         }
     
@@ -595,15 +604,14 @@ module.exports = class DiscordBot {
     
         if (command.commandName === `tesco`) {
             const CommandTesco = require('./commands/tesco')
-            CommandTesco(command)
+            await CommandTesco(command)
             return
         }
     
         if (command.commandName === `crossout`) {
             const Crossout = require('./commands/crossout')
-            command.deferReply({ ephemeral: privateCommand }).then(() => {
-                Crossout.GetItem(command, command.options.getString('search'), privateCommand)
-            })
+            await command.deferReply({ ephemeral: privateCommand })
+            Crossout.GetItem(command, command.options.getString('search'), privateCommand)
             return
         }
     
@@ -666,7 +674,7 @@ module.exports = class DiscordBot {
                     '> Mód: ' + this.Client.shard.mode
                 }])
             }
-            command.reply({ embeds: [embed], ephemeral: privateCommand })
+            await command.reply({ embeds: [embed], ephemeral: privateCommand })
             this.Database.UserstatsSendCommand(command.user)
             return
         }
@@ -675,11 +683,11 @@ module.exports = class DiscordBot {
             const CommandWeather = require('./commands/weather')
             const weatherLocation = command.options.getString('location', false)
             if (weatherLocation == 'mars') {
-                CommandWeather(command, privateCommand, false)
+                await CommandWeather(command, privateCommand, false)
             } else if (weatherLocation == 'earth' || weatherLocation == null) {            
-                CommandWeather(command, privateCommand)
+                await CommandWeather(command, privateCommand)
             } else {
-                command.reply({ content: '> \\❌ **Nem tudok ilyen helyről <:wojakNoBrain:985043138471149588>**' })
+                await command.reply({ content: '> \\❌ **Nem tudok ilyen helyről <:wojakNoBrain:985043138471149588>**' })
             }
             this.Database.UserstatsSendCommand(command.user)
             return
@@ -697,41 +705,41 @@ module.exports = class DiscordBot {
                         '>  \\📊  `.poll wyr`'
                     }])
                     .setColor(Color.Highlight)
-                command.reply({ embeds: [embed], ephemeral: true })
+                    await command.reply({ embeds: [embed], ephemeral: true })
             } else {
-                command.reply({ content: '> \\⛔ **Nincs jogosultságod a parancs használatához!**', ephemeral: true })
+                await command.reply({ content: '> \\⛔ **Nincs jogosultságod a parancs használatához!**', ephemeral: true })
             }
             return
         }
     
         if (command.commandName === `help`) {
             const CommandHelp = require('./commands/help')
-            command.reply({ embeds: [CommandHelp(isDm)], ephemeral: privateCommand })
+            await command.reply({ embeds: [CommandHelp(isDm)], ephemeral: privateCommand })
             this.Database.UserstatsSendCommand(command.user)
             return
         }
     
         if (command.commandName === `crate`) {
-            command.reply(CommandOpenCrate.On(command.member.id, command.options.getInteger("darab"), this.Database))
+            await command.reply(CommandOpenCrate.On(command.member.id, command.options.getInteger("darab"), this.Database))
             this.Database.UserstatsSendCommand(command.user)
             return
         }
     
         if (command.commandName === `heti`) {
-            command.reply(CommandOpenDailyCrate.On(command.user.id, command.options.getInteger("darab"), this.Database, economy))
+            await command.reply(CommandOpenDailyCrate.On(command.user.id, command.options.getInteger("darab"), this.Database, economy))
             this.Database.UserstatsSendCommand(command.user)
             return
         }
     
         if (command.commandName === `napi`) {
-            command.reply(CommandOpenDailyCrate.On(command.user.id, command.options.getInteger("darab"), this.Database, economy))
+            await command.reply(CommandOpenDailyCrate.On(command.user.id, command.options.getInteger("darab"), this.Database, economy))
             this.Database.UserstatsSendCommand(command.user)
             return
         }
     
         if (command.commandName === `profil` || command.commandName === `profile`) {
             const CommandProfil = require('./economy/profil')
-            CommandProfil(this.Database, command, privateCommand)
+            await CommandProfil(this.Database, command, privateCommand)
             this.Database.UserstatsSendCommand(command.user)
             return
         }
@@ -743,7 +751,7 @@ module.exports = class DiscordBot {
         }
     
         if (command.commandName === `bolt` || command.commandName === `shop`) {
-            command.reply(CommandShop.CommandShop(command.channel, command.user, command.member, this.Database, 0, '', privateCommand))
+            await command.reply(CommandShop.CommandShop(command.channel, command.user, command.member, this.Database, 0, '', privateCommand))
             this.Database.UserstatsSendCommand(command.user)
             return
         }
@@ -787,11 +795,11 @@ module.exports = class DiscordBot {
         if (command.commandName === `music`) {
             if (isDm == false) {
                 if (command.options.getSubcommand() == 'play') {
-                    this.MusicPlayer.CommandMusic(command, command.options.getString('url'))
+                    await this.MusicPlayer.CommandMusic(command, command.options.getString('url'))
                 } else if (command.options.getSubcommand() == `skip`) {
-                    this.MusicPlayer.CommandSkip(command)
+                    await this.MusicPlayer.CommandSkip(command)
                 } else if (command.options.getSubcommand() == `list`) {
-                    this.MusicPlayer.CommandMusicList(command)
+                    await this.MusicPlayer.CommandMusicList(command)
                 }
             } else {
                 command.reply("> \\❌ **Ez a parancs csak szerveren használható!**")
@@ -802,15 +810,14 @@ module.exports = class DiscordBot {
     
         if (command.commandName === `settings` || command.commandName === `preferences`) {
             await command.deferReply()
-            /** @type {Discord.GuildMember} */
             const member = await command.member.fetch()
             await member.guild.fetch()
-            command.editReply(CommandSettings(this.Database, command.member, privateCommand))
+            await command.editReply(CommandSettings(this.Database, command.member, privateCommand))
             this.Database.UserstatsSendCommand(command.user)
             return
         }
     
-        command.reply("> \\❌ **Ismeretlen parancs `" + command.commandName + "`! **`/help`** a parancsok listájához!**")
+        await command.reply("> \\❌ **Ismeretlen parancs `" + command.commandName + "`! **`/help`** a parancsok listájához!**")
     }
 
     /**

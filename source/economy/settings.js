@@ -31,6 +31,7 @@ function BoolToIcon(bool) {
  * @param {DatabaseManager} database
  * @param {Discord.GuildMember} member
  * @param {boolean} privateCommand
+ * @returns {Discord.BaseMessageOptions}
 */
 module.exports = (database, member, privateCommand) => {
     const userRoles = member.roles.cache
@@ -70,7 +71,7 @@ module.exports = (database, member, privateCommand) => {
         .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/322/gear_2699-fe0f.png')
         .setFooter({ text: 'Válaszd ki az egyik opciót, hogy megváltoztasd a beállítást (bekapcs => kikapcs, és vissza)'})
     const row = new Discord.ActionRowBuilder()
-    const contextMenu = new Discord.SelectMenuBuilder()
+    const contextMenu = new Discord.StringSelectMenuBuilder()
         .setCustomId('userSettings')
         .setPlaceholder('Beállítások')
         .addOptions([
@@ -137,5 +138,5 @@ module.exports = (database, member, privateCommand) => {
             },
         ])
         row.addComponents(contextMenu)
-    return { components: [row], embeds: [embed], ephemeral: privateCommand }
+    return { components: [ row ], embeds: [embed], ephemeral: privateCommand }
 }

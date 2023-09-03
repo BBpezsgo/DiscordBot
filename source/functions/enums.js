@@ -78,14 +78,14 @@ const ColorRoles = {
 
 /** @type {import('discord.js').ActivityOptions[]} */
 const activitiesDesktop = [
-    { name: 'Nothing 2', type: ActivityType.Playing },
-    { name: 'Visual Studio', type: ActivityType.Playing },
-    { name: 'Unity', type: ActivityType.Playing },
+    { name: 'Bruh', type: ActivityType.Custom, state: 'Bruh' },
+    // { name: 'Visual Studio', type: ActivityType.Playing },
+    // { name: 'Unity', type: ActivityType.Playing },
 ]
 
 /** @type {import('discord.js').ActivityOptions[]} */
 const activitiesMobile = [
-    { name: 'Photon PUN documentation', type: ActivityType.Watching, browser: "DISCORD IOS" },
+    { name: 'Photon PUN documentation', type: ActivityType.Watching, b: "DISCORD IOS" },
     { name: 'Discord Guide', type: ActivityType.Watching, browser: "DISCORD IOS" },
     { name: 'Node.js documentation', type: ActivityType.Watching, browser: "DISCORD IOS" },
     { name: 'Unity tutorials', type: ActivityType.Watching, browser: "DISCORD IOS" },
