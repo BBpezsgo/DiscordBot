@@ -55,8 +55,6 @@ const CountyDays = {
     'FourthDay': 'weex',
 }
 
-const FsSettings = {encoding:'utf-8'}
-
 const CountyIDs = {
     'Baranya': 2,
     'BacsKiskun': 3,
@@ -185,20 +183,20 @@ async function CreateSnapshotAsync() {
     const Func0 = async function(page) {
         try {
             const data = await DownloadAsync(UrlPaths.Warnings.Main + page)
-            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '.html'), data, FsSettings)
-            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '.json'), JSON.stringify(ProcessData(data), undefined, ' '), FsSettings)    
+            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '.html'), data, 'utf8')
+            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '.json'), JSON.stringify(ProcessData(data), undefined, ' '), 'utf8')    
         } catch (error) {
-            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '-error.json'), JSON.stringify(error, undefined, ' '), FsSettings)    
+            fs.writeFileSync(Path.join(basePath, snapshot + 'page-' + page + '-error.json'), JSON.stringify(error, undefined, ' '), 'utf8')    
         }
     }
     
     const Func1 = async function(countyID) {
         try {
             const data = await DownloadAsync(UrlPaths.Warnings.County + 'id=' + CountyDays.Today + '&kod=' + countyID)
-            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '.html'), data, FsSettings)
-            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '.json'), JSON.stringify(ProcessCountyData(data), undefined, ' '), FsSettings)    
+            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '.html'), data, 'utf8')
+            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '.json'), JSON.stringify(ProcessCountyData(data), undefined, ' '), 'utf8')    
         } catch (error) {
-            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '-error.json'), JSON.stringify(error, undefined, ' '), FsSettings)    
+            fs.writeFileSync(Path.join(basePath, snapshot + 'county-' + countyID + '-error.json'), JSON.stringify(error, undefined, ' '), 'utf8')    
         }
     }
 
@@ -303,4 +301,124 @@ async function GetSnowReport(forceDownload = false) {
     return data
 }
 
-module.exports = { CountyIDs, Pages, CountyDays, GetMainAlerts, GetCountyAlerts, GetMainWeather, GetSnowReport }
+const Descriptions = {
+    'ts1.gif': {
+        icon: '',
+        description: 'Figyelem! Zivatar alakulhat ki. Elsődleges veszélyforrást a villámlás jelent, emellett esetenként szélerősödés, jégeső előfordulhat!',
+    },
+    'ts2.gif': {
+        icon: '',
+        description: 'Veszély! Hevesebb zivatarok kialakulására lehet számítani. A villámlások mellett kockázatot jelent a zivatarokat kísérő szél, jégeső is!',
+    },
+    'ts3.gif': {
+        icon: '',
+        description: 'Fokozott veszély! Heves zivatarok várhatók! A zivatarokat kísérő szél, jégeső is jelentős kockázatot jelent!',
+    },
+    'rainstorm1.gif': {
+        icon: '',
+        description: 'Intenzív záporból, zivatarból rövid idő alatt 25-30 mm-t meghaladó csapadék hullhat.',
+    },
+    'rainstorm2.gif': {
+        icon: '',
+        description: 'Intenzív záporból, zivatarból rövid idő alatt 50 mm-t meghaladó csapadék hullhat.',
+    },
+    'wind1.gif': {
+        icon: '',
+        description: 'A várt legerősebb széllökések meghaladhatják a 70 km/h-t.',
+    },
+    'wind2.gif': {
+        icon: '',
+        description: 'A várt legerősebb széllökések meghaladhatják a 90 km/h-t.',
+    },
+    'wind3.gif': {
+        icon: '',
+        description: 'A várt legerősebb széllökések meghaladhatják a 110 km/h-t.',
+    },
+    'fzra1.gif': {
+        icon: '',
+        description: 'Gyenge ónos eső. A várt csapadékmennyiség általában néhány tized (> 0,1) mm.',
+    },
+    'fzra2.gif': {
+        icon: '',
+        description: 'Tartós (több órás) ónos eső. A várt csapadékmennyiség meghaladhatja az 1 mm-t.',
+    },
+    'fzra3.gif': {
+        icon: '',
+        description: 'Tartós (több órás) ónos eső. A várt csapadékmennyiség meghaladhatja az 5 mm-t.',
+    },
+    'snowdrift1.gif': {
+        icon: '',
+        description: 'Gyenge hófúvás. A friss hóval fedett területeken a szél alacsony hótorlaszokat emelhet.',
+    },
+    'snowdrift2.gif': {
+        icon: '',
+        description: 'Hófúvás. A friss hóval fedett területeken a viharos szél magas hótorlaszokat emelhet.',
+    },
+    'snowdrift3.gif': {
+        icon: '',
+        description: 'Erős hófúvás. A friss hóval fedett területeken a viharos szél több helyen jelentős hóakadályokat emel.',
+    },
+    'rain1.gif': {
+        icon: '',
+        description: '24 óra alatt több mint 20 mm csapadék hullhat.',
+    },
+    'rain2.gif': {
+        icon: '',
+        description: '24 óra alatt több mint 30 mm csapadék hullhat.',
+    },
+    'rain3.gif': {
+        icon: '',
+        description: '24 óra alatt több mint 50 mm csapadék hullhat.',
+    },
+    'snow1.gif': {
+        icon: '',
+        description: '12 óra alatt 5 cm-t meghaladó friss hó hullhat.',
+    },
+    'snow2.gif': {
+        icon: '',
+        description: '24 óra alatt 20 cm-t meghaladó friss hó hullhat.',
+    },
+    'snow3.gif': {
+        icon: '',
+        description: '24 óra alatt 30 cm-t meghaladó friss hó hullhat.',
+    },
+    'coldx1.gif': {
+        icon: '',
+        description: 'A hőmérséklet -15 °C alá csökkenhet.',
+    },
+    'coldx2.gif': {
+        icon: '',
+        description: 'A hőmérséklet -20 °C alá csökkenhet.',
+    },
+    'coldx3.gif': {
+        icon: '',
+        description: 'A hőmérséklet -25 °C alá csökkenhet.',
+    },
+    'hotx1.gif': {
+        icon: '',
+        description: 'A napi középhőmérséklet 25 °C felett alakulhat.',
+    },
+    'hotx2.gif': {
+        icon: '',
+        description: 'A napi középhőmérséklet 27 °C felett alakulhat.',
+    },
+    'hotx3.gif': {
+        icon: '',
+        description: 'A napi középhőmérséklet 29 °C felett alakulhat.',
+    },
+    'fog1.gif': {
+        icon: '',
+        description: 'Tartós (> 6 óra) sűrű köd (látástávolság pár száz méter) várható.',
+    },
+}
+
+module.exports = {
+    CountyIDs,
+    Pages,
+    CountyDays,
+    GetMainAlerts,
+    GetCountyAlerts,
+    GetMainWeather,
+    GetSnowReport,
+    Descriptions,
+}

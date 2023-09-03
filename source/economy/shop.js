@@ -2,7 +2,7 @@ const Discord = require('discord.js')
 const fs = require('fs')
 const { ActionRowBuilder, ButtonBuilder, SelectMenuBuilder } = require('discord.js');
 const { DatabaseManager } = require('../functions/databaseManager')
-const { abbrev } = require('../functions/abbrev')
+const { Abbrev } = require('../functions/utils')
 
 const ColorRoles = {
 	red: "850016210422464534",
@@ -31,7 +31,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
             .addFields([
                 {
                     name: '\\💵 Egyenleged:',
-                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    value: '**' + Abbrev(databaseManager.dataBasic[sender.id].money) + '**',
                     inline: true
                 },
                 {
@@ -54,7 +54,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
             .addFields([
                 {
                     name: '\\💵 Egyenleged:',
-                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    value: '**' + Abbrev(databaseManager.dataBasic[sender.id].money) + '**',
                     inline: true
                 },
                 {
@@ -78,7 +78,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
             .addFields([
                 {
                     name: '\\💵 Egyenleged:',
-                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    value: '**' + Abbrev(databaseManager.dataBasic[sender.id].money) + '**',
                     inline: true
                 },
                 {
@@ -101,7 +101,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
             .addFields([
                 {
                     name: '\\💵 Egyenleged:',
-                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    value: '**' + Abbrev(databaseManager.dataBasic[sender.id].money) + '**',
                     inline: true
                 },
                 {
@@ -149,7 +149,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
             .addFields([
                 {
                     name: '\\💵 Egyenleged:',
-                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    value: '**' + Abbrev(databaseManager.dataBasic[sender.id].money) + '**',
                     inline: true
                 },
                 {
@@ -180,7 +180,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
             .addFields([
                 {
                     name: '\\💵 Egyenleged:',
-                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    value: '**' + Abbrev(databaseManager.dataBasic[sender.id].money) + '**',
                     inline: true
                 },
                 {
@@ -210,7 +210,7 @@ function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
             .addFields([
                 {
                     name: '\\💵 Egyenleged:',
-                    value: '**' + abbrev(databaseManager.dataBasic[sender.id].money) + '**',
+                    value: '**' + Abbrev(databaseManager.dataBasic[sender.id].money) + '**',
                     inline: true
                 },
                 {
@@ -296,7 +296,7 @@ async function removeAllColorRoles(member, exceptRoleId) {
         const role = roleList[i]
         if (role == exceptRoleId) { continue; }
         if (member == undefined || member == null) { break; }
-        if (member.roles.cache.some(role => role.id == role)) {
+        if (member.roles.cache.some(_role => _role.id == role)) {
             member.roles.remove(member.guild.roles.cache.get(role))
         }
     }
@@ -659,10 +659,10 @@ function OnSelectMenu(e, database) {
     }
 
     if (e.customId == 'shopBackpackColors') {
-        const selectedIndex = e.values[0]
+        const selectedIndex = Number.parseInt(e.values[0])
         const money = database.dataBasic[e.user.id].money
 
-        if (selectedIndex == 0) {
+        if (selectedIndex === 0) {
             if (money >= 3299) {
                 database.dataBasic[e.user.id].money -= 3299
                 database.dataBasic[e.user.id].color = '#fffff9'
@@ -671,7 +671,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 1) {
+        } else if (selectedIndex === 1) {
             if (money >= 99) {
                 database.dataBasic[e.user.id].money -= 99
                 database.dataBasic[e.user.id].color = '#000000'
@@ -680,7 +680,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 2) {
+        } else if (selectedIndex === 2) {
             if (money >= 2999) {
                 database.dataBasic[e.user.id].money -= 2999
                 database.dataBasic[e.user.id].color = 'brown'
@@ -689,7 +689,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 3) {
+        } else if (selectedIndex === 3) {
             if (money >= 1499) {
                 database.dataBasic[e.user.id].money -= 1499
                 database.dataBasic[e.user.id].color = 'red'
@@ -698,7 +698,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 4) {
+        } else if (selectedIndex === 4) {
             if (money >= 2499) {
                 database.dataBasic[e.user.id].money -= 2499
                 database.dataBasic[e.user.id].color = 'orange'
@@ -707,7 +707,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 5) {
+        } else if (selectedIndex === 5) {
             if (money >= 1499) {
                 database.dataBasic[e.user.id].money -= 1499
                 database.dataBasic[e.user.id].color = 'yellow'
@@ -716,7 +716,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 6) {
+        } else if (selectedIndex === 6) {
             if (money >= 2499) {
                 database.dataBasic[e.user.id].money -= 2499
                 database.dataBasic[e.user.id].color = 'green'
@@ -725,7 +725,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 7) {
+        } else if (selectedIndex === 7) {
             if (money >= 1499) {
                 database.dataBasic[e.user.id].money -= 1499
                 database.dataBasic[e.user.id].color = 'blue'
@@ -734,7 +734,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 8) {
+        } else if (selectedIndex === 8) {
             if (money >= 2499) {
                 database.dataBasic[e.user.id].money -= 2499
                 database.dataBasic[e.user.id].color = 'purple'
@@ -750,14 +750,14 @@ function OnSelectMenu(e, database) {
     }
 
     if (e.customId == 'shopNameColors') {
-        const { ColorRoles } = require('../../functions/enums.js')
+        const { ColorRoles } = require('../functions/enums.js')
 
-        const selectedIndex = e.values[0]
+        const selectedIndex = Number.parseInt(e.values[0])
         const money = database.dataBasic[e.user.id].money
 
         var newColorRoleId = ''
 
-        if (selectedIndex == 0) {
+        if (selectedIndex === 0) {
             if (money >= 9) {
                 database.dataBasic[e.user.id].money -= 9
                 removeAllColorRoles(e.member, '')
@@ -765,7 +765,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 1) {
+        } else if (selectedIndex === 1) {
             if (money >= 2999) {
                 removeAllColorRoles(e.member, ColorRoles.red)
                 try {
@@ -776,7 +776,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 2) {
+        } else if (selectedIndex === 2) {
             if (money >= 3499) {
                 removeAllColorRoles(e.member, ColorRoles.orange)
                 try {
@@ -787,7 +787,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 3) {
+        } else if (selectedIndex === 3) {
             if (money >= 2999) {
                 removeAllColorRoles(e.member, ColorRoles.yellow)
                 try {
@@ -798,7 +798,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 4) {
+        } else if (selectedIndex === 4) {
             if (money >= 3499) {
                 removeAllColorRoles(e.member, ColorRoles.green)
                 try {
@@ -809,7 +809,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 5) {
+        } else if (selectedIndex === 5) {
             if (money >= 2999) {
                 removeAllColorRoles(e.member, ColorRoles.blue)
                 try {
@@ -820,7 +820,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 6) {
+        } else if (selectedIndex === 6) {
             if (money >= 3499) {
                 removeAllColorRoles(e.member, ColorRoles.purple)
                 try {
@@ -831,7 +831,7 @@ function OnSelectMenu(e, database) {
             } else {
                 e.reply({ content: '> \\❌ **Nincs elég pénzed!**', ephemeral: true })
             }
-        } else if (selectedIndex == 7) {
+        } else if (selectedIndex === 7) {
             if (money >= 3999) {
                 removeAllColorRoles(e.member, ColorRoles.invisible)
                 try {

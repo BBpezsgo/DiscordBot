@@ -1,7 +1,7 @@
 const Discord = require('discord.js')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const GetUserColor = require('./userColor')
-const { abbrev } = require('../functions/abbrev')
+const { Abbrev } = require('../functions/utils.js')
 
 const awardRoles = [
     '929443006627586078',
@@ -44,12 +44,12 @@ module.exports = async (database, command, privateCommand) => {
             {
                 name: 'Statisztika',
                 value:
-                    '> \\🎼 Zenék: ' + abbrev(database.dataUserstats[command.member.id].memes) + '\n' +
-                    '> \\🎭 Vicces dolgok: ' + abbrev(database.dataUserstats[command.member.id].musics) + '\n' +
-                    '> \\🎬 YouTube linkek: ' + abbrev(database.dataUserstats[command.member.id].youtubevideos) + '\n' +
-                    '> \\📋 Üzenetek: ' + abbrev(database.dataUserstats[command.member.id].messages) + '\n' +
-                    '> \\🖥️ Parancsok:' + abbrev(database.dataUserstats[command.member.id].commands) + '\n' +
-                    '> \\👁‍🗨 Összes karakter: ' + abbrev(database.dataUserstats[command.member.id].chars)
+                    '> \\🎼 Zenék: ' + Abbrev(database.dataUserstats[command.member.id].memes) + '\n' +
+                    '> \\🎭 Vicces dolgok: ' + Abbrev(database.dataUserstats[command.member.id].musics) + '\n' +
+                    '> \\🎬 YouTube linkek: ' + Abbrev(database.dataUserstats[command.member.id].youtubevideos) + '\n' +
+                    '> \\📋 Üzenetek: ' + Abbrev(database.dataUserstats[command.member.id].messages) + '\n' +
+                    '> \\🖥️ Parancsok:' + Abbrev(database.dataUserstats[command.member.id].commands) + '\n' +
+                    '> \\👁‍🗨 Összes karakter: ' + Abbrev(database.dataUserstats[command.member.id].chars)
             }
         ])
 

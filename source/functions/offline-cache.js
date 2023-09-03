@@ -117,7 +117,7 @@ function GetMembers(client, guildID) {
     /**
       @type {{
         id: string
-        nickname: nickname
+        nickname: string
       }[]} */
     const members = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, `./cache/members-${guildID}.json`), { encoding: 'utf-8' }))
     return members
@@ -135,7 +135,7 @@ function SaveMembers(client, guild) {
     /**
       @type {{
         id: string
-        nickname: nickname
+        nickname: string
       }[]} */
     const members = []
     guild.members.cache.forEach(member => {
@@ -147,7 +147,7 @@ function SaveMembers(client, guild) {
     /**
       @type {{
         id: string
-        nickname: nickname
+        nickname: string
       }[]} */
     const membersSaved = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, `./cache/members-${guild.id}.json`), { encoding: 'utf-8' }))
 

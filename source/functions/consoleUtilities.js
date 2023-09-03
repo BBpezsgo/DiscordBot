@@ -15,7 +15,7 @@ function Get(s) {
     key.y = s.charCodeAt(5) - 32
     key.button = null
     key.sequence = s
-    key.buf = Buffer(key.sequence)
+    key.buf = new Buffer(key.sequence)
     if ((modifier & 96) === 96) {
         key.name = 'scroll'
         key.button = modifier & 1 ? 'down' : 'up'
@@ -32,7 +32,7 @@ function Get(s) {
     return key
 }
 
-/** @param {string} s */
+/** @param {string} raw */
 function IsMouse(raw) {
     return /^\u001b\[M/.test(raw)
 }

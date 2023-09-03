@@ -117,7 +117,7 @@ async function Messages() {
 
     const folders = GetFolders(Path.join(ARCHIVE_PATH, 'messages'))
     for (const channelId of folders) {
-        const channel = JSON.parse(fs.readFileSync(Path.join(ARCHIVE_PATH, 'messages', channelId, 'channel.json')))
+        const channel = JSON.parse(fs.readFileSync(Path.join(ARCHIVE_PATH, 'messages', channelId, 'channel.json'), 'utf8'))
         
         /** @type {Types.ArchivedMessage[]} */
         let messages = []

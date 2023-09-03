@@ -2,7 +2,7 @@ const Discord = require('discord.js')
 const fs = require('fs');
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./xpFunctions')
 const GetUserColor = require('../economy/userColor')
-const { abbrev } = require('../functions/abbrev')
+const { Abbrev } = require('../functions/utils')
 const { DatabaseManager } = require('../functions/databaseManager')
 
 let coloredProgressBarPart = '⬜'
@@ -58,7 +58,7 @@ async function execute(command, database, privateCommand) {
                 value: '\\' + xpRankIcon(score) + ' ' + progressBar + ' \\❔'
             }])
             .setColor(GetUserColor(userColor))
-            .setFooter({ text: abbrev(score) + ' / ' + abbrev(next) + '\nKell még: 🍺' + abbrev(next - score) + ' xp' })
+            .setFooter({ text: Abbrev(score) + ' / ' + Abbrev(next) + '\nKell még: 🍺' + Abbrev(next - score) + ' xp' })
         command.reply({ embeds: [embed], ephemeral: privateCommand })
     } catch (error) {
         command.reply({ content: '> \\❗ ' + error.toString(), ephemeral: privateCommand})

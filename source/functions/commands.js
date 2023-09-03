@@ -14,22 +14,21 @@ const { StatesManager } = require('./statesManager')
 
 /** @param {string[]} commandNames @param {string} commandDescription */
 function GenerateCommand(commandNames, commandDescription) {
-    /** @type {RESTPostAPIApplicationCommandsJSONBody[]} */
+    /** @type {Discord.ApplicationCommandData[]} */
     const generatedCommands = []
 
     for (let i = 0; i < commandNames.length; i++) {
-        const commandName = commandNames[i]
-        const newCommand = new SlashCommandBuilder()
-            .setName(commandName)
-            .setDescription(commandDescription)
-        generatedCommands.push(newCommand.toJSON())
+        generatedCommands.push({
+            name: commandNames[i],
+            description: commandDescription,
+        })
     }
 
     return generatedCommands
 }
 
 function GenerateGuildCommands() {
-    /** @type {RESTPostAPIApplicationCommandsJSONBody[]} */
+    /** @type {Discord.ApplicationCommandData[]} */
     const generatedCommands = []
 
     GenerateCommand(
@@ -199,7 +198,7 @@ function GenerateGuildCommands() {
 }
 
 function GenerateGlobalCommands() {
-    /** @type {RESTPostAPIApplicationCommandsJSONBody[]} */
+    /** @type {Discord.RESTPostAPIApplicationCommandsJSONBody[]} */
     const generatedCommands = []
 
     GenerateCommand(
@@ -457,7 +456,7 @@ function DeleteCommand(bot, commandID, FinishCallback) {
     }
 }
 
-/** @param {string} commandName @param {string} commandDescription @returns {RESTPostAPIApplicationCommandsJSONBody | null} */
+/** @param {string} commandName @param {string} commandDescription @returns {Discord.ApplicationCommandData | null} */
 function GetCommandData(commandName, commandDescription) {
     var x = GenerateGlobalCommands()
     var y = GenerateGuildCommands()

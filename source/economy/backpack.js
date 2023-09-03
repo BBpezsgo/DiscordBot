@@ -1,13 +1,13 @@
 const Discord = require('discord.js')
 const GetUserColor = require('./userColor')
-const { abbrev } = require('../functions/abbrev')
+const { Abbrev } = require('../functions/utils')
 const { DatabaseManager } = require('../functions/databaseManager')
 
 /**
- * @param {Discord.BaseInteraction<Cached>} e 
+ * @param {Discord.ButtonInteraction<Discord.CacheType>} e 
  * @param {DatabaseManager} database
  * @param {boolean} privateCommand
- * @returns {Discord.InteractionReplyOptions}
+ * @returns {Discord.MessagePayload}
  */
 function GetEmbed(e, database, privateCommand) {
     const sender = e.user
@@ -26,7 +26,7 @@ function GetEmbed(e, database, privateCommand) {
         .setAuthor({ name: sender.username, iconURL: sender.avatarURL() })
         .setTitle('Hátizsák')
         .addFields([
-            { name: 'Pénz', value: '\\💵 ' + abbrev(money), inline: false },
+            { name: 'Pénz', value: '\\💵 ' + Abbrev(money), inline: false },
             {
                 name: 'Alap cuccok', value: 
                 '> \\🧱 ' + crates + ' láda\n' +
@@ -94,18 +94,18 @@ function GetEmbed(e, database, privateCommand) {
     const rowSecondary = new Discord.ActionRowBuilder()
         .addComponents(buttonSendGift)
     if (getGifts > 0) { rowSecondary.addComponents(buttonOpenGift) }
-    return { embeds: [embed], components: [rowPrimary, rowSecondary], ephemeral: privateCommand }
+    return { body: { embeds: [ embed.toJSON() ], components: [ rowPrimary, rowSecondary ], ephemeral: privateCommand } }
 }
 
 /**
- * @param {Discord.CommandInteraction<Discord.CacheType>} e 
+ * @param {Discord.ButtonInteraction<Discord.CacheType>} e 
  * @param {DatabaseManager} database
  * @param {boolean} privateCommand
  */
 function OnCommand(e, database, privateCommand) { e.reply(GetEmbed(e, database, privateCommand)) }
 
 /**
- * @param {number} userId
+ * @param {string} userId
  * @param {DatabaseManager} database
  * @returns {string} The result string
  */
@@ -171,7 +171,7 @@ function OnButtonClick(e, database) {
             database.dataBasic[e.user.id].day = database.dataBot.day
         }
 
-        e.ed(GetEmbed(e, database, privateCommand))
+        e.editReply(GetEmbed(e, database, privateCommand))
 
         database.SaveDatabase()
         return true

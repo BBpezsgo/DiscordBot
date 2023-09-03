@@ -152,7 +152,6 @@ const { GatewayIntentBits } = require('discord.js')
 
 logManager.Loading('Loading packet', "other functions")
 
-const { DateToString } = require('./functions/dateToString')
 const NewsManager = require('./functions/news')
 
 const {
@@ -168,6 +167,7 @@ logManager.BlankScreen()
 
 logManager.Loading('Loading packet', "Other functions")
 const GetAddress = require('./functions/getAddress')
+const { ToUnix } = require('./functions/utils')
 
 /** @type {string[]} */
 let listOfHelpRequiestUsers = []
@@ -738,7 +738,7 @@ async function processApplicationCommand(command) {
                     name: '\\🤖 BOT:',
                     value:
                     '> \\📱 **Telefonról vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
-                    '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
+                    `> Készen áll: <t:${ToUnix(new Date(bot.readyTimestamp))}:T> óta`
                 },
                 {
                     name: '\\📡 WebSocket:',

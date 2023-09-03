@@ -2,7 +2,7 @@ const { DatabaseManager } = require('../functions/databaseManager')
 const Discord = require('discord.js')
 const { Color } = require('../functions/enums')
 const { ActionRowBuilder, ButtonBuilder } = require('discord.js')
-const { abbrev } = require('../functions/abbrev')
+const { Abbrev } = require('../functions/utils')
 const seedrandom = require('seedrandom')
 
 function GetValues() {    
@@ -32,7 +32,7 @@ function OnCommand(database, dataMarket, user, privateCommand = false) {
         .addFields([
             {
                 name: '\\💵 Egyenleged:',
-                value: '**' + abbrev(database.dataBasic[user.id].money) + '**',
+                value: '**' + Abbrev(database.dataBasic[user.id].money) + '**',
                 inline: true
             },
             {
@@ -71,7 +71,7 @@ function OnCommand(database, dataMarket, user, privateCommand = false) {
     if (database.dataBackpacks[user.id].jewel <= 0) {
         buttonJewelToMoney.setDisabled(true)
     }
-    if (database.dataBasic[user.id].money < Number.parseInt(values.jewel)) {
+    if (database.dataBasic[user.id].money < values.jewel) {
         buttonMoneyToJewel.setDisabled(true)
     }
 
@@ -103,7 +103,7 @@ function OnButton(e, database) {
         const buyItem = e.component.customId.replace('market', '')
         if (buyItem == 'TokenToMoney') {
             if (database.dataBackpacks[e.user.id].quizTokens > 0) {
-                database.dataBasic[e.user.id].money += Number.parseInt(values.token)
+                database.dataBasic[e.user.id].money += values.token
                 database.dataBackpacks[e.user.id].quizTokens -= 1
                 database.SaveDatabase()
 
@@ -113,7 +113,7 @@ function OnButton(e, database) {
             }
         } else if (buyItem == 'TicketToMoney') {
             if (database.dataBackpacks[e.user.id].tickets > 0) {
-                database.dataBasic[e.user.id].money += Number.parseInt(values.coupon)
+                database.dataBasic[e.user.id].money += values.coupon
                 database.dataBackpacks[e.user.id].tickets -= 1
                 database.SaveDatabase()
 

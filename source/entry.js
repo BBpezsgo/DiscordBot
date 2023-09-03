@@ -3,9 +3,7 @@ console.log('[Script]: Loaded')
 
 process.title = "Discord BOT"
 
-console.log('[Script]: Loading fancy console ...')
-
-console.log('Script', 'Listening to uncaught exceptions ...')
+console.log('[Script]: Listening to uncaught exceptions ...')
 
 const LogError = require('./functions/errorLog')
 const fs = require('fs')
@@ -17,7 +15,7 @@ process.on('uncaughtException', (error, origin) => {
     LogError(error, { key: 'Origin', value: origin })
 })
 
-console.log('Script', 'Init process ...')
+console.log('[Script]: Init process ...')
 
 // @ts-ignore
 process.__defineGetter__('stderr', () => { return fs.createWriteStream(Path.join(CONFIG.paths.base, 'node.error.log'), { flags: 'a' }) })
@@ -41,10 +39,10 @@ ConsoleUtilities.Listen()
 
 process.on('exit', (code, a) => {
     // ConsoleUtilities.DisableMouse()
-    console.log('Script', 'Exit with code ' + code)
+    console.log('[Script]: Exit with code ' + code)
 })
 
-console.log('Script', 'Create BOT instance ...')
+console.log('[Script]: Create BOT instance ...')
 
 const DiscordBot = new(require('./discord-bot'))('DESKTOP')
 
@@ -59,7 +57,7 @@ if (!DiscordBot.Database.LoadDatabase()) {
     DiscordBot.LogManager.Destroy()
 
     const { CliColor } = require('./functions/enums.js')
-    console.log('Script', CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
+    console.log('[Script]: ' + CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
     setTimeout(() => { process.exit(-1) }, 2000)
 } else {
     DiscordBot.Login()

@@ -14,7 +14,6 @@ const {
     ChannelId, Color
 } = require('./functions/enums.js')
 const { AutoReact } = require('./functions/autoReact')
-const { DateToString } = require('./functions/dateToString')
 
 const CommandShop = require('./economy/shop')
 const CommandBackpack = require('./economy/backpack')
@@ -38,6 +37,7 @@ const {
 const QuizManager = require('./economy/quiz')
 const PollManager = require('./commands/poll')
 const { calculateAddXp } = require('./economy/xpFunctions')
+const { ToUnix } = require('./functions/utils')
 
 module.exports = class DiscordBot {
     /**
@@ -649,7 +649,7 @@ module.exports = class DiscordBot {
                     {
                         name: '\\🤖 BOT:',
                         value:
-                        '> Készen áll: ' + DateToString(new Date(this.Client.readyTimestamp))
+                        `> Készen áll: <t:${ToUnix(new Date(this.Client.readyTimestamp))}:T> óta`
                     },
                     {
                         name: '\\📡 WebSocket:',
@@ -833,12 +833,12 @@ module.exports = class DiscordBot {
         if (command === `test`) {
             const button0 = new ButtonBuilder()
                 .setLabel("This is a button!")
-                .setID("myid0")
-                .setStyle("grey")
+                .setCustomId("myid0")
+                .setStyle(Discord.ButtonStyle.Secondary)
             const button1 = new ButtonBuilder()
                 .setLabel("This is a button!")
-                .setID("myid1")
-                .setStyle("blurple")
+                .setCustomId("myid1")
+                .setStyle(Discord.ButtonStyle.Primary)
             const option = new MessageMenuOption()
                 .setLabel('Your Label')
                 .setEmoji('🍔')

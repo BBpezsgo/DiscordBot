@@ -7,7 +7,7 @@ const {
     DONE
  } = require('../functions/enums')
 
-const SERVER = '[' + '\033[36m' + 'SERVER' + '\033[40m' + '' + '\033[37m' + ']'
+const SERVER = '[' + '\x1b[36m' + 'SERVER' + '\x1b[40m' + '' + '\x1b[37m' + ']'
 
 const groupNames = {
     shard: "shard",
@@ -53,7 +53,7 @@ function TranslateMessage(message) {
         } else if (message.startsWith('[WS => Shard 0] Shard received all its guilds. Marking as fully ready.')) {
             return new TranslateResult(message, "Befejezés", SHARD, false, groupNames.shard, new Status(100))
         } else if (message.startsWith('[WS => Shard 0] Heartbeat acknowledged, latency of ')) {
-            ping = message.replace('[WS => Shard 0] Heartbeat acknowledged, latency of ', '').replace('ms.', '')
+            const ping = message.replace('[WS => Shard 0] Heartbeat acknowledged, latency of ', '').replace('ms.', '')
             return new TranslateResult(message, "Heartbeat nyugtázva: " + ping + "ms", SHARD, true, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] [HeartbeatTimer] Sending a heartbeat.')) {
             return new TranslateResult(message, "Heartbeat küldése", SHARD, true, groupNames.shard)
@@ -202,7 +202,7 @@ function TranslateMessageEN(message) {
         } else if (message.startsWith('[WS => Shard 0] Shard received all its guilds. Marking as fully ready.')) {
             return new TranslateResult(message, "Shard received all its guilds. Marking as fully ready.", SHARD, false, groupNames.shard, new Status(100))
         } else if (message.startsWith('[WS => Shard 0] Heartbeat acknowledged, latency of ')) {
-            ping = message.replace('[WS => Shard 0] Heartbeat acknowledged, latency of ', '').replace('ms.', '')
+            const ping = message.replace('[WS => Shard 0] Heartbeat acknowledged, latency of ', '').replace('ms.', '')
             return new TranslateResult(message, "Heartbeat acknowledged: " + ping + "ms", SHARD, true, groupNames.shard)
         } else if (message.startsWith('[WS => Shard 0] [HeartbeatTimer] Sending a heartbeat.')) {
             return new TranslateResult(message, "Sending a heartbeat", SHARD, true, groupNames.shard)

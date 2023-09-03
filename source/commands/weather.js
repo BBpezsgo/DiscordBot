@@ -49,11 +49,9 @@ const {
     MetAlert_TypeNames,
     CityBekescsaba
 } = require('../commands/weatherFunctions');
+const Utils = require('../functions/utils')
 
 const EmojiPrefix = ''
-
-const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
-const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 
 /**
  @param {Openweathermap.OpenWeatherMap.WeatherResult} OpenweatherWeather
@@ -190,13 +188,13 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
             description +=
                 '\n\n☀️ **Nap:**\n\n' +
 
-                `${EmojiPrefix}🌇 Hajnal: <t:${ToUnix(times.dawn)}:t>\n` +
-                `${EmojiPrefix}🌇 Napkelte: <t:${AverageUnix(OpenweatherWeather.sys.sunrise, ToUnix(times.sunrise))}:t> - <t:${ToUnix(times.sunriseEnd)}:t>\n` +
-                `${EmojiPrefix}🌞 Dél: <t:${ToUnix(times.solarNoon)}:t>\n` +
-                `${EmojiPrefix}📷 "Golden Hour": <t:${ToUnix(times.goldenHour)}:t>\n` +
-                `${EmojiPrefix}🌆 Napnyugta: <t:${ToUnix(times.sunsetStart)}:t> - <t:${AverageUnix(OpenweatherWeather.sys.sunset, ToUnix(times.sunset))}:t>\n` +
-                `${EmojiPrefix}🌆 Szürkület: <t:${ToUnix(times.dusk)}:t>\n` +
-                `${EmojiPrefix}🌃 Éjjfél: <t:${ToUnix(times.nadir) + 86400}:t>`            
+                `${EmojiPrefix}🌇 Hajnal: <t:${Utils.ToUnix(times.dawn)}:t>\n` +
+                `${EmojiPrefix}🌇 Napkelte: <t:${Utils.Average(OpenweatherWeather.sys.sunrise, Utils.ToUnix(times.sunrise))}:t> - <t:${Utils.ToUnix(times.sunriseEnd)}:t>\n` +
+                `${EmojiPrefix}🌞 Dél: <t:${Utils.ToUnix(times.solarNoon)}:t>\n` +
+                `${EmojiPrefix}📷 "Golden Hour": <t:${Utils.ToUnix(times.goldenHour)}:t>\n` +
+                `${EmojiPrefix}🌆 Napnyugta: <t:${Utils.ToUnix(times.sunsetStart)}:t> - <t:${Utils.Average(OpenweatherWeather.sys.sunset, Utils.ToUnix(times.sunset))}:t>\n` +
+                `${EmojiPrefix}🌆 Szürkület: <t:${Utils.ToUnix(times.dusk)}:t>\n` +
+                `${EmojiPrefix}🌃 Éjjfél: <t:${Utils.ToUnix(times.nadir) + 86400}:t>`            
         } catch (error) {
             LogError(error)
         }
@@ -206,9 +204,9 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
         description += `${EmojiPrefix}${weatherMoonIcon(Moon[1].phaseName())} ${weatherMoonText(Moon[1].phaseName())} (${Math.floor(Moon[1].illum * 100)} %-a látható)\n`
         
         if (moonTimes.rise !== undefined)
-        { description += `${EmojiPrefix}⬆️ Holdkelte: <t:${ToUnix(moonTimes.rise)}:t>\n` }
+        { description += `${EmojiPrefix}⬆️ Holdkelte: <t:${Utils.ToUnix(moonTimes.rise)}:t>\n` }
         if (moonTimes.set !== undefined)
-        { description += `${EmojiPrefix}⬇️ Holdnyugta: <t:${ToUnix(moonTimes.set)}:t>\n` }
+        { description += `${EmojiPrefix}⬇️ Holdnyugta: <t:${Utils.ToUnix(moonTimes.set)}:t>\n` }
 
         if (moonTimes.alwaysUp)
         { description += `A Hold ma mindig a **horizont felett lesz**\n` }
@@ -298,9 +296,9 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
     })
     */
 
-    embed.setTimestamp(Date.parse(OpenweatherWeather.dt))    
+    embed.setTimestamp(new Date(OpenweatherWeather.dt))    
     // embed.setThumbnail('attachment://graph.png')
-    embed.setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(OpenweatherWeather.weather[0].id, true)))
+    embed.setThumbnail(weatherThumbnailUrl(weatherSkytextIcon(OpenweatherWeather.weather[0].id)))
     const MsnFooter = ((msnIsCache === true) ? '📁' : '') + 'weather.service.msn.com'
     const OpenweathermapFooter = ((openweathermapWeatherIsCache === true) ? '📁' : '') + 'openweathermap.org'
     embed.setFooter({ text: `${OpenweathermapFooter}` })
@@ -332,7 +330,7 @@ function GetSeason(season) {
 /** @param {string} date YYYY-MM-DD */
 function DateToDate(date) {
     var newDate = new Date()
-    newDate.setFullYear(date.split('-')[0], Number.parseInt(date.split('-')[1]) - 1, date.split('-')[2])
+    newDate.setFullYear(Number.parseInt(date.split('-')[0]), Number.parseInt(date.split('-')[1]) - 1, Number.parseInt(date.split('-')[2]))
     return newDate
 }
 
@@ -383,7 +381,7 @@ function getEmbedMars(data, weeklyImage) {
             `${EmojiPrefix}🌡️ ${latestSol.min_temp} - ${latestSol.max_temp} °C\n` +
             `${GetMarsPressureIcon(latestSol.pressure, averagePressure)} ${latestSol.pressure} pHa légnyomás\n` +
             `${GetSeason(latestSol.season)}\n` +
-            `${EmojiPrefix}🌍 Földi dátum: <t:${ToUnix(DateToDate(latestSol.terrestrial_date))}:d>` +
+            `${EmojiPrefix}🌍 Földi dátum: <t:${Utils.ToUnix(DateToDate(latestSol.terrestrial_date))}:d>` +
 
             '\n\n☀️ **Nap:**\n\n' +
 

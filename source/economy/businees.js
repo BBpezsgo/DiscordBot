@@ -3,7 +3,7 @@ const { DatabaseManager } = require('../functions/databaseManager.js')
 
 const now = new Date()
 const start = new Date(now.getFullYear(), 0, 0)
-const diff = now - start
+const diff = now.getTime() - start.getTime()
 const oneDay = 1000 * 60 * 60 * 24
 const dayOfYear = Math.floor(diff / oneDay)
 
@@ -58,15 +58,15 @@ function businessAddToMemoryDetails(sender, database) {
 }
 
 /**
- * @returns {string}
  * @param {Discord.User} sender
  * @param {number} type
+ * @returns {number}
  */
 function calculateAddMoney(sender, type, database) {
     const aaa = database.dataBusinesses[sender.id].businessUses.date.toString().split(':')
     const lastDate = new Date(aaa[0], aaa[1], aaa[2])
     const nowDate = new Date()
-    const difference = nowDate - lastDate
+    const difference = nowDate.getTime() - lastDate.getTime()
     const differenceInDays = Math.floor(difference / oneDay)
 
     let returnTestString = ''

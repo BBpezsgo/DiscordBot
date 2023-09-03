@@ -1,17 +1,15 @@
 const { StatesManager } = require('./statesManager')
 
 const Discord = require('discord.js')
-const fs = require('fs')
 
 const LogError = require('./errorLog')
 const { FormatError } = require('./formatError')
+const Utils = require('./utils')
 
 const Service = require('../services/ExchangeRate')
 const icon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Logo_European_Central_Bank.svg/64px-Logo_European_Central_Bank.svg.png'
 
 const SendTest = false
-
-const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
 
 /**
  * @param {Service.Result} data
@@ -22,7 +20,7 @@ function GetEmbed(data) {
         .setColor('#48BF21')
         .setAuthor({ name: data.sender, url: 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', iconURL: icon })
         .setTitle('Árfolyam')
-        .setDescription('💶 Euró árfolyam\nKövetkező frissítés ' + `<t:${ToUnix(Service.GetNextUpdate(new Date(Date.now())))}:R>`)
+        .setDescription('💶 Euró árfolyam\nKövetkező frissítés ' + `<t:${Utils.ToUnix(Service.GetNextUpdate(new Date(Date.now())))}:R>`)
         .setTimestamp(Date.parse(data.time))
 
     const currencyInInterest = [
@@ -44,7 +42,7 @@ function GetEmbed(data) {
     return embed
 }
 
-/** @param {Discord.TextChannel} channel @param {StatesManager} statesManager */
+/** @param {Discord.TextBasedChannel} channel @param {StatesManager} statesManager */
 async function SendReport(channel, statesManager) {
     statesManager.ExchangeReport.Text = 'Get Exchange data...'
     Service.GetCurrency()
@@ -68,7 +66,7 @@ async function SendReport(channel, statesManager) {
         })
 }
 
-/** @param {StatesManager} statesManager @param {Discord.BaseGuildTextChannel} channel */
+/** @param {StatesManager} statesManager @param {Discord.TextBasedChannel} channel */
 async function GetOldReport(statesManager, channel) {
     statesManager.ExchangeReport.Text = 'Search old Exchange report message (Fetch old messages)...'
     const messages = await channel.messages.fetch({ limit: 20 })
@@ -99,11 +97,13 @@ async function TrySendReport(statesManager, client, channelID) {
     if (SendTest) {
         statesManager.WeatherReport.Text = 'Fetch test channel...'
         const testChannel = await client.channels.fetch('760804414205591585')
+        /** @ts-ignore @type {Discord.TextBasedChannel} */
         await SendReport(testChannel, statesManager)
         return
     }
 
     statesManager.WeatherReport.Text = 'Fetch news channel...'
+    /** @ts-ignore @type {Discord.TextBasedChannel} */
     const channel = await client.channels.fetch(channelID)
 
     statesManager.ExchangeReport.Text = 'Search old Exchange report message...'

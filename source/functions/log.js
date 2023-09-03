@@ -1,4 +1,4 @@
-const { GetTime, GetDataSize, Capitalize } = require('../functions/functions')
+const { GetTime, GetDataSize, Capitalize } = require('./utils')
 const { WsStatus } = require('../functions/enums')
 
 /** @type {boolean} */
@@ -23,7 +23,7 @@ const CliColor = {
     BgCyan: "\x1b[46m",
     BgWhite: "\x1b[47m",
 
-    FgDefault: '\033[37m'
+    FgDefault: '\x1b[37m'
 }
 
 const { StatesManager } = require('./statesManager.js')

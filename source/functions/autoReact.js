@@ -16,7 +16,7 @@ function AutoReact(message) {
 
         if (isHaveMusic === false) { return }
 
-        const settingsRaw = fs.readFileSync(Path.join(CONFIG.paths.base, './settings.json'))
+        const settingsRaw = fs.readFileSync(Path.join(CONFIG.paths.base, './settings.json'), 'utf8')
         const settings = JSON.parse(settingsRaw)
         const channelSettings = settings.channelSettings
         const messageChannelId = message.channel.id

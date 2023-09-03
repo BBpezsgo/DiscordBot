@@ -162,7 +162,6 @@ const { perfix, tokens } = require('./config.json')
 logManager.Loading('Loading packet', "other functions")
 
 
-const { DateToString } = require('./functions/dateToString')
 const NewsManager = require('./functions/news')
 const {
     INFO,
@@ -178,6 +177,7 @@ const {
     ChannelId,
     CliColor
 } = require('./functions/enums.js')
+const { ToUnix } = require('./functions/utils')
 
 
 logManager.BlankScreen()
@@ -1082,7 +1082,7 @@ async function processApplicationCommand(command) {
                     name: '\\🤖 BOT:',
                     value:
                     '> \\🍓 **Raspberry-ről vagyok bejelentkezve.** A legtöbb funkció nem elérhető.\n' +
-                    '> Készen áll: ' + DateToString(new Date(bot.readyTimestamp))
+                    `> Készen áll: <t:${ToUnix(new Date(bot.readyTimestamp))}:T> óta`
                 },
                 {
                     name: '\\📡 WebSocket:',

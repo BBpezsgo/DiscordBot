@@ -39,7 +39,7 @@ const ProcessData = function(data) {
         for (let i = 0; i < container.length; i++) {
             const element = container.item(i)
             const categoryName = element.childNodes.item(3).textContent
-            const categorySize = element.childNodes.item(4).textContent
+            const categorySize = Number.parseInt(element.childNodes.item(4).textContent)
             if (categoryName && categorySize) categories.push({
                 name: categoryName,
                 size: categorySize,
@@ -237,7 +237,7 @@ function Download(search, page, callback) {
  * @param {number} page
  * @param {Types.SortMode} sort
  * @returns {Promise<Types.SuccessfulResponse<Types.SearchResult>>}
- */
+ */// @ts-ignore
 function SearchFor(search, page = 1, sort = SortMode.AZ) {
     return new Promise((resolve, reject) => {
         Download(search, page, res => {

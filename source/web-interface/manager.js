@@ -21,7 +21,7 @@ const {
     VerificationLevel,
     MFALevel
 } = require('../functions/enums')
-const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
+const { GetTime, GetDataSize, GetDate } = require('../functions/utils')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
 const { MessageType, GuildVerificationLevel } = require('discord.js')
@@ -1171,7 +1171,7 @@ class WebInterfaceManager {
                 thereIsNetworkError = true
             }
 
-            const { abbrev } = require('../functions/abbrev')
+            const { Abbrev } = require('../functions/utils')
 
             const score = this.database.dataBasic[userId].score
             const next = require('../economy/xpFunctions').xpRankNext(score)
@@ -1195,9 +1195,9 @@ class WebInterfaceManager {
             }
 
             const statistics = {
-                messages: abbrev(dataUserstats.messages),
-                chars: abbrev(dataUserstats.chars),
-                commands: abbrev(dataUserstats.commands)
+                messages: Abbrev(dataUserstats.messages),
+                chars: Abbrev(dataUserstats.chars),
+                commands: Abbrev(dataUserstats.commands)
             }
 
             const awards = {
@@ -1228,7 +1228,7 @@ class WebInterfaceManager {
                 
             }
 
-            const moneyText = abbrev(this.database.dataBasic[userId].money)
+            const moneyText = Abbrev(this.database.dataBasic[userId].money)
 
             const userInfo = {
                 name: '<valaki>',

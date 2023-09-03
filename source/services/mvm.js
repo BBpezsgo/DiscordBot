@@ -35,7 +35,7 @@ function DateToCorrectString(date) { return `${date.getFullYear()}.${date.getMon
 const authRequiredRes = "<?xml version='1.0' encoding='UTF-8'?>\n<partial-response id=\"j_id1\"><redirect url=\"/aram/pages/online/aramszunet.jsf\"></redirect></partial-response>"
 
 /**
- * @param {{viewState:string;cookies:never[]} | null} authValues
+ * @param {{viewState:string;cookies:string[]} | null} authValues
  * @param {import('../functions/statesManager').StatesManager} statesManager
  */
 function Get(statesManager, authValues = null) {

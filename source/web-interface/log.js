@@ -1,5 +1,5 @@
 const fs = require('fs')
-const { GetTime } = require('../functions/functions')
+const { GetTime } = require('../functions/utils')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')

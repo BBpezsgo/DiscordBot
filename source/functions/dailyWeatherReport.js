@@ -1,5 +1,5 @@
 const { StatesManager } = require('./statesManager')
-const { Client, BaseGuildTextChannel } = require('discord.js')
+const { Client } = require('discord.js')
 const SendTest = false
 const LogError = require('./errorLog')
 
@@ -22,9 +22,8 @@ const {
 } = require('../commands/weatherFunctions')
 
 const { Color } = require('./enums')
+const { ToUnix, Average } = require('./utils')
 
-const ToUnix=(date)=>{return Math.round(date.getTime()/1000)}
-const AverageUnix=(unix1,unix2)=>{return Math.round((unix1+unix2)/2)}
 const IsMorning = () => { return (new Date(Date.now()).getHours() < 10) }
 
 /**
@@ -63,8 +62,8 @@ function GetEmbed(weatherData, isCache) {
         description: '\u200b'
     })
     fields.push({
-        time: AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise)),
-        title: `<t:${AverageUnix(weatherData.city.sunrise, ToUnix(times.sunrise))}:t> - <t:${ToUnix(times.sunriseEnd)}:t> ${EmojiPrefix}🌇 Napkelte`,
+        time: Average(weatherData.city.sunrise, ToUnix(times.sunrise)),
+        title: `<t:${Average(weatherData.city.sunrise, ToUnix(times.sunrise))}:t> - <t:${ToUnix(times.sunriseEnd)}:t> ${EmojiPrefix}🌇 Napkelte`,
         description: '\u200b'
     })
     fields.push({
@@ -73,8 +72,8 @@ function GetEmbed(weatherData, isCache) {
         description: '\u200b'
     })
     fields.push({
-        time: AverageUnix(weatherData.city.sunset, ToUnix(times.sunset)),
-        title: `<t:${ToUnix(times.sunsetStart)}:t> - <t:${AverageUnix(weatherData.city.sunset, ToUnix(times.sunset))}:t> ${EmojiPrefix}🌆 Napnyugta`,
+        time: Average(weatherData.city.sunset, ToUnix(times.sunset)),
+        title: `<t:${ToUnix(times.sunsetStart)}:t> - <t:${Average(weatherData.city.sunset, ToUnix(times.sunset))}:t> ${EmojiPrefix}🌆 Napnyugta`,
         description: '\u200b'
     })
     fields.push({
@@ -114,7 +113,7 @@ function GetEmbed(weatherData, isCache) {
 
         fields.push({
             time: ToUnix(new Date(currentWeatherItem.dt * 1000)),
-            title: `<t:${ToUnix(new Date(currentWeatherItem.dt * 1000))}:t>` + ` ${EmojiPrefix}${weatherSkytextIcon(currentWeatherItem.weather[0].main, true)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
+            title: `<t:${ToUnix(new Date(currentWeatherItem.dt * 1000))}:t>` + ` ${EmojiPrefix}${weatherSkytextIcon(currentWeatherItem.weather[0].main)} ${weatherSkytxt(currentWeatherItem.weather[0].main)}`,
             description: stringBuilder.trimEnd() + '\n'
         })
     }
@@ -130,7 +129,6 @@ function GetEmbed(weatherData, isCache) {
         }])
     }
 
-    // embed.setThumbnail('https://raw.githubusercontent.com/BBpezsgo/DiscordBot/main/source/commands/weatherImages/earth.gif')
     embed.setTimestamp(Date.now())
     if (isCache) {
         embed.setFooter({ text: '📁 openweathermap.org' })
@@ -170,10 +168,42 @@ function GetAlertEmbed(alerts) {
                 'ts1.gif': '🌩️',
                 'ts2.gif': '🌩️',
                 'ts3.gif': '🌩️',
+
                 'rainstorm1.gif': '🌧️',
                 'rainstorm2.gif': '🌊',
+                'rainstorm3.gif': '🌊',
+
                 'hotx1.gif': '🌡️',
-                'hotx2.gif': '🌡️',
+                'hotx2.gif': '🔥',
+                'hotx3.gif': '🔥',
+                
+                'wind1.gif': '💨',
+                'wind2.gif': '🌪️',
+                'wind3.gif': '🌪️',
+                
+                'fzra1.gif': '🧊',
+                'fzra2.gif': '🧊',
+                'fzra3.gif': '🧊',
+                
+                'snowdrift1.gif': '☃️',
+                'snowdrift2.gif': '☃️',
+                'snowdrift3.gif': '☃️',
+                
+                'rain1.gif': '🌧️',
+                'rain2.gif': '🌧️',
+                'rain3.gif': '🌧️',
+                
+                'snow1.gif': '🌨️',
+                'snow2.gif': '🌨️',
+                'snow3.gif': '🌨️',
+                
+                'fog1.gif': '🌫️',
+                'fog2.gif': '🌫️',
+                'fog3.gif': '🌫️',
+                
+                'coldx1.gif': '❄️',
+                'coldx2.gif': '❄️',
+                'coldx3.gif': '❄️',
             }[alert.typeIcon] ?? alert.typeIcon
                 
             const degreeIcon = {
@@ -182,7 +212,9 @@ function GetAlertEmbed(alerts) {
                 'w3.gif': '3',
             }[alert.degreeIcon] ?? alert.degreeIcon
 
-            stringBuilder += `> ${typeIcon} ${alert.Name} ${degreeIcon}\n`
+            const description = Met.Descriptions[alert.typeIcon]?.description
+
+            stringBuilder += `> ${typeIcon} \`${alert.Name} ${degreeIcon}\` - ${description}\n`
         }
         embed.addFields({
             name: dayName,
@@ -197,7 +229,7 @@ function GetAlertEmbed(alerts) {
 }
 
 /**
- * @param {Discord.TextChannel} channel
+ * @param {Discord.TextBasedChannel} channel
  * @param {StatesManager} statesManager
  */
 async function SendReport(channel, statesManager) {
@@ -247,7 +279,7 @@ async function SendReport(channel, statesManager) {
         })
 }
 
-/** @param {StatesManager} statesManager @param {BaseGuildTextChannel} channel */
+/** @param {StatesManager} statesManager @param {Discord.TextBasedChannel} channel */
 async function GetOldDailyWeatherReport(statesManager, channel) {
 
     statesManager.WeatherReport.Text = 'Search old weather report message (Fetch old messages)...'
@@ -277,7 +309,9 @@ async function GetOldDailyWeatherReport(statesManager, channel) {
 /** @param {StatesManager} statesManager @param {Client} client @param {string} channelID */
 async function TrySendWeatherReport(statesManager, client, channelID) {
     statesManager.WeatherReport.Text = 'Fetch news channel...'
+    /** @ts-ignore @type {Discord.TextBasedChannel} */
     const channel = await client.channels.fetch(channelID)
+    /** @ts-ignore @type {Discord.TextBasedChannel} */
     const testChannel = await client.channels.fetch('760804414205591585')
 
     statesManager.WeatherReport.Text = 'Search old weather report message...'
@@ -285,9 +319,9 @@ async function TrySendWeatherReport(statesManager, client, channelID) {
 
     if (oldWeatherMessage == null || oldWeatherMessage == undefined) {
         if (IsMorning()) {
-            await SendReport(channel, statesManager, false)
+            await SendReport(channel, statesManager)
         } else {
-            if (SendTest) await SendReport(testChannel, statesManager, true)
+            if (SendTest) await SendReport(testChannel, statesManager)
             statesManager.WeatherReport.Text = 'I will not send a report because it is not morning now'
         }
     } else {
@@ -295,13 +329,13 @@ async function TrySendWeatherReport(statesManager, client, channelID) {
             statesManager.WeatherReport.Text = 'Delete old weather report message...'
             await oldWeatherMessage.delete()
             if (IsMorning()) {
-                await SendReport(channel, statesManager, false)
+                await SendReport(channel, statesManager)
             } else {
-                if (SendTest) await SendReport(testChannel, statesManager, true)
+                if (SendTest) await SendReport(testChannel, statesManager)
                 statesManager.WeatherReport.Text = 'I don\'t need to send a new report'
             }
         } else {
-            if (SendTest) await SendReport(testChannel, statesManager, true)
+            if (SendTest) await SendReport(testChannel, statesManager)
             statesManager.WeatherReport.Text = 'I don\'t need to send a new report'
         }
     }

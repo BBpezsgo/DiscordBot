@@ -279,14 +279,14 @@ class NewsManager {
         const DeleteRawNewsMessages = true
 
         if (this.listOfNews.length > 0) {
-            /** @type {Discord.GuildTextBasedChannel} */ 
+            /** @ts-ignore @type {Discord.TextBasedChannel} */ 
             const newsChannel = client.channels.cache.get(NewsProcessedChannel)
 
             const newsMessage = this.listOfNews.shift()
             if (!newsMessage) { return }
             const embed = newsMessage.embed
             this.statesManager.News.LoadingText2 = 'Send copy of news message...'
-            /** @type {Discord.GuildTextBasedChannel} */
+            /** @ts-ignore @type {Discord.TextBasedChannel} */
             const newsTestChannel = client.channels.cache.get('1010110583800078397')
             if (newsTestChannel) {
                 newsTestChannel.send({

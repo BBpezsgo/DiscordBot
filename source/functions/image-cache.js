@@ -6,11 +6,14 @@ const https = require('https')
 const PATH = 'C:/Users/bazsi/Documents/GitHub/DiscordBot/source/cache/images/'
 
 /**
- * @param {string} url
+ * @param {string | URL | https.RequestOptions} url
  */
 function NormalizeURL(url) {
     if (!url) return null
     let result = url
+    if (typeof result !== 'string') {
+        result = result.toString()
+    }
     result = result.replace(/\\/g, '_')
     result = result.replace(/\//g, '_')
     result = result.replace(/\?/g, '_')

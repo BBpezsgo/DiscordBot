@@ -21,7 +21,7 @@ const {
     VerificationLevel,
     MFALevel
 } = require('../functions/enums')
-const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
+const { GetTime, GetDataSize, GetDate } = require('../functions/utils')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
 const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
 const { MessageType, GuildVerificationLevel } = require('discord.js')

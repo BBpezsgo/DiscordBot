@@ -88,15 +88,15 @@ function ProcessData(data) {
     return result
 }
 
-/** @param {string} data @param {(result: any | undefined, error: string | undefined) => void} callback */
+/** @param {string} data @param {(result: any | null, error: string | null) => void} callback */
 function Parse(data, callback) {
     const parser = new XML.Parser()
     parser.parseString(data, function (error, result) {
         if (error) {
-            callback(undefined, error)
+            callback(null, error)
             return
         }
-        callback(result)
+        callback(result, null)
     })
 }
 

@@ -62,7 +62,7 @@ function GetEmbed(data, isCache) {
     return embed
 }
 
-/** @param {StatesManager} statesManager @param {BaseGuildTextChannel} channel */
+/** @param {StatesManager} statesManager @param {import('discord.js').TextBasedChannel} channel */
 async function GetOldReport(statesManager, channel) {
     statesManager.MVMReport.Text = 'Search old MVM report message (Fetch old messages)...'
     const messages = await channel.messages.fetch({ limit: 20 })
@@ -85,7 +85,7 @@ async function GetOldReport(statesManager, channel) {
 }
 
 /**
- * @param {Discord.TextChannel} channel
+ * @param {Discord.TextBasedChannel} channel
  * @param {StatesManager} statesManager
  */
 async function SendReport(channel, statesManager) {
@@ -118,12 +118,14 @@ async function SendReport(channel, statesManager) {
 async function TrySendMVMReport(statesManager, client, channelID) {
     if (SendTest) {
         statesManager.WeatherReport.Text = 'Fetch test channel...'
+        /** @ts-ignore @type {Discord.TextBasedChannel} */
         const testChannel = await client.channels.fetch('760804414205591585')
         await SendReport(testChannel, statesManager)
         return
     }
 
     statesManager.WeatherReport.Text = 'Fetch news channel...'
+    /** @ts-ignore @type {Discord.TextBasedChannel} */
     const channel = await client.channels.fetch(channelID)
 
     statesManager.MVMReport.Text = 'Search old MVM report message...'

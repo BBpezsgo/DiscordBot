@@ -260,7 +260,7 @@ function weatherPressureIcon(pressureValue) {
 }
 
 /**
- * @param {number[]} values 
+ * @param {any[]} values 
  */
 function Average(values) {
     let returnValue = 0

@@ -11,7 +11,7 @@ const {
     VerificationLevel,
     MFALevel
 } = require('../functions/enums')
-const { GetTime, GetDataSize, GetDate } = require('../functions/functions')
+const { GetTime, GetDataSize, GetDate } = require('../functions/utils')
 const ArchiveBrowser = require('../functions/archive-browser')
 const HarBrowser = require('../functions/har-discord-browser')
 const ContentParser = require('./content-parser')

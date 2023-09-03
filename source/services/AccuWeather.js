@@ -33,7 +33,7 @@ const MaxTimeDifference = 1000 * 60 * 10 // 10 minutes
 const AccuWeatherForecast = function(callback) {
     return new Promise((resolve, reject) => {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
-        if (ReadFromCache || fromCache) {
+        if (ReadFromCache) {
             if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/accu-current.json'))) {
                 const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-forecast.json'), 'utf-8'))
                 cached.cache = true
@@ -72,7 +72,7 @@ const AccuWeatherForecast = function(callback) {
 const AccuWeatherCurrent = function() {
     return new Promise((resolve, reject) => {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
-        if (ReadFromCache || fromCache) {
+        if (ReadFromCache) {
             if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/accu-current.json'))) {
                 const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/accu-current.json'), 'utf-8'))
                 cached.cache = true

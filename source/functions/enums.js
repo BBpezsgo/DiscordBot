@@ -1,4 +1,4 @@
-const { ActivityType, ActivityOptions } = require('discord.js')
+const { ActivityType } = require('discord.js')
 
 const ChannelId = {
     Quiz: "799340273431478303",
@@ -37,32 +37,32 @@ const SHARD = '[' + CliColor.FgMagenta + 'SHARD' + CliColor.BgBlack + '' + CliCo
 const DEBUG = '[' + CliColor.FgBlack + 'DEBUG' + CliColor.BgBlack + '' + CliColor.FgWhite + ']'
 const DONE = '[' + CliColor.FgGreen + 'DONE' + CliColor.BgBlack + '' + CliColor.FgWhite + ']'
 
-const { ColorResolvable } = require('discord.js')
+const Discord = require('discord.js')
 
 const Color = {
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     Error: "#ed4245",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     ErrorLight: "#f57531",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     Warning: "#faa81a",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     Done: "#3ba55d",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     White: "#dcddde",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     Silver: "#b9bbbe",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     Gray: "#8e9297",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     DimGray: "#72767d",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     Highlight: "#5865f2",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     Purple: "#9b59b6",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     Pink: "#e91e63",
-    /** @type {ColorResolvable} */
+    /** @type {Discord.ColorResolvable} */
     DarkPink: "#ad1457"
 }
 
@@ -76,14 +76,14 @@ const ColorRoles = {
     invisible: "850016786186371122"
 }
 
-/** @type {ActivityOptions[]} */
+/** @type {import('discord.js').ActivityOptions[]} */
 const activitiesDesktop = [
     { name: 'Nothing 2', type: ActivityType.Playing },
     { name: 'Visual Studio', type: ActivityType.Playing },
     { name: 'Unity', type: ActivityType.Playing },
 ]
 
-/** @type {ActivityOptions[]} */
+/** @type {import('discord.js').ActivityOptions[]} */
 const activitiesMobile = [
     { name: 'Photon PUN documentation', type: ActivityType.Watching, browser: "DISCORD IOS" },
     { name: 'Discord Guide', type: ActivityType.Watching, browser: "DISCORD IOS" },

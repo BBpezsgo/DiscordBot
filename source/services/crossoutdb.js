@@ -2,7 +2,6 @@
 
 const fs = require('fs')
 /** @type {import('../config').Config} */
-// @ts-ignore
 const CONFIG = require('../config.json')
 const Path = require('path')
 const HTTP = require('../functions/http')
