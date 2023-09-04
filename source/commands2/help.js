@@ -6,7 +6,7 @@ const { Color } = require('../functions/enums')
  * @param {boolean} isMobile
  * @returns {Discord.EmbedBuilder}
  */
-function getEmbedMessage(isPrivate, isMobile) {
+function GetEmbed(isPrivate, isMobile) {
     if (isMobile === true) {
         const embed = new Discord.EmbedBuilder()
             .setTitle('Parancsok')
@@ -118,11 +118,17 @@ function getEmbedMessage(isPrivate, isMobile) {
     }
 }
 
-/**
-* @param {boolean} isPrivate
-* @param {boolean} isMobile
-* @returns {Discord.EmbedBuilder}
-*/
-module.exports = (isPrivate, isMobile = false) => {
-    return getEmbedMessage(isPrivate, isMobile)
+/** @type {import("./base").Command} */
+const Command = {
+    Data: new Discord.SlashCommandBuilder()
+        .setName('help')
+        .setDescription('A parancsok listája'),
+    Execute: async function(interaction, ephemeral, sender) {
+        await interaction.reply({
+            embeds: [ GetEmbed(ephemeral, sender.Platform === 'MOBILE') ],
+            ephemeral,
+        })
+    }
 }
+
+module.exports = Command

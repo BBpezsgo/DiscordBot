@@ -426,77 +426,103 @@ function addDays(date, days) {
     return date
 }
 
-/** @param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
-module.exports = async (command, privateCommand, earth = true) => {
-    await command.deferReply({ ephemeral: privateCommand })
+/** @type {import("./base").Command} */
+const Command = {
+	Data: new Discord.SlashCommandBuilder()
+        .setName('weather')
+        .setDescription('Időjárása')
+        .addStringOption(option =>
+            option.setName('location')
+                .setDescription('Weather location')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'Earth - Békéscsaba', value: 'earth' },
+                    { name: 'Mars - Jezero Kráter', value: 'mars' }
+                )),
+    /** @param {Discord.ChatInputCommandInteraction} command */
+    Execute: async function(command, ephemeral, sender) {
+        await command.deferReply({ ephemeral })
+        const location = command.options.getString('location', false)
 
-    if (earth == true) {        
-        const year = new Date().getFullYear()
-        const month = new Date().getMonth() + 1
-        const day = new Date().getDate()
+        if (!location || location === 'earth') {        
+            const year = new Date().getFullYear()
+            const month = new Date().getMonth() + 1
+            const day = new Date().getDate()
+    
+            Openweathermap.OpenweathermapWeather()
+                .then(openweathermapWeather => {
+                    Openweathermap.OpenweathermapPollution()
+                        .then(async openweathermapPollution => {
+                            const MoonPhases = [
+                                new MoonPhase(addDays(new Date(year, month, day), -1)),
+                                new MoonPhase(new Date(year, month, day)),
+                                new MoonPhase(addDays(new Date(year, month, day), 1)),
+                                new MoonPhase(addDays(new Date(year, month, day), 2)),
+                                new MoonPhase(addDays(new Date(year, month, day), 3))
+                            ]
+        
+                            /** @type {WeatherAlertsService.MET.ResultCounty[]} */
+                            var alerts = []
+        
+                            try
+                            { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Today')) }
+                            catch (e)
+                            { alerts.push(null) }
+        
+                            try
+                            { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Tomorrow')) }
+                            catch (e)
+                            { alerts.push(null) }
+        
+                            try
+                            { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'ThirdDay')) }
+                            catch (e)
+                            { alerts.push(null) }
+        
+                            try
+                            { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'FourthDay')) }
+                            catch (e)
+                            { alerts.push(null) }
+        
+                            const embed = getEmbedEarth(openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts, false, openweathermapWeather.fromCache, await WeatherAlertsService.GetSnowReport())
+                            command.editReply({ embeds: [embed] })
+                        })
+                        .catch(openweathermapPollutionError => {
+                            LogError(openweathermapPollutionError)
+                            command.editReply({ content: '> \\❌ ' + openweathermapPollutionError })
+                        })
+                })
+                .catch(openweathermapWeatherError => {
+                    LogError(openweathermapWeatherError)
+                    command.editReply({ content: '> \\❌ ' + openweathermapWeatherError })
+                })
+            return
+        }
+        
+        if (location === 'mars') {
+            NASA.NasaMarsWeather()
+                .then(weatherData => {
+                    NASA.NasaMarsWeeklyImage()
+                        .then(bodyImage => {
+                            command.editReply({ embeds: [ getEmbedMars(weatherData, bodyImage)] })
+                        })
+                        .catch(error => {
+                            LogError(error)
+                            command.editReply({ content: '> \\❗ ' + error })
+                        })
+                })
+                .catch(error => {
+                    LogError(error)
+                    command.editReply({ content: '> \\❗ ' + error })
+                })
 
-        Openweathermap.OpenweathermapWeather()
-            .then(openweathermapWeather => {
-                Openweathermap.OpenweathermapPollution()
-                    .then(async openweathermapPollution => {
-                        const MoonPhases = [
-                            new MoonPhase(addDays(new Date(year, month, day), -1)),
-                            new MoonPhase(new Date(year, month, day)),
-                            new MoonPhase(addDays(new Date(year, month, day), 1)),
-                            new MoonPhase(addDays(new Date(year, month, day), 2)),
-                            new MoonPhase(addDays(new Date(year, month, day), 3))
-                        ]
-    
-                        /** @type {WeatherAlertsService.MET.ResultCounty[]} */
-                        var alerts = []
-    
-                        try
-                        { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Today')) }
-                        catch (e)
-                        { alerts.push(null) }
-    
-                        try
-                        { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Tomorrow')) }
-                        catch (e)
-                        { alerts.push(null) }
-    
-                        try
-                        { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'ThirdDay')) }
-                        catch (e)
-                        { alerts.push(null) }
-    
-                        try
-                        { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'FourthDay')) }
-                        catch (e)
-                        { alerts.push(null) }
-    
-                        const embed = getEmbedEarth(openweathermapWeather, MoonPhases, openweathermapPollution.list[0], alerts, false, openweathermapWeather.fromCache, await WeatherAlertsService.GetSnowReport())
-                        command.editReply({ embeds: [embed] })
-                    })
-                    .catch(openweathermapPollutionError => {
-                        LogError(openweathermapPollutionError)
-                        command.editReply({ content: '> \\❌ ' + openweathermapPollutionError })
-                    })
-            })
-            .catch(openweathermapWeatherError => {
-                LogError(openweathermapWeatherError)
-                command.editReply({ content: '> \\❌ ' + openweathermapWeatherError })
-            })
-    } else {
-        NASA.NasaMarsWeather()
-            .then(weatherData => {
-                NASA.NasaMarsWeeklyImage()
-                    .then(bodyImage => {
-                        command.editReply({ embeds: [ getEmbedMars(weatherData, bodyImage)] })
-                    })
-                    .catch(error => {
-                        LogError(error)
-                        command.editReply({ content: '> \\❗ ' + error })
-                    })
-            })
-            .catch(error => {
-                LogError(error)
-                command.editReply({ content: '> \\❗ ' + error })
-            })
+            return
+        }
+        
+        await command.reply({ content: '> \\❌ **Nem tudok ilyen helyről <:wojakNoBrain:985043138471149588>**', ephemeral })
     }
+}
+
+module.exports = {
+    ...Command,
 }

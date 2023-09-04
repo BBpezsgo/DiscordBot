@@ -22,7 +22,7 @@ const CommandOpenDailyCrate = require('./economy/open-daily-crate')
 const CommandMarket = require('./economy/market')
 const CommandSettings = require('./economy/settings')
 const CommandGift = require('./economy/gift')
-const { CommandHangman, HangmanManager } = require('./commands/hangman.js')
+const { HangmanManager } = require('./commands2/hangman.js')
 const {
     gameResetCameraPos,
     getGameUserSettings,
@@ -45,6 +45,8 @@ module.exports = class DiscordBot {
      */
     constructor(platform) {
         try {
+            /** @type {Discord.Collection<string, import("./commands2/base").Command>} */
+            this.Commands = new Discord.Collection()
             /** @type {'DESKTOP' | 'MOBILE'} */
             this.Platform = platform
             /** @type {StatesManager} */
@@ -121,33 +123,33 @@ module.exports = class DiscordBot {
             this.StatesManager.botLoadingState = 'Resume'
         })
 
-        this.Client.on('error', error => {
+        this.Client.on(Discord.Events.Error, error => {
             this.StatesManager.botLoadingState = 'Error'
             LogError(error)
         })
 
-        this.Client.on('debug', debug => {
+        this.Client.on(Discord.Events.Debug, debug => {
             this.StatesManager.ProcessDebugMessage(debug)
         })
 
-        this.Client.on('warn', warn => {
+        this.Client.on(Discord.Events.Warn, warn => {
             this.StatesManager.botLoadingState = 'Warning'
         })
 
-        this.Client.on('shardError', (error, shardID) => {
+        this.Client.on(Discord.Events.ShardError, (error, shardID) => {
             
         })
 
-        this.Client.on('invalidated', () => {
+        this.Client.on(Discord.Events.Invalidated, () => {
             
         })
 
-        this.Client.on('shardDisconnect', (colseEvent, shardID) => {
+        this.Client.on(Discord.Events.ShardDisconnect, (colseEvent, shardID) => {
             this.StatesManager.Shard.IsLoading = true
             this.StatesManager.Shard.LoadingText = 'Lecsatlakozva'
         })
 
-        this.Client.on('shardReady', (shardID) => {
+        this.Client.on(Discord.Events.ShardReady, (shardID) => {
             const mainGuild = this.Client.guilds.cache.get('737954264386764812')
             const quizChannel = mainGuild.channels.cache.get('799340273431478303')
             if (quizChannel && quizChannel.isTextBased()) {
@@ -156,16 +158,16 @@ module.exports = class DiscordBot {
             this.StatesManager.Shard.IsLoading = false
         })
 
-        this.Client.on('shardReconnecting', (shardID) => {
+        this.Client.on(Discord.Events.ShardReconnecting, (shardID) => {
             this.StatesManager.Shard.IsLoading = true
             this.StatesManager.Shard.LoadingText = 'Újracsatlakozás...'
         })
 
-        this.Client.on('shardResume', (shardID, replayedEvents) => {
+        this.Client.on(Discord.Events.ShardResume, (shardID, replayedEvents) => {
             this.StatesManager.Shard.IsLoading = false
         })
 
-        this.Client.on('raw', async event => {
+        this.Client.on(Discord.Events.Raw, async event => {
             
         })
 
@@ -185,13 +187,13 @@ module.exports = class DiscordBot {
             this.StatesManager.botLoadingState = 'All Ready'
         })
 
-        this.Client.on('presenceUpdate', (oldPresence, newPresence) => {
+        this.Client.on(Discord.Events.PresenceUpdate, (oldPresence, newPresence) => {
             
         })
 
-        this.Client.on('ready', () => this.OnReady())
-        this.Client.on('interactionCreate', (interaction) => this.OnInteraction(interaction))
-        this.Client.on('messageCreate', (message) => {
+        this.Client.on(Discord.Events.ClientReady, () => this.OnReady())
+        this.Client.on(Discord.Events.InteractionCreate, (interaction) => this.OnInteraction(interaction))
+        this.Client.on(Discord.Events.MessageCreate, (message) => {
             message.fetch()
                 .then(fetchedMessage => {
                     this.OnMessage(fetchedMessage)
@@ -260,6 +262,28 @@ module.exports = class DiscordBot {
         ImageCache.DownloadEverything(this.Client)
 
         this.Database.dataBot.day = dayOfYear
+
+        this.Commands = new Discord.Collection()
+
+        const commandsPath = Path.join(__dirname, 'commands2')
+        const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'))
+        for (const file of commandFiles) {
+            const filePath = Path.join(commandsPath, file)
+            if (!fs.statSync(filePath).isFile()) { continue }
+
+            try {
+                /** @type {import("./commands2/base").Command} */
+                const command = require(filePath)
+                if ('Data' in command && 'Execute' in command) {
+                    this.Commands.set(command.Data.name, command)
+                } else {
+                    console.warn(`The command at ${filePath} is missing a required "data" or "execute" property`)
+                }
+            } catch (error) {
+                LogError(error)
+            }
+        }
+
     }
 
     /** @param {Discord.Interaction<Discord.CacheType>} interaction */
@@ -516,10 +540,12 @@ module.exports = class DiscordBot {
             }
         }
     
+        /*
         if (message.content.startsWith(CONFIG.perfix)) {
             this.OnSimpleCommand(message, thisIsPrivateMessage, sender, message.content.substring(1).trim())
             return
         }
+        */
     
         if (this.ListOfHelpRequiestUsers.includes(message.author.id) === true) {
             if (message.content.toLowerCase().includes('igen')) {
@@ -541,291 +567,30 @@ module.exports = class DiscordBot {
      * @param {boolean} privateCommand
      */
     async OnCommand(command, privateCommand) {
-        const isDm = command.guild == null
-    
-        /*
-        if (command.commandName == `test`) {
-            const modal = new ModalBuilder()
-                .setCustomId('myModal')
-                .setTitle('My Modal');
-    
-            // Add components to modal
-    
-            // Create the text input components
-            const favoriteColorInput = new TextInputBuilder()
-                .setCustomId('favoriteColorInput')
-                // The label is the prompt the user sees for this input
-                .setLabel("What's your favorite color?")
-                // Short means only a single line of text
-                .setStyle(TextInputStyle.Short);
-    
-            const hobbiesInput = new TextInputBuilder()
-                .setCustomId('hobbiesInput')
-                .setLabel("What's some of your favorite hobbies?")
-                // Paragraph means multiple lines of text.
-                .setStyle(TextInputStyle.Paragraph);
-    
-            // An action row only holds one text input,
-            // so you need one action row per text input.
-            const firstActionRow = new ActionRowBuilder().addComponents(favoriteColorInput);
-            const secondActionRow = new ActionRowBuilder().addComponents(hobbiesInput);
-    
-            // Add inputs to the modal
-            modal.addComponents(firstActionRow, secondActionRow);
-    
-            await command.showModal(modal);
-    
-            return;
-        }
-        */
-    
-        if (command.commandName === `handlebars` || command.commandName === `webpage`) {
-            const { GetHash } = require('./economy/userHashManager')
-            const button = new ButtonBuilder()
-                .setLabel('Weboldal')
-                .setStyle(Discord.ButtonStyle.Link)
-                .setURL('http://bbpezsgo.ddns.net:5665/public?user=' + GetHash(command.user.id))
-            const row = new ActionRowBuilder()
-                .addComponents(button)
-                await command.reply({ components: [ row ], ephemeral: true })
-            return
-        }
-    
-        if (command.commandName === `hangman`) {
-            CommandHangman(command, this.HangmanManager, true)
-            return
-        }
-    
-        if (command.commandName == `gift`) {
-            this.Database.UserstatsSendCommand(command.user)
-            CommandGift.OnCommand(command, this.Database)
-            return
-        }
-    
-        if (command.commandName === `tesco`) {
-            const CommandTesco = require('./commands/tesco')
-            await CommandTesco(command)
-            return
-        }
-    
-        if (command.commandName === `crossout`) {
-            const Crossout = require('./commands/crossout')
-            await command.deferReply({ ephemeral: privateCommand })
-            Crossout.GetItem(command, command.options.getString('search'), privateCommand)
-            return
-        }
-    
-        if (command.commandName === `market` || command.commandName === `piac`) {
-            command.reply(CommandMarket.OnCommand(this.Database, this.Database.dataMarket, command.user, privateCommand))
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `xp` || command.commandName === `score`) {
-            const CommandXp = require('./economy/xp')
-            CommandXp(command, this.Database, privateCommand)
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName == `ping`) {
-            var WsStatus = "Unknown"
-            if (this.Client.ws.status === 0) {
-                WsStatus = "Kész"
-            } else if (this.Client.ws.status === 1) {
-                WsStatus = "Csatlakozás"
-            } else if (this.Client.ws.status === 2) {
-                WsStatus = "Újracsatlakozás"
-            } else if (this.Client.ws.status === 3) {
-                WsStatus = "Tétlen"
-            } else if (this.Client.ws.status === 4) {
-                WsStatus = "Majdnem kész"
-            } else if (this.Client.ws.status === 5) {
-                WsStatus = "Lecsatlakozba"
-            } else if (this.Client.ws.status === 6) {
-                WsStatus = "Várakozás guild-okra"
-            } else if (this.Client.ws.status === 7) {
-                WsStatus = "Azonosítás"
-            } else if (this.Client.ws.status === 8) {
-                WsStatus = "Folytatás"
-            }
-            const embed = new Discord.EmbedBuilder()
-                .setTitle('Pong!')
-                .setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/ping-pong_1f3d3.png')
-                .setColor(Color.Highlight)
-                .addFields([
-                    {
-                        name: '\\🤖 BOT:',
-                        value:
-                        `> Készen áll: <t:${ToUnix(new Date(this.Client.readyTimestamp))}:T> óta`
-                    },
-                    {
-                        name: '\\📡 WebSocket:',
-                        value:
-                        '> Ping: ' + this.Client.ws.ping + ' ms\n' +
-                    '> Státusz: ' + WsStatus
-                    }
-                ])
-            if (this.Client.shard != null) {
-                embed.addFields([{
-                    name: 'Shard:',
-                    value:
-                    '> Fő port: ' + this.Client.shard.parentPort + '\n' +
-                    '> Mód: ' + this.Client.shard.mode
-                }])
-            }
-            await command.reply({ embeds: [embed], ephemeral: privateCommand })
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `weather`) {
-            const CommandWeather = require('./commands/weather')
-            const weatherLocation = command.options.getString('location', false)
-            if (weatherLocation == 'mars') {
-                await CommandWeather(command, privateCommand, false)
-            } else if (weatherLocation == 'earth' || weatherLocation == null) {            
-                await CommandWeather(command, privateCommand)
-            } else {
-                await command.reply({ content: '> \\❌ **Nem tudok ilyen helyről <:wojakNoBrain:985043138471149588>**' })
-            }
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `dev`) {
-            if (command.user.id === '726127512521932880') {
-                this.Database.UserstatsSendCommand(command.user)
-                const embed = new Discord.EmbedBuilder()
-                    .addFields([{
-                        name: 'Fejlesztői parancsok',
-                        value:
-                        '> \\❔  `.quiz`\n' +
-                        '>  \\📊  `.poll simple`\n' +
-                        '>  \\📊  `.poll wyr`'
-                    }])
-                    .setColor(Color.Highlight)
-                    await command.reply({ embeds: [embed], ephemeral: true })
-            } else {
-                await command.reply({ content: '> \\⛔ **Nincs jogosultságod a parancs használatához!**', ephemeral: true })
-            }
-            return
-        }
-    
-        if (command.commandName === `help`) {
-            const CommandHelp = require('./commands/help')
-            await command.reply({ embeds: [CommandHelp(isDm)], ephemeral: privateCommand })
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `crate`) {
-            await command.reply(CommandOpenCrate.On(command.member.id, command.options.getInteger("darab"), this.Database))
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `heti`) {
-            await command.reply(CommandOpenDailyCrate.On(command.user.id, command.options.getInteger("darab"), this.Database, economy))
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `napi`) {
-            await command.reply(CommandOpenDailyCrate.On(command.user.id, command.options.getInteger("darab"), this.Database, economy))
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `profil` || command.commandName === `profile`) {
-            const CommandProfil = require('./economy/profil')
-            await CommandProfil(this.Database, command, privateCommand)
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `backpack`) {
-            CommandBackpack.OnCommand(command, this.Database, privateCommand)
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `bolt` || command.commandName === `shop`) {
-            await command.reply(CommandShop.CommandShop(command.channel, command.user, command.member, this.Database, 0, '', privateCommand))
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `quiz`) {
-            await command.deferReply()
-            this.Client.channels.fetch(ChannelId.Quiz)
-                .then(async () => {
-                    try {
-                        QuizManager.Quiz(this.Client, command.options.getString("title"), command.options.getString("options"), command.options.getString("option_emojis"), command.options.getInteger("add_xp"), command.options.getInteger("remove_xp"), command.options.getInteger("add_token"), command.options.getInteger("remove_token"))
-                            .then(() => {
-                                command.editReply({ content: '> \\✔️ **Kész**', ephemeral: true })
-                            })
-                            .catch((error) => {
-                                command.editReply({ content: '> \\❗ **Hiba: ' + error.toString() + '**', ephemeral: true })
-                            })
-                    } catch (error) {
-                        command.editReply({ content: '> \\❗ **Hiba: ' + error.toString() + '**', ephemeral: true })
-                    }
+        const commandHandler = this.Commands.get(command.commandName)
+
+        if (commandHandler) {
+            try {
+                await commandHandler.Execute(command, privateCommand, this)
+            } catch (error) {
+                LogError(error)
+                await command.reply({
+                    content: `> \\❌ **Error:** ${error}`,
+                    ephemeral: privateCommand,
                 })
-                .catch((error) => {
-                    command.editReply({ content: '> \\❗ **Hiba: ' + error.toString() + '**', ephemeral: true })
-                })
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === 'quizdone') {
-            await QuizManager.QuizDoneTest(this.Client, command)
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `font`) {
-            const { CommandFont } = require('./commands/fonts')
-            CommandFont(command, privateCommand)
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `music`) {
-            if (isDm == false) {
-                if (command.options.getSubcommand() == 'play') {
-                    await this.MusicPlayer.CommandMusic(command, command.options.getString('url'))
-                } else if (command.options.getSubcommand() == `skip`) {
-                    await this.MusicPlayer.CommandSkip(command)
-                } else if (command.options.getSubcommand() == `list`) {
-                    await this.MusicPlayer.CommandMusicList(command)
-                }
-            } else {
-                command.reply("> \\❌ **Ez a parancs csak szerveren használható!**")
             }
-            this.Database.UserstatsSendCommand(command.user)
-            return
-        }
-    
-        if (command.commandName === `settings` || command.commandName === `preferences`) {
-            await command.deferReply()
-            const member = await command.member.fetch()
-            await member.guild.fetch()
-            await command.editReply(CommandSettings(this.Database, command.member, privateCommand))
-            this.Database.UserstatsSendCommand(command.user)
             return
         }
     
         await command.reply("> \\❌ **Ismeretlen parancs `" + command.commandName + "`! **`/help`** a parancsok listájához!**")
     }
 
-    /**
+    /*
      * @param {Discord.Message<boolean>} message
      * @param {boolean} thisIsPrivateMessage
      * @param {Discord.User} sender
      * @param {string} command
-     */
+     *
     async OnSimpleCommand(message, thisIsPrivateMessage, sender, command) {
     
         //#region Enabled in dm
@@ -1024,11 +789,11 @@ module.exports = class DiscordBot {
                 message.channel.send("> Az opciók száma nem lehet több 5-nél")
                 return
             }
-            */
+            *
     
-            /**
+            /*
              * @type {ButtonBuilder[]}
-             */
+             *
             /*
             let buttons = []
             for (let i = 0; i < icons.length; i++) {
@@ -1058,9 +823,10 @@ module.exports = class DiscordBot {
                 addNewPoll(msg.id, title, texts, icons, this.Database)
             })
             return
-            */
+            *
         }
     }
+    */
 
     Login() {
         return new Promise(resolve => {

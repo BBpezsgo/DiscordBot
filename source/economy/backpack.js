@@ -98,7 +98,7 @@ function GetEmbed(e, database, privateCommand) {
 }
 
 /**
- * @param {Discord.ButtonInteraction<Discord.CacheType>} e 
+ * @param {Discord.RepliableInteraction<Discord.CacheType>} e 
  * @param {DatabaseManager} database
  * @param {boolean} privateCommand
  */

@@ -226,16 +226,27 @@ class HangmanManager {
 }
 
 /**
- * @param {Discord.Interaction} e
+ * @param {Discord.ChatInputCommandInteraction} e
  * @param {HangmanManager} manager
  */
-function CommandHangman(e, manager, isCommand) {
+async function CommandHangman(e, manager, isCommand) {
     var isMenu = (manager.GetPlayerIndex(e.user.id) == null)
     if (isCommand) {
-        e.reply(GetMessage(isMenu, manager, e.user))
+        await e.reply(GetMessage(isMenu, manager, e.user))
     } else {
-        e.update(GetMessage(isMenu, manager, e.user))
+        await e.editReply(GetMessage(isMenu, manager, e.user))
     }
 }
 
-module.exports = { CommandHangman, HangmanManager }
+/** @type {import("./base").Command} */
+const Command = {
+    Data: {},
+    Execute: async (interaction, ephemeral, sender) => {
+        await CommandHangman(interaction, sender.HangmanManager, true)
+    }
+}
+
+module.exports = {
+    ...Command,
+    HangmanManager,
+}
