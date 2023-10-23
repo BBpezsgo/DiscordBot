@@ -5,6 +5,9 @@ const jsdom = require('jsdom')
 const CONFIG = require('../config.json')
 const Path = require('path')
 
+/**
+ * @param {any} text
+ */
 function ParseData(text) {
     const c = new jsdom.JSDOM(text)
     /** @type {HTMLTableElement} */
@@ -29,7 +32,11 @@ function ParseData(text) {
 const ONE_DAY = (1000 * 60 * 60 * 24)
 const start = new Date(Date.now())
 const end = new Date(Date.now() + (ONE_DAY * 7))
+const town = 'Békéscsaba'
 
+/**
+ * @param {Date} date
+ */
 function DateToCorrectString(date) { return `${date.getFullYear()}.${date.getMonth()+1}.${date.getDate()}` }
 
 const authRequiredRes = "<?xml version='1.0' encoding='UTF-8'?>\n<partial-response id=\"j_id1\"><redirect url=\"/aram/pages/online/aramszunet.jsf\"></redirect></partial-response>"
@@ -72,7 +79,7 @@ function Get(statesManager, authValues = null) {
             'aramszunetForm%3Aj_idt30=aramszunetForm%3Aj_idt30&' +
             'aramszunetForm=aramszunetForm&' +
             'aramszunetForm%3Atelepules_focus=&' +
-            'aramszunetForm%3Atelepules_input=B%C3%A9k%C3%A9scsaba&' +
+            `aramszunetForm%3Atelepules_input=${encodeURIComponent(town)}&` +
             `aramszunetForm%3AstartDate_input=${DateToCorrectString(start)}&` +
             `aramszunetForm%3AendDate_input=${DateToCorrectString(end)}&` +
             'aramszunetForm%3AaramszunetTable_rppDD=10&' +
@@ -157,7 +164,7 @@ function Get(statesManager, authValues = null) {
 
 /** @returns {Promise<{viewState:string,cookies:string[]}>} @param {import('../functions/statesManager').StatesManager} statesManager */
 function Authorize(statesManager) {
-    return new Promise(((callback) => {
+    return new Promise(((resolve, reject) => {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/mvm/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/mvm/')) }
         
         statesManager.MVMReport.Service = 'Authorize self: Send HTTP requiest ...'
@@ -175,6 +182,7 @@ function Authorize(statesManager) {
                 data += chunk.toString()
                 statesManager.MVMReport.Service = `Authorize self: Process HTTP response (${data.length}) ...`
             })
+            res.on('error', reject)
             res.on('end', () => {
                 statesManager.MVMReport.Service = 'Authorize self: HTTP response ended'
 
@@ -191,13 +199,11 @@ function Authorize(statesManager) {
                     throw new Error('MVM Auth failed')
                 }
                 statesManager.MVMReport.Service = 'Authorized'
-                callback({ viewState: viewState, cookies: setCookie })
+                resolve({ viewState: viewState, cookies: setCookie })
             })
         })
 
-        req.on('error', (error) => {
-            throw error
-        })
+        req.on('error', reject)
 
         req.end()
     }))

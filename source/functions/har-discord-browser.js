@@ -35,6 +35,14 @@ function Load() {
         if (!entry.request.url.startsWith('https://discord.com/api/v9/')) { continue }
         const url = new URL(entry.request.url)
         const apiPath = url.pathname.replace('/api/v9/', '')
+
+        let response = null
+        if (entry.response.content.mimeType === 'application/json') {
+            try { response = JSON.parse(entry.response.content.text) }
+            catch (error)
+            { console.error(error) }
+        }
+
         if (apiPath.startsWith('channels')) {
             const channel = apiPath.split('/')[1]
             const method = apiPath.split('/')[2]
@@ -64,7 +72,7 @@ function Load() {
                     }
                 }
             } else {
-                console.log(method)
+                console.log(response)
             }
         } else if (apiPath.startsWith('invites')) {
             const inviteID = apiPath.replace('invites/', '')
@@ -82,6 +90,11 @@ function Load() {
         } else if (apiPath.startsWith('users')) {
             const userId = apiPath.split('/')[1]
             const userPath = apiPath.substring(userId.length + 'users'.length + 2)
+            if (userId === '@me') {
+
+            } else {
+                
+            }
         } else if (apiPath === 'science') {
         } else if (apiPath === 'auth/login') {
         } else if (apiPath === 'auth/mfa/totp') {
@@ -91,7 +104,7 @@ function Load() {
             const guildId = apiPath.split('/')[1]
             const guildPath = apiPath.substring(guildId.length + 'guilds'.length + 2)
         } else {
-            
+            debugger
         }
     }
 
@@ -169,6 +182,14 @@ function Guilds(cache = true) {
 
     const guilds = { }
     
+    if (fs.existsSync(MANUAL_PATH + 'guilds.json')) {
+        const raw = fs.readFileSync(MANUAL_PATH + 'guilds.json', 'utf-8')
+        const parsed = JSON.parse(raw)
+        for (const id in parsed) {
+            guilds[id] = parsed[id]
+        }
+    }
+
     for (const invitation of invitations) {
         if (!invitation.guild) { continue }
         if (!guilds[invitation.guild.id]) {
@@ -177,19 +198,22 @@ function Guilds(cache = true) {
                 memberCount: invitation.approximate_member_count,
                 channels: { },
             }
+        } else {
+            guilds[invitation.guild.id] = {
+                ...guilds[invitation.guild.id],
+                ...invitation.guild,
+                memberCount: invitation.approximate_member_count,
+                channels: { },
+            }
         }
 
         if (!guilds[invitation.guild.id].channels[invitation.channel.id]) {
             guilds[invitation.guild.id].channels[invitation.channel.id] = invitation.channel
-        }
-    }
-
-    if (fs.existsSync(MANUAL_PATH + 'guilds.json')) {
-        const raw = fs.readFileSync(MANUAL_PATH + 'guilds.json', 'utf-8')
-        const parsed = JSON.parse(raw)
-        for (const id in parsed) {
-            if (guilds[id]) continue
-            guilds[id] = parsed[id]
+        } else {
+            guilds[invitation.guild.id].channels[invitation.channel.id] = {
+                ...guilds[invitation.guild.id].channels[invitation.channel.id],
+                ...invitation.channel,
+            }
         }
     }
 

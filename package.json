@@ -7,8 +7,7 @@
     "test": "node ./source/tests/test.js",
     "build": "tsc --project tsconfig.json",
     "start": "cd source && node --trace-warnings entry.js",
-    "check": "depcheck",
-    "lint": "eslint ."
+    "check": "depcheck"
   },
   "dependencies": {
     "@discordjs/voice": "^0.13.0",

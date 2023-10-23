@@ -157,9 +157,19 @@ export type Invitation = {
     inviter: User
     approximate_member_count: number
     approximate_presence_count: number
+    
+    message: undefined
 } | {
     message: string
     code: number
+    
+    type: undefined
+    expires_at: undefined
+    guild: undefined
+    channel: undefined
+    inviter: undefined
+    approximate_member_count: undefined
+    approximate_presence_count: undefined
 }
 
 export type CollectedGuild = {
