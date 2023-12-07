@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
 
-export async function Quiz(client: Discord.Client, titleText: string, listOfOptionText: string, listOfOptionEmojis: string, addXpValue, removeXpValue, addToken, removeToken, image: Discord.MessageAttachment = undefined)
+export async function Quiz(client: Discord.Client, titleText: string, listOfOptionText: string, listOfOptionEmojis: string, addXpValue, removeXpValue, addToken, removeToken, image: Discord.Attachment = null)
 export function HasQuizStreakRole(member: Discord.GuildMember): boolean
 export async function QuizDone(client: Discord.Client, quizMessageId: string, correctIndex: number)
 export async function QuizDoneTest(client: Discord.Client, command: Discord.ChatInputCommandInteraction<Discord.CacheType>)
@@ -28,6 +28,7 @@ export type Quiz = {
 }
 
 export type SendedQuiz = Quiz & {
+    Debug: object
     MessageID: string
 }
 

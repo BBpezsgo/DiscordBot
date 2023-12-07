@@ -2,12 +2,15 @@ const Discord = require('discord.js')
 const fs = require('fs')
 const { StatesManager } = require('../functions/statesManager')
 const { userstatsSendMeme, userstatsSendMusic, userstatsSendYoutube, userstatsSendMessage, userstatsSendChars, userstatsSendCommand, userstatsAddUserToMemory } = require('../economy/userstats.js')
-const LogError = require('./errorLog')
+const LogError = require('./errorLog').LogError
 
+/**
+ * @param {any} obj
+ */
 function IsAnything(obj) {
     if (obj == undefined) { return false }
     if (obj == null) { return false }
-    if (obj === {}) { return false }
+    if (Object.keys(obj).length === 0) { return false }
     return true
 }
 
@@ -39,7 +42,20 @@ class DatabaseManager {
     /** @param {Discord.User} user @param {string} username */
     SaveUserToMemoryAll(user, username) {
         if (!this.dataBackpacks[user.id]) {
-            this.dataBackpacks[user.id] = {}
+            this.dataBackpacks[user.id] = {
+                crates: 0,
+                getGift: 0,
+                gifts: 0,
+                jewel: 0,
+                luckyCards: {
+                    small: 0,
+                    medium: 0,
+                    large: 0,
+                },
+                quizTokens: 0,
+                tickets: 0,
+                username: username
+            }
         }
         this.dataBackpacks[user.id].username = username
         if (!this.dataBackpacks[user.id].crates) {
@@ -58,7 +74,11 @@ class DatabaseManager {
             this.dataBackpacks[user.id].quizTokens = 0
         }
         if (!this.dataBackpacks[user.id].luckyCards) {
-            this.dataBackpacks[user.id].luckyCards = {}
+            this.dataBackpacks[user.id].luckyCards = {
+                small: 0,
+                medium: 0,
+                large: 0,
+            }
         }
         if (!this.dataBackpacks[user.id].luckyCards.small) {
             this.dataBackpacks[user.id].luckyCards.small = 0
@@ -134,7 +154,7 @@ class DatabaseManager {
             this.dataUsernames[user.id] = {}
         }
         this.dataUsernames[user.id].username = username
-        this.dataUsernames[user.id].avatarURL = user.avatarURL({ format: 'png' })
+        this.dataUsernames[user.id].avatarURL = user.avatarURL({ extension: 'png' })
 
         if (!this.dataBusinesses[user.id]) {
             this.dataBusinesses[user.id] = {}

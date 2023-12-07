@@ -26,7 +26,8 @@ const Command = {
     /** @param {Discord.ChatInputCommandInteraction} interaction */
     Execute: async function(interaction, ephemeral, sender) {
         CommandFont(interaction, ephemeral)
-    }
+    },
+    Guild: null,
 }
 
 module.exports = Command

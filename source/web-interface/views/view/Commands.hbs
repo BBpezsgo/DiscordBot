@@ -16,7 +16,7 @@
 </head>
 
 <body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
-	<div style="width: 250px;" id="context-menubar">
+	<div id="context-menubar">
 		<div id="context-menubar-content">
 
 		</div>
@@ -26,135 +26,94 @@
 	</div>
 	<div id="content">
 
-        <h1>Application</h1>
+        <h1>Application Commands</h1>
 
+        <div class="container loading-effect" style="padding-top: 20px;">
+            <form action="/view/Commands/Fetch" method="post"
+                style="margin-left: 5px; display: inline-block;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
+                <input type="submit" value="Fetch">
+            </form>
+
+            <form action="/view/Commands/DeleteAll" method="post"
+                style="margin-left: 5px; display: inline-block;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; document.getElementById('deletingProgressPanel').style.display = 'inline-block'; refreshCreatingProgressBar = true;"
+                class="show-invert-{{deleting}}">
+                <input type="submit" value="Delete All">
+                <div id="lbl-error-post-delete"></div>
+            </form>
+
+            <div id="deletingProgressPanel" class="show-{{deleting}}">
+                <label for="deletingProgress">Deleting...</label>
+                <progress id="deletingProgress" value="{{deletingPercent}}" max="1"></progress>
+            </div>
+
+            <form action="/view/Commands/Createall" method="post"
+                style="margin-left: 5px; display: inline-block;"
+                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; document.getElementById('creatingProgressPanel').style.display = 'inline-block'; refreshCreatingProgressBar = true;"
+                class="show-invert-{{creating}}">
+                <input type="submit" value="Create All">
+                <div id="lbl-error-post-create"></div>
+            </form>
+            
+            <div id="creatingProgressPanel" class="show-{{creating}}">
+                <label for="creatingProgress">Creating...</label>
+                <progress id="creatingProgress" value="{{creatingPercent}}" max="1"></progress>
+            </div>
+        </div>
+        
         <div class="container loading-effect">
-            <h2>Commands</h2>
-            <table border="0" width="100%">
-                <tbody>
-                    <tr>
-                        <td>
-                            <form action="/view/Commands/Fetch" method="post"
-                                style="margin-left: 5px; display: inline-block;"
-                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%';">
-                                <input type="submit" value="Fetch">
-                            </form>
-                            <form action="/view/Commands/DeleteAll" method="post"
-                                style="margin-left: 5px; display: inline-block;"
-                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; document.getElementById('deletingProgressPanel').style.display = 'inline-block'; refreshCreatingProgressBar = true;"
-                                class="show-invert-{{deleting}}">
-                                <input type="submit" value="Delete All">
-                            </form>
-                            <div id="lbl-error-post-delete"></div>
-                            <div id="deletingProgressPanel" class="show-{{deleting}}">
-                                <label for="deletingProgress">Deleting...</label>
-                                <progress id="deletingProgress" value="{{deletingPercent}}" max="1"></progress>
-                            </div>
-                            <form action="/view/Commands/Createall" method="post"
-                                style="margin-left: 5px; display: inline-block;"
-                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; document.getElementById('creatingProgressPanel').style.display = 'inline-block'; refreshCreatingProgressBar = true;"
-                                class="show-invert-{{creating}}">
-                                <input type="submit" value="Create All">
-                            </form>
-                            <div id="lbl-error-post-create"></div>
-                            <div id="creatingProgressPanel" class="show-{{creating}}">
-                                <label for="creatingProgress">Creating...</label>
-                                <progress id="creatingProgress" value="{{creatingPercent}}" max="1"></progress>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="698" align="center">
-                            <table class="datas" border="1" align="center" width="698" cellspacing="0" cellpadding="0" style="margin-top: 10px;">
-                                <tbody>
-                                    <tr>
-                                        <td class="ListM">
-                                            <div class="caret-all"></div>
-                                        </td>
-                                        <td class="ListM">
-                                            <b>Type</b>
-                                        </td>
-                                        <td class="ListM" style="width: 100%;">
-                                            <b>Name</b>
-                                        </td>
-                                        <td class="ListM">
-                                            <b>Description</b>
-                                        </td>
-                                        <td class="ListM">
-                                            <b>ID</b>
-                                        </td>
-                                        <td class="ListM">
-                                            <b>Created At</b>
-                                        </td>
-                                        <td class="ListM">
-                                            <b>Global</b>
-                                        </td>
-                                        <td class="ListM">
-                                            
-                                        </td>
-                                    </tr>
-                                    {{#each commands}}
-                                    <tr>
-                                        <td style="padding:0 2 0 2;word-break:break-all; width: 16px;">
-                                            <div class="caret show-{{this.haveOptions}}" id="{{this.id}}"></div>
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            <img src="/dcbot/images/command-{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeUrl}}">
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.name}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.description}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.id}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.createdAt}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all; text-align: center;">
-                                            <img src="/images/bool-{{this.global}}.png" class="miniicon">
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            <form action="/view/Commands/Update" method="post"
-                                                style="margin: 0; display: inline-block;"
-                                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                                                <input type="text" name="id" value="{{this.id}}" style="display: none;">
-                                                <input type="submit" value="Update">
-                                            </form>
-                                            <form action="/view/Commands/Delete" method="post"
-                                                style="margin: 0; display: inline-block;"
-                                                onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
-                                                <input type="text" name="id" value="{{this.id}}" style="display: none;">
-                                                <input type="submit" value="Delete">
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    {{#each options}}
-                                    <tr class="nested {{../id}}">
-                                        <td style="padding:0 2 0 2;word-break:break-all; width: 16px;">
-                                            
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            <img src="/dcbot/images/commandt-{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeUrl}}">
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.name}}
-                                        </td>
-                                        <td style="padding:0 2 0 2;word-break:break-all">
-                                            {{this.description}}
-                                        </td>
-                                        <td colspan="4"></td>
-                                    </tr>
-                                    {{/each}}
-                                    {{/each}}
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <style>
+                #commands-table {
+                    margin-top: 10px;
+                }
+
+                #commands-table .command-row {
+                    background-color: #fff1;
+                    margin-top: 10px;
+                    border-radius: 6px;
+                    padding: 8px 4px;
+                }
+
+                .caret.show-true {
+                    display: inline-block;
+                }
+            </style>
+            <div id="commands-table">
+                {{#each commands}}
+                <div class="command-row">
+                    <img src="/dcbot/images/command-{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeUrl}}" class="miniicon">
+                    <div style="width: 16px;" class="caret show-{{this.haveOptions}}" id="{{this.id}}"></div>
+                    <span style="color: #fff; font-weight: 600; margin-right: 20px;">
+                        {{this.name}}
+                    </span>
+                    <!--<span style="color: #777;">{{this.description}}</span>-->
+                    <code style="font-family: Consolas; background-color: #2b2d31; border-radius: 3px;">{{this.id}}</code>
+                    <!--<span>{{this.createdAt}}</span>-->
+                    <img src="/images/bool-{{this.global}}.png" class="miniicon" title="Is it global?">
+                    <form action="/view/Commands/Update" method="post"
+                        
+                        style="margin: 0; display: inline-block;"
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                        <input type="submit" class="btn-fetch" value="" title="Fetch">
+                    </form>
+                    <form action="/view/Commands/Delete" method="post"
+                        style="margin: 0; display: inline-block;"
+                        onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
+                        <input type="text" name="id" value="{{this.id}}" style="display: none;">
+                        <input type="submit" class="btn-delete" value="" title="Delete">
+                    </form>
+                    {{#each options}}
+                    <div class="nested {{../id}}">
+                        <img src="/dcbot/images/commandt-{{this.typeUrl}}.png" width="16" height="16" title="{{this.typeUrl}}" class="miniicon">
+                        <span style="color: #fff; font-weight: 600; margin-right: 20px;">{{this.name}}</span>
+                        <span style="color: #777;">{{this.description}}</span>
+                    </div>
+                    {{/each}}
+                </div>
+                {{/each}}
+            </div>
         </div>
         
 	</div>

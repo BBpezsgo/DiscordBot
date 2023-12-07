@@ -2,7 +2,7 @@ const fs = require('fs')
 const Types = require('./archive-browser')
 const Path = require('path')
 const CSV = require('csv')
-const LogError = require('./errorLog')
+const LogError = require('./errorLog').LogError
 
 const ARCHIVE_PATH = 'D:/Mappa/Discord/DiscordOldData/'
 
@@ -22,7 +22,7 @@ function GetFolders(folder) {
 
 function Guilds() {
     /** @type {Types.Dictionary<string, string>} */
-    const index = JSON.parse(fs.readFileSync(ARCHIVE_PATH + 'servers/index.json'))
+    const index = JSON.parse(fs.readFileSync(ARCHIVE_PATH + 'servers/index.json', 'utf8'))
 
     const folders = GetFolders(ARCHIVE_PATH + 'servers/')
 
@@ -183,7 +183,6 @@ function Account() {
         username: accountData.username,
         discriminator: accountData.discriminator,
         flags: accountData.flags,
-        id: accountData.id,
         avatarData: Buffer.from(avatarImageData).toString('base64'),
     }
 }
@@ -231,7 +230,7 @@ async function Servers() {
                     name: messageChannel.name,
                     type: messageChannel.type,
                     permission_overwrites: [],
-                    messages: messageChannel.messages
+                    messages: messageChannel.messages,
                 })
             }
         } else {

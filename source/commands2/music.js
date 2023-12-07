@@ -40,7 +40,8 @@ const Command = {
         } else {
             interaction.reply("> \\❌ **Ez a parancs csak szerveren használható!**")
         }
-    }
+    },
+    Guild: null,
 }
 
 module.exports = Command

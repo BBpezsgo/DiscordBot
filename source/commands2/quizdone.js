@@ -10,7 +10,8 @@ const Command = {
     /** @param {Discord.ChatInputCommandInteraction} interaction */
     Execute: async function(interaction, ephemeral, sender) {
         await QuizManager.QuizDoneTest(interaction.client, interaction)
-    }
+    },
+    Guild: '737954264386764812',
 }
 
 module.exports = Command

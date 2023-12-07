@@ -15,7 +15,8 @@ const Command = {
     /** @param {Discord.ChatInputCommandInteraction} interaction */
     Execute: async function(interaction, ephemeral, sender) {
         CommandGift.OnCommand(interaction, sender.Database)
-    }
+    },
+    Guild: '737954264386764812',
 }
 
 module.exports = Command

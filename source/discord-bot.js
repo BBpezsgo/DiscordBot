@@ -2,7 +2,7 @@ const Discord = require('discord.js')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
 const { StatesManager } = require('./functions/statesManager')
-const LogError = require('./functions/errorLog')
+const LogError = require('./functions/errorLog').LogError
 const LogManager = require('./functions/log')
 const ImageCache = require('./functions/image-cache')
 const { DatabaseManager } = require('./functions/databaseManager')
@@ -283,7 +283,6 @@ module.exports = class DiscordBot {
                 LogError(error)
             }
         }
-
     }
 
     /** @param {Discord.Interaction<Discord.CacheType>} interaction */

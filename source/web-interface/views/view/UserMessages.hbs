@@ -51,7 +51,7 @@
 </head>
 
 <body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
-	<div style="width: 250px;" id="context-menubar">
+	<div id="context-menubar">
         <div id="server-panel">
             <style>
                 #server-panel table, #server-panel tr, #server-panel td {
@@ -85,10 +85,15 @@
                         {{/if}}
                     </td>
                     <td style="font-size: 14px; font-weight: 600; max-width: 70px; overflow: hidden;">
-                        <span title="Username">{{this.username}}</span><span style="color: #999;" title="Discriminator">#{{this.discriminator}}</span>
+                        <span title="Username">{{this.username}}</span>{{#if this.discriminator}}<span style="color: #999;" title="Discriminator">#{{this.discriminator}}</span>{{/if}}
                         
                         {{#if bot}}<span class="tag">BOT</span>{{/if}}
                         {{#if system}}<span class="tag">System</span>{{/if}}
+                        
+                        {{#if archived}}
+                            <img src="/images/archived.png" width="12" height="12" title="Loaded from user-exported data" style="transform: translateY(2px); opacity: 50%;">
+                        {{/if}}
+                        
                         {{#if flags.HypeSquadOnlineHouse1}}
                         <span class="user-badge">
                             <img src="https://static.wikia.nocookie.net/discord/images/3/31/Hypesquad_bravery_badge.png">

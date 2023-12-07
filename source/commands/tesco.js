@@ -9,7 +9,7 @@ const Path = require('path')
 /** @param {Discord.CommandInteraction<Discord.CacheType>} command */
 module.exports = async (command) => {
     await command.deferReply()
-    Tesco.SearchFor(command.options.get('search').value)
+    Tesco.SearchFor(command.options.get('search').value.toString())
         .then(async searchResult => {
             const result = searchResult.result
             if (!result) {
@@ -55,8 +55,7 @@ module.exports = async (command) => {
                         embeds.push(embed)
                     }
                 } catch (error) {
-                    const LogError = require('../functions/errorLog')
-                    LogError(error)
+                    require('../functions/errorLog').LogError(error)
                 }
             })
 

@@ -1,6 +1,6 @@
 const { usersWithTax } = require('../functions/enums')
 const { DatabaseManager } = require('../functions/databaseManager')
-const LogError = require('../functions/errorLog')
+const LogError = require('../functions/errorLog').LogError
 
 /** @param {DatabaseManager} database @param {number} lastDay */
 function Taxation(database, lastDay) {

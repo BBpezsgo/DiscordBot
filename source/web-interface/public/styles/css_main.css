@@ -803,6 +803,49 @@ input[type=submit].btn-fetch:active {
 	opacity: 100%;
 }
 
+button.btn-delete,
+input[type=submit].btn-delete {
+	border: none;
+	color: var(--text);
+	background-color: transparent;
+	border-radius: 50%;
+	transition: background 200ms, opacity 200ms;
+	cursor: pointer;
+	font-weight: bold;
+	width: 24px;
+	height: 24px;
+	position: relative;
+	display: inline-block;
+	padding: unset;
+	min-width: unset;
+	opacity: 50%;
+	background-image: url('../images/delete.png');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+
+button.btn-delete:focus-visible,
+button.btn-delete:focus,
+input[type=submit].btn-delete:focus-visible,
+input[type=submit].btn-delete:focus {
+	outline: 1px solid #fff2;
+	opacity: 100%;
+}
+
+button.btn-delete:hover,
+input[type=submit].btn-delete:hover {
+	background-color: #fff2;
+	opacity: 100%;
+}
+
+button.btn-delete:active,
+input[type=submit].btn-delete:active {
+	background-color: #fff4;
+	outline: none;
+	opacity: 100%;
+}
+
 .user-badge {
 	user-select: none;
 	width: 16px;
@@ -958,6 +1001,7 @@ button.btn-toggle-info:active {
 #context-menubar {
 	background-color: #2b2d31;
 	height: 100%;
+	width: 240px;
 	display: flex;
 	flex-direction: column;
 }
@@ -967,7 +1011,7 @@ button.btn-toggle-info:active {
 	overflow-x: hidden;
 	overflow-y: auto;
 	flex: 1 1;
-	margin: 4px;
+	margin: 4px 0px 4px 4px;
 }
 html {height: 100%;}
 

@@ -61,6 +61,7 @@ const Command = {
             ephemeral,
         })
 	},
+    Guild: null,
 }
 
 module.exports = Command

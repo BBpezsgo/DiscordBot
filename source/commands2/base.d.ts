@@ -4,4 +4,5 @@ import DiscordBot from "../discord-bot"
 export type Command = {
     Data: SlashCommandBuilder | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
     Execute(interaction: ChatInputCommandInteraction, ephemeral: boolean, sender: DiscordBot): Promise<void>
+    Guild: string | null
 }

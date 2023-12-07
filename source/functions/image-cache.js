@@ -1,5 +1,5 @@
 const fs = require('fs')
-const LogError = require('./errorLog')
+const LogError = require('./errorLog').LogError
 const Discord = require('discord.js')
 const https = require('https')
 

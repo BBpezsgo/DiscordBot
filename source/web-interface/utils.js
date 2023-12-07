@@ -1,7 +1,7 @@
 // @ts-check
 
 const Discord = require('discord.js')
-const LogError = require('../functions/errorLog')
+const LogError = require('../functions/errorLog').LogError
 const CacheManager = require('../functions/offline-cache')
 const { GetID, GetHash } = require('../economy/userHashManager')
 const { DatabaseManager } = require('../functions/databaseManager.js')
@@ -75,6 +75,101 @@ function UserJson(user, database = null) {
         userJson.flags.TeamPseudoUser = user.flags.has('TeamPseudoUser')
         userJson.flags.VerifiedBot = user.flags.has('VerifiedBot')
         userJson.flags.VerifiedDeveloper = user.flags.has('VerifiedDeveloper')
+    }
+    return userJson
+}
+
+/**
+ * @param {HarBrowser.User} user
+ * @param {DatabaseManager?} database
+ */
+function UserJsonHar(user, database = null) {
+    const userJson = {
+        defaultAvatarUrl: 'https://cdn.discordapp.com/embed/avatars/0.png',
+        avatarUrlSmall: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=${16}`,
+        avatarUrlMedium: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=${32}`,
+        avatarUrlBig: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=${128}`,
+        id: user.id,
+        flags: {
+            BotHTTPInteractions: false,
+            BugHunterLevel1: false,
+            BugHunterLevel2: false,
+            CertifiedModerator: false,
+            HypeSquadOnlineHouse1: false,
+            HypeSquadOnlineHouse2: false,
+            HypeSquadOnlineHouse3: false,
+            Hypesquad: false,
+            Partner: false,
+            PremiumEarlySupporter: false,
+            Quarantined: false,
+            Spammer: false,
+            Staff: false,
+            TeamPseudoUser: false,
+            VerifiedBot: false,
+            VerifiedDeveloper: false,
+        },
+        bot: user.bot,
+        discriminator: user.discriminator,
+        username: user.username,
+        haveHash: (GetHash(user.id) !== null && GetHash(user.id) !== undefined),
+        hash: '' + GetHash(user.id),
+        haveDatabase: database ? database.dataBasic[user.id] !== undefined : false,        
+    }
+    /*
+    if (user.public_flags) {            
+        userJson.flags.BotHTTPInteractions = user.public_flags.has('BotHTTPInteractions')
+        userJson.flags.BugHunterLevel1 = user.flags.has('BugHunterLevel1')
+        userJson.flags.BugHunterLevel2 = user.flags.has('BugHunterLevel2')
+        userJson.flags.CertifiedModerator = user.flags.has('CertifiedModerator')
+        userJson.flags.HypeSquadOnlineHouse1 = user.flags.has('HypeSquadOnlineHouse1')
+        userJson.flags.HypeSquadOnlineHouse2 = user.flags.has('HypeSquadOnlineHouse2')
+        userJson.flags.HypeSquadOnlineHouse3 = user.flags.has('HypeSquadOnlineHouse3')
+        userJson.flags.Hypesquad = user.flags.has('Hypesquad')
+        userJson.flags.Partner = user.flags.has('Partner')
+        userJson.flags.PremiumEarlySupporter = user.flags.has('PremiumEarlySupporter')
+        userJson.flags.Quarantined = user.flags.has('Quarantined')
+        userJson.flags.Spammer = user.flags.has('Spammer')
+        userJson.flags.Staff = user.flags.has('Staff')
+        userJson.flags.TeamPseudoUser = user.flags.has('TeamPseudoUser')
+        userJson.flags.VerifiedBot = user.flags.has('VerifiedBot')
+        userJson.flags.VerifiedDeveloper = user.flags.has('VerifiedDeveloper')
+    }
+    */
+    return userJson
+}
+
+/**
+ * @param {ArchiveBrowser.ArchivedAccount} user
+ * @param {DatabaseManager?} database
+ */
+function UserJsonArchived(user, database = null) {
+    const userJson = {
+        defaultAvatarUrl: 'https://cdn.discordapp.com/embed/avatars/0.png',
+        avatarUrlSmall: "data:png;base64," + user.avatarData,
+        avatarUrlMedium: "data:png;base64," + user.avatarData,
+        avatarUrlBig: "data:png;base64," + user.avatarData,
+        id: user.id,
+        flags: {
+            BotHTTPInteractions: false,
+            BugHunterLevel1: false,
+            BugHunterLevel2: false,
+            CertifiedModerator: false,
+            HypeSquadOnlineHouse1: false,
+            HypeSquadOnlineHouse2: false,
+            HypeSquadOnlineHouse3: false,
+            Hypesquad: false,
+            Partner: false,
+            PremiumEarlySupporter: false,
+            Quarantined: false,
+            Spammer: false,
+            Staff: false,
+            TeamPseudoUser: false,
+            VerifiedBot: false,
+            VerifiedDeveloper: false,
+        },
+        bot: false,
+        discriminator: user.discriminator,
+        username: user.username,    
     }
     return userJson
 }
@@ -555,6 +650,8 @@ function GetHandlebarsMessage(client, content, serverID = undefined) {
 
 module.exports = {
     UserJson,
+    UserJsonHar,
+    UserJsonArchived,
     UsersCache,
     ServersCache,
     ChannelsCache,

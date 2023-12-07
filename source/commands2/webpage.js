@@ -18,7 +18,8 @@ const Command = {
             components: [ row ],
             ephemeral: true,
         })
-    }
+    },
+    Guild: '737954264386764812',
 }
 
 module.exports = Command

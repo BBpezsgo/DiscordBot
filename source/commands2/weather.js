@@ -5,7 +5,7 @@ const SunCalc = require('suncalc')
 const Openweathermap = require('../services/Openweathermap')
 const NASA = require('../services/NASA')
 const WeatherAlertsService = require('../services/weatherMet')
-const LogError = require('../functions/errorLog')
+const LogError = require('../functions/errorLog').LogError
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
@@ -520,7 +520,8 @@ const Command = {
         }
         
         await command.reply({ content: '> \\❌ **Nem tudok ilyen helyről <:wojakNoBrain:985043138471149588>**', ephemeral })
-    }
+    },
+    Guild: null,
 }
 
 module.exports = {

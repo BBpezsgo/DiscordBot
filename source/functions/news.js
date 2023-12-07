@@ -2,7 +2,7 @@ const Discord = require("discord.js")
 const fs = require("fs")
 const { Color } = require('./enums.js')
 const { StatesManager } = require('./statesManager')
-const LogError = require('./errorLog')
+const LogError = require('./errorLog').LogError
 const ytdl = require("ytdl-core")
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')

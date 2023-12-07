@@ -12,7 +12,8 @@ const Command = {
         const member = await interaction.member.fetch()
         await member.guild.fetch()
         await interaction.editReply(CommandSettings(sender.Database, interaction.member, ephemeral))
-    }
+    },
+    Guild: '737954264386764812',
 }
 
 module.exports = Command

@@ -82,7 +82,7 @@ function Get(statesManager, authValues = null) {
             `aramszunetForm%3Atelepules_input=${encodeURIComponent(town)}&` +
             `aramszunetForm%3AstartDate_input=${DateToCorrectString(start)}&` +
             `aramszunetForm%3AendDate_input=${DateToCorrectString(end)}&` +
-            'aramszunetForm%3AaramszunetTable_rppDD=10&' +
+            `aramszunetForm%3AaramszunetTable_rppDD=${10}&` +
             `javax.faces.ViewState=${(authValues === null) ? "-0000000000000000000:-0000000000000000000" : authValues.viewState}`
 
         statesManager.MVMReport.Service = 'Send HTTP request...'

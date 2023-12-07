@@ -8,7 +8,7 @@ const path = require('path')
 const Discord = require('discord.js')
 const LogManager = require('../functions/log')
 const ContentParser = require('./content-parser')
-const LogError = require('../functions/errorLog')
+const LogError = require('../functions/errorLog').LogError
 const CacheManager = require('../functions/offline-cache')
 const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../economy/userHashManager')
 const fs = require('fs')
@@ -268,9 +268,9 @@ class WebInterfaceManager {
         this.wss.on('listening', () => {
             const wssAddress = this.wss.address()
             if (typeof wssAddress === 'string') {
-                console.log('[WebSocketServer]: Listening on ' + wssAddress)
+                console.log(`[WebSocketServer]: Listening on ${wssAddress}`)
             } else {
-                console.log('[WebSocketServer]: Listening on ' + wssAddress.address + ':' + wssAddress.port + ' (' + wssAddress.family + ')')
+                console.log(`[WebSocketServer]: Listening on ${wssAddress.address}:${wssAddress.port} (${wssAddress.family})`)
             }
         })
         this.wss.on('close', () => {
@@ -281,19 +281,19 @@ class WebInterfaceManager {
         })
         this.wss.on('connection', req => {
             req.on('message', (data) => {
-                console.log('[WebSocketServer]: received: ' + data.toString('utf8'))
+                console.log('[WebSocketServer]: Received: ' + data.toString('utf8'))
             })
             req.on('close', (code, reason) => {
-                console.log('[WebSocketServer]: Client "' + req.url + '" closed (' + code + ') (' + reason + ')')
+                console.log(`[WebSocketServer]: Client "${req.url}" closed (${code})`, reason.toString('utf8'))
             })
             req.on('error', (error) => {
-                console.error('[WebSocketServer]: Client "' + req.url + '" error', error)
+                console.error(`[WebSocketServer]: Client "${req.url}" error`, error)
             })
             req.on('ping', (data) => {
-                console.error('[WebSocketServer]: Client "' + req.url + '" ping', data.toString('utf8'))
+                console.log(`[WebSocketServer]: Client "${req.url}" ping`, data.toString('utf8'))
             })
             req.on('pong', (data) => {
-                console.error('[WebSocketServer]: Client "' + req.url + '" pong', data.toString('utf8'))
+                console.log(`[WebSocketServer]: Client "${req.url}" pong`, data.toString('utf8'))
             })
         })
 

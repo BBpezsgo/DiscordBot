@@ -1,7 +1,7 @@
 const { StatesManager } = require('./statesManager')
 const { Client } = require('discord.js')
 const SendTest = false
-const LogError = require('./errorLog')
+const LogError = require('./errorLog').LogError
 
 const Discord = require('discord.js')
 const SunCalc = require('suncalc')

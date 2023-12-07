@@ -2,7 +2,7 @@
 
 const Discord = require('discord.js')
 const { Color } = require('../functions/enums')
-const LogError = require('../functions/errorLog')
+const LogError = require('../functions/errorLog').LogError
 const CrossoutDB = require('../services/crossoutdb')
 
 function lbl(txt) { return '**`' + txt + '`**' }

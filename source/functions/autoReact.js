@@ -3,7 +3,7 @@ const fs = require('fs')
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')
-const LogError = require('./errorLog')
+const LogError = require('./errorLog').LogError
 
 /** @param {Message} message */
 function AutoReact(message) {

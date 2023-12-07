@@ -5,7 +5,7 @@ process.title = "Discord BOT"
 
 console.log('[Script]: Listening to uncaught exceptions ...')
 
-const LogError = require('./functions/errorLog')
+const { LogError, LogCrash } = require('./functions/errorLog')
 const fs = require('fs')
 const Path = require('path')
 /** @type {import('./config').Config} */
@@ -18,7 +18,7 @@ process.on('uncaughtException', (error, origin) => {
 console.log('[Script]: Init process ...')
 
 // @ts-ignore
-process.__defineGetter__('stderr', () => { return fs.createWriteStream(Path.join(CONFIG.paths.base, 'node.error.log'), { flags: 'a' }) })
+process.__defineGetter__('stderr', () => { return fs.createWriteStream(Path.join(CONFIG.paths.base, 'node.stderr.log'), { flags: 'a' }) })
 process.stdin.on('mousepress', (info) => { })
 process.stdin.resume()
 

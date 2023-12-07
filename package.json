@@ -4,10 +4,7 @@
   "description": "A discord.js application",
   "repository": "https://github.com/BBpezsgo/DiscordBot",
   "scripts": {
-    "test": "node ./source/tests/test.js",
-    "build": "tsc --project tsconfig.json",
-    "start": "cd source && node --trace-warnings entry.js",
-    "check": "depcheck"
+    "start": "cd source && node --trace-warnings entry.js"
   },
   "dependencies": {
     "@discordjs/voice": "^0.13.0",

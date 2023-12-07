@@ -29,7 +29,7 @@ var logManager = new LogManager(null, null)
 logManager.Loading('Loading packet', "fs")
 const fs = require('fs')
 
-process.__defineGetter__('stderr', function() { return fs.createWriteStream('./node.error.log', {flags:'a'}) })
+process.__defineGetter__('stderr', function() { return fs.createWriteStream('./node.stderr.log', {flags:'a'}) })
 
 var botStopped = false
 
@@ -365,7 +365,7 @@ async function playAudio(command) {
     const stream = ytdl(link, { filter: 'audioonly' })
     const player = createAudioPlayer()
 
-    /** @type {Discord.VoiceChannel} */
+    /** @ts-ignore @type {Discord.VoiceChannel} */
     const voiceChannel = command.member.voice.channel
     const connection = joinVoiceChannel({
         channelId: voiceChannel.id,

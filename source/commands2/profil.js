@@ -9,7 +9,8 @@ const Command = {
     /** @param {Discord.ChatInputCommandInteraction} interaction */
     Execute: async function(interaction, ephemeral, sender) {
         await CommandProfil(sender.Database, interaction, ephemeral)
-    }
+    },
+    Guild: '737954264386764812',
 }
 
 module.exports = Command

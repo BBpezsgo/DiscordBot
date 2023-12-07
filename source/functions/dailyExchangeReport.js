@@ -2,7 +2,7 @@ const { StatesManager } = require('./statesManager')
 
 const Discord = require('discord.js')
 
-const LogError = require('./errorLog')
+const LogError = require('./errorLog').LogError
 const { FormatError } = require('./formatError')
 const Utils = require('./utils')
 

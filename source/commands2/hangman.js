@@ -243,7 +243,8 @@ const Command = {
     Data: {},
     Execute: async (interaction, ephemeral, sender) => {
         await CommandHangman(interaction, sender.HangmanManager, true)
-    }
+    },
+    Guild: '737954264386764812',
 }
 
 module.exports = {

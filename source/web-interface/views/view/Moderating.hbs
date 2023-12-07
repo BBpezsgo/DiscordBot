@@ -80,7 +80,7 @@
 </head>
 
 <body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
-	<div style="width: 240px;" id="context-menubar">
+	<div id="context-menubar">
         <div id="server-panel" onclick="document.getElementById('server-menu').classList.toggle('server-menu-visible')">
             <style>
                 #server-panel table, #server-panel tr, #server-panel td {
@@ -755,6 +755,10 @@
                         <div id="msg-attachment-{{this.id}}" style="display:block;">
                             {{#switch this.contentType}}
                                 {{#case 'image/jpeg'}}
+                                <img src="{{this.url}}"height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
+                                {{/case}}
+                                
+                                {{#case 'image/png'}}
                                 <img src="{{this.url}}"height="{{this.height}}" style="display: block; max-height: 256px; border-radius: 8px; margin: 4px 0px 0px 0px;">
                                 {{/case}}
 

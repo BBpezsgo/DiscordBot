@@ -17,7 +17,8 @@ const Command = {
         const Crossout = require('../commands/crossout')
         await interaction.deferReply({ ephemeral })
         Crossout.GetItem(interaction, interaction.options.getString('search'))
-    }
+    },
+    Guild: null,
 }
 
 module.exports = Command

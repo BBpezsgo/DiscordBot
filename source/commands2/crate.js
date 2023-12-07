@@ -12,7 +12,8 @@ const Command = {
                 .setRequired(true)),
     Execute: async function(interaction, ephemeral, sender) {
         await interaction.reply(CommandOpenCrate.On(interaction.member.id, interaction.options.getInteger("darab"), sender.Database))
-    }
+    },
+    Guild: '737954264386764812',
 }
 
 module.exports = Command

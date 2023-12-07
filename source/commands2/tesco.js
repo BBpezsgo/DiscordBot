@@ -15,7 +15,8 @@ const Command = {
     Execute: async function(command, ephemeral, sender) {
         const CommandTesco = require('../commands/tesco')
         await CommandTesco(command)
-    }
+    },
+    Guild: null,
 }
 
 module.exports = Command

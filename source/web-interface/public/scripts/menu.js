@@ -58,7 +58,7 @@ const items = [
     }
 ]
 
-/** @param {(result: { id: string, iconUrl: string, name: string, HAR?: boolean }[]) => void} callback */
+/** @param {(result: { id: string, iconUrl: string, name: string, source: string }[]) => void} callback */
 function GetGuilds(callback) {
     var xmlHttp =  new XMLHttpRequest()
     xmlHttp.open('GET', '/dcbot/guilds.json')
@@ -188,7 +188,41 @@ function menuDisplay() {
         
             const newA = document.createElement('a')
             newA.id = `guild-a${guild.id}`
-            if (!guild.HAR) {
+            if (guild.source === 'har') {
+                newA.href = `/dcbot/view/moderating.html/Search?id=${guild.id}`
+                newA.onclick = (e) => {
+                    collapseAll()
+                    UnselectAll()
+                    /** @type {HTMLElement} */
+                    // @ts-ignore
+                    const target = e.target
+                    const guild = target.getAttribute('data').split('-')[1]
+                    document.getElementById('guild-ol' + guild).classList.add('selected')
+                }
+                /*
+                const newIcon = document.createElement('div')
+                newIcon.className = 'chrome-icon'
+                newIcon.title = 'Loaded from HAR data'
+                newOL.appendChild(newIcon)
+                */
+            } else if (guild.source === 'archive') {
+                newA.href = `/dcbot/view/moderating.html/Search?id=${guild.id}`
+                newA.onclick = (e) => {
+                    collapseAll()
+                    UnselectAll()
+                    /** @type {HTMLElement} */
+                    // @ts-ignore
+                    const target = e.target
+                    const guild = target.getAttribute('data').split('-')[1]
+                    document.getElementById('guild-ol' + guild).classList.add('selected')
+                }
+                /*
+                const newIcon = document.createElement('div')
+                newIcon.className = 'archived-icon'
+                newIcon.title = 'Loaded from user-exported data'
+                newOL.appendChild(newIcon)
+                */
+            } else {
                 newA.href = `/dcbot/view/Moderating.html/Search?id=${guild.id}`
                 newA.onclick = (e) => {
                     collapseAll()
@@ -199,21 +233,6 @@ function menuDisplay() {
                     const guild = target.getAttribute('data').split('-')[1]
                     document.getElementById('guild-ol' + guild).classList.add('selected')
                 }
-            } else {
-                newA.href = `/har/view/moderating/Search?id=${guild.id}`
-                newA.onclick = (e) => {
-                    collapseAll()
-                    UnselectAll()
-                    /** @type {HTMLElement} */
-                    // @ts-ignore
-                    const target = e.target
-                    const guild = target.getAttribute('data').split('-')[1]
-                    document.getElementById('guild-ol' + guild).classList.add('selected')
-                }
-                const newIcon = document.createElement('div')
-                newIcon.className = 'chrome-icon'
-                newIcon.title = 'Loaded from HAR data'
-                newOL.appendChild(newIcon)
             }
             newA.setAttribute('data', `guild-${guild.id}`)
             newA.target = 'mainFrame'

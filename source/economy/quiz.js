@@ -4,7 +4,8 @@ const {
     ChannelId
 } = require('../functions/enums.js')
 const Types = require('./quiz')
-const LogError = require('../functions/errorLog.js')
+const LogError = require('../functions/errorLog.js').LogError
+const { ToUnix } = require('../functions/utils.js')
 
 /**@param {number} days @returns {number} */
 function DaysToMilliseconds(days) {
@@ -50,17 +51,21 @@ function GenerateQuiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValu
 
 /**
  * @param {Discord.Client} client
- * @param {any} image
  * @param {string} titleText
  * @param {string} listOfOptionText
  * @param {string} listOfOptionEmojis
+ * @param {any} addXpValue
+ * @param {any} removeXpValue
+ * @param {any} addToken
+ * @param {any} removeToken
+ * @param {Discord.Attachment} image
  */
 async function Quiz(client, titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image = undefined) {
     const quiz = GenerateQuiz(titleText, listOfOptionText, listOfOptionEmojis, addXpValue, removeXpValue, addToken, removeToken, image?.url)
     
     const embed = GetEmbed(quiz)
 
-    /** @type {Discord.GuildTextBasedChannel} */
+    /** @ts-ignore @type {Discord.GuildTextBasedChannel} */
     const quizChannel = client.channels.cache.get(ChannelId.Quiz)
     const sentQuiz = await quizChannel.send({ embeds: [embed] })
     if (sentQuiz) {
@@ -123,7 +128,7 @@ function HasQuizStreakRole(member) {
  * @param {number} correctIndex
  */
 async function QuizDone(client, quizMessageId, correctIndex) {
-    /**@type {Discord.TextChannel} */
+    /** @ts-ignore @type {Discord.TextChannel} */
     const channel = client.channels.cache.get(ChannelId.Quiz)
     channel.messages.fetch({ limit: 10 }).then(async (messages) => {
         const message = messages.get(quizMessageId)
@@ -192,12 +197,12 @@ async function QuizDone(client, quizMessageId, correctIndex) {
  * @param {Discord.Client} client
  */
 async function GetLastQuizMessage(client) {
-    /**@type {Discord.GuildTextBasedChannel} */
+    /** @ts-ignore @type {Discord.GuildTextBasedChannel} */
     const channel = client.channels.cache.get(ChannelId.Quiz)
-    const messages = await channel.messages.fetch({ limit: 3 })
+    const messages = await channel.messages.fetch({ limit: 5 })
     for (let i = 0; i < messages.size; i++) {
         const message = messages.at(i)
-        if (message.embeds.length !== 1) { continue }
+        if (message.embeds.length == 0) { continue }
         const embed = message.embeds[0]
         if (embed.title !== 'Quiz!') { continue }
 
@@ -211,6 +216,9 @@ async function GetLastQuizMessage(client) {
  */
 async function GetLastQuiz(client) {
     const message = await GetLastQuizMessage(client)
+
+    if (message.embeds.length == 0) { return }
+
     const embed = message.embeds[0]
 
     const lines = embed.description.split('\n')
@@ -267,7 +275,7 @@ async function GetLastQuiz(client) {
     /** @type {Types.SendedQuiz} */
     const quiz = {
         Debug,
-        EndsAt: embed.timestamp,
+        EndsAt: Number.parseInt(embed.timestamp),
         Question: embed.fields[0].name,
         Reward: {
             Score: Number.parseInt(awardAdd0),
@@ -290,7 +298,7 @@ async function GetLastQuiz(client) {
  */
 async function GetLastFinishedQuiz(client, correctAnswer = null) {
     const message = await GetLastQuizMessage(client)
-    /** @type {Types.FinishedQuiz} */
+    /** @ts-ignore @type {Types.FinishedQuiz} */
     const quiz = await GetLastQuiz(client)
     quiz.Reactions = [ ]
     
@@ -353,9 +361,38 @@ async function QuizDoneTest(client, command) {
         )
     }
 
+    /** @type {Discord.APIEmbed} */
+    const embed = {
+        title: 'Finishing Quiz',
+        description: quiz.Question,
+        color: Discord.resolveColor(Color.Pink),
+        fields: [
+            {
+                name: 'Info',
+                value: `> ☑️ ${quiz.Reward.Score} 🍺 & ${quiz.Reward.Token} 🎫\n` +
+                       `> ❌ -${quiz.Penalty.Score} 🍺 & -${quiz.Penalty.Token} 🎫\n` +
+                       `> Ends in <t:${ToUnix(new Date(quiz.EndsAt))}:R>`,
+                inline: true,
+            },
+        ],
+    }
+
+    const reactionsField = {
+        name: 'Reactions',
+        value: '',
+        inline: false,
+    }
+    for (const yeah of quiz.Reactions) {
+        reactionsField.value += `<@${yeah.User.ID}> - ${yeah.Reaction} ${((yeah.User.WantToMultiply && yeah.User.AnswerStreak) ? '🎯' : '')}\n`
+    }
+    reactionsField.value = reactionsField.value.trimEnd()
+    embed.fields.push(reactionsField)
+
     command.editReply({
-        content: '```json\n' + JSON.stringify(quiz, null, ' ') + '\n```',
+        // content: '```json\n' + JSON.stringify(quiz, null, ' ') + '\n```',
+        embeds: [ embed ],
         components: [
+            // @ts-ignore
             new Discord.ActionRowBuilder()
                 .addComponents(
                     new Discord.StringSelectMenuBuilder()
@@ -403,11 +440,11 @@ function OnSelectMenu(e) {
                 }
             }
 
-            /** @type {Discord.GuildTextBasedChannel} */
+            /** @ts-ignore @type {Discord.GuildTextBasedChannel} */
             const channel = e.client.channels.cache.get(ChannelId.Quiz)
             channel.send(finalText)
                 .then(() => {
-                    e.editReply('Ok')
+                    e.editReply('> \\✔️ **OK**')
                 })
                 .catch(LogError)
         })

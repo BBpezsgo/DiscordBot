@@ -8,13 +8,14 @@ const path = require('path')
 const Discord = require('discord.js')
 const LogManager = require('../functions/log')
 const ContentParser = require('./content-parser')
-const LogError = require('../functions/errorLog')
+const LogError = require('../functions/errorLog').LogError
 const CacheManager = require('../functions/offline-cache')
 const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../economy/userHashManager')
 const fs = require('fs')
 const os = require('os')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
+const DiscordUtils = require('../functions/discord-utils')
 const {
     WsStatusText,
     NsfwLevel,
@@ -23,7 +24,7 @@ const {
 } = require('../functions/enums')
 const { GetTime, GetDataSize, GetDate } = require('../functions/utils')
 const { HbLog, HbGetLogs, HbStart } = require('./log')
-const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
+const Commands = require('../functions/commands')
 const { MessageType, GuildVerificationLevel } = require('discord.js')
 const process = require('process')
 const archivePath = 'D:/Mappa/Discord/DiscordOldData/'
@@ -471,19 +472,33 @@ class WebInterfaceHandlebarsManager {
                     id: guild.id,
                     iconUrl: guild.iconURL({ size: 64 }),
                     name: guild.name,
+                    source: 'discord',
                 })
             })
             
             const harGuilds = HarBrowser.Guilds()
             for (const harGuildId in harGuilds) {
+
+                let added = false
+                for (const addedGuild of guilds) {
+                    if (addedGuild.id === harGuildId) {
+                        added = true
+                        break
+                    }
+                }
+
+                if (added) { continue }
+
                 const harGuild = harGuilds[harGuildId]
+                
                 guilds.push({
                     id: harGuild.id,
                     name: harGuild.name,
                     iconUrl: `https://cdn.discordapp.com/icons/${harGuild.id}/${harGuild.icon}.webp?size=64`,
-                    HAR: true,
+                    source: 'har',
                 })
             }
+            
             res.status(200).send(JSON.stringify(guilds))
         })
 
@@ -1002,18 +1017,29 @@ class WebInterfaceHandlebarsManager {
             this.StopBot()
         })
 
-        this.app.post('/view/Commands/Delete', (req, res) => {
-            const commandID = req.body.id
-            DeleteCommand(this.client, commandID, () => {
-                this.RenderPage_Commands(req, res)
-            })
+        this.app.post('/view/Commands/Delete', async (req, res) => {
+            const commandId = req.body.id
+            const command = await Commands.Fetch(this.client, commandId)
+            if (command) {
+                Commands.Delete(this.client, command.name)
+                    .finally(() => this.RenderPage_Commands(req, res))
+                return
+            }
+            this.RenderPage_Commands(req, res)
         })
 
-        this.app.post('/view/Commands/Update', (req, res) => {
-            const commandID = req.body.id
-            Updatecommand(this.client, commandID, () => {
-                this.RenderPage_Commands(req, res)
-            })
+        this.app.post('/view/Commands/Update', async (req, res) => {
+            const commandId = req.body.id
+            const command = await Commands.Fetch(this.client, commandId)
+            if (command) {
+                const commandData = Commands.Get(command.name)
+                if (commandData) {
+                    Commands.Update(this.client, commandData)
+                        .finally(() => this.RenderPage_Commands(req, res))
+                    return
+                }
+            }
+            this.RenderPage_Commands(req, res)
         })
 
         this.app.post('/dcbot/view/Moderating.html/SendMessage', (req, res) => {
@@ -1045,21 +1071,13 @@ class WebInterfaceHandlebarsManager {
 
         this.app.post('/view/Commands/DeleteAll', (req, res) => {
             this.commandsDeleting = true
-            DeleteCommandsSync(this.client, this.statesManager, (percent) => {
-                this.commandsDeletingPercent = percent
-            }, () => {
-                this.commandsDeleting = false
-            })
+            Commands.DeleteAll(this.client)
             this.RenderPage_Commands(req, res)
         })
 
         this.app.post('/view/Commands/Createall', (req, res) => {
             this.commandsCreating = true
-            CreateCommandsSync(this.client, this.statesManager, (percent) => {
-                this.commandsCreatingPercent = percent
-            }, () => {
-                this.commandsCreating = false
-            })
+            Commands.CreateAll(this.client)
             this.RenderPage_Commands(req, res)
         })
 
@@ -1109,9 +1127,12 @@ class WebInterfaceHandlebarsManager {
 
             if (this.client.guilds.cache.has(serverId)) {
                 this.moderatingSearchedServerId = serverId
-
+                this.RenderPage_ModeratingGuildSearch(req, res, '')
+            } else if (HarBrowser.Guilds()[serverId]) {
+                this.moderatingSearchedServerId = serverId
                 this.RenderPage_ModeratingGuildSearch(req, res, '')
             } else {
+                this.moderatingSearchedServerId = ''
                 this.RenderPage_ModeratingError(req, res, `Server \"${serverId}\" not found`)
             }
         })
@@ -1215,9 +1236,9 @@ class WebInterfaceHandlebarsManager {
 
             if (this.client.channels.cache.has(channelId)) {
                 this.moderatingSearchedChannelId = channelId
-
                 this.RenderPage_Moderating(req, res)
             } else {
+                this.moderatingSearchedChannelId = ''
                 this.RenderPage_ModeratingError(req, res, 'Channel not found')
             }
         })
@@ -1601,7 +1622,7 @@ class WebInterfaceHandlebarsManager {
     }
 
     RenderPage_ModeratingError(req, res, searchError) {
-        if (this.moderatingSearchedServerId.length > 0) {
+        if (false && this.moderatingSearchedServerId.length > 0) {
             this.RenderPage_ModeratingGuildSearch(req, res, searchError)
             return
         }
@@ -1817,7 +1838,7 @@ class WebInterfaceHandlebarsManager {
         res.render(`view/CacheUsers`, { users: Utils.UsersCache(this.client), errorMessage })
     }
 
-    RenderPage_ModeratingGuildSearch(req, res, searchError) {
+    async RenderPage_ModeratingGuildSearch(req, res, searchError) {
         if (this.moderatingSearchedServerId.length === 0) {
             this.RenderPage_ModeratingError(req, res, 'No server selected')
             return
@@ -1835,7 +1856,7 @@ class WebInterfaceHandlebarsManager {
             const c = g.channels.cache.get(this.moderatingSearchedChannelId)
     
             if (c) {
-                this.RenderPage_Moderating(req, res)
+                await this.RenderPage_Moderating(req, res)
                 return
             }
         }
@@ -1932,11 +1953,13 @@ class WebInterfaceHandlebarsManager {
         res.render(`view/ModeratingGuildSearch`, { server: guild, members: members, groups: Utils.ChannelsInGuild(g).groups, singleChannels: Utils.ChannelsInGuild(g).singleChannels, searchError: searchError, emojis: emojis })
     }
     
-    RenderPage_Moderating(req, res) {
+    async RenderPage_Moderating(req, res) {
         if (this.moderatingSearchedServerId.length === 0) {
             this.RenderPage_ModeratingError(req, res, 'No server selected')
             return
         }
+
+        const aaaah = (new DiscordUtils.Guild(this.moderatingSearchedServerId, this.client)).Load()
 
         const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
 
@@ -2038,6 +2061,145 @@ class WebInterfaceHandlebarsManager {
 
         /** @type {{id:string;createdAtTimestamp:number}[]} */
         const messages = []
+
+        const harMessages = HarBrowser.Load()?.channels[c.id]?.messages
+        if (harMessages) {
+            for (const message of harMessages) {
+                let memberAdded = false
+                for (const member of members) {
+                    if (member.id == message.author.id) {
+                        memberAdded = true
+                        break
+                    }
+                }
+
+                if (!memberAdded) {
+                    members.push(Utils.UserJsonHar(message.author))
+                }
+
+                const attachments = message.attachments
+                const attachmentsResult = []
+                for (const attachment of attachments) {
+                    attachmentsResult.push({
+                        name: attachment.filename,
+                        height: attachment.height,
+                        width: attachment.width,
+                        id: attachment.id,
+                        spoiler: false,
+                        url: attachment.url,
+                    })
+                }
+
+                const reactions = message.reactions
+                const reactionsResult = []
+                for (const reaction of reactions) {
+                    reactionsResult.push({
+                        count: reaction.count,
+                        name: reaction.emoji.name,
+                        me: reaction.me,
+                    })
+                }
+
+                const embedsResult = []
+                for (const embed of message.embeds) {
+                    embedsResult.push({
+                        color: embed.color,
+                        author: embed.author,
+                        description: Utils.GetHandlebarsMessage(this.client, embed.description, this.moderatingSearchedServerId),
+                        // @ts-ignore
+                        footer: embed.footer,
+                        // @ts-ignore
+                        image: embed.image,
+                        thumbnail: embed.thumbnail,
+                        url: embed.url,
+                        title: Utils.GetHandlebarsMessage(this.client, embed.title, this.moderatingSearchedServerId),
+                        fields: embed.fields.map(field => {
+                            return {
+                                name: Utils.GetHandlebarsMessage(this.client, field.name, this.moderatingSearchedServerId),
+                                value: Utils.GetHandlebarsMessage(this.client, field.value, this.moderatingSearchedServerId),
+                                inline: field.inline,
+                            }
+                        }),
+                    })
+                }
+
+                messages.push({
+                    // @ts-ignore
+                    content: Utils.GetHandlebarsMessage(this.client, message.content, this.moderatingSearchedServerId),
+                    reactions: reactionsResult,
+                    attachments: attachmentsResult,
+                    embeds: embedsResult,
+                    id: message.id,
+                    cleanContent: message.content,
+                    tts: message.tts,
+                    createdAt: GetDate(new Date(message.timestamp)),
+                    createdAtTimestamp: (new Date(message.timestamp)).getTime(),
+                    editedAt: GetDate(new Date(message.edited_timestamp)),
+                    pinned: message.pinned,
+                    type: message.type,
+                    types: {
+                        AutoModerationAction: message.type === MessageType.AutoModerationAction,
+                        Call: message.type === MessageType.Call,
+                        ChannelFollowAdd: message.type === MessageType.ChannelFollowAdd,
+                        ChannelIconChange: message.type === MessageType.ChannelIconChange,
+                        ChannelNameChange: message.type === MessageType.ChannelNameChange,
+                        ChannelPinnedMessage: message.type === MessageType.ChannelPinnedMessage,
+                        ChatInputCommand: message.type === MessageType.ChatInputCommand,
+                        ContextMenuCommand: message.type === MessageType.ContextMenuCommand,
+                        Default: message.type === MessageType.Default,
+                        GuildBoost: message.type === MessageType.GuildBoost,
+                        GuildBoostTier1: message.type === MessageType.GuildBoostTier1,
+                        GuildBoostTier2: message.type === MessageType.GuildBoostTier2,
+                        GuildBoostTier3: message.type === MessageType.GuildBoostTier3,
+                        RecipientRemove: message.type === MessageType.RecipientRemove,
+                        RecipientAdd: message.type === MessageType.RecipientAdd,
+                        GuildInviteReminder: message.type === MessageType.GuildInviteReminder,
+                        Reply: message.type === MessageType.Reply,
+                        ThreadCreated: message.type === MessageType.ThreadCreated,
+                        ThreadStarterMessage: message.type === MessageType.ThreadStarterMessage,
+                        UserJoin: message.type === MessageType.UserJoin,
+                    },
+                    author: Utils.UserJsonHar(message.author, this.database)
+                })
+            }
+        }
+
+        const archidedChannels = (await ArchiveBrowser.Messages())
+        if (archidedChannels) {
+            const archivedAccount = ArchiveBrowser.Account()
+            for (const archidedChannel of archidedChannels) {
+                if (archidedChannel.id !== c.id) { continue }
+                for (const message of archidedChannel.messages) {    
+                    const attachmentsResult = []
+                    if (message.attachment) {
+                        attachmentsResult.push({
+                            contentType: message.attachment.contentType,
+                            spoiler: false,
+                            url: message.attachment.url,
+                        })
+                    }
+            
+                    messages.push({
+                        // @ts-ignore
+                        content: Utils.GetHandlebarsMessage(this.client, message.content, this.moderatingSearchedServerId),
+                        reactions: [],
+                        attachments: attachmentsResult,
+                        embeds: [],
+                        id: message.id,
+                        cleanContent: message.content,
+                        tts: false,
+                        createdAt: GetDate(new Date(message.date)),
+                        createdAtTimestamp: (new Date(message.date)).getTime(),
+                        pinned: false,
+                        type: MessageType.Default,
+                        types: {
+                            Default: true,
+                        },
+                        author: Utils.UserJsonArchived(archivedAccount, this.database)
+                    })
+                }
+            }
+        }
 
         if (c.type === Discord.ChannelType.GuildText) {
             const cTxt = c
@@ -2222,7 +2384,7 @@ class WebInterfaceHandlebarsManager {
             commands.push(newCommand)
         });
 
-        res.render(`view/Moderating`, { commands: commands, deleting: this.commandsDeleting, creating: this.commandsCreating, deletingPercent: this.commandsDeletingPercent, creatingPercent: this.commandsCreatingPercent })
+        res.render(`view/Commands`, { commands: commands, deleting: this.commandsDeleting, creating: this.commandsCreating, deletingPercent: this.commandsDeletingPercent, creatingPercent: this.commandsCreatingPercent })
     }
 }
 

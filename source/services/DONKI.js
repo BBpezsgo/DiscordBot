@@ -19,7 +19,7 @@ function GST(fromCache = false) {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/donki/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/donki/')) }
         if (ReadFromCache || fromCache) {
             if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/donki/gst.json'))) {
-                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/donki/gst.json'), { encoding: 'utf-8' }))
+                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/donki/gst.json'), 'utf8'))
                 cached.cache = true
                 resolve(cached)
                 return
@@ -44,9 +44,9 @@ function GST(fromCache = false) {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/gst-headers.txt'), headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/gst-headers.txt'), headersText, 'utf8')
 
-                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/gst.json'), body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/gst.json'), JSON.stringify(JSON.parse(body), null, ' '), 'utf8')
                 resolve(JSON.parse(body))
             })
             .catch(error => reject('**HTTP Error:** ' + error))
@@ -58,7 +58,7 @@ function IPS(fromCache = false) {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/donki/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/donki/')) }
         if (ReadFromCache || fromCache) {
             if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/donki/ips.json'))) {
-                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/donki/ips.json'), { encoding: 'utf-8' }))
+                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/donki/ips.json'), 'utf8'))
                 cached.cache = true
                 resolve(cached)
                 return
@@ -83,9 +83,9 @@ function IPS(fromCache = false) {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/ips-headers.txt'), headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/ips-headers.txt'), headersText, 'utf8')
 
-                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/ips.json'), body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/ips.json'), JSON.stringify(JSON.parse(body), null, ' '), 'utf8')
                 resolve(JSON.parse(body))
             })
             .catch(error => reject('**HTTP Error:** ' + error))
@@ -97,7 +97,7 @@ function FLR(fromCache = false) {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/donki/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/donki/')) }
         if (ReadFromCache || fromCache) {
             if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/donki/flr.json'))) {
-                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/donki/flr.json'), { encoding: 'utf-8' }))
+                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/donki/flr.json'), 'utf8'))
                 cached.cache = true
                 resolve(cached)
                 return
@@ -122,9 +122,9 @@ function FLR(fromCache = false) {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/flr-headers.txt'), headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/flr-headers.txt'), headersText, 'utf8')
 
-                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/flr.json'), body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/flr.json'), JSON.stringify(JSON.parse(body), null, ' '), 'utf8')
                 resolve(JSON.parse(body))
             })
             .catch(error => reject('**HTTP Error:** ' + error))
@@ -136,7 +136,7 @@ function Notifications(fromCache = false) {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/donki/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/donki/')) }
         if (ReadFromCache || fromCache) {
             if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/donki/notifications.json'))) {
-                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/donki/notifications.json'), { encoding: 'utf-8' }))
+                const cached = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/donki/notifications.json'), 'utf8'))
                 cached.cache = true
                 resolve(cached)
                 return
@@ -161,9 +161,9 @@ function Notifications(fromCache = false) {
                 var headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
-                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/notifications-headers.txt'), headersText, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/notifications-headers.txt'), headersText, 'utf8')
 
-                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/notifications.json'), body, { encoding: 'utf-8' })
+                fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/notifications.json'), JSON.stringify(JSON.parse(body), null, ' '), 'utf8')
                 resolve(JSON.parse(body))
             })
             .catch(error => reject('**HTTP Error:** ' + error))

@@ -4,7 +4,7 @@ const SendTest = true
 
 const Discord = require('discord.js')
 const MVM = require('../services/mvm')
-const LogError = require('./errorLog')
+const LogError = require('./errorLog').LogError
 /** @type {import('../config').Config} */
 const CONFIG = require('../config.json')
 const Path = require('path')

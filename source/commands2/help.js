@@ -128,7 +128,8 @@ const Command = {
             embeds: [ GetEmbed(ephemeral, sender.Platform === 'MOBILE') ],
             ephemeral,
         })
-    }
+    },
+    Guild: null,
 }
 
 module.exports = Command
