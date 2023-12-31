@@ -1,6 +1,5 @@
 const QuizManager = require('../economy/quiz')
 const Discord = require('discord.js')
-const { ChannelId } = require('../functions/enums')
 
 /** @type {import("./base").Command} */
 const Command = {

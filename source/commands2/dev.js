@@ -1,4 +1,3 @@
-const CommandOpenCrate = require('../economy/open-daily-crate')
 const Discord = require('discord.js')
 const { Color } = require('../functions/enums')
 

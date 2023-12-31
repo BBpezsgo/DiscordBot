@@ -11,6 +11,13 @@ const Command = {
         interaction.reply(CommandMarket.OnCommand(sender.Database, sender.Database.dataMarket, interaction.user, ephemeral))
     },
     Guild: '737954264386764812',
+    OnButton: function(interaction, sender) {
+        if (CommandMarket.OnButton(interaction, sender.Database)) {
+            return Promise.resolve()
+        } else {
+            return false
+        }
+    },
 }
 
 module.exports = Command

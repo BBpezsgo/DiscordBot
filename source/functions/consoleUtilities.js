@@ -6,7 +6,7 @@ function Get(s) {
     // reuse the key array albeit its name
     // otherwise recompute as the mouse event is structured differently
     const modifier = s.charCodeAt(3)
-    /** @type {import('./consoleUtilities').ConsoleKey} */
+    /** @type {import('./consoleUtilities').ConsoleMouse} */
     var key = {}
     key.shift = !!(modifier & 4)
     key.meta = !!(modifier & 8)
@@ -15,7 +15,7 @@ function Get(s) {
     key.y = s.charCodeAt(5) - 32
     key.button = null
     key.sequence = s
-    key.buf = new Buffer(key.sequence)
+    key.buf = Buffer.from(key.sequence)
     if ((modifier & 96) === 96) {
         key.name = 'scroll'
         key.button = modifier & 1 ? 'down' : 'up'
@@ -65,7 +65,8 @@ class ConsoleUtilities extends EventEmitter {
             process.stdin.setRawMode(true)
         } else {
             const tty = require('tty')
-            if (tty.setRawMode)
+            if (tty['setRawMode'] && typeof tty['setRawMode'] === 'function')
+            // @ts-ignore
             { tty.setRawMode(true) }
         }
     }

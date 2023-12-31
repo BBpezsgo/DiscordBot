@@ -1,3 +1,4 @@
+const { Socket } = require("net")
 const { CliColor } = require("./enums")
 
 class StatesManager {
@@ -34,14 +35,7 @@ class StatesManager {
         }
 
         /** @type {{IsDone: boolean, Error: string, URL: string, ClientsTime: number[], Clients: Socket[], Requests: number[]}[]} */
-        this.WebInterface = {}/* {
-            IsDone: false,
-            Error: '',
-            URL: '',
-            ClientsTime: [],
-            Clients: [],
-            Requests: []
-        }*/
+        this.WebInterface = []
 
         /**@type {number} */
         this.heartbeat = 0
@@ -148,7 +142,7 @@ class StatesManager {
             this.Shard.LoadingText = 'Finishing...'
             this.Shard.Error = ''
         } else if (message.startsWith('[WS => Shard 0] Heartbeat acknowledged, latency of ')) {
-            this.ping = message.replace('[WS => Shard 0] Heartbeat acknowledged, latency of ', '')
+            this.ping = Number.parseInt(message.replace('[WS => Shard 0] Heartbeat acknowledged, latency of ', ''))
             this.Shard.Error = ''
             this.heartbeat = 1
         } else if (message.startsWith('[WS => Shard 0] [HeartbeatTimer] Sending a heartbeat.')) {

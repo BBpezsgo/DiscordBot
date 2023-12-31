@@ -1,5 +1,4 @@
 const Discord = require('discord.js')
-const fs = require('fs')
 const { ActionRowBuilder, ButtonBuilder, SelectMenuBuilder } = require('discord.js');
 const { DatabaseManager } = require('../functions/databaseManager')
 const { Abbrev } = require('../functions/utils')
@@ -139,7 +138,9 @@ function getEmbedMessage(sender, menuIndex, databaseManager, privateCommand) {
             colorEmoji = '🟩'
         } else if (userColor === "brown") {
             colorEmoji = '🟫'
-        } else if (userColor === "#000000") {
+        } else if (userColor === "black") {
+            colorEmoji = '⬛'
+        } else if (userColor === "white") {
             colorEmoji = '⬛'
         }
     
@@ -309,6 +310,7 @@ async function removeAllColorRoles(member, exceptRoleId) {
  * @param {number} menuIndex
  * @param {DatabaseManager} databaseManager
  * @param {boolean} privateCommand
+ * @returns {Discord.InteractionReplyOptions & { fetchReply: true }}
  */
 function CommandShop(channel, sender, senderMember, databaseManager, menuIndex = 0, newColorRole = '', privateCommand = false) {
     const money = databaseManager.dataBasic[sender.id].money
@@ -560,10 +562,12 @@ function OnButtonClick(e, database) {
     if (e.component.customId == 'shopClose') {
         e.client.channels.fetch(e.channelId)
             .then((channel) => {
-                channel.messages.fetch(e.message.id)
-                    .then((message) => {
-                        message.delete()
-                    })
+                if (channel.isTextBased()) {
+                    channel.messages.fetch(e.message.id)
+                        .then(message => {
+                            message.delete()
+                        })
+                }
             })
         return true
     }

@@ -4,7 +4,7 @@ const { Abbrev } = require('../functions/utils')
 const { DatabaseManager } = require('../functions/databaseManager')
 
 /**
- * @param {Discord.ButtonInteraction<Discord.CacheType>} e 
+ * @param {Discord.RepliableInteraction<Discord.CacheType>} e 
  * @param {DatabaseManager} database
  * @param {boolean} privateCommand
  * @returns {Discord.MessagePayload}

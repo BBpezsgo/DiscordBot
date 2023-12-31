@@ -12,11 +12,17 @@ const Command = {
                 .setDescription('Felhasználó')
                 .setRequired(true)
             ),
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
     Execute: async function(interaction, ephemeral, sender) {
         CommandGift.OnCommand(interaction, sender.Database)
     },
     Guild: '737954264386764812',
+    OnButton: function(interaction, sender) {
+        if (CommandGift.OnButtonClick(interaction, sender.Database)) {
+            return Promise.resolve()
+        } else {
+            return false
+        }
+    },
 }
 
 module.exports = Command

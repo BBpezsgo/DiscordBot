@@ -28,35 +28,41 @@ const awardRoleNames = {
 */
 module.exports = async (database, command, privateCommand) => {
     const embed = new Discord.EmbedBuilder()
-        .setColor(GetUserColor(database.dataBasic[command.member.id].color))
+        .setColor(GetUserColor(database.dataBasic[command.user.id].color))
         .setTitle('Profil')
         .setAuthor({ name: command.member.displayName, iconURL: command.member.displayAvatarURL() })
         .addFields([
             {
                 name: 'Matricák',
                 value:
-                    '> ' + database.dataStickers[command.member.id].stickersMusic + ' \\🎼 Zene\n' +
-                    '> ' + database.dataStickers[command.member.id].stickersMeme + ' \\🎭 Meme\n' +
-                    '> ' + database.dataStickers[command.member.id].stickersMessage + ' \\📋 Üzenet\n' +
-                    '> ' + database.dataStickers[command.member.id].stickersCommand + ' \\🖥️ Parancs\n' +
-                    '> ' + database.dataStickers[command.member.id].stickersTip + ' \\💡 Ötlet'
+                    '> ' + database.dataStickers[command.user.id].stickersMusic + ' \\🎼 Zene\n' +
+                    '> ' + database.dataStickers[command.user.id].stickersMeme + ' \\🎭 Meme\n' +
+                    '> ' + database.dataStickers[command.user.id].stickersMessage + ' \\📋 Üzenet\n' +
+                    '> ' + database.dataStickers[command.user.id].stickersCommand + ' \\🖥️ Parancs\n' +
+                    '> ' + database.dataStickers[command.user.id].stickersTip + ' \\💡 Ötlet'
             },
             {
                 name: 'Statisztika',
                 value:
-                    '> \\🎼 Zenék: ' + Abbrev(database.dataUserstats[command.member.id].memes) + '\n' +
-                    '> \\🎭 Vicces dolgok: ' + Abbrev(database.dataUserstats[command.member.id].musics) + '\n' +
-                    '> \\🎬 YouTube linkek: ' + Abbrev(database.dataUserstats[command.member.id].youtubevideos) + '\n' +
-                    '> \\📋 Üzenetek: ' + Abbrev(database.dataUserstats[command.member.id].messages) + '\n' +
-                    '> \\🖥️ Parancsok:' + Abbrev(database.dataUserstats[command.member.id].commands) + '\n' +
-                    '> \\👁‍🗨 Összes karakter: ' + Abbrev(database.dataUserstats[command.member.id].chars)
+                    '> \\🎼 Zenék: ' + Abbrev(database.dataUserstats[command.user.id].memes) + '\n' +
+                    '> \\🎭 Vicces dolgok: ' + Abbrev(database.dataUserstats[command.user.id].musics) + '\n' +
+                    '> \\🎬 YouTube linkek: ' + Abbrev(database.dataUserstats[command.user.id].youtubevideos) + '\n' +
+                    '> \\📋 Üzenetek: ' + Abbrev(database.dataUserstats[command.user.id].messages) + '\n' +
+                    '> \\🖥️ Parancsok:' + Abbrev(database.dataUserstats[command.user.id].commands) + '\n' +
+                    '> \\👁‍🗨 Összes karakter: ' + Abbrev(database.dataUserstats[command.user.id].chars)
             }
         ])
 
     var text = ''
     awardRoles.forEach(award => {
-        if (command.member.roles.cache.some(role => role.id == award)) {
-            text += '\n> ' + awardRoleNames[award]
+        if (Array.isArray(command.member.roles)) {
+            if (command.member.roles.some(role => role === award)) {
+                text += '\n> ' + awardRoleNames[award]
+            }
+        } else {
+            if (command.member.roles.cache.some(role => role.id === award)) {
+                text += '\n> ' + awardRoleNames[award]
+            }
         }
     })
 

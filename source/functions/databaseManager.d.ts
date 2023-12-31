@@ -13,7 +13,7 @@ export type DataBasic = UserInDatabase & {
     score: number
     money: number
     day: number
-    color: string
+    color: 'red' | 'yellow' | 'green' | 'blue' | 'purple' | 'black' | 'brown' | 'white' | 'orange'
     customname: string
     privateCommands: boolean
 }
@@ -104,7 +104,10 @@ export type DataUserstats = {
     commands: number
 }
 
-export type DataBusiness = UserInDatabase & ({
+export type DataBusiness = UserInDatabase & (DataBusinessDetails | DataNoBusiness)
+
+export type DataBusinessDetails = {
+    Has: true
     businessIndex: number
     businessName: string
     businessLevel: number
@@ -112,9 +115,11 @@ export type DataBusiness = UserInDatabase & ({
         date: string
         day: number
     }
-} | {
-    businessIndex: 0
-})
+}
+
+export type DataNoBusiness = {
+    Has: false
+}
 
 export class DatabaseManager {
     databaseFolderPath: string
@@ -125,7 +130,7 @@ export class DatabaseManager {
     dataUsernames: Users<DataUsername>
     dataStickers: Users<DataStickers>
     dataUserstats: Users<DataUserstats>
-    dataBusinesses: Users<DataBusiness>
+    dataBusinesses: Users<UserInDatabase & (DataBusinessDetails | DataNoBusiness)>
 
     // dataMarket: DataMarket
     dataPolls: DataPoll

@@ -188,7 +188,7 @@ async function QuizDone(client, quizMessageId, correctIndex) {
                     }
                 })
             }
-            client.channels.cache.get(ChannelId.Quiz).send(finalText)
+            channel.send(finalText)
         })
     })
 }
@@ -427,13 +427,13 @@ function OnSelectMenu(e) {
                 if (usersReacted.includes(reaction.User.ID)) { continue }
                 if (reaction.Reaction === quiz.Correct.Emoji) {
                     if (reaction.User.AnswerStreak && reaction.User.WantToMultiply) {
-                        finalText += '\n> <@!' + reaction.User.ID + '> nyert ' + (parseInt(quiz.Reward.Score) * 2) + ' \uD83C\uDF7At és ' + (parseInt(quiz.Reward.Token) * 2) + ' 🎫t'
+                        finalText += '\n> <@!' + reaction.User.ID + '> nyert ' + (quiz.Reward.Score * 2) + ' \uD83C\uDF7At és ' + (quiz.Reward.Token * 2) + ' 🎫t'
                     } else {
                         finalText += '\n> <@!' + reaction.User.ID + '> nyert ' + (quiz.Reward.Score) + ' \uD83C\uDF7At és ' + (quiz.Reward.Token) + ' 🎫t'
                     }
                 } else {
                     if (reaction.User.AnswerStreak && reaction.User.WantToMultiply) {
-                        finalText += '\n> <@!' + reaction.User.ID + '> veszített ' + (parseInt(quiz.Penalty.Score) * 2) + ' \uD83C\uDF7At és ' + (parseInt(quiz.Penalty.Token) * 2) + ' 🎫t'
+                        finalText += '\n> <@!' + reaction.User.ID + '> veszített ' + (quiz.Penalty.Score * 2) + ' \uD83C\uDF7At és ' + (quiz.Penalty.Token * 2) + ' 🎫t'
                     } else {
                         finalText += '\n> <@!' + reaction.User.ID + '> veszített ' + (quiz.Penalty.Score) + ' \uD83C\uDF7At és ' + (quiz.Penalty.Token) + ' 🎫t'
                     }

@@ -161,8 +161,10 @@ async function Messages() {
                 }
                 if (url) attachment.url = url.toString()
 
+                // @ts-ignore
                 rawMessages[i].attachment = attachment
             }
+            // @ts-ignore
             messages = rawMessages
         }
 

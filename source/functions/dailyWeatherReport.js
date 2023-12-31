@@ -16,7 +16,6 @@ const {
     weatherTempIcon,
     weatherHumidityIcon,
     DirectionToArrow,
-    unixToTime,
     weatherSkytextIcon,
     CityBekescsaba
 } = require('../commands/weatherFunctions')

@@ -1,5 +1,4 @@
 const Discord = require('discord.js')
-const fs = require('fs');
 const { xpRankIcon, xpRankNext, xpRankPrevoius, xpRankText } = require('./xpFunctions')
 const GetUserColor = require('../economy/userColor')
 const { Abbrev } = require('../functions/utils')

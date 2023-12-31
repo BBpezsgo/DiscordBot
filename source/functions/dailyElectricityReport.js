@@ -1,5 +1,5 @@
 const { StatesManager } = require('./statesManager')
-const { Client, BaseGuildTextChannel } = require('discord.js')
+const { Client } = require('discord.js')
 const SendTest = true
 
 const Discord = require('discord.js')

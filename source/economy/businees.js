@@ -30,28 +30,13 @@ function toDateString(date) {
 */
 function businessAddToMemoryDetails(sender, database) {
     if (!database.dataBusinesses[sender.id]) {
-        database.dataBusinesses[sender.id] = {}
+        database.dataBusinesses[sender.id] = {
+            Has: false,
+            username: sender.username,
+        }
     }
     if (!database.dataBusinesses[sender.id].username) {
         database.dataBusinesses[sender.id].username = sender.username
-    }
-    if (!database.dataBusinesses[sender.id].businessIndex) {
-        database.dataBusinesses[sender.id].businessIndex = 0
-    }
-    if (!database.dataBusinesses[sender.id].businessName) {
-        database.dataBusinesses[sender.id].businessName = "Névtelen biznisz"
-    }
-    if (!database.dataBusinesses[sender.id].businessLevel) {
-        database.dataBusinesses[sender.id].businessLevel = 0
-    }
-    if (!database.dataBusinesses[sender.id].businessUses) {
-        database.dataBusinesses[sender.id].businessUses = {}
-    }
-    if (!database.dataBusinesses[sender.id].businessUses.date) {
-        database.dataBusinesses[sender.id].businessUses.date = toDateString(new Date())
-    }
-    if (!database.dataBusinesses[sender.id].businessUses.day) {
-        database.dataBusinesses[sender.id].businessUses.day = dayOfYear
     }
 
     database.SaveDatabase()
@@ -117,31 +102,31 @@ module.exports = (channel, sender, isPrivate, database) => {
 
     database.SaveUserToMemoryAll(sender, sender.username)
 
-    var businessIndex = database.dataBusinesses[sender.id].businessIndex
+    let business = database.dataBusinesses[sender.id]
 
     var money = database.dataBasic[sender.id].money
 
-    if (database.dataBusinesses[sender.id].businessIndex > 0) {
-        var moneyMakerName = database.dataBusinesses[sender.id].businessName
-        var moneyMakerLevel = database.dataBusinesses[sender.id].businessLevel
+    if (business.Has) {
+        var moneyMakerName = business.businessName
+        var moneyMakerLevel = business.businessLevel
 
         var moneyMakerImage = ''
         var moneyMakerLevelText = ''
 
         var uprageCost = 0
 
-        let addMoney = calculateAddMoney(sender, database.dataBusinesses[sender.id].businessIndex, database)
-        if (database.dataBusinesses[sender.id].businessIndex === 1) {
-            addMoney *= 1335 * database.dataBusinesses[sender.id].businessLevel
-        } else if (database.dataBusinesses[sender.id].businessIndex === 2) {
-            addMoney *= 181 * database.dataBusinesses[sender.id].businessLevel
-        } else if (database.dataBusinesses[sender.id].businessIndex === 3) {
-            addMoney *= 189 * database.dataBusinesses[sender.id].businessLevel
-        } else if (database.dataBusinesses[sender.id].businessIndex === 4) {
+        let addMoney = calculateAddMoney(sender, business.businessIndex, database)
+        if (business.businessIndex === 1) {
+            addMoney *= 1335 * business.businessLevel
+        } else if (business.businessIndex === 2) {
+            addMoney *= 181 * business.businessLevel
+        } else if (business.businessIndex === 3) {
+            addMoney *= 189 * business.businessLevel
+        } else if (business.businessIndex === 4) {
 
         }
 
-        if (database.dataBusinesses[sender.id].businessIndex === 1) {
+        if (business.businessIndex === 1) {
             if (moneyMakerLevel === 1) {
                 moneyMakerImage = '\\🚏'
                 moneyMakerLevelText = 'Városi buszmegálló'
@@ -158,7 +143,7 @@ module.exports = (channel, sender, isPrivate, database) => {
                 moneyMakerImage = '\\🛫'
                 moneyMakerLevelText = 'Globális repülőtér'
             }
-        } else if (database.dataBusinesses[sender.id].businessIndex === 2) {
+        } else if (business.businessIndex === 2) {
             if (moneyMakerLevel === 1) {
                 moneyMakerImage = '\\🏪'
                 moneyMakerLevelText = 'Vegyesbolt'
@@ -167,7 +152,7 @@ module.exports = (channel, sender, isPrivate, database) => {
                 moneyMakerImage = '\\🏬'
                 moneyMakerLevelText = 'Bevásárló központ'
             }
-        } else if (database.dataBusinesses[sender.id].businessIndex === 3) {
+        } else if (business.businessIndex === 3) {
             if (moneyMakerLevel === 1) {
                 moneyMakerImage = '\\🏗️'
                 moneyMakerLevelText = 'Építőanyag gyár'
@@ -176,7 +161,7 @@ module.exports = (channel, sender, isPrivate, database) => {
                 moneyMakerImage = '\\🏭'
                 moneyMakerLevelText = 'Autógyár'
             }
-        } else if (database.dataBusinesses[sender.id].businessIndex === 4) {
+        } else if (business.businessIndex === 4) {
             if (moneyMakerLevel === 1) {
                 moneyMakerImage = '\\🏤'
                 moneyMakerLevelText = 'Városszintű irodák'
@@ -227,7 +212,7 @@ module.exports = (channel, sender, isPrivate, database) => {
             }
         }
         if (addMoney > 0) {
-                const aaaaaaaaaaaaaa = database.dataBusinesses[sender.id].businessUses.date.toString().split(':')
+                const aaaaaaaaaaaaaa = business.businessUses.date.toString().split(':')
                 const lastDate = new Date(aaaaaaaaaaaaaa[0], aaaaaaaaaaaaaa[1], aaaaaaaaaaaaaa[2])
             if (isPrivate === true) {
                 embed.addFields([{

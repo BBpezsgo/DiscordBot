@@ -6,25 +6,26 @@ const selfId = '738030244367433770'
 /**
  * @param {string} userID
  * @param {DatabaseManager} database
- * @returns {{ammount: number, type: 'MONEY' | 'XP'}?}
+ * @returns {{ammount: number, type: 'MONEY' | 'XP'} | null}
  */
 function OpenGift(userID, database) {
     if (database.dataBackpacks[userID].getGift <= 0) return null
     
     const typeResult = ['xp', 'money'][Math.floor(Math.random() * 2)]
+    /** @type {{ammount: number, type: 'MONEY' | 'XP'}} */
     const result = { }
 
     if (typeResult === 'xp') {
         const ammount = Math.floor(Math.random() * 530) + 210
         result.ammount = ammount
         result.type = 'XP'
-        database.dataBasic[e.user.id].score += ammount
+        database.dataBasic[userID].score += ammount
         database.dataBackpacks[userID].getGift -= 1
     } else if (typeResult === 'money') {
         const ammount = Math.floor(Math.random() * 2300) + 1000
         result.ammount = ammount
         result.type = 'MONEY'
-        database.dataBasic[e.user.id].money += ammount
+        database.dataBasic[userID].money += ammount
         database.dataBackpacks[userID].getGift -= 1
     }
 
@@ -121,29 +122,28 @@ function OnUserContextMenu(e, database) {
     if (e.commandName !== 'Megajándékozás') return false
 
     try {
-        /** @type {Discord.GuildMember} */
         const giftableMember = e.targetMember
         if (database.dataBackpacks[e.user.id].gifts <= 0) {
-            if (giftableMember.id === e.user.id)
+            if (giftableMember.user.id === e.user.id)
             { e.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad. Sőt! Nincs is ajándékod**', ephemeral: true }) }
             else
             { e.reply({ content: '> **\\❌ Nincs ajándékod, amit odaadhatnál**', ephemeral: true }) }
             return true
         }
 
-        if (giftableMember.id === e.user.id) {
+        if (giftableMember.user.id === e.user.id) {
             e.reply({ content: '> **\\❌ Nem ajándékozhatod meg magad**', ephemeral: true })
             return true
         }
 
-        if (!database.dataBackpacks[giftableMember.id] || giftableMember.id === selfId) {
-            e.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.displayName + ' nevű felhasználó az adatbázisban**', ephemeral: true })
+        if (!database.dataBackpacks[giftableMember.user.id] || giftableMember.user.id === selfId) {
+            e.reply({ content: '> **\\❌ Úgy néz ki hogy nincs ' + giftableMember.user.username + ' nevű felhasználó az adatbázisban**', ephemeral: true })
             return true
         }
 
-        database.dataBackpacks[giftableMember.id].getGift += 1
+        database.dataBackpacks[giftableMember.user.id].getGift += 1
         database.dataBackpacks[e.user.id].gifts -= 1
-        e.reply({ content: '> \\✔️ **' + giftableMember.username.toString() + '** megajándékozva', ephemeral: true })
+        e.reply({ content: '> \\✔️ **' + giftableMember.user.username.toString() + '** megajándékozva', ephemeral: true })
         giftableMember.send({ content: '> **\\✨ ' + e.user.username + ' megajándékozott! \\🎆**' })
         database.SaveDatabase()
     } catch (error) {

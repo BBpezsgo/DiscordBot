@@ -28,9 +28,12 @@ class DatabaseManager {
         this.dataBasic = {}
         // this.dataMarket = {}
         this.dataBackpacks = {}
+        // @ts-ignore
         this.dataPolls = {}
+        // @ts-ignore
         this.dataMail = {}
         this.dataUsernames = {}
+        // @ts-ignore
         this.dataBot = {}
         this.dataStickers = {}
         this.dataUserstats = {}
@@ -91,6 +94,7 @@ class DatabaseManager {
         }
 
         if (!this.dataBasic[user.id]) {
+            // @ts-ignore
             this.dataBasic[user.id] = {}
         }
         this.dataBasic[user.id].username = username
@@ -104,6 +108,7 @@ class DatabaseManager {
             this.dataBasic[user.id].day = 0
         }
         if (!this.dataBasic[user.id].color) {
+            // @ts-ignore
             this.dataBasic[user.id].color = 0
         }
         if (!this.dataBasic[user.id].customname) {
@@ -114,6 +119,7 @@ class DatabaseManager {
         }
 
         if (!this.dataStickers[user.id]) {
+            // @ts-ignore
             this.dataStickers[user.id] = {}
         }
         this.dataStickers[user.id].username = username
@@ -140,6 +146,7 @@ class DatabaseManager {
             this.dataMail.mailIds = ''
         }
         if (!this.dataMail[user.id]) {
+            // @ts-ignore
             this.dataMail[user.id] = {}
         }
         this.dataMail[user.id].username = username
@@ -151,12 +158,14 @@ class DatabaseManager {
         }
 
         if (!this.dataUsernames[user.id]) {
+            // @ts-ignore
             this.dataUsernames[user.id] = {}
         }
         this.dataUsernames[user.id].username = username
         this.dataUsernames[user.id].avatarURL = user.avatarURL({ extension: 'png' })
 
         if (!this.dataBusinesses[user.id]) {
+            // @ts-ignore
             this.dataBusinesses[user.id] = {}
         }
         if (!this.dataBusinesses[user.id].username) {
@@ -172,43 +181,43 @@ class DatabaseManager {
     SaveDatabase() {
         if (IsAnything(this.dataBackpacks)) {
             this.statesManager.Database.SaveText = 'backpacks'
-            fs.writeFile(this.databaseFolderPath + 'backpacks.json', JSON.stringify(this.dataBackpacks), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'backpacks.json', JSON.stringify(this.dataBackpacks), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataBasic)) {
             this.statesManager.Database.SaveText = 'basic'
-            fs.writeFile(this.databaseFolderPath + 'basic.json', JSON.stringify(this.dataBasic), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'basic.json', JSON.stringify(this.dataBasic), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataStickers)) {
             this.statesManager.Database.SaveText = 'stickers'
-            fs.writeFile(this.databaseFolderPath + 'stickers.json', JSON.stringify(this.dataStickers), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'stickers.json', JSON.stringify(this.dataStickers), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataUsernames)) {
             this.statesManager.Database.SaveText = 'userNames'
-            fs.writeFile(this.databaseFolderPath + 'userNames.json', JSON.stringify(this.dataUsernames), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'userNames.json', JSON.stringify(this.dataUsernames), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataMail)) {
             this.statesManager.Database.SaveText = 'mails'
-            fs.writeFile(this.databaseFolderPath + 'mails.json', JSON.stringify(this.dataMail), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'mails.json', JSON.stringify(this.dataMail), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataPolls)) {
             this.statesManager.Database.SaveText = 'polls'
-            fs.writeFile(this.databaseFolderPath + 'polls.json', JSON.stringify(this.dataPolls), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'polls.json', JSON.stringify(this.dataPolls), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataUserstats)) {
             this.statesManager.Database.SaveText = 'userstats'
-            fs.writeFile(this.databaseFolderPath + 'userstats.json', JSON.stringify(this.dataUserstats), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'userstats.json', JSON.stringify(this.dataUserstats), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataBusinesses)) {
             this.statesManager.Database.SaveText = 'businesses'
-            fs.writeFile(this.databaseFolderPath + 'businesses.json', JSON.stringify(this.dataBusinesses), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'businesses.json', JSON.stringify(this.dataBusinesses), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataBot)) {
             this.statesManager.Database.SaveText = 'bot'
-            fs.writeFile(this.databaseFolderPath + 'bot.json', JSON.stringify(this.dataBot), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+            fs.writeFile(this.databaseFolderPath + 'bot.json', JSON.stringify(this.dataBot), (err) => { if (err) { LogError(err) } })
         }
         // if (IsAnything(this.dataMarket)) {
         //     this.statesManager.Database.SaveText = 'market'
-        //     fs.writeFile(this.databaseFolderPath + 'market.json', JSON.stringify(this.dataMarket), (err) => { if (err) { console.log(ERROR & ': ' & err.message) }; })
+        //     fs.writeFile(this.databaseFolderPath + 'market.json', JSON.stringify(this.dataMarket), (err) => { if (err) { LogError(err) } })
         // }
         this.statesManager.Database.SaveText = ''
     }

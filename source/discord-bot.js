@@ -1,43 +1,25 @@
 const Discord = require('discord.js')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
-const { StatesManager } = require('./functions/statesManager')
+const StatesManager = require('./functions/statesManager').StatesManager
 const LogError = require('./functions/errorLog').LogError
 const LogManager = require('./functions/log')
 const ImageCache = require('./functions/image-cache')
-const { DatabaseManager } = require('./functions/databaseManager')
-const { GatewayIntentBits, ButtonBuilder, ActionRowBuilder } = require('discord.js')
+const DatabaseManager = require('./functions/databaseManager').DatabaseManager
 const fs = require('fs')
 const Path = require('path')
 const CacheManager = require('./functions/offline-cache')
-const {
-    ChannelId, Color
-} = require('./functions/enums.js')
-const { AutoReact } = require('./functions/autoReact')
+const { ChannelId } = require('./functions/enums.js')
+const AutoReact = require('./functions/autoReact').AutoReact
 
 const CommandShop = require('./economy/shop')
 const CommandBackpack = require('./economy/backpack')
-const CommandOpenCrate = require('./economy/open-crate')
-const CommandOpenDailyCrate = require('./economy/open-daily-crate')
 const CommandMarket = require('./economy/market')
 const CommandSettings = require('./economy/settings')
 const CommandGift = require('./economy/gift')
-const { HangmanManager } = require('./commands2/hangman.js')
-const {
-    gameResetCameraPos,
-    getGameUserSettings,
-    createGame,
-    connectTogame,
-    Game,
-    savedGameMessage,
-    GameUserSettings,
-    getGameMessage,
-} = require('./commands/game')
 
 const QuizManager = require('./economy/quiz')
-const PollManager = require('./commands/poll')
 const { calculateAddXp } = require('./economy/xpFunctions')
-const { ToUnix } = require('./functions/utils')
 
 module.exports = class DiscordBot {
     /**
@@ -57,10 +39,10 @@ module.exports = class DiscordBot {
             this.Client = new Discord.Client({
                 intents:
                 [
-                    GatewayIntentBits.Guilds,
-                    GatewayIntentBits.GuildMessages,
-                    GatewayIntentBits.GuildMessageReactions,
-                    GatewayIntentBits.GuildVoiceStates
+                    Discord.GatewayIntentBits.Guilds,
+                    Discord.GatewayIntentBits.GuildMessages,
+                    Discord.GatewayIntentBits.GuildMessageReactions,
+                    Discord.GatewayIntentBits.GuildVoiceStates
                 ],
                 partials:
                 [
@@ -94,15 +76,11 @@ module.exports = class DiscordBot {
             const { MailManager } = require('./commands/mail')
             this.Mails = new MailManager(this.Database)
 
-            this.HangmanManager = new HangmanManager()
-
             const { Economy } = require('./economy/economy')
             this.Economy = new Economy(this.Database)
 
             const MusicPlayer = require('./commands/music/functions')
             this.MusicPlayer = new MusicPlayer(this.StatesManager, this.Client)
-
-            this.Game = new Game()
 
             this.StatesManager.botLoaded = true
         } catch (error) {
@@ -328,17 +306,29 @@ module.exports = class DiscordBot {
                     return
                 }
             } catch (error) { }
-    
-            if (CommandShop.OnButtonClick(interaction, this.Database)) return
-            if (CommandBackpack.OnButtonClick(interaction, this.Database)) return
-            if (CommandGift.OnButtonClick(interaction, this.Database)) return
-            if (CommandMarket.OnButton(interaction, this.Database)) return
+
+            for (const command of this.Commands) {
+                if (command[1].OnButton) {
+                    const result = command[1].OnButton(interaction, this)
+                    if (result) {
+                        await result
+                        return
+                    }
+                }
+            }
+
             if (this.Mails.OnButtonClick(interaction)) return
-            if (this.HangmanManager.OnButton(interaction)) return
-            if (this.Game.OnButton(interaction)) return
         } else if (interaction.isStringSelectMenu()) {
-            if (CommandShop.OnSelectMenu(interaction, this.Database)) return
-            if (this.HangmanManager.OnSelectMenu(interaction)) return
+            for (const command of this.Commands) {
+                if (command[1].OnSelectMenu) {
+                    const result = command[1].OnSelectMenu(interaction, this)
+                    if (result) {
+                        await result
+                        return
+                    }
+                }
+            }
+
             if (QuizManager.OnSelectMenu(interaction)) return
     
             if (interaction.customId == 'userSettings') {

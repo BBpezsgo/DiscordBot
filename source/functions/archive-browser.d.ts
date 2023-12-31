@@ -4,21 +4,21 @@ export interface Dictionary<T> {
 
 export type ArchivedChannel = {
     id: string
-    last_message_id: string | null
+    last_message_id?: string | null
     type: number
     name: string
-    position: number
-    parent_id: string | null
-    topic: string | null
+    position?: number | null
+    parent_id?: string | null
+    topic?: string | null
     permission_overwrites: {
         id: string
         type: number
         allow: string
         deny: string
     }[]
-    nsfw: boolean
-    rate_limit_per_user?: number
-    messages?: ArchivedMessage[]
+    nsfw?: boolean | null
+    rate_limit_per_user?: number | null
+    messages?: ArchivedMessage[] | null
 }
 
 export type ArchivedEmoji = {
@@ -44,7 +44,9 @@ export type ArchivedMessage = null | {
     }
 }
 
-export type ArchivedMessageChannel = ArchivedGuildMessageChannel | ArchivedBaseMessageChannel | ArchivedMessageChannel3
+export type ArchivedMessageChannel =
+    ArchivedGuildMessageChannel |
+    ArchivedMessageChannel3
 
 export type ArchivedBaseMessageChannel = {
     id: string
@@ -58,9 +60,12 @@ export type ArchivedGuildMessageChannel = ArchivedBaseMessageChannel & {
         id: string
         name: string
     }
+    recipients: undefined
 }
 
 export type ArchivedMessageChannel3 = ArchivedBaseMessageChannel & {
+    name: undefined
+    guild: undefined
     recipients: string[]
 }
 
