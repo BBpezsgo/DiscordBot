@@ -7,25 +7,17 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const Discord = require('discord.js')
 const LogManager = require('../functions/log')
-const ContentParser = require('./content-parser')
 const LogError = require('../functions/errorLog').LogError
-const CacheManager = require('../functions/offline-cache')
-const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../economy/userHashManager')
+const { GetID } = require('../economy/userHashManager')
 const fs = require('fs')
-const os = require('os')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const { StatesManager } = require('../functions/statesManager')
 const {
-    WsStatusText,
     NsfwLevel,
-    VerificationLevel,
     MFALevel
 } = require('../functions/enums')
-const { GetTime, GetDataSize, GetDate } = require('../functions/utils')
-const { HbLog, HbGetLogs, HbStart } = require('./log')
-const { CreateCommandsSync, DeleteCommandsSync, DeleteCommand, Updatecommand } = require('../functions/commands')
-const { MessageType, GuildVerificationLevel } = require('discord.js')
-const process = require('process')
+const { GetTime, GetDate } = require('../functions/utils')
+const { HbLog, HbStart } = require('./log')
 const archivePath = 'D:/Mappa/Discord/DiscordOldData/'
 const Key = require('../key')
 /** @type {import('../config').Config} */
@@ -122,27 +114,7 @@ class WebInterfaceManager {
         this.app.use(bodyParser.urlencoded({ extended: false }))
         this.app.use(bodyParser.json())
 
-        this.ipToRate = {}
-        this.blockedIpsFor = {}
-
         this.app.use((req, res, next) => {
-            if (this.ipToRate[req.ip] == undefined) {
-                this.ipToRate[req.ip] = 1
-            } else {
-                this.ipToRate[req.ip] += 1
-            }
-
-            if (this.blockedIpsFor[req.ip] != undefined) {
-                if (this.blockedIpsFor[req.ip] > 0) {
-                    res.status(429).send('Too many requiests! Try again in ' + this.blockedIpsFor[req.ip] + ' secs')
-                    return
-                }
-            }
-
-            if (req.path.startsWith('/public')) {
-                return next()
-            }
-
             const url = new URL(req.url, `http://${req.headers.host}`)
             const authKey = url.searchParams.get('key')
             if (authKey) {
@@ -172,29 +144,9 @@ class WebInterfaceManager {
             res.status(401).render('view/401')
         })
 
-        setInterval(() => {
-            for (var ip in this.ipToRate) {
-                var rate = this.ipToRate[ip]
-                if (rate > 0) {
-                    if (rate > 10) {
-                        HbLog({ IP: ip, type: 'BLOCKED', message: 'Address blocked: too many requiests' })
-                        this.blockedIpsFor[ip] = 5
-                    }
-                }
-                this.ipToRate[ip] = 0
-            }
-            for (var ip in this.blockedIpsFor) {
-                var time = this.blockedIpsFor[ip]
-                if (time > 0) {
-                    this.blockedIpsFor[ip] -= 1
-                }
-            }
-        }, 1000);
-
         this.handlebarsManager = new WebInterfaceHandlebarsManager(client, database, StartBot, StopBot, clientType, statesManager, this.app)
 
         this.RegisterHandlebarsRoots()
-        if (this.database) this.RegisterPublicRoots()
         this.RegisterWeatherRoots()
         this.RegisterArchiveBrowserRoots()
         
@@ -1149,262 +1101,6 @@ class WebInterfaceManager {
         })
     }
 
-    RegisterPublicRoots() {
-        const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24))
-
-        /**
-         * @param {import('express').Request} req
-         * @param {import('express').Response} res
-         * @param {string} userId
-         * @param {string} hash
-         */
-        const RenderStartpage = async (req, res, userId, hash, dontReload, additionalInfo) => {
-            const user = this.client.users.cache.get(userId)
-            var member = undefined
-            var thereIsNetworkError = false
-            try {
-                member = this.client.guilds.cache.get('737954264386764812').members.cache.get(userId)
-                if (member == undefined) {
-                    member = await this.client.guilds.cache.get('737954264386764812').members.fetch(userId)
-                }
-            } catch (err) {
-                thereIsNetworkError = true
-            }
-
-            const { Abbrev } = require('../functions/utils')
-
-            const score = this.database.dataBasic[userId].score
-            const next = require('../economy/xpFunctions').xpRankNext(score)
-            const scorePercent = score / next
-            const xpImageUrl = require('../economy/xpFunctions').xpRankIconModern(score)
-            const rankText = require('../economy/xpFunctions').xpRankText(score)
-
-            const dataBackpack = this.database.dataBackpacks[userId]
-            const dataBasic = this.database.dataBasic[userId]
-            const dataUserstats = this.database.dataUserstats[userId]
-
-            const dayCrates = this.database.dataBot.day - dataBasic.day
-
-            const bools = {
-                haveCrates: dataBackpack.crates > 0,
-                gotGifts: dataBackpack.getGift > 0,
-                haveDayCrates: dayCrates > 0,
-                haveLuckycardSmall: dataBackpack.luckyCards.small > 0,
-                haveLuckycardMedium: dataBackpack.luckyCards.medium > 0,
-                haveLuckycardLarge: dataBackpack.luckyCards.large > 0,
-            }
-
-            const statistics = {
-                messages: Abbrev(dataUserstats.messages),
-                chars: Abbrev(dataUserstats.chars),
-                commands: Abbrev(dataUserstats.commands)
-            }
-
-            const awards = {
-                quiz: false,
-                meme: false,
-                online: false
-            }
-
-            try {
-                if (member != undefined) {
-                    if (member.roles.cache.some(role => role.id == '929443006627586078')) {
-                        awards.quiz = true
-                    } else if (member.roles.cache.some(role => role.id == '929443558040166461')) {
-                        awards.quiz = true
-                    } else if (member.roles.cache.some(role => role.id == '929443627527180288')) {
-                        awards.quiz = true
-                    } else if (member.roles.cache.some(role => role.id == '929443673077329961')) {
-                        awards.quiz = true
-                    }
-                    if (member.roles.cache.some(role => role.id == '929443957967048834')) {
-                        awards.meme = true
-                    }
-                    if (member.roles.cache.some(role => role.id == '893187175087226910')) {
-                        awards.online = true
-                    }
-                }                
-            } catch (error) {
-                
-            }
-
-            const moneyText = Abbrev(this.database.dataBasic[userId].money)
-
-            const userInfo = {
-                name: '<valaki>',
-                progress: scorePercent,
-                xpImageUrl: xpImageUrl,
-                rankText: rankText,
-                avatarURL: user.avatarURL({ size: 32 })
-            }
-
-            if (member != undefined) {
-                userInfo.name = member.displayName
-            } else if (user != undefined) {
-                userInfo.name = user.username
-            }
-
-            res.render('public/startPage', { additionalInfo: additionalInfo, dontReload: dontReload, hash: hash, thereIsNetworkError: thereIsNetworkError, awards: awards, statistics: statistics, dayCrates: dayCrates, bools: bools, userInfo: userInfo, backpack: dataBackpack, money: moneyText })
-        }
-
-        /**
-         * @param {string} id 
-         */
-        const openAllCrate = (id) => {
-            if (this.database.dataBackpacks[id].crates === 0) {
-                return {
-                    success: false
-                }
-            } else {
-                let Crates = this.database.dataBackpacks[id].crates
-
-                let getXpS = 0
-                let getGiftS = 0
-                let getMoney = 0
-                for (let i = 0; i < Crates; i++) {
-
-                    let replies = ['xp', 'money', 'gift']
-                    let random = Math.floor(Math.random() * 3)
-                    let out = replies[random]
-                    let val = 0
-
-                    if (out === 'xp') {
-                        val = Math.floor(Math.random() * 110) + 100
-                        getXpS += val
-                        this.database.dataBasic[id].score += val
-                    }
-                    if (out === 'money') {
-                        val = Math.floor(Math.random() * 2000) + 2000
-                        getMoney += val
-                        this.database.dataBasic[id].money += val
-                    }
-                    if (out === 'gift') {
-                        getGiftS += 1
-                        this.database.dataBackpacks[id].gifts += 1
-                    }
-                }
-
-                this.database.dataBackpacks[id].crates = this.database.dataBackpacks[id].crates - Crates
-                this.database.SaveDatabase()
-
-                return {
-                    success: true,
-                    xp: getXpS,
-                    money: getMoney,
-                    gift: getGiftS
-                }
-
-            }
-        }
-        /**
-         * @param {string} id
-         */
-        const openAllDayCrate = (id) => {
-            /**
-             * @param {string} userId
-             * @returns {String} The result string
-             */
-            const openDayCrate = (userId) => {
-                const RandomPercente = Math.floor(Math.random() * 100)
-                let val = 0
-                if (RandomPercente < 10) { // 10%
-                    val = 1
-                    this.database.dataBackpacks[userId].tickets += val
-
-                    return 0 + '|' + val
-                } else if (RandomPercente < 30) { // 20%
-                    val = 1
-                    this.database.dataBackpacks[userId].crates += val
-
-                    return 1 + '|' + val
-                } else if (RandomPercente < 60) { // 30%
-                    val = Math.floor(Math.random() * 50) + 30
-                    this.database.dataBasic[userId].score += val
-
-                    return 2 + '|' + val
-                } else { // 40%
-                    val = Math.floor(Math.random() * 300) + 100
-                    this.database.dataBasic[userId].money += val
-
-                    return 3 + '|' + val
-                }
-            }
-
-            if (dayOfYear === this.database.dataBasic[id].day) {
-                return { success: false }
-            } else {
-                let dayCrates = this.database.dataBot.day - this.database.dataBasic[id].day
-
-                let getXpS = 0
-                let getChestS = 0
-                let getMoney = 0
-                let getTicket = 0
-                for (let i = 0; i < dayCrates; i++) {
-                    const rewald = openDayCrate(id)
-                    const rewaldIndex = rewald.split('|')[0]
-                    const rewaldValue = parseInt(rewald.split('|')[1])
-
-                    if (rewaldIndex === '2') {
-                        getXpS += rewaldValue
-                    } else if (rewaldIndex === '3') {
-                        getMoney += rewaldValue
-                    } else if (rewaldIndex === '1') {
-                        getChestS += 1
-                    } else if (rewaldIndex === '0') {
-                        getTicket += 1
-                    }
-                }
-
-                this.database.dataBasic[id].day = this.database.dataBot.day
-                this.database.SaveDatabase()
-
-                return {
-                    success: true,
-                    money: getMoney,
-                    xp: getXpS,
-                    crate: getChestS,
-                    ticket: getTicket
-                }
-            }
-        }
-
-        /**
-         * @param {import('express').Request<{}, any, any, qs.ParsedQs, Record<string, any>>} req
-         * @param {import('express').Response<any, Record<string, any>, number>} res
-         * @param {string} errorTitle
-         * @param {string} errorText
-         */
-        const RenderError = (req, res, errorTitle, errorText) => {
-            res.render('public/error', { title: errorTitle, text: errorText })
-        }
-
-        this.app.get('/public', (req, res) => {
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-            const userHash = req.query.user
-            if (userHash == undefined) {
-                RenderError(req, res, 'Hozzáférés megtagadva', 'felhasználó-azonosító nincs megadva!')
-                return
-            }
-            if (typeof userHash !== 'string') {
-                res.status(500).send('Invalid query parameter type')
-                return
-            }
-            const userId = GetID(userHash)
-            if (userId == undefined || userId == null) {
-                RenderError(req, res, 'Hozzáférés megtagadva', 'nincs ilyen felhasználó!')
-                return
-            }
-            const action = req.query.action
-            if (action == 'openAllDayCrates') {
-                RenderStartpage(req, res, userId, userHash, true, { dayCrateResult: openAllDayCrate(userId) })
-                return
-            } else if (action == 'openAllCrates') {
-                RenderStartpage(req, res, userId, userHash, true, { crateResult: openAllCrate(userId) })
-                return
-            }
-            RenderStartpage(req, res, userId, userHash, false, {})
-        })
-    }
     RegisterArchiveBrowserRoots() {
         this.app.get('/archive', (req, res) => {
             const view = req.query.view

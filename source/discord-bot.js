@@ -12,9 +12,6 @@ const CacheManager = require('./functions/offline-cache')
 const { ChannelId } = require('./functions/enums.js')
 const AutoReact = require('./functions/autoReact').AutoReact
 
-const CommandShop = require('./economy/shop')
-const CommandBackpack = require('./economy/backpack')
-const CommandMarket = require('./economy/market')
 const CommandSettings = require('./economy/settings')
 const CommandGift = require('./economy/gift')
 
@@ -72,9 +69,6 @@ module.exports = class DiscordBot {
 
             const NewsManager = require('./functions/news')
             this.NewsManager = new NewsManager(this.StatesManager, true)
-
-            const { MailManager } = require('./commands/mail')
-            this.Mails = new MailManager(this.Database)
 
             const { Economy } = require('./economy/economy')
             this.Economy = new Economy(this.Database)
@@ -316,8 +310,6 @@ module.exports = class DiscordBot {
                     }
                 }
             }
-
-            if (this.Mails.OnButtonClick(interaction)) return
         } else if (interaction.isStringSelectMenu()) {
             for (const command of this.Commands) {
                 if (command[1].OnSelectMenu) {
@@ -621,67 +613,6 @@ module.exports = class DiscordBot {
     
             this.Database.UserstatsSendCommand(sender)
             return
-        }
-    
-        const currEditingMailI = this.Mails.GetCurrentlyEditingMailIndex(sender.id)
-        if (command === `mail`) {
-            this.Mails.CommandMail(sender, message.channel)
-            this.Database.UserstatsSendCommand(sender)
-            return
-        }
-        if (currEditingMailI > -1) {
-            if (command.startsWith(`mail wt `)) {
-                const mailNewValue = command.replace(`mail wt `, '')
-                
-                this.Mails.currentlyWritingEmails[currEditingMailI].mail.title = mailNewValue
-    
-                const _message = this.Mails.GetMailMessage(sender, 3)
-                this.Mails.currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
-                try { message.delete() } catch (error) { }
-    
-                this.Database.UserstatsSendCommand(sender)
-                return
-            } else if (command.startsWith(`mail wc `)) {
-                const mailNewValue = command.replace(`mail wc `, '')
-    
-                this.Mails.currentlyWritingEmails[currEditingMailI].mail.context = mailNewValue
-    
-                const _message = this.Mails.GetMailMessage(sender, 3)
-                this.Mails.currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
-                try { message.delete() } catch (error) { }
-    
-                this.Database.UserstatsSendCommand(sender)
-                return
-            } else if (command.startsWith(`mail wr `) && message.mentions.users.first()) {
-                const mailNewValue = message.mentions.users.first()
-    
-                this.Mails.currentlyWritingEmails[currEditingMailI].mail.reciver.id = mailNewValue.id
-                this.Mails.currentlyWritingEmails[currEditingMailI].mail.reciver.name = mailNewValue.username
-    
-                const _message = this.Mails.GetMailMessage(sender, 3)
-                this.Mails.currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
-                try { message.delete() } catch (error) { }
-    
-                this.Database.UserstatsSendCommand(sender)
-                return
-            } else if (command.startsWith(`mail wr `) && command.length == 26) {
-                const mailNewValue = command.replace(`mail wr `, '')
-    
-                let userName = '???'
-                try {
-                    userName = this.Client.users.cache.get(mailNewValue).username
-                } catch (error) { }
-    
-                this.Mails.currentlyWritingEmails[currEditingMailI].mail.reciver.id = mailNewValue
-                this.Mails.currentlyWritingEmails[currEditingMailI].mail.reciver.name = userName
-    
-                const _message = this.Mails.GetMailMessage(sender, 3)
-                this.Mails.currentlyWritingEmails[currEditingMailI].message.edit({ embed: _message.embed, component: _message.actionRows[0] })
-                try { message.delete() } catch (error) { }
-    
-                this.Database.UserstatsSendCommand(sender)
-                return
-            }
         }
     
         //#endregion

@@ -945,11 +945,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
         return
     }
 
-    if (command === `mail`) {
-        channel.send('> \\⛔ **Ez a parancs nem használható 😕.**\n> Raspberry-ről vagyok bejelentkezve, az adatbázis nem elérhető.')
-        return
-    }
-
     //#endregion
 
     //#region Disabled in dm

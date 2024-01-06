@@ -1,16 +1,10 @@
 // @ts-check
 
-const express = require('express')
-const ExpressHandlebars = require('express-handlebars')
-const Handlebars = require('handlebars')
-const bodyParser = require('body-parser')
-const path = require('path')
 const Discord = require('discord.js')
-const LogManager = require('../functions/log')
 const ContentParser = require('./content-parser')
 const LogError = require('../functions/errorLog').LogError
 const CacheManager = require('../functions/offline-cache')
-const { GetID, GetHash, AddNewUser, RemoveAllUser } = require('../economy/userHashManager')
+const { AddNewUser, RemoveAllUser } = require('../economy/userHashManager')
 const fs = require('fs')
 const os = require('os')
 const { DatabaseManager } = require('../functions/databaseManager.js')
@@ -19,16 +13,13 @@ const DiscordUtils = require('../functions/discord-utils')
 const {
     WsStatusText,
     NsfwLevel,
-    VerificationLevel,
     MFALevel
 } = require('../functions/enums')
 const { GetTime, GetDataSize, GetDate } = require('../functions/utils')
-const { HbLog, HbGetLogs, HbStart } = require('./log')
+const { HbGetLogs } = require('./log')
 const Commands = require('../functions/commands')
-const { MessageType, GuildVerificationLevel } = require('discord.js')
+const { MessageType } = require('discord.js')
 const process = require('process')
-const archivePath = 'D:/Mappa/Discord/DiscordOldData/'
-const Key = require('../key')
 /** @type {import('../config').Config} */
 // @ts-ignore
 const CONFIG = require('../config.json')

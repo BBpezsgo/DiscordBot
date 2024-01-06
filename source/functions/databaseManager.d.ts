@@ -55,28 +55,6 @@ export type DataPoll = {
     }
 }
 
-export type MailAccount = {
-    id: string
-    name: string
-}
-
-export type Mail = {
-    sender: MailAccount
-    reciver: MailAccount
-    title: string
-    context: string
-    date: number
-    readed: boolean
-    icon: string
-}
-
-export type DataMail = {
-    mailIds: string
-} & Users<UserInDatabase & {
-    inbox: { [index: string]: Mail }
-    outbox: { [index: string]: Mail }
-}>
-
 export type DataUsername = UserInDatabase & {
     avatarURL: string
 }
@@ -134,7 +112,6 @@ export class DatabaseManager {
 
     // dataMarket: DataMarket
     dataPolls: DataPoll
-    dataMail: DataMail
     dataBot: DataBot
 
     statesManager: StatesManager

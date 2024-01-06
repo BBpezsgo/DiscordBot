@@ -65,7 +65,6 @@ function GetEmbed(isPrivate, isMobile) {
                     '>  \\⛅  `/weather <earth|mars>` Időjárása.\n' +
                     '>  \\🚸  `/crossout <search>` Egy Crossout-os tárgy adatai.\n' +
                     '>  \\🏓  `/ping` A BOT ping-elése, avagy megnézni hogy most épp online e.\n' +
-                    '>  \\📯  `.mail` E-mailek megtekintése vagy írása.\n' +
                     '>  \\⚙️   `/settings` Beállítások.'
             }])
         }

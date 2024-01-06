@@ -624,11 +624,6 @@ function processCommand(message, thisIsPrivateMessage, sender, command, channel,
         return
     }
 
-    if (command === `mail`) {
-        channel.send(CommandNotAvailable)
-        return
-    }
-
     //#endregion
 
     //#region Disabled in dm

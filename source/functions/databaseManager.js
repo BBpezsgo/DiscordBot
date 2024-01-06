@@ -30,8 +30,6 @@ class DatabaseManager {
         this.dataBackpacks = {}
         // @ts-ignore
         this.dataPolls = {}
-        // @ts-ignore
-        this.dataMail = {}
         this.dataUsernames = {}
         // @ts-ignore
         this.dataBot = {}
@@ -142,21 +140,6 @@ class DatabaseManager {
             this.dataStickers[user.id].stickersTip = 0
         }
 
-        if (!this.dataMail.mailIds) {
-            this.dataMail.mailIds = ''
-        }
-        if (!this.dataMail[user.id]) {
-            // @ts-ignore
-            this.dataMail[user.id] = {}
-        }
-        this.dataMail[user.id].username = username
-        if (!this.dataMail[user.id].inbox) {
-            this.dataMail[user.id].inbox = {}
-        }
-        if (!this.dataMail[user.id].outbox) {
-            this.dataMail[user.id].outbox = {}
-        }
-
         if (!this.dataUsernames[user.id]) {
             // @ts-ignore
             this.dataUsernames[user.id] = {}
@@ -194,10 +177,6 @@ class DatabaseManager {
         if (IsAnything(this.dataUsernames)) {
             this.statesManager.Database.SaveText = 'userNames'
             fs.writeFile(this.databaseFolderPath + 'userNames.json', JSON.stringify(this.dataUsernames), (err) => { if (err) { LogError(err) } })
-        }
-        if (IsAnything(this.dataMail)) {
-            this.statesManager.Database.SaveText = 'mails'
-            fs.writeFile(this.databaseFolderPath + 'mails.json', JSON.stringify(this.dataMail), (err) => { if (err) { LogError(err) } })
         }
         if (IsAnything(this.dataPolls)) {
             this.statesManager.Database.SaveText = 'polls'
@@ -237,8 +216,6 @@ class DatabaseManager {
         // const rawJsonMarket = fs.readFileSync(this.databaseFolderPath + 'market.json', 'utf-8')
         this.statesManager.Database.LoadText = 'userNames'
         const rawJsonUsernames = fs.readFileSync(this.databaseFolderPath + 'userNames.json', 'utf-8')
-        this.statesManager.Database.LoadText = 'mails'
-        const rawJsonMail = fs.readFileSync(this.databaseFolderPath + 'mails.json', 'utf-8')
         this.statesManager.Database.LoadText = 'polls'
         const rawJsonPolls = fs.readFileSync(this.databaseFolderPath + 'polls.json', 'utf-8')
         this.statesManager.Database.LoadText = 'userstats'
@@ -271,10 +248,6 @@ class DatabaseManager {
         if (rawJsonUsernames != undefined && rawJsonUsernames != null && rawJsonUsernames != '') {
             this.dataUsernames = JSON.parse(rawJsonUsernames)
         } else { success = false }
-        this.statesManager.Database.ParsingText = 'mails'
-        if (rawJsonMail != undefined && rawJsonMail != null && rawJsonMail != '') {
-            this.dataMail = JSON.parse(rawJsonMail)
-        } else { success = false }
         this.statesManager.Database.ParsingText = 'polls'
         if (rawJsonPolls != undefined && rawJsonPolls != null && rawJsonPolls != '') {
             this.dataPolls = JSON.parse(rawJsonPolls)
@@ -304,8 +277,6 @@ class DatabaseManager {
         fs.copyFileSync(this.backupFolderPath + 'market.json', this.databaseFolderPath + 'market.json', )
         this.statesManager.Database.BackupText = 'userNames'
         fs.copyFileSync(this.backupFolderPath + 'userNames.json', this.databaseFolderPath + 'userNames.json', )
-        this.statesManager.Database.BackupText = 'mails'
-        fs.copyFileSync(this.backupFolderPath + 'mails.json', this.databaseFolderPath + 'mails.json', )
         this.statesManager.Database.BackupText = 'polls'
         fs.copyFileSync(this.backupFolderPath + 'polls.json', this.databaseFolderPath + 'polls.json', )
         this.statesManager.Database.BackupText = 'userstats'
@@ -387,9 +358,6 @@ class DatabaseManager {
             catch (error) { LogError(error) }
             
             if (this.dataBusinesses[user]) try { await database.Set(path + 'business', this.dataBusinesses[user]) }
-            catch (error) { LogError(error) }
-            
-            if (this.dataMail[user]) try { await database.Set(path + 'mail', this.dataMail[user]) }
             catch (error) { LogError(error) }
             
             if (this.dataStickers[user]) try { await database.Set(path + 'stickers', this.dataStickers[user]) }

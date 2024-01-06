@@ -103,14 +103,15 @@ function HbGetLogs(invisibleIp) {
 
                 newEvent.seriousLogs = false
 
-                newLogGroup = {}
+                newLogGroup = {
+                    startTime: time,
+                    endTime: time,
+                    logs: [],
+                    running: false,
+                    seriousLogs: false,
+                }
                 thereIsAnyLogGroup = true
 
-                newLogGroup.startTime = time
-                newLogGroup.endTime = time
-                newLogGroup.logs = []
-                newLogGroup.running = false
-                newLogGroup.seriousLogs = false
                 lastTime = '--:--:--'
             } else {
                 if (newLogGroup.logs == undefined) {

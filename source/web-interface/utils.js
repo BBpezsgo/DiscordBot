@@ -1,17 +1,14 @@
 // @ts-check
 
 const Discord = require('discord.js')
-const LogError = require('../functions/errorLog').LogError
 const CacheManager = require('../functions/offline-cache')
-const { GetID, GetHash } = require('../economy/userHashManager')
+const { GetHash } = require('../economy/userHashManager')
 const { DatabaseManager } = require('../functions/databaseManager.js')
 const {
-    WsStatusText,
     NsfwLevel,
-    VerificationLevel,
     MFALevel
 } = require('../functions/enums')
-const { GetTime, GetDataSize, GetDate } = require('../functions/utils')
+const { GetDate } = require('../functions/utils')
 const ArchiveBrowser = require('../functions/archive-browser')
 const HarBrowser = require('../functions/har-discord-browser')
 const ContentParser = require('./content-parser')
