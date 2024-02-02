@@ -104,16 +104,16 @@ module.exports = (channel, sender, isPrivate, database) => {
 
     let business = database.dataBusinesses[sender.id]
 
-    var money = database.dataBasic[sender.id].money
+    const money = database.dataBasic[sender.id].money
 
     if (business.Has) {
-        var moneyMakerName = business.businessName
-        var moneyMakerLevel = business.businessLevel
+        const moneyMakerName = business.businessName
+        const moneyMakerLevel = business.businessLevel
 
-        var moneyMakerImage = ''
-        var moneyMakerLevelText = ''
+        let moneyMakerImage = ''
+        let moneyMakerLevelText = ''
 
-        var uprageCost = 0
+        let uprageCost = 0
 
         let addMoney = calculateAddMoney(sender, business.businessIndex, database)
         if (business.businessIndex === 1) {

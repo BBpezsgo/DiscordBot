@@ -38,12 +38,13 @@ function addNewPoll(messageId, title, optionTexts, optionIcons, database) {
         vals.push(0)
     }
 
-    database.dataPolls.messages[messageId] = {}
-    database.dataPolls.messages[messageId].title = title
-    database.dataPolls.messages[messageId].optionTexts = optionTexts
-    database.dataPolls.messages[messageId].optionIcons = optionIcons
-    database.dataPolls.messages[messageId].optionValues = vals
-    database.dataPolls.messages[messageId].userIds = usrs
+    database.dataPolls.messages[messageId] = {
+        title: title,
+        optionTexts: optionTexts,
+        optionIcons: optionIcons,
+        optionValues: vals,
+        userIds: usrs,
+    }
 
     database.dataPolls.messageIds += "|" + messageId
 
@@ -81,7 +82,7 @@ function poll(client, titleText, listOfOptionText, listOfOptionEmojis, wouldYouR
             value: optionText
         }])
 
-    /** @type {Discord.TextBasedChannel} */
+    /** @ts-ignore @type {Discord.TextBasedChannel} */
     const channel = client.channels.cache.get('795935090026086410')
     channel.send({ embeds: [embed] })
         .then(message => {

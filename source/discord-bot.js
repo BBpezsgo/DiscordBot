@@ -24,8 +24,8 @@ module.exports = class DiscordBot {
      */
     constructor(platform) {
         try {
-            /** @type {Discord.Collection<string, import("./commands2/base").Command>} */
-            this.Commands = new Discord.Collection()
+            /** @type {import("./commands2/base").Command[]} */
+            this.Commands = []
             /** @type {'DESKTOP' | 'MOBILE'} */
             this.Platform = platform
             /** @type {StatesManager} */
@@ -80,6 +80,20 @@ module.exports = class DiscordBot {
         } catch (error) {
             LogError(error)
         }
+    }
+
+    /**
+     * @param {string} commandName
+     * @returns {({ Guild: string | null } & import('./commands2/base').GeneralListener & import('./commands2/base').YesCommandListener) | null}
+     */
+    GetCommandByName(commandName) {
+        for (const command of this.Commands) {
+            if (command.Command && command.OnCommand && command.Command.name === commandName) {
+                // @ts-ignore
+                return command
+            }
+        }
+        return null
     }
 
     SetupListeners() {
@@ -235,7 +249,7 @@ module.exports = class DiscordBot {
 
         this.Database.dataBot.day = dayOfYear
 
-        this.Commands = new Discord.Collection()
+        this.Commands = []
 
         const commandsPath = Path.join(__dirname, 'commands2')
         const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'))
@@ -246,11 +260,7 @@ module.exports = class DiscordBot {
             try {
                 /** @type {import("./commands2/base").Command} */
                 const command = require(filePath)
-                if ('Data' in command && 'Execute' in command) {
-                    this.Commands.set(command.Data.name, command)
-                } else {
-                    console.warn(`The command at ${filePath} is missing a required "data" or "execute" property`)
-                }
+                this.Commands.push(command)
             } catch (error) {
                 LogError(error)
             }
@@ -268,24 +278,13 @@ module.exports = class DiscordBot {
     
         const privateCommand = this.Database.dataBasic[interaction.user.id].privateCommands
         if (interaction.isMessageContextMenuCommand()) {
-            if (interaction.commandName == 'Xp érték') {
-                const messageXpValue = calculateAddXp(interaction.targetMessage)
-                if (messageXpValue.total == 0) {
-                    interaction.reply({
-                        content: '> Ez az üzenet semmi \\🍺t se ér', ephemeral: true
-                    })
-                } else {
-                    interaction.reply({
-                        content:
-                            '> Ez az üzenet **' + messageXpValue.total + '**\\🍺t ér:' + '\n' +
-                            '>  Alap érték: ' + messageXpValue.messageBasicReward + '\\🍺' + '\n' +
-                            '>  \\📄 Fájl bónusz: ' + messageXpValue.messageAttachmentBonus + '\\🍺' + '\n' +
-                            '>  \\➰ Hossz bónusz: ' + messageXpValue.messageLengthBonus + '\\🍺' + '\n' +
-                            '>  \\🙂 Emoji bónusz: ' + messageXpValue.messageEmojiBonus + '\\🍺' + '\n' +
-                            '>  \\🔗 Link bónusz: ' + messageXpValue.otherBonuses + '\\🍺' + '\n' +
-                            '>  \\💄 Egyedi emoji bónusz: ' + messageXpValue.messageCustomEmojiBonus + '\\🍺'
-                        ,ephemeral: true
-                    })
+            for (const command of this.Commands) {
+                if (command.OnMessageContextMenu) {
+                    const result = command.OnMessageContextMenu(interaction, this)
+                    if (result) {
+                        await result
+                        return
+                    }
                 }
             }
         } else if (interaction.isUserContextMenuCommand()) {
@@ -302,8 +301,8 @@ module.exports = class DiscordBot {
             } catch (error) { }
 
             for (const command of this.Commands) {
-                if (command[1].OnButton) {
-                    const result = command[1].OnButton(interaction, this)
+                if (command.OnButton) {
+                    const result = command.OnButton(interaction, this)
                     if (result) {
                         await result
                         return
@@ -312,8 +311,8 @@ module.exports = class DiscordBot {
             }
         } else if (interaction.isStringSelectMenu()) {
             for (const command of this.Commands) {
-                if (command[1].OnSelectMenu) {
-                    const result = command[1].OnSelectMenu(interaction, this)
+                if (command.OnSelectMenu) {
+                    const result = command.OnSelectMenu(interaction, this)
                     if (result) {
                         await result
                         return
@@ -341,7 +340,7 @@ module.exports = class DiscordBot {
                 const selectedIndex = interaction.values[0]
                 const money = this.Database.dataBasic[interaction.user.id].money
     
-                var newColorRoleId = ''
+                let newColorRoleId = ''
     
                 try {
                     const memberRoles = interaction.member.roles
@@ -548,11 +547,11 @@ module.exports = class DiscordBot {
      * @param {boolean} privateCommand
      */
     async OnCommand(command, privateCommand) {
-        const commandHandler = this.Commands.get(command.commandName)
+        const commandHandler = this.GetCommandByName(command.commandName)
 
         if (commandHandler) {
             try {
-                await commandHandler.Execute(command, privateCommand, this)
+                await commandHandler.OnCommand(command, privateCommand, this)
             } catch (error) {
                 LogError(error)
                 await command.reply({
@@ -751,8 +750,8 @@ module.exports = class DiscordBot {
     Login() {
         return new Promise(resolve => {
             this.Client.login(CONFIG.tokens.discord)
-                .then(token => { resolve() })
-                .catch(error => { LogError(error) })
+                .then(resolve)
+                .catch(LogError)
         })
     }
 

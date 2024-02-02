@@ -147,7 +147,7 @@ function calculateAddXp(message) {
     const customEmojiRegex = /(<:[a-zA-Z]+:[0-9]{18}>)/
     const builtinEmojiRegex = /(:[a-z_]+:)/
     
-    var settings = {
+    let settings = {
         "xpRewards": {
             "messageContents": {
                 "attachment": { "xp": 100 },
@@ -182,7 +182,7 @@ function calculateAddXp(message) {
 
     settings = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, 'settings.json'), 'utf-8'))
 
-    var msg = message.content
+    const msg = message.content
 
     const _msg_lnk_rw = msg.match(linkRegex)
     const _msg_wrd_rw = msg.match(/\b(\w+)\b/)
@@ -190,7 +190,7 @@ function calculateAddXp(message) {
     const _msg_dcej_rw = msg.match(customEmojiRegex)
     const _msg_dbej_rw = msg.match(builtinEmojiRegex)
 
-    var allLinkLength = 0
+    let allLinkLength = 0
     if (_msg_lnk_rw != null) {
         _msg_lnk_rw.forEach(link => {
             if (link != undefined) {
@@ -200,7 +200,7 @@ function calculateAddXp(message) {
     }
     const messageCharacters = Math.max(1, msg.length - allLinkLength)
 
-    var messageEmojis = 0
+    let messageEmojis = 0
     if (_msg_dbej_rw != null) {
         messageEmojis += _msg_dbej_rw.length
     }
@@ -208,12 +208,12 @@ function calculateAddXp(message) {
         messageEmojis += _msg_ej_rw.length
     }
     messageEmojis = 0
-    var messageCustomEmojis = 0
+    let messageCustomEmojis = 0
     if (_msg_dcej_rw != null) {
         messageCustomEmojis += _msg_dcej_rw.length
     }
-    var messageLinkCount = 0
-    var messageLinks = []
+    let messageLinkCount = 0
+    const messageLinks = []
     if (_msg_lnk_rw != null) {
         messageLinkCount = _msg_lnk_rw.length
         for (let i = 0; i < messageLinkCount; i++) {
@@ -222,7 +222,7 @@ function calculateAddXp(message) {
         }
     }
 
-    var messageLengthBonus = 0
+    let messageLengthBonus = 0
     for (let i = 0; i < settings.xpRewards.messageSizes.length; i++) {
         const item = settings.xpRewards.messageSizes[i];
         if (item.minChar <= messageCharacters) {
@@ -239,14 +239,14 @@ function calculateAddXp(message) {
 
     const messageAttachmentBonus = message.attachments.size * settings.xpRewards.messageContents.attachment.xp
 
-    var otherBonuses = 0
+    let otherBonuses = 0
     if (msg.toLowerCase().includes('https://cdn.discordapp.com/attachments/')) {
         otherBonuses += settings.xpRewards.messageContents.attachmentLink.xp
     } else if (msg.toLowerCase().includes('https://tenor.com/view/')) {
         otherBonuses += settings.xpRewards.messageContents.GIF.xp
     } else {
         messageLinks.forEach(link => {
-            var bonus = settings.xpRewards.messageContents.link.xp
+            const bonus = settings.xpRewards.messageContents.link.xp
 
             for (let i = 0; i < settings.xpRewards.messageContents.specialLinks.length; i++) {
                 const specialLink = settings.xpRewards.messageContents.specialLinks[i];

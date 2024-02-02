@@ -10,20 +10,16 @@ const SPINNER = 'https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif'
 const DONE = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/282/check-mark-button_2705.png'
 const WARNING = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/322/warning_26a0-fe0f.png'
 
-/**@param {string} redditLink */
+/**
+ * @param {string} redditLink
+ */
 function ConvertToRedditsaveLink(redditLink) {
-    var newStr = "https://redditsave.com/info?url="
-    var lnk = redditLink
-    while (lnk.includes('/')) { lnk = lnk.replace('/', '%2F') }
-    while (lnk.includes(':')) { lnk = lnk.replace(':', '%3A') }
-    while (lnk.includes('?')) { lnk = lnk.replace('?', '%3F') }
-    while (lnk.includes('=')) { lnk = lnk.replace('=', '%3D') }
-    while (lnk.includes('=')) { lnk = lnk.replace('=', '%3D') }
-    while (lnk.includes('&')) { lnk = lnk.replace('&', '%26') }
-    return newStr + lnk
+    return "https://redditsave.com/info?url=" + encodeURIComponent(redditLink)
 }
 
-/**@param {string} rawHtmlFile @returns {number} 1: Video | 2: GIF*/
+/**
+ * @param {string} rawHtmlFile @returns {number} 1: Video | 2: GIF
+ */
 function GifOrVideo(rawHtmlFile) {
     if (rawHtmlFile.includes('<a onclick="gtag(\'event\', \'click\', {\'event_category\' : \'downloads\',\'event_label\' : \'download_sound_video\'});"') == true) {
         return 1
@@ -59,7 +55,7 @@ function GetInformations(rawHtmlFile, redditLink) {
 async function DownloadVideo(message, url, replymessage, postInfo) {
     const videoFile = fs.createWriteStream(message.id + '.mp4')
     const request = https.get(url, function (response) {
-        var cur = 0
+        let cur = 0
 
         response.on('data', function (chunk) {
             cur += chunk.length
@@ -147,7 +143,7 @@ async function Redditsave(message) {
 
     const rawHtmlFile = fs.createWriteStream(message.id)
     const request = https.get(ConvertToRedditsaveLink(messageContentUrl), function (response) {
-        var cur = 0
+        let cur = 0
 
         response.on('data', function (chunk) {
             cur += chunk.length
@@ -155,8 +151,8 @@ async function Redditsave(message) {
 
         response.on('end', async function () {
             setTimeout(async () => {
-                var rawHtml = fs.readFileSync(message.id)
-                var videoOrGif = GifOrVideo(rawHtml)
+                const rawHtml = fs.readFileSync(message.id)
+                const videoOrGif = GifOrVideo(rawHtml)
 
                 if (videoOrGif == 1) {
                     const postInfo = GetInformations(rawHtml.toString('utf8'), messageContentUrl)

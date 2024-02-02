@@ -29,9 +29,9 @@ async function execute(command, database, privateCommand) {
             coloredProgressBarPart = '🟫'
         }
 
-        var score = scores[command.user.id].score
-        var rankName = xpRankText(score)
-        var next = xpRankNext(score)
+        const score = scores[command.user.id].score
+        const rankName = xpRankText(score)
+        const next = xpRankNext(score)
 
         let progressBar = ''
 

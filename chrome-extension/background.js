@@ -27,7 +27,7 @@ function Get(url) {
 }
 
 /** @type {NodeJS.Timer | null} */
-var refreshingTimer = null
+let refreshingTimer = null
 
 function StopRefreshing() {
   if (refreshingTimer) {
@@ -36,7 +36,7 @@ function StopRefreshing() {
   }
 }
 
-var GetDataPending = false
+let GetDataPending = false
 function Refreshing() {
   if (refreshingTimer) { StopRefreshing() }
   return setInterval(() => {

@@ -74,7 +74,7 @@ function GetNextUpdate(date) {
 }
 
 function ProcessData(data) {
-    var result = {}
+    const result = { }
 
     result.sender = data['gesmes:Envelope']['gesmes:Sender'][0]['gesmes:name'][0]
     result.rates = {}
@@ -116,7 +116,7 @@ function Download(callback) {
     try {
         const req = https.request('https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', function (res) {
             res.setEncoding('utf8')
-            var data = ''
+            let data = ''
             fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/currency-res.json'), JSON.stringify({ headers: res.headers }, null, ' '), 'utf8')
             res.on('data', function (chunk) {
                 data += chunk

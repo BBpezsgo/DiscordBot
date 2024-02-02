@@ -10,8 +10,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 
 	<script>
-		var refreshing = true
-		var autoReload = true
+		let refreshing = true
+		let autoReload = true
 		setInterval(() => {
 			if (autoReload == true) {
 				// Reload()
@@ -20,7 +20,7 @@
 	</script>
 </head>
 
-<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+<body>
 	<div id="context-menubar">
 		<div id="context-menubar-content">
 
@@ -56,8 +56,8 @@
 							</div>
 						</td>
 						<script>
-							var sendPing = true
-							var currentlyReloading = false
+							let sendPing = true
+							let currentlyReloading = false
 							var enableReloadOnPingSuccess = false
 							const serverPingLabel = document.getElementById('server-ping-label')
 							const serverPingIcon = document.getElementById('server-ping-icon')
@@ -89,7 +89,7 @@
 								xhr.send(null)
 							}, 100)
 							
-							var i = 0
+							let i = 0
 							/** @param {numner} ms */
 							function Restart(ms) {
 								currentlyReloading = true
@@ -120,7 +120,7 @@
 
 									i = 1
 									//const elem = document.getElementById('restartProgress')
-									var value = 0
+									let value = 0
 									//var id = setInterval(Tick, ms / 100)
 
 									function Tick() {

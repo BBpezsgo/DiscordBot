@@ -85,9 +85,13 @@ const activitiesDesktop = [
 
 /** @type {import('discord.js').ActivityOptions[]} */
 const activitiesMobile = [
+    // @ts-ignore
     { name: 'Photon PUN documentation', type: ActivityType.Watching, browser: "DISCORD IOS" },
+    // @ts-ignore
     { name: 'Discord Guide', type: ActivityType.Watching, browser: "DISCORD IOS" },
+    // @ts-ignore
     { name: 'Node.js documentation', type: ActivityType.Watching, browser: "DISCORD IOS" },
+    // @ts-ignore
     { name: 'Unity tutorials', type: ActivityType.Watching, browser: "DISCORD IOS" },
 ]
 

@@ -52,7 +52,7 @@ process.stdout.addListener('resize', () => {
 /**Reprints a line on the console */
 const reprint = (text, x = 0, y = 0) => {
     process.stdout.cursorTo(x, y)
-    process.stdout.clearLine()
+    process.stdout.clearLine(0)
     process.stdout.write(text)
     process.stdout.write('\n')
 }
@@ -155,7 +155,7 @@ function RemoveColors(text) {
 
 /** @param {string} text @param {number} width @param {number} marginLeft */
 function FixedWidth(text, width, marginLeft = undefined) {
-    var txt = text + ''
+    let txt = text + ''
     const textLength = RemoveColors(txt).length
     if (marginLeft !== undefined) {
         if (textLength + marginLeft > width) {
@@ -213,7 +213,7 @@ class LogManager {
 
                 const webInterfaceIDs = Object.keys(this.statesManager.WebInterface)
                 for (const webInterfaceID of webInterfaceIDs) {
-                    var delIndex = -1
+                    let delIndex = -1
                     for (let i = 0; i < this.statesManager.WebInterface[webInterfaceID].Requests.length; i++) {
                         this.statesManager.WebInterface[webInterfaceID].Requests[i] -= this.deltaTime
                         if (this.statesManager.WebInterface[webInterfaceID].Requests[i] <= 0) delIndex = i
@@ -241,7 +241,7 @@ class LogManager {
                 this.lastTime = now
 
                 for (const webInterfaceID of webInterfaceIDs) {
-                    var removeIndex = -1
+                    let removeIndex = -1
                     for (let i = 0; i < this.statesManager.WebInterface[webInterfaceID].Clients.length; i++) {
                         const element = this.statesManager.WebInterface[webInterfaceID].Clients[i]
                         if (element.destroyed == true) {
@@ -278,7 +278,7 @@ class LogManager {
     }
 
     Destroy() {
-        clearInterval(this.timer)
+        clearTimeout(this.timer)
     }
 
     GetSocketState(socket) {
@@ -310,9 +310,9 @@ class LogManager {
     }
 
     BlankScreen() {
-        if (enabled == false) return
+        if (!enabled) return
         this.loadingOverride = ''
-        var txt = ''
+        let txt = ''
         txt += '\n'
         const remaingHeight = window.height - txt.split('\n').length - 1
         for (let i = 0; i < remaingHeight; i++) txt += '\n'
@@ -321,9 +321,9 @@ class LogManager {
     }
 
     RefreshScreen() {
-        if (enabled == false) { return }
+        if (!enabled) { return }
 
-        var txt = ''
+        let txt = ''
 
         if (this.scriptLoadingText !== null && this.scriptLoadingText !== undefined && this.scriptLoadingText !== '' && this.scriptLoadingText.length > 0) {
             txt += FixedWidth(this.scriptLoadingText, window.width) + '\n'
@@ -333,7 +333,7 @@ class LogManager {
             if (this.bot !== undefined) {
                 txt += FixedWidth('┌──── Client', window.width)
                 if (this.bot.readyAt) txt += FixedWidth('│' + FixedWidth('Ready at:', 20) + GetTime(this.bot.readyAt), window.width) + '\n'
-                var dfdfdf = new Date(0)
+                const dfdfdf = new Date(0)
                 dfdfdf.setSeconds(this.bot.uptime / 1000)
                 dfdfdf.setHours(dfdfdf.getHours() - 1)
                 if (dfdfdf !== '0:00:00') txt += FixedWidth('│' + FixedWidth('Uptime:', 20) + GetTime(dfdfdf), window.width) + '\n'

@@ -8,7 +8,7 @@ const LogError = require('./errorLog').LogError
 /** @param {Message} message */
 function AutoReact(message) {
     try {
-        var isHaveMusic = false
+        let isHaveMusic = false
         if (message.content.includes('https://youtu.be/') === true) { isHaveMusic = true }
         if (message.content.includes('https://www.youtube.com/watch') === true) { isHaveMusic = true }
         if (message.content.includes('https://open.spotify.com/') === true) { isHaveMusic = true }
@@ -28,14 +28,8 @@ function AutoReact(message) {
                 if (reaction == null) {
                     await message.react(autoReaction)
                 } else {
-                    const users = await reaction.users.fetch();
-                    var botIsReacted = false
-                    users.forEach(async (user) => {
-                        if (user.id == '738030244367433770') {
-                            botIsReacted = true
-                        }
-                    })
-                    if (botIsReacted == false) {
+                    const users = await reaction.users.fetch()
+                    if (!users.has('738030244367433770')) {
                         await message.react(autoReaction)
                     }
                 }

@@ -4,14 +4,11 @@ const { ToUnix } = require('../functions/utils')
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: new Discord.SlashCommandBuilder()
+	Command: new Discord.SlashCommandBuilder()
 		.setName('ping'),
-    /**
-     * @param {Discord.ChatInputCommandInteraction} interaction
-     */
-	async Execute(interaction, ephemeral, sender) {
+	async OnCommand(interaction, ephemeral, sender) {
         const client = interaction.client
-        var WsStatus = "Unknown"
+        let WsStatus = "Unknown"
         if (client.ws.status === 0) {
             WsStatus = "Kész"
         } else if (client.ws.status === 1) {

@@ -16,7 +16,7 @@ function GetClassName(obj) {
  * @param {{ key: string, value: any }[]} parameters
  */
 function FormatError(error, ...parameters) {
-    var str = ''
+    let str = ''
     if (error instanceof DiscordAPIError) {
         str = `${error.name}: ${error.message}`
         str += `\n  Method: ${error.method}`

@@ -41,7 +41,7 @@ function GST(fromCache = false) {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/gst-headers.txt'), headersText, 'utf8')
@@ -80,7 +80,7 @@ function IPS(fromCache = false) {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/ips-headers.txt'), headersText, 'utf8')
@@ -119,7 +119,7 @@ function FLR(fromCache = false) {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/flr-headers.txt'), headersText, 'utf8')
@@ -158,7 +158,7 @@ function Notifications(fromCache = false) {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/donki/notifications-headers.txt'), headersText, 'utf8')

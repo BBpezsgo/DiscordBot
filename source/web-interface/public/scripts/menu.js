@@ -14,7 +14,7 @@
  *   }[]
  * })[]}
  */
-const items = [
+const  items = [
     {
         id: 'status',
         displayName: str_menu.status,
@@ -292,7 +292,7 @@ function UnselectAll() {
 }
 
 function collapseAll() {
-    for (var i = 0; i < items.length; i++) {
+    for (let i = 0; i < items.length; i++) {
         const item = items[i]
         if (typeof item === 'string') continue
         if (!item.childs) continue
@@ -309,7 +309,7 @@ function collapseAll() {
             continue
         }
     }
-    for (var i = 0; i < document.links.length; i++) {
+    for (let i = 0; i < document.links.length; i++) {
         document.links[i].className = "L1"
     }
 }
@@ -383,41 +383,5 @@ function doClick(i) {
         document.getElementById('ol' + item.index).classList.add('selected')
     } else {
         document.getElementById('ol' + item.index).classList.add('selected')
-    }
-
-    // @ts-ignore
-    if (!UrlExists(document.getElementById('a' + item.index).href)) {
-        parent.window.frames["mainFrame"].src = ""
-        parent.window.frames["mainFrame"].document.body.innerHTML = Page404
-    }
-}
-
-// @ts-ignore
-const Page404 =
-    `<table id="autoWidth" style="width: 100%;">` +
-    `    <tbody>` +
-    `        <tr>` +
-    `           <td class="h1" colspan="3">` +
-    `               The server is down` +
-    `           </td>` +
-    `        </tr>` +
-    `    </tbody>` +
-    `</table>`
-
-/**
- * @param {string | URL} url
- */
-function UrlExists(url) {
-    try {
-        var http = new XMLHttpRequest()
-        http.open('HEAD', url, false)
-        http.send()
-        if (http.status != 404) {
-            return true
-        } else {
-            return false
-        }
-    } catch (error) {
-        return false
     }
 }

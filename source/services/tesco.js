@@ -28,7 +28,7 @@ const ProcessData = function(data) {
     const result = []
 
     const dom = new DOM.JSDOM(data)
-    /** @type {Document} */
+    /** @type {DOM.Document} */
     const doc = dom.window.document
 
     const categories = []
@@ -47,11 +47,11 @@ const ProcessData = function(data) {
         }
     } catch (error) { LogError(error) }
 
-    /** @type {HTMLUListElement | null} */
+    /** @type {DOM.HTMLUListElement | null} */
     const list = doc.querySelector('#product-list > div.product-list-view.has-trolley > div.product-list-container > div.product-lists > div > div.search.product-list--page.product-list--current-page > div > ul')
     if (list === null) { return undefined }
     list.querySelectorAll('li').forEach(i_ => {
-        /** @type {HTMLDivElement | null} */
+        /** @type {DOM.HTMLDivElement | null} */
         const item = i_.querySelector('div > div > div')
 
         try {
@@ -63,12 +63,12 @@ const ProcessData = function(data) {
             LogError(error)
         }
 
-        var url = null
-        var imageUrl = null
-        var name = null
-        var price = null
-        var price2 = null
-        var errorOccured = false
+        let url = null
+        let imageUrl = null
+        let name = null
+        let price = null
+        let price2 = null
+        let errorOccured = false
         try {
             url = item?.querySelector('div:nth-child(1) > a')?.getAttribute('href')
         } catch (error) {
@@ -103,14 +103,14 @@ const ProcessData = function(data) {
             LogError(error)
         }
 
-        var discount = null
+        let discount = null
 
         if (item !== null) {
             const discountElement = item.querySelector('div:nth-child(2)')
             if (discountElement !== null) {
                 try {
-                    var validUntil = discountElement.querySelector('div > div > a > div > span')?.textContent
-                    var desc = discountElement.querySelector('div > div > a > div > div > span')?.textContent
+                    const validUntil = discountElement.querySelector('div > div > a > div > span')?.textContent
+                    const desc = discountElement.querySelector('div > div > a > div > div > span')?.textContent
         
                     if (validUntil && desc) {
                         discount = {
@@ -192,7 +192,7 @@ function Download(search, page, callback) {
         const req = https.request(options, function (res) {
             fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/tesco/search-res-' + search + '.json'), JSON.stringify({ headers: res.headers }), { encoding: 'utf-8' })
             res.setEncoding('utf8')
-            var data = ''
+            let data = ''
             res.on('data', function (chunk) {
                 data += chunk
             })

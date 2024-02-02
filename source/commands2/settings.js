@@ -3,11 +3,10 @@ const CommandSettings = require('../economy/settings')
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: new Discord.SlashCommandBuilder()
+	Command: new Discord.SlashCommandBuilder()
         .setName('settings')
         .setDescription('Értesítési, és parancs beállítások'),
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
-    Execute: async function(interaction, ephemeral, sender) {
+    OnCommand: async function(interaction, ephemeral, sender) {
         await interaction.deferReply()
         const member = await interaction.member.fetch()
         await member.guild.fetch()

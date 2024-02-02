@@ -74,7 +74,7 @@ function GetItemEmbed(options) {
             }])
         }
         if (item.sortedStats != undefined && item.sortedStats != null) {
-            var statsBuilder = ''
+            let statsBuilder = ''
 
             const statIcons = {
                 'StatPercentDamageRating': '\\💥 ',

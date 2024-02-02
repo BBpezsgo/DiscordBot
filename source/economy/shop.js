@@ -651,7 +651,7 @@ function OnButtonClick(e, database) {
 }
 
 /**
- * @param {Discord.SelectMenuInteraction<Discord.CacheType>} e
+ * @param {Discord.SelectMenuInteraction<'cached'>} e
  * @param {DatabaseManager} database
  */
 function OnSelectMenu(e, database) {
@@ -669,7 +669,7 @@ function OnSelectMenu(e, database) {
         if (selectedIndex === 0) {
             if (money >= 3299) {
                 database.dataBasic[e.user.id].money -= 3299
-                database.dataBasic[e.user.id].color = '#fffff9'
+                database.dataBasic[e.user.id].color = 'white'
 
                 database.SaveDatabase()
             } else {
@@ -678,7 +678,7 @@ function OnSelectMenu(e, database) {
         } else if (selectedIndex === 1) {
             if (money >= 99) {
                 database.dataBasic[e.user.id].money -= 99
-                database.dataBasic[e.user.id].color = '#000000'
+                database.dataBasic[e.user.id].color = 'black'
 
                 database.SaveDatabase()
             } else {
@@ -759,7 +759,7 @@ function OnSelectMenu(e, database) {
         const selectedIndex = Number.parseInt(e.values[0])
         const money = database.dataBasic[e.user.id].money
 
-        var newColorRoleId = ''
+        let newColorRoleId = ''
 
         if (selectedIndex === 0) {
             if (money >= 9) {

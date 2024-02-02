@@ -186,7 +186,7 @@ function UsersCache(client) {
     const archivedUsers = ArchiveBrowser.Users()
 
     for (const archivedUser of archivedUsers) {
-        var found = false
+        let found = false
         for (let j = 0; j < users.length; j++) {
             const user = users[j]
             if (user.id == archivedUser.id) {
@@ -214,7 +214,7 @@ function UsersCache(client) {
 
     for (let i = 0; i < usersSaved.length; i++) {
         const userSaved = usersSaved[i]
-        var found = false
+        let found = false
         for (let j = 0; j < users.length; j++) {
             const user = users[j]
             if (user.id == userSaved.id) {
@@ -543,9 +543,9 @@ function ChannelsInGuild(guild) {
  * @param {string?} serverID
  */
 function GetHandlebarsMessage(client, content, serverID = undefined) {
-    const result = (new ContentParser.Parser(content)).result
+    const result = ContentParser.Parse(content)
 
-    var attachmentCounter = 0
+    let attachmentCounter = 0
     for (let i = 0; i < result.length; i++) {
         switch (result[i].type) {
             case 'URL':
@@ -607,7 +607,7 @@ function GetHandlebarsMessage(client, content, serverID = undefined) {
             case 'EMOJI':
                 {
                     const parsedEmoji = Discord.parseEmoji(result[i].data)
-                    var details = {
+                    const details = {
                         id: parsedEmoji.id,
                         animated: parsedEmoji.animated,
                         name: parsedEmoji.name

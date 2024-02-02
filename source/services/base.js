@@ -31,7 +31,7 @@ function Get(ApiUrl, CacheFolder, FromCache = false) {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/' + CacheFolder + '/headers.txt'), headersText, 'utf-8')

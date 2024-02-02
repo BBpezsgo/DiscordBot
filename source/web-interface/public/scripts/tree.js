@@ -1,16 +1,16 @@
 setTimeout(() => {
     const toggler = document.getElementsByClassName("caret");
     const togglerAll = document.getElementsByClassName("caret-all")[0];
-    var i;
+    let i;
 
     for (i = 0; i < toggler.length; i++) {
         toggler[i].addEventListener("click", (e) => {
-            e.target.classList.toggle("caret-down")
+            (/** @type {HTMLElement} */ (e.target)).classList.toggle("caret-down")
 
             togglerAll?.classList.remove("caret-up")
             togglerAll?.classList.remove("caret-down")
 
-            const childs = document.getElementsByClassName(e.target.id)
+            const childs = document.getElementsByClassName((/** @type {HTMLElement} */ (e.target)).id)
             for (let i = 0; i < childs.length; i++) {
                 const element = childs[i]
                 element.classList.toggle("nested-show")

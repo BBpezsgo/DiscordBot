@@ -3,11 +3,10 @@ const Discord = require('discord.js')
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: new Discord.SlashCommandBuilder()
+	Command: new Discord.SlashCommandBuilder()
         .setName('quizdone')
         .setDescription('Quiz befejezése'),
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
-    Execute: async function(interaction, ephemeral, sender) {
+    OnCommand: async function(interaction, ephemeral, sender) {
         await QuizManager.QuizDoneTest(interaction.client, interaction)
     },
     Guild: '737954264386764812',

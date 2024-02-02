@@ -7,8 +7,4 @@ export type ParserElement<T = ParserElementType> = {
     attachmentID?: number
 }
 
-export class Parser {
-    result: ParserElement[]
-
-    constructor(text: string)
-}
+export function Parse(text: string): ParserElement[]

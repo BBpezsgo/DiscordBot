@@ -3,11 +3,10 @@ const CommandMarket = require('../economy/market')
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: new Discord.SlashCommandBuilder()
+	Command: new Discord.SlashCommandBuilder()
         .setName('market')
         .setDescription('Piac'),
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
-    Execute: async function(interaction, ephemeral, sender) {
+    OnCommand: async function(interaction, ephemeral, sender) {
         interaction.reply(CommandMarket.OnCommand(sender.Database, sender.Database.dataMarket, interaction.user, ephemeral))
     },
     Guild: '737954264386764812',

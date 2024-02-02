@@ -9,10 +9,10 @@
 function On(userID, ammount, database, economy) {
     const privateCommand = database.dataBasic[userID].privateCommands
 
-    if (Math.floor((database.dataBot.day - database.dataBasic[userID].day) / 7) <= 0) {
+    const dayCrateCountRaw = (database.dataBot.day - database.dataBasic[userID].day) / 7
+    if (Math.floor(dayCrateCountRaw) <= 0) {
         return { content: '> **\\❌ Nincs heti ládád! \\🧰**', ephemeral: privateCommand }
     } else {
-        var dayCrateCountRaw = (database.dataBot.day - database.dataBasic[userID].day) / 7
         let dayCrates = Math.min(dayCrateCountRaw, ammount)
 
         let getXpS = 0

@@ -28,6 +28,7 @@ function GetUsers(client) {
     const users = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/users.json'), { encoding: 'utf-8' }))
     if (client !== undefined) {
         for (let i = 0; i < users.length; i++) {
+            // @ts-ignore
             users[i] = new Discord.User(client, users[i])        
         }
     }
@@ -43,6 +44,7 @@ function GetGuilds(client) {
     const guilds = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/guilds.json'), { encoding: 'utf-8' }))
     if (client !== undefined) {
         for (let i = 0; i < guilds.length; i++) {
+            // @ts-ignore
             guilds[i] = new Discord.Guild(client, guilds[i])        
         }
     }
@@ -63,7 +65,7 @@ function SaveUsers(client) {
     const usersSaved = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/users.json'), { encoding: 'utf-8' }))
 
     for (let i = 0; i < usersSaved.length; i++) {
-        var found = false
+        let found = false
         for (let j = 0; j < users.length; j++) {
             const user = users[j]
             if (user.id == usersSaved[i].id) {
@@ -93,7 +95,7 @@ function SaveGuilds(client) {
     const guildsSaved = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/guilds.json'), { encoding: 'utf-8' }))
 
     for (let i = 0; i < guildsSaved.length; i++) {
-        var found = false
+        let found = false
         for (let j = 0; j < guilds.length; j++) {
             const user = guilds[j]
             if (user.id == guildsSaved[i].id) {
@@ -152,7 +154,7 @@ function SaveMembers(client, guild) {
     const membersSaved = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, `./cache/members-${guild.id}.json`), { encoding: 'utf-8' }))
 
     for (let i = 0; i < membersSaved.length; i++) {
-        var found = false
+        let found = false
         for (let j = 0; j < members.length; j++) {
             const member = members[j]
             if (member.id == membersSaved[i].id) {

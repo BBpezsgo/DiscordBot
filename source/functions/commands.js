@@ -18,7 +18,7 @@ function Load() {
             /** @type {import('../commands2/base').Command} */
             const command = require(filePath)
             if ('Data' in command && 'Execute' in command) {
-                result.set(command.Data.name, command)
+                result.set(command.Command.name, command)
             } else {
                 console.warn(`The command at ${filePath} is missing a required "Data" or "Execute" property`)
             }
@@ -43,7 +43,7 @@ function Get(name) {
             /** @type {import("../commands2/base").Command} */
             const command = require(filePath)
             if ('Data' in command && 'Execute' in command) {
-                if (command.Data.name === name) { return command }
+                if (command.Command.name === name) { return command }
             } else {
                 console.warn(`The command at ${filePath} is missing a required "Data" or "Execute" property`)
             }
@@ -63,7 +63,7 @@ async function CreateAll(client) {
     for (const command of commands) {
         const commandContext = command.Guild
         if (!commandContext) {
-            client.application.commands.create(command.Data)
+            client.application.commands.create(command.Command)
         }
     }
 }
@@ -132,19 +132,19 @@ async function FetchFromGlobal(client, name) {
  */
 async function Update(client, command) {
     if (command.Guild) {
-        const alreadyThere = await FetchFromGuild(client, command.Data.name, command.Guild)
+        const alreadyThere = await FetchFromGuild(client, command.Command.name, command.Guild)
         const guild = await client.guilds.fetch(command.Guild)
         if (alreadyThere) {
-            await guild.commands.edit(alreadyThere.id, command.Data)
+            await guild.commands.edit(alreadyThere.id, command.Command)
         } else {
-            await guild.commands.create(command.Data)
+            await guild.commands.create(command.Command)
         }
     } else {
-        const alreadyThere = await FetchFromGlobal(client, command.Data.name)
+        const alreadyThere = await FetchFromGlobal(client, command.Command.name)
         if (alreadyThere) {
-            await client.application.commands.edit(alreadyThere.id, command.Data)
+            await client.application.commands.edit(alreadyThere.id, command.Command)
         } else {
-            await client.application.commands.create(command.Data)
+            await client.application.commands.create(command.Command)
         }
     }
 }

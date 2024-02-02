@@ -11,9 +11,8 @@ const commandCrossout = new Discord.SlashCommandBuilder()
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: commandCrossout,
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
-    Execute: async function(interaction, ephemeral, sender) {
+	Command: commandCrossout,
+    OnCommand: async function(interaction, ephemeral, sender) {
         const Crossout = require('../commands/crossout')
         await interaction.deferReply({ ephemeral })
         Crossout.GetItem(interaction, interaction.options.getString('search'))

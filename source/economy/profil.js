@@ -53,7 +53,7 @@ module.exports = async (database, command, privateCommand) => {
             }
         ])
 
-    var text = ''
+    let text = ''
     awardRoles.forEach(award => {
         if (Array.isArray(command.member.roles)) {
             if (command.member.roles.some(role => role === award)) {

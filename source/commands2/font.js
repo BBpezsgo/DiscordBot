@@ -22,9 +22,8 @@ commandFont.addStringOption(commandFontSub0)
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: commandFont,
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
-    Execute: async function(interaction, ephemeral, sender) {
+	Command: commandFont,
+    OnCommand: async function(interaction, ephemeral, sender) {
         CommandFont(interaction, ephemeral)
     },
     Guild: null,

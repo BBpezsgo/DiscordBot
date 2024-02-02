@@ -119,10 +119,10 @@ function GetEmbed(isPrivate, isMobile) {
 
 /** @type {import("./base").Command} */
 const Command = {
-    Data: new Discord.SlashCommandBuilder()
+    Command: new Discord.SlashCommandBuilder()
         .setName('help')
         .setDescription('A parancsok listája'),
-    Execute: async function(interaction, ephemeral, sender) {
+    OnCommand: async function(interaction, ephemeral, sender) {
         await interaction.reply({
             embeds: [ GetEmbed(ephemeral, sender.Platform === 'MOBILE') ],
             ephemeral,

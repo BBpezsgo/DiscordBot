@@ -24,8 +24,8 @@ function GetDate(date) {
  * @param {number} bytes
  */
 function GetDataSize(bytes) {
-    var txt = "byte"
-    var val = bytes
+    let txt = "byte"
+    let val = bytes
     if (val > 1024) {
         txt = "Kb"
         val = val / 1024
@@ -46,14 +46,14 @@ function GetDataSize(bytes) {
  * @param {string} text
  */
 function Capitalize(text) {
-    var str = text
+    let str = text
     if (str.includes(' ') == true) {
         return str.charAt(0).toUpperCase() + str.slice(1)
     }
 
     const arr = str.split(' ')
 
-    for (var i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1)
     }
 
@@ -65,16 +65,16 @@ function Capitalize(text) {
  * @returns {string}
  */
 function Abbrev(num) {
-    if (!num ) return '0'
+    if (!num) return '0'
     if (typeof num === 'string') num = parseInt(num)
     if (isNaN(num)) return '0'
     
     let result = num.toString()
-    let decPlaces = Math.pow(10, 1)
-    var abbrev = ["E", "m", "M", "b", "B", "tr", "TR", "qa", "QA", "qi", "QI", "sx", "SX", "sp", "SP"]
+    const decPlaces = Math.pow(10, 1)
+    const abbrev = ["E", "m", "M", "b", "B", "tr", "TR", "qa", "QA", "qi", "QI", "sx", "SX", "sp", "SP"]
     
-    for (var i = abbrev.length - 1; i >= 0; i--) {
-        var size = Math.pow(10, (i + 1) * 3)
+    for (let i = abbrev.length - 1; i >= 0; i--) {
+        const size = Math.pow(10, (i + 1) * 3)
         if (size <= num) {
             num = Math.round((num * decPlaces) / size) / decPlaces
             if (num == 1000 && i < abbrev.length - 1) {

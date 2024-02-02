@@ -59,7 +59,7 @@ module.exports = async (command) => {
                 }
             })
 
-            var content = 'Categories:'
+            let content = 'Categories:'
             for (const category of result.categories) {
                 content += `\n> ${category.name} (${category.size})`
             }

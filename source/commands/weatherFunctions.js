@@ -239,11 +239,10 @@ function DirectionToArrow(degrees) {
 }
 /** @param {number} unixValue */
 function unixToTime(unixValue) {
-    let date = new Date(unixValue * 1000)
-    let hours = date.getHours()
-    let minutes = "0" + date.getMinutes()
-    var formattedTime = hours + ':' + minutes.substring(-2)
-    return formattedTime
+    const date = new Date(unixValue * 1000)
+    const hours = date.getHours()
+    const minutes = "0" + date.getMinutes()
+    return hours + ':' + minutes.substring(-2)
 }
 function weatherPressureIcon(pressureValue) {
     if (pressureValue < 980) {

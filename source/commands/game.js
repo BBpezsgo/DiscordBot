@@ -1,3 +1,7 @@
+/**
+ * @typedef {{ 0: number, 1: number }} Point
+ */
+
 class Game {
     constructor () {
         /** @type {GameMap} */
@@ -17,13 +21,13 @@ class Game {
     }
     
     /**
-     * @param {Discord.ButtonInteraction<Discord.CacheType>} e
+     * @param {Discord.ButtonInteraction<'cached'>} e
      */
     OnButton(e) {
         if (!e.component.customId.startsWith('game')) return false
 
         if (this.gameMap == null) {
-            e.reply('> \\❗ **Nincs létrehozva játék!**', true)
+            e.reply({ content: '> \\❗ **Nincs létrehozva játék!**', ephemeral: true })
             return true
         }
 
@@ -136,7 +140,7 @@ class Game {
         } else if (e.component.customId === 'gameSwitchPhone') {
             for (let i = 0; i < this.gameUserSettings.length; i++) {
                 if (this.gameUserSettings[i].userId === e.user.id) {
-                    if (isOnPhone === true) {
+                    if (isOnPhone) {
                         this.gameUserSettings[i].isOnPhone = false
                     } else {
                         this.gameUserSettings[i].isOnPhone = true
@@ -154,7 +158,7 @@ class Game {
         } else if (e.component.customId === 'gameSwitchDebug') {
             for (let i = 0; i < this.gameUserSettings.length; i++) {
                 if (this.gameUserSettings[i].userId === e.user.id) {
-                    if (isInDebugMode === true) {
+                    if (isInDebugMode) {
                         this.gameUserSettings[i].isInDebugMode = false
                     } else {
                         this.gameUserSettings[i].isInDebugMode = true
@@ -180,22 +184,33 @@ class Game {
 }
 
 const Discord = require('discord.js')
-const { ActionRowBuilder, ButtonBuilder, SelectMenuBuilder } = require('discord.js')
+const { ActionRowBuilder, ButtonBuilder } = require('discord.js')
 
+/**
+ * @param {number} x1
+ * @param {number} y1
+ * @param {number} x2
+ * @param {number} y2
+ */
 function distance(x1, y1, x2, y2) {
     return Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)))
 }
 
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {Point[]} points
+ */
 function distanceNearestPoint(x, y, points) {
-    let z = -1
+    let d = -1
     points.forEach(point => {
-        if (z === -1) {
-            z = distance(x, y, point[0], point[1])
+        if (d === -1) {
+            d = distance(x, y, point[0], point[1])
         } else {
-            z = Math.min(z, distance(x, y, point[0], point[1]))
+            d = Math.min(d, distance(x, y, point[0], point[1]))
         }
     })
-    return z
+    return d
 }
 
 /**
@@ -236,8 +251,8 @@ function getView(cameraX, cameraY, gameMap, isOnPhone) {
                 }
             }
 
-            if (mapP === undefined) {
-                mapP = new MapPoint(xVal, yVal, MapBiome.void, MapHeight.normal)
+            if (!mapP) {
+                mapP = new MapPoint(xVal, yVal, MapBiome.void, MapHeight.normal, null)
             }
 
             const height = mapP.height
@@ -450,11 +465,19 @@ function combineNoises(parentNoise, overlayNoise) {
     return newNoise
 }
 
+/**
+ * @param {number} width
+ * @param {number} height
+ */
 function createGame(width, height) {
     let newMap = new GameMap(width, height, generateMap(width, height), [])
     return newMap
 }
 
+/**
+ * @param {number} width
+ * @param {number} height
+ */
 function generateMap(width, height) {
 
     const heightScale = 4
@@ -498,30 +521,30 @@ function generateMap(width, height) {
             } else if (heightValue < 3) {
                 if (biomeValue < 2) {
                     if (treesValue < 2) {
-                        newMapPoint = new MapPoint(x, y, MapBiome.forest, MapHeight.normal)
+                        newMapPoint = new MapPoint(x, y, MapBiome.forest, MapHeight.normal, null)
                     } else if (plantsValue < 3) {
-                        newMapPoint = new MapPoint(x, y, MapBiome.flowerPlain, MapHeight.normal)
+                        newMapPoint = new MapPoint(x, y, MapBiome.flowerPlain, MapHeight.normal, null)
                     } else {
-                        newMapPoint = new MapPoint(x, y, MapBiome.plain, MapHeight.normal)
+                        newMapPoint = new MapPoint(x, y, MapBiome.plain, MapHeight.normal, null)
                     }
                 } else {
-                    newMapPoint = new MapPoint(x, y, MapBiome.desert, MapHeight.normal)
+                    newMapPoint = new MapPoint(x, y, MapBiome.desert, MapHeight.normal, null)
                 }
             } else if (heightValue < 4) {
                 if (biomeValue < 2) {
                     if (treesValue < 2) {
-                        newMapPoint = new MapPoint(x, y, MapBiome.spruceForest, MapHeight.mountain)
+                        newMapPoint = new MapPoint(x, y, MapBiome.spruceForest, MapHeight.mountain, null)
                     } else {
-                        newMapPoint = new MapPoint(x, y, MapBiome.mountains, MapHeight.mountain)
+                        newMapPoint = new MapPoint(x, y, MapBiome.mountains, MapHeight.mountain, null)
                     }
                 } else {
-                    newMapPoint = new MapPoint(x, y, MapBiome.desertHills, MapHeight.mountain)
+                    newMapPoint = new MapPoint(x, y, MapBiome.desertHills, MapHeight.mountain, null)
                 }
             } else {
                 if (biomeValue < 2) {
-                    newMapPoint = new MapPoint(x, y, MapBiome.mountains, MapHeight.mountainSnow)
+                    newMapPoint = new MapPoint(x, y, MapBiome.mountains, MapHeight.mountainSnow, null)
                 } else {
-                    newMapPoint = new MapPoint(x, y, MapBiome.desertHills, MapHeight.mountainSnow)
+                    newMapPoint = new MapPoint(x, y, MapBiome.desertHills, MapHeight.mountainSnow, null)
                 }
             }
 
@@ -604,7 +627,7 @@ function connectTogame(user, game) {
  */
 function generateNoise(width, height, scale) {
     /**
-     * @type {number[][]}
+     * @type {Point[]}
      */
     const points = []
     for (let y = 0; y < height; y++) {
@@ -676,7 +699,7 @@ function addItemToPlayer(player, item, count) {
 /**
  * @param {number} x
  * @param {number} y
- * @param {gameMap} map
+ * @param {GameMap} map
  * @returns {boolean}
  */
 function playerCanMoveToHere(x, y, map) {
@@ -858,6 +881,10 @@ function resetGameMessage(user, message, isOnPhone, isInDebugMode, integration, 
     }
 }
 
+/**
+ * @param {string} userId
+ * @param {Game} game
+ */
 function getGameUserSettings(userId, game) {
     for (let i = 0; i < game.gameUserSettings.length; i++) {
         const userSettings = game.gameUserSettings[i]
@@ -918,20 +945,24 @@ class NoisePoint {
     }
 
     /*
-        get xValue() {
-            return this.x
-        }
-    
-        get yValue() {
-            return this.y
-        }
-    
-        get zValue() {
-            return this.value
-        }
-        */
+    get xValue() {
+        return this.x
+    }
+
+    get yValue() {
+        return this.y
+    }
+
+    get zValue() {
+        return this.value
+    }
+    */
 }
 
+/**
+ * @readonly
+ * @enum {string}
+ */
 const MapBiome = {
     void: 'void',
     plain: 'plains',
@@ -945,6 +976,10 @@ const MapBiome = {
     forest: 'forest'
 }
 
+/**
+ * @readonly
+ * @enum {number}
+ */
 const MapHeight = {
     water: 0,
     normal: 1,
@@ -952,6 +987,10 @@ const MapHeight = {
     mountainSnow: 3
 }
 
+/**
+ * @readonly
+ * @enum {number}
+ */
 const MapObjectType = {
     plant: 0, //🌱
     bamboo: 1, //🎍
@@ -971,6 +1010,10 @@ const MapObjectType = {
     igloo: 15, //🍙
 }
 
+/**
+ * @readonly
+ * @enum {number}
+ */
 const Direction = {
     Up: 0,
     Right: 1,
@@ -978,6 +1021,10 @@ const Direction = {
     Left: 3
 }
 
+/**
+ * @readonly
+ * @enum {number}
+ */
 const ToolType = {
     Fix: 0,
     Pickaxe: 1,
@@ -986,6 +1033,10 @@ const ToolType = {
     RangeWeapon: 4
 }
 
+/**
+ * @readonly
+ * @enum {number}
+ */
 const ItemType = {
     Wood: 0, //📏
     Whool: 1, //🧶
@@ -1013,13 +1064,16 @@ class GameTool {
     /**
      * @param {ToolType} type
      * @param {number} health
-     * @param {number} maxHealth
      * @param {number} efficiency
      */
     constructor(type, health, efficiency) {
+        /** @type {ToolType} */
         this.type = type
+        /** @type {number} */
         this.health = health
+        /** @type {number} */
         this.maxHealth = health
+        /** @type {number} */
         this.efficiency = efficiency
     }
 }
@@ -1032,9 +1086,13 @@ class GameMap {
      * @param {GamePlayer[]} players
      */
     constructor(width, height, map, players) {
+        /** @type {number} */
         this.width = width
+        /** @type {number} */
         this.height = height
+        /** @type {MapPoint[]} */
         this.map = map
+        /** @type {GamePlayer[]} */
         this.players = players
     }
 }
@@ -1045,36 +1103,41 @@ class MapPoint {
      * @param {number} y
      * @param {MapBiome} biome
      * @param {MapHeight} height
-     * @param {MapObject} object
+     * @param {MapObject | null} object
      */
     constructor(x, y, biome, height, object) {
+        /** @type {number} */
         this.x = x
+        /** @type {number} */
         this.y = y
+        /** @type {MapBiome} */
         this.biome = biome
+        /** @type {MapHeight} */
         this.height = height
+        /** @type {MapObject | null} */
         this.object = object
     }
     /*
-        get xValue() {
-            return this.x
-        }
-    
-        get yValue() {
-            return this.y
-        }
-    
-        get biomeValue() {
-            return this.biome
-        }
-    
-        get heightValue() {
-            return this.height
-        }
-    
-        get objectValue() {
-            return this.object
-        }
-        */
+    get xValue() {
+        return this.x
+    }
+
+    get yValue() {
+        return this.y
+    }
+
+    get biomeValue() {
+        return this.biome
+    }
+
+    get heightValue() {
+        return this.height
+    }
+
+    get objectValue() {
+        return this.object
+    }
+    */
 }
 
 class MapObject {
@@ -1084,15 +1147,18 @@ class MapObject {
      * @param {number} breakValue
      */
     constructor(type, walkable, breakValue) {
+        /** @type {MapObjectType} */
         this.type = type
+        /** @type {boolean} */
         this.walkable = walkable
+        /** @type {number} */
         this.breakValue = breakValue
     }
     /*
-        get typeValue() {
-            return this.type
-        }
-        */
+    get typeValue() {
+        return this.type
+    }
+    */
 }
 
 class GamePlayer {
@@ -1108,14 +1174,22 @@ class GamePlayer {
      * @param {boolean} aggreeToRestart
      */
     constructor(x, y, ownerUser, health = 10, direction = 0, selectedToolIndex = 0, tools = [], items = [], aggreeToRestart = false) {
+        /** @type {number} */
         this.x = x
+        /** @type {number} */
         this.y = y
+        /** @type {Discord.User} */
         this.ownerUser = ownerUser
+        /** @type {number} */
         this.health = health
         this.direction = direction
+        /** @type {number} */
         this.selectedToolIndex = selectedToolIndex
+        /** @type {GameTool[]} */
         this.tools = tools
+        /** @type {GameItem[]} */
         this.items = items
+        /** @type {boolean} */
         this.aggreeToRestart = false
     }
 }
@@ -1123,10 +1197,12 @@ class GamePlayer {
 class GameMessage {
     /**
      * @param {Discord.EmbedBuilder} embed
-     * @param {ActionRowBuilder[]} actionRows
+     * @param {Discord.ActionRowBuilder[]} actionRows
      */
     constructor(embed, actionRows) {
+        /** @type {Discord.EmbedBuilder} */
         this.embed = embed
+        /** @type {Discord.ActionRowBuilder[]} */
         this.actionRows = actionRows
     }
 }
@@ -1147,10 +1223,12 @@ class GameUserSettings {
 class savedGameMessage {
     /**
      * @param {Discord.Message} message
-     * @param {Discord.User]} user
+     * @param {Discord.User} user
      */
     constructor(message, user) {
+        /** @type {Discord.Message} */
         this.message = message
+        /** @type {Discord.User} */
         this.user = user
     }
 }

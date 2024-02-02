@@ -3,11 +3,10 @@ const { Color } = require('../functions/enums')
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: new Discord.SlashCommandBuilder()
+	Command: new Discord.SlashCommandBuilder()
         .setName('dev')
         .setDescription('Fejlesztői segítség'),
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
-    Execute: async function(interaction, ephemeral, sender) {
+    OnCommand: async function(interaction, ephemeral, sender) {
         if (interaction.user.id === '726127512521932880') {
             const embed = new Discord.EmbedBuilder()
                 .addFields([{

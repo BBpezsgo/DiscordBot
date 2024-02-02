@@ -36,4 +36,4 @@ class WSC extends EventTarget {
     }
 }
 
-window.WSC = function() { return new WSC() }
+window['WSC'] = function() { return new WSC() }

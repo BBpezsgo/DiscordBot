@@ -35,7 +35,7 @@ function GET(url) {
             })
             res.on('error', reject)
 
-            var headersText = ''
+            let headersText = ''
             for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
             { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
             if (!fs.existsSync(Path.join(Config.paths.base, './cache/' + CacheFolder + '/'))) fs.mkdirSync(Path.join(Config.paths.base, './cache/' + CacheFolder + '/'), { recursive: true })

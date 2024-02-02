@@ -10,10 +10,10 @@ const Path = require('path')
  */
 function ParseData(text) {
     const c = new jsdom.JSDOM(text)
-    /** @type {HTMLTableElement} */
+    /** @type {jsdom.HTMLTableElement} */
     const table = c.window.document.body.firstChild.firstChild
     const tBody = table.tBodies.item(0)
-    var data = []
+    const data = []
     for (let i = 0; i < tBody.rows.length; i++) {
         const row = tBody.rows.item(i)
         if (row.innerHTML === '<td colspan="3">Nem található bejegyzés.</td>') { break }
@@ -108,7 +108,7 @@ function Get(statesManager, authValues = null) {
             method: 'POST'
         }, (res) => {
             statesManager.MVMReport.Service = 'Process HTTP response...'
-            var data = ''
+            let data = ''
             res.on('data', (chunk) => {
                 data += chunk.toString()
                 statesManager.MVMReport.Service = `Process HTTP response (${data.length}) ...`
@@ -126,12 +126,12 @@ function Get(statesManager, authValues = null) {
                         throw new Error('MVM Auth Failed')
                     }
                     const newAuthValues = await Authorize(statesManager)
-                    var newAuthValues2 = {
+                    const newAuthValues2 = {
                         viewState: newAuthValues.viewState,
                         cookies: []
                     }
                     for (let i = 0; i < newAuthValues.cookies.length; i++) {
-                        var element = newAuthValues.cookies[i]
+                        let element = newAuthValues.cookies[i]
                         if (element.endsWith(';') !== true) {
                             element = element + ';'
                         }
@@ -177,7 +177,7 @@ function Authorize(statesManager) {
             method: 'GET'
         }, (res) => {
             statesManager.MVMReport.Service = 'Authorize self: Process HTTP response ...'
-            var data = ''
+            let data = ''
             res.on('data', (chunk) => {
                 data += chunk.toString()
                 statesManager.MVMReport.Service = `Authorize self: Process HTTP response (${data.length}) ...`

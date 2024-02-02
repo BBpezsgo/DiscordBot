@@ -1,10 +1,12 @@
 const http = require('http')
 const https = require('https')
 
-/** @param {string | URL} url @returns {Promise<{ data: string, res: http.IncomingMessage, req: http.ClientRequest }>} */
+/**
+ * @param {string | URL} url
+ * @returns {Promise<{ data: string, res: http.IncomingMessage, req: http.ClientRequest }>} */
 function Get(url) {
     return new Promise((resolve, reject) => {
-        const uri = new URL(url)
+        const uri = (typeof url === 'string') ? new URL(url) : url
     
         if (uri.protocol === 'https:') {
             const req = https.get(url, res => {

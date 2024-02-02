@@ -11,16 +11,16 @@ const { DatabaseManager } = require('../functions/databaseManager')
  */
 function GetEmbed(e, database, privateCommand) {
     const sender = e.user
-    var dayCrates = (database.dataBot.day - database.dataBasic[sender.id].day) / 7
-    var crates = database.dataBackpacks[sender.id].crates
-    var gifts = database.dataBackpacks[sender.id].gifts
-    var tickets = database.dataBackpacks[sender.id].tickets
-    var getGifts = database.dataBackpacks[sender.id].getGift
-    var quizTokens = database.dataBackpacks[sender.id].quizTokens
-    var smallLuckyCard = database.dataBackpacks[sender.id].luckyCards.small
-    var mediumLuckyCard = database.dataBackpacks[sender.id].luckyCards.medium
-    var largeLuckyCard = database.dataBackpacks[sender.id].luckyCards.large
-    var money = database.dataBasic[sender.id].money
+    const dayCrates = (database.dataBot.day - database.dataBasic[sender.id].day) / 7
+    const crates = database.dataBackpacks[sender.id].crates
+    const gifts = database.dataBackpacks[sender.id].gifts
+    const tickets = database.dataBackpacks[sender.id].tickets
+    const getGifts = database.dataBackpacks[sender.id].getGift
+    const quizTokens = database.dataBackpacks[sender.id].quizTokens
+    const smallLuckyCard = database.dataBackpacks[sender.id].luckyCards.small
+    const mediumLuckyCard = database.dataBackpacks[sender.id].luckyCards.medium
+    const largeLuckyCard = database.dataBackpacks[sender.id].luckyCards.large
+    const money = database.dataBasic[sender.id].money
 
     const embed = new Discord.EmbedBuilder()
         .setAuthor({ name: sender.username, iconURL: sender.avatarURL() })
@@ -136,7 +136,7 @@ function openDayCrate(userId, database) {
 }
 
 /**
- * @param {Discord.ButtonInteraction<Discord.CacheType>} e
+ * @param {Discord.ButtonInteraction<'cached'>} e
  * @param {DatabaseManager} database
  */
 function OnButtonClick(e, database) {
@@ -180,11 +180,11 @@ function OnButtonClick(e, database) {
     if (e.component.customId === 'openCrate') {
         if (database.dataBackpacks[e.user.id].crates > 0) {
             database.dataBackpacks[e.user.id].crates -= 1
-            var replies = ['xp', 'money', 'gift']
-            var random = Math.floor(Math.random() * 3)
-            var out = replies[random]
-            var val = 0
-            var txt = ''
+            const replies = ['xp', 'money', 'gift']
+            const random = Math.floor(Math.random() * 3)
+            const out = replies[random]
+            let val = 0
+            let txt = ''
 
             if (out === 'xp') {
                 val = Math.floor(Math.random() * 110) + 10
@@ -214,9 +214,9 @@ function OnButtonClick(e, database) {
 
     if (e.component.customId === 'useLuckyCardSmall') {
         database.dataBackpacks[e.user.id].luckyCards.small -= 1
-        var val = 0
+        let val = 0
 
-        var nyeroszam = Math.floor(Math.random() * 2)
+        const nyeroszam = Math.floor(Math.random() * 2)
         if (nyeroszam === 1) {
             val = Math.floor(Math.random() * 1001) + 1500
             database.dataBasic[e.user.id].money += val
@@ -236,9 +236,9 @@ function OnButtonClick(e, database) {
 
     if (e.component.customId === 'useLuckyCardMedium') {
         database.dataBackpacks[e.user.id].luckyCards.medium -= 1
-        var val = 0
+        let val = 0
 
-        var nyeroszam = Math.floor(Math.random() * 4)
+        const nyeroszam = Math.floor(Math.random() * 4)
         if (nyeroszam === 1) {
             val = Math.floor(Math.random() * 3001) + 3000
             database.dataBasic[e.user.id].money += val

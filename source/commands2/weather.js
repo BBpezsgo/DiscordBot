@@ -88,7 +88,7 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
         const times = SunCalc.getTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
         const moonTimes = SunCalc.getMoonTimes(new Date(Date.now()), CityBekescsaba.Lat, CityBekescsaba.Lon)
 
-        var description = ''
+        let description = ''
         description += '\n' + `${EmojiPrefix}☁️ ${OpenweatherWeather.clouds.all} % felhősség`
         
         description += '\n' + `${EmojiPrefix}${weatherHumidityIcon(humidityValue)} ${humidityValue} % páratartalom`
@@ -105,7 +105,7 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
             }
         }
 
-        var snowDepth = null
+        let snowDepth = null
         for (let i = 0; i < MetSnowReport.length; i++) {
             if (MetSnowReport[i].location === 'Békéscsaba') {
                 snowDepth = MetSnowReport[i].depth
@@ -144,7 +144,7 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
                 
                 for (let i = 0; i < MetAlerts[0].alerts.length; i++) {
                     const alert = MetAlerts[0].alerts[i]
-                    var result = ''
+                    let result = ''
                     
                     if (MetAlert_TypeIcons[alert.typeIcon] !== undefined) {
                         result += `${EmojiPrefix}${MetAlert_TypeIcons[alert.typeIcon]} `
@@ -237,7 +237,7 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
         const tempMaxValue = Element.high
         const tempMaxIcon = weatherTempIcon(tempMaxValue)
 
-        var text = ''
+        let text = ''
 
         if (Element.precip !== undefined && Element.precip !== '0')
         { text += `\n${EmojiPrefix}☔ ${Element.precip} %` }
@@ -254,7 +254,7 @@ function getEmbedEarth(OpenweatherWeather, Moon, OpenweatherPollution, MetAlerts
                     
                     for (let j = 0; j < MetAlerts[i-1].alerts.length; j++) {
                         const alert = MetAlerts[i-1].alerts[j]
-                        var result = ''
+                        let result = ''
                         
                         if (MetAlert_TypeIcons[alert.typeIcon] !== undefined) {
                             result += `${EmojiPrefix}${MetAlert_TypeIcons[alert.typeIcon]} `
@@ -320,7 +320,7 @@ function GetMarsPressureIcon(pressure, averagePressure) {
 }
 
 function GetSeason(season) {
-    var seasonName = season
+    let seasonName = season
     if (seasons[seasonName] != undefined) {
         seasonName = `${EmojiPrefix}${seasons[seasonName].icon} ${seasons[seasonName].name}`
     }
@@ -329,7 +329,7 @@ function GetSeason(season) {
 
 /** @param {string} date YYYY-MM-DD */
 function DateToDate(date) {
-    var newDate = new Date()
+    const newDate = new Date()
     newDate.setFullYear(Number.parseInt(date.split('-')[0]), Number.parseInt(date.split('-')[1]) - 1, Number.parseInt(date.split('-')[2]))
     return newDate
 }
@@ -340,14 +340,14 @@ function getEmbedMars(data, weeklyImage) {
         .setColor('#fd875f')
         .setAuthor({ name: 'Jezero Kráter', url: 'https://mars.nasa.gov/mars2020/weather/', iconURL: 'https://mars.nasa.gov/mars2020/favicon-16x16.png' })
 
-    var averagePressure = 0
+    let averagePressure = 0
     try {
-        var text = ""
+        let text = ""
         if (fs.existsSync(Path.join(CONFIG.paths.base, './pressures.txt'))) {
             text = fs.readFileSync(Path.join(CONFIG.paths.base, './pressures.txt'), 'utf-8')
         }
-        var lines = text.split('\n')
-        var solsLogged = []
+        let lines = text.split('\n')
+        const solsLogged = []
         lines.forEach(line => {
             if (line.length > 0) {
                 solsLogged.push(line.split(' ')[0])
@@ -360,8 +360,8 @@ function getEmbedMars(data, weeklyImage) {
             }
         })
         fs.writeFileSync(Path.join(CONFIG.paths.base, './pressures.txt'), text, 'utf-8')
-        var lines = text.split('\n')
-        var n = 0
+        lines = text.split('\n')
+        let n = 0
         lines.forEach(line => {
             if (line.length > 0) {
                 averagePressure += Number.parseFloat(line.split(' ')[1])
@@ -428,7 +428,7 @@ function addDays(date, days) {
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: new Discord.SlashCommandBuilder()
+	Command: new Discord.SlashCommandBuilder()
         .setName('weather')
         .setDescription('Időjárása')
         .addStringOption(option =>
@@ -439,8 +439,7 @@ const Command = {
                     { name: 'Earth - Békéscsaba', value: 'earth' },
                     { name: 'Mars - Jezero Kráter', value: 'mars' }
                 )),
-    /** @param {Discord.ChatInputCommandInteraction} command */
-    Execute: async function(command, ephemeral, sender) {
+    OnCommand: async function(command, ephemeral, sender) {
         await command.deferReply({ ephemeral })
         const location = command.options.getString('location', false)
 
@@ -462,7 +461,7 @@ const Command = {
                             ]
         
                             /** @type {WeatherAlertsService.MET.ResultCounty[]} */
-                            var alerts = []
+                            const alerts = []
         
                             try
                             { alerts.push(await WeatherAlertsService.GetCountyAlerts('Bekes', 'Today')) }

@@ -3,10 +3,10 @@ const CommandShop = require('../economy/shop')
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: new Discord.SlashCommandBuilder()
+	Command: new Discord.SlashCommandBuilder()
         .setName('shop')
         .setDescription('Bevásárlás'),
-    Execute: async function(interaction, ephemeral, sender) {
+    OnCommand: async function(interaction, ephemeral, sender) {
         await interaction.reply(CommandShop.CommandShop(interaction.channel, interaction.user, interaction.member, sender.Database, 0, '', ephemeral))
     },
     Guild: '737954264386764812',

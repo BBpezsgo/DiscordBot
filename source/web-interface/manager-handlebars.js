@@ -16,7 +16,6 @@ const {
     MFALevel
 } = require('../functions/enums')
 const { GetTime, GetDataSize, GetDate } = require('../functions/utils')
-const { HbGetLogs } = require('./log')
 const Commands = require('../functions/commands')
 const { MessageType } = require('discord.js')
 const process = require('process')
@@ -71,7 +70,7 @@ class WebInterfaceHandlebarsManager {
             const view = req.query.view
 
             if (view == 'default' || view == null || view == undefined) {
-                var icon = ''
+                let icon = ''
 
                 if (this.ClientType == 'DESKTOP') {
                     icon = '🖥️'
@@ -139,7 +138,7 @@ class WebInterfaceHandlebarsManager {
         })
 
         this.app.get('/dcbot/view/cache-emojis.html', (req, res) => {
-            var emojis = []
+            const emojis = []
 
             this.client.emojis.cache.forEach(emoji => {
                 const newEmoji = {
@@ -246,18 +245,18 @@ class WebInterfaceHandlebarsManager {
             const data = fs.readFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), 'utf8')
             const lines = data.split('\n')
 
-            var linesProcessed = []
+            const linesProcessed = []
 
-            var isCrash = false
+            let isCrash = false
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i]
                 if (line.length < 2) { continue }
                 
                 /** @type {'none' | 'error' | 'crash' | 'warning'} */
-                var icon = 'none'
-                var type = 'none'
-                var title = 'none'
-                var isHeader = true
+                let icon = 'none'
+                let type = 'none'
+                let title = 'none'
+                let isHeader = true
 
                 if (line == 'CRASH') {
                     isCrash = true
@@ -297,7 +296,7 @@ class WebInterfaceHandlebarsManager {
                     isHeader = false
 
                     const stactItem = line.replace('    at ', '')
-                    var filePath = ''
+                    let filePath = ''
                     const isFile = (stactItem.startsWith('C:\\'))
                     if (isFile && stactItem.includes(':')) {
                         filePath = stactItem.replace(':' + stactItem.split(':')[2], '')
@@ -309,7 +308,7 @@ class WebInterfaceHandlebarsManager {
                     icon = 'warning'
                     type = 'DeprecationWarning'
 
-                    var xd = line.replace(line.split(':')[0], '')
+                    let xd = line.replace(line.split(':')[0], '')
                     xd = xd.replace(':', '')
                     xd = line.replace(line.split(':')[0], '')
                     xd = xd.replace(': ', '')
@@ -319,7 +318,7 @@ class WebInterfaceHandlebarsManager {
                     icon = 'warning'
                     type = 'ExperimentalWarning'
 
-                    var xd = line.replace(line.split(':')[0], '')
+                    let xd = line.replace(line.split(':')[0], '')
                     xd = xd.replace(':', '')
                     xd = line.replace(line.split(':')[0], '')
                     xd = xd.replace(': ', '')
@@ -347,8 +346,8 @@ class WebInterfaceHandlebarsManager {
             const errors = []
             const warnings = []
 
-            var isCrash = false
-            var lastLine = ''
+            let isCrash = false
+            let lastLine = ''
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i]
@@ -383,7 +382,7 @@ class WebInterfaceHandlebarsManager {
                         errors[errors.length - 1].stack = []
                     }
                     const stactItem = line.replace('    at ', '')
-                    var filePath = ''
+                    let filePath = ''
                     const isFile = (stactItem.startsWith('C:\\'))
                     if (isFile && stactItem.includes(':')) {
                         filePath = stactItem.replace(':' + stactItem.split(':')[2], '')
@@ -396,14 +395,14 @@ class WebInterfaceHandlebarsManager {
                     })
                     isCrash = false
                 } else if (line.includes(' DeprecationWarning:')) {
-                    var xd = line.replace(line.replace(':'[0]), '')
+                    let xd = line.replace(line.replace(':'[0]), '')
                     xd = xd.replace(':', '')
                     xd = line.replace(line.replace(':'[0]), '')
                     xd = xd.replace(': ', '')
                     warnings.push({ type: 'DeprecationWarning', title: xd, id: i })
                     isCrash = false
                 } else if (line.includes(' ExperimentalWarning:')) {
-                    var xd = line.replace(line.replace(':'[0]), '')
+                    let xd = line.replace(line.replace(':'[0]), '')
                     xd = xd.replace(':', '')
                     xd = line.replace(line.replace(':'[0]), '')
                     xd = xd.replace(': ', '')
@@ -429,14 +428,6 @@ class WebInterfaceHandlebarsManager {
             */
 
             res.render(`view/ErrorLogs`, { logs: linesProcessed })
-        })
-
-        this.app.get('/dcbot/view/log-handlebars.html', (req, res) => {
-            if (this.ClientType == 'MOBILE') {
-                res.render(`view/HandlebarsLogsNotSupported`, { })
-            } else {
-                res.render(`view/HandlebarsLogs`, { logs: HbGetLogs('192.168.1.100') })
-            }
         })
 
         this.app.get('/dcbot/view/application-commands.html', (req, res) => {
@@ -516,7 +507,7 @@ class WebInterfaceHandlebarsManager {
         })
 
         const GetTitle = () => {
-            var icon = ''
+            let icon = ''
 
             if (this.ClientType == 'DESKTOP') {
                 icon = '🖥️'
@@ -526,7 +517,7 @@ class WebInterfaceHandlebarsManager {
                 icon = '🍓'
             }
 
-            var statusIcon = ' - ❌'
+            let statusIcon = ' - ❌'
             if (this.client.ws.shards.size > 0) {
                 if (this.client.ws.shards.first().status == 0) {
                     statusIcon = ''
@@ -543,11 +534,11 @@ class WebInterfaceHandlebarsManager {
         this.app.get('/dcbot/status.json', (req, res) => {
             this.ipToRate[req.ip] -= 1
 
-            var uptime = new Date(0)
+            let uptime = new Date(0)
             uptime.setSeconds(this.client.uptime / 1000)
             uptime.setHours(uptime.getHours() - 1)
 
-            var shardState = 'none'
+            let shardState = 'none'
             if (this.client.ws.shards.size > 0) {
                 shardState = WsStatusText[this.client.ws.shards.first().status]
             }
@@ -584,7 +575,7 @@ class WebInterfaceHandlebarsManager {
             const data = fs.readFileSync(Path.join(CONFIG.paths.base, 'node.error.log'), 'utf8')
             const lines = data.split('\n')
 
-            var notificationIcon = 0
+            let notificationIcon = 0
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i]
@@ -827,19 +818,9 @@ class WebInterfaceHandlebarsManager {
         })
 
         this.app.post('/Message/Fetch', (req, res) => {
-            var id = req.query.id
-            if (id === undefined || id === null) {
-                id = req.body.id
-            }
-            var count = req.query.count
-            if (count === undefined || count === null) {
-                count = req.body.count
-            }
-
-            var channel = req.query.channel
-            if (channel === undefined || channel === null) {
-                channel = req.body.channel
-            }
+            const id = req.query['id'] ?? req.body['id']
+            const count = req.query['count'] ?? req.body['count']
+            const channel = req.query['channel'] ?? req.body['channel']
 
             if (typeof channel !== 'string') {
                 res.status(500).send('Invalid query parameter type')
@@ -874,15 +855,8 @@ class WebInterfaceHandlebarsManager {
         })
 
         this.app.post('/Message/FetchMore', (req, res) => {
-            var count = req.query.count
-            if (count === undefined || count === null) {
-                count = req.body.count
-            }
-
-            var channel = req.query.channel
-            if (channel === undefined || channel === null) {
-                channel = req.body.channel
-            }
+            const count = req.query['count'] ?? req.body['count']
+            const channel = req.query['channel'] ?? req.body['channel']
 
             if (typeof channel !== 'string') {
                 res.status(500).send('Invalid query parameter type')
@@ -965,10 +939,7 @@ class WebInterfaceHandlebarsManager {
         })
 
         this.app.post('/Channel/Fetch', (req, res) => {
-            var id = req.query.id
-            if (id === undefined || id === null) {
-                id = req.body.id
-            }
+            const id = req.query['id'] ?? req.body['id']
             if (typeof id !== 'string') {
                 res.status(500).send('Invalid query parameter type')
                 return
@@ -983,10 +954,7 @@ class WebInterfaceHandlebarsManager {
         })
 
         this.app.post('/Guild/Fetch', (req, res) => {
-            var id = req.query.id
-            if (id == undefined || id == null) {
-                id = req.body.id
-            }
+            const id = req.query['id'] ?? req.body['id']
             if (typeof id !== 'string') {
                 res.status(500).send('Invalid query parameter type')
                 return
@@ -1386,18 +1354,23 @@ class WebInterfaceHandlebarsManager {
     }
     
     RenderPage_Status(req, res) {
-        var uptime = new Date(0)
+        let uptime = new Date(0)
         uptime.setSeconds(this.client.uptime / 1000)
         uptime.setHours(uptime.getHours() - 1)
 
-        var shardState = 'none'
+        let shardState = 'none'
         if (this.client.ws.shards.size > 0) {
             shardState = WsStatusText[this.client.ws.shards.first().status]
         }
 
-        var systemInfo = {
-            CPUs: []
+        const systemInfo = {
+            CPUs: [],
+            TotalMemory: os.totalmem(),
+            FreeMemory: os.freemem(),
+            Uptime: GetTime(new Date(os.uptime() * 1000)),
+            UserInfo: os.userInfo(),
         }
+        systemInfo.UsedMemory = systemInfo.TotalMemory - systemInfo.FreeMemory
 
         const cpus = os.cpus()
 
@@ -1416,12 +1389,6 @@ class WebInterfaceHandlebarsManager {
             })
             
         }
-
-        systemInfo.TotalMemory = os.totalmem()
-        systemInfo.FreeMemory = os.freemem()
-        systemInfo.UsedMemory = systemInfo.TotalMemory - systemInfo.FreeMemory
-        systemInfo.Uptime = GetTime(new Date(os.uptime() * 1000))
-        systemInfo.UserInfo = os.userInfo()
 
         const clientData = {
             readyTime: GetTime(this.client.readyAt),
@@ -1674,16 +1641,16 @@ class WebInterfaceHandlebarsManager {
                             embedsResult.push({
                                 color: embed.hexColor,
                                 author: embed.author,
-                                description: (new ContentParser.Parser(embed.description)).result,
+                                description: ContentParser.Parse(embed.description),
                                 footer: embed.footer,
                                 image: embed.image,
                                 thumbnail: embed.thumbnail,
                                 url: embed.url,
-                                title: (new ContentParser.Parser(embed.title)).result,
+                                title: ContentParser.Parse(embed.title),
                                 fields: embed.fields.map(field => {
                                     return {
-                                        name: (new ContentParser.Parser(field.name)).result,
-                                        value: (new ContentParser.Parser(field.value)).result,
+                                        name: ContentParser.Parse(field.name),
+                                        value: ContentParser.Parse(field.value),
                                         inline: field.inline,
                                     }
                                 }),
@@ -1913,7 +1880,7 @@ class WebInterfaceHandlebarsManager {
         
         for (let i = 0; i < membersSaved.length; i++) {
             const memberSaved = membersSaved[i]
-            var found = false
+            let found = false
             for (let j = 0; j < members.length; j++) {
                 const member = members[j]
                 if (member.id == memberSaved.id) {

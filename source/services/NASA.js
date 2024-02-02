@@ -42,7 +42,7 @@ const NasaMarsWeather = function() {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-weather-headers.txt'), headersText, { encoding: 'utf-8' })
@@ -79,7 +79,7 @@ const NasaMarsWeeklyImage = () => {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/nasa-mars-image-headers.txt'), headersText, { encoding: 'utf-8' })

@@ -7,7 +7,7 @@ function Get(s) {
     // otherwise recompute as the mouse event is structured differently
     const modifier = s.charCodeAt(3)
     /** @type {import('./consoleUtilities').ConsoleMouse} */
-    var key = {}
+    const key = {}
     key.shift = !!(modifier & 4)
     key.meta = !!(modifier & 8)
     key.ctrl = !!(modifier & 16)

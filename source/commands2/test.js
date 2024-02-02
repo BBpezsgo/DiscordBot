@@ -3,11 +3,10 @@ const LogError = require('../functions/errorLog').LogError
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: new Discord.SlashCommandBuilder()
+	Command: new Discord.SlashCommandBuilder()
         .setName('test')
         .setDescription('Teszt'),
-    /** @param {Discord.ChatInputCommandInteraction} command */
-    Execute: async function(command, ephemeral, sender) {
+    OnCommand: async function(command, ephemeral, sender) {
         const service = require('../services/DONKI')
         service.FLR(false)
             .then(result => {

@@ -88,13 +88,16 @@ const Pages = {
 async function DownloadAsync(url) {
     return new Promise((callback) => {
         https.get(url, (res) => {
-            var data = ''
+            let data = ''
             res.on('data', (d) => { data += d })
             res.on('end', () => { callback(data) })
         }).on('error', (e) => { console.error(e) })
     })
 }
 
+/**
+ * @param {string} data
+ */
 function ProcessData(data) {
     const dom = new JSDOM(data)
     const eventsListElement = dom.window.document.querySelector("body > div > div.content > div.left")
@@ -102,7 +105,7 @@ function ProcessData(data) {
     eventsListElement.childNodes.forEach((child) => {
         if (child.nodeType === child.ELEMENT_NODE) {
             if (child.nodeName === 'TABLE') {
-                /** @type {HTMLTableElement} */
+                /** @type {JSDOM.HTMLTableElement} */
                 const x = child
                 const caption = x.querySelector('caption:first-child').textContent
                 const countyName = caption.replace('County ', '').trim()
@@ -113,13 +116,13 @@ function ProcessData(data) {
                     if (i === 0) { continue }
                     const row = rows[i]
                     if (row.innerHTML === '<td colspan=3>&nbsp;No warnings issued</td>') { break }
-                    /** @type {HTMLTableCellElement} */
+                    /** @type {JSDOM.HTMLTableCellElement} */
                     const cell0 = row.querySelector('td:nth-child(1)')
-                    /** @type {HTMLTableCellElement} */
+                    /** @type {JSDOM.HTMLTableCellElement} */
                     const cell1 = row.querySelector('td:nth-child(2)')
-                    /** @type {HTMLTableCellElement} */
+                    /** @type {JSDOM.HTMLTableCellElement} */
                     const cell2 = row.querySelector('td:nth-child(3)')
-                    /** @type {HTMLTableCellElement} */
+                    /** @type {JSDOM.HTMLTableCellElement} */
                     const cell3 = row.querySelector('td:nth-child(4)')
     
                     alerts.push({
@@ -140,8 +143,11 @@ function ProcessData(data) {
     return data_
 }
 
+/**
+ * @param {string} data
+ */
 function ProcessCountyData(data) {
-    var kiadva = '?'
+    let kiadva = '?'
     const alerts = []
 
     const xd2 = new JSDOM(data).window.document
@@ -155,11 +161,11 @@ function ProcessCountyData(data) {
         for (let i = 0; i < rows.length; i++) {
             if (i === 0) { continue }
             const row = rows[i]
-            /** @type {HTMLTableCellElement | null} */
+            /** @type {JSDOM.HTMLTableCellElement | null} */
             const Cell0 = row.querySelector('td:nth-child(1)')
-            /** @type {HTMLTableCellElement | null} */
+            /** @type {JSDOM.HTMLTableCellElement | null} */
             const Cell1 = row.querySelector('td:nth-child(2)')
-            /** @type {HTMLTableCellElement | null} */
+            /** @type {JSDOM.HTMLTableCellElement | null} */
             const Cell2 = row.querySelector('td:nth-child(3)')
             try {
                 alerts.push({
@@ -245,7 +251,7 @@ async function GetMainWeather(forceDownload = false) {
     const dataRaw = await DownloadAsync(UrlPaths.MainWeather)
     const doc_tbody = new JSDOM(dataRaw).window.document.body.querySelector('table.tbl-def1>tbody')
     const rows = doc_tbody.querySelectorAll('tr')
-    var data = []
+    let data = []
     rows.forEach((row, i) => {
         data[i] = {}
         data[i]['time'] = row.querySelector('th>a').textContent.trim()
@@ -280,7 +286,7 @@ async function GetSnowReport(forceDownload = false) {
     { return cache.data }
     const dataRaw = await DownloadAsync(UrlPaths.SnowReport)
     const tables = new JSDOM(dataRaw).window.document.body.querySelectorAll('.def-tbl.au, .def-tbl.mo')
-    var data = []
+    let data = []
     tables.forEach(table => {
         const rows = table.querySelectorAll('tr')
         for (let i = 1; i < rows.length; i++) {

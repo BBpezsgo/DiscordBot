@@ -7,11 +7,11 @@
  * @param {string | null} errorLabelID
  */
 function Post(url, event, callback = null, errorLabelID = null) {
-    event.srcElement.classList.add('disabled')
+    (/** @type {HTMLElement} */ (event.target)).classList.add('disabled')
     const xmlHttp = new XMLHttpRequest()
     xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4) {
-            event.srcElement.classList.remove('disabled')
+            (/** @type {HTMLElement} */ (event.target)).classList.remove('disabled')
             if (xmlHttp.status === 404) {
                 console.warn('404')
                 if (errorLabelID) {
@@ -31,7 +31,7 @@ function Post(url, event, callback = null, errorLabelID = null) {
                     console.warn(JSON.stringify(res, null, ' '))
                     if (errorLabelID) {
                         const errorLabel = document.getElementById(errorLabelID)
-                        var details = ''
+                        let details = ''
                         if (res.rawError.errors) {
                             details = `: ${JSON.stringify(res.rawError.errors)}`
                         }
@@ -75,11 +75,11 @@ function Post(url, event, callback = null, errorLabelID = null) {
  * @param {string | null} errorLabelID
  */
 function Get(url, event, callback = null, errorLabelID = null) {
-    event.srcElement.classList.add('disabled')
+    (/** @type {HTMLElement} */ (event.target)).classList.add('disabled')
     const xmlHttp = new XMLHttpRequest()
     xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4) {
-            event.srcElement.classList.remove('disabled')
+            (/** @type {HTMLElement} */ (event.target)).classList.remove('disabled')
             if (xmlHttp.status === 404) {
                 console.warn('404')
                 if (errorLabelID) {
@@ -99,7 +99,7 @@ function Get(url, event, callback = null, errorLabelID = null) {
                     console.warn(JSON.stringify(res, null, ' '))
                     if (errorLabelID) {
                         const errorLabel = document.getElementById(errorLabelID)
-                        var details = ''
+                        let details = ''
                         if (res.rawError.errors) {
                             details = `: ${JSON.stringify(res.rawError.errors)}`
                         }

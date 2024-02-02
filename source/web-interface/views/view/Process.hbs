@@ -11,7 +11,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 
 	<script>
-		var i = 0
+		let i = 0
 		/** @param {numner} ms */
 		function Restart(ms) {
 			const form = document.getElementById("restart-form")
@@ -29,7 +29,7 @@
 
 				i = 1
 				const elem = document.getElementById('restartProgress')
-				var value = 0
+				let value = 0
 				var id = setInterval(Tick, ms / 100)
 
 				function Tick() {
@@ -48,7 +48,7 @@
 	</script>
 </head>
 
-<body onload="resize(this);" onresize="resize(this);" class="ctxpanel" marginwidth="0" marginheight="0">
+<body>
 	<div id="context-menubar">
 		<div id="context-menubar-content">
 

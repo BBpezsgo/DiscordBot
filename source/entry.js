@@ -37,7 +37,7 @@ ConsoleUtilities.on('onKeyDown', key => {
 ConsoleUtilities.Listen()
 // ConsoleUtilities.EnableMouse()
 
-process.on('exit', (code, a) => {
+process.on('exit', (code) => {
     // ConsoleUtilities.DisableMouse()
     console.log('[Script]: Exit with code ' + code)
 })
@@ -47,8 +47,8 @@ console.log('[Script]: Create BOT instance ...')
 const DiscordBot = new(require('./discord-bot'))('DESKTOP')
 
 const WebInterface = require('./web-interface/manager')
-const WebInterfaceExternal = new WebInterface('1234', '192.168.1.100', 5665, DiscordBot.Client, null, DiscordBot.Database, DiscordBot.Login, DiscordBot.Destroy, DiscordBot.StatesManager, DiscordBot.Platform)
-const WebInterfaceLoopback = new WebInterface('1234', '127.0.0.1', 5665, DiscordBot.Client, null, DiscordBot.Database, DiscordBot.Login, DiscordBot.Destroy, DiscordBot.StatesManager, DiscordBot.Platform)
+new WebInterface('1234', '192.168.1.100', 5665, DiscordBot.Client, null, DiscordBot.Database, DiscordBot.Login, DiscordBot.Destroy, DiscordBot.StatesManager, DiscordBot.Platform)
+new WebInterface('1234', '127.0.0.1', 5665, DiscordBot.Client, null, DiscordBot.Database, DiscordBot.Login, DiscordBot.Destroy, DiscordBot.StatesManager, DiscordBot.Platform)
 
 DiscordBot.LogManager.BlankScreen()
 DiscordBot.LogManager.scriptLoadingText = ''

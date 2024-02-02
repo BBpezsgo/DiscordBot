@@ -202,7 +202,7 @@ class DatabaseManager {
     }
 
     LoadDatabase() {
-        var success = true
+        let success = true
 
         this.statesManager.Database.LoadText = 'backpacks'
         const rawJsonBackpacks = fs.readFileSync(this.databaseFolderPath + 'backpacks.json', 'utf-8')

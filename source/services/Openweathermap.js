@@ -21,7 +21,7 @@ const OpenweathermapForecast = function() {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
         if (ReadFromCache) {
             if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast.json'))) {
-                var cacheData = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast.json'), { encoding: 'utf-8' }))
+                const cacheData = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast.json'), { encoding: 'utf-8' }))
                 cacheData['fromCache'] = true
                 resolve(cacheData)
                 return
@@ -43,13 +43,13 @@ const OpenweathermapForecast = function() {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast-headers.txt'), headersText, { encoding: 'utf-8' })
 
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-forecast.json'), body, { encoding: 'utf-8' })
-                var data = JSON.parse(body)
+                const data = JSON.parse(body)
                 data['fromCache'] = false
                 resolve(data)
             })
@@ -62,7 +62,7 @@ const OpenweathermapWeather = function() {
         if (!fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/'))) { fs.mkdirSync(Path.join(CONFIG.paths.base, './cache/weather/')) }
         if (fs.existsSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather.json'))) {
             /** @type {Types.OpenWeatherMap.WeatherResult} */
-            var cacheData = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather.json'), { encoding: 'utf-8' }))
+            const cacheData = JSON.parse(fs.readFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather.json'), { encoding: 'utf-8' }))
             const date = cacheData.dt * 1000
             const diff = Date.now() - date
             fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather-date.txt'), `now: ${Date.now()}\ncache: ${date}\ndiff: ${diff}`, 'utf-8')
@@ -88,14 +88,14 @@ const OpenweathermapWeather = function() {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather-headers.txt'), headersText, { encoding: 'utf-8' })
 
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-weather.json'), body, { encoding: 'utf-8' })
                 
-                var data = JSON.parse(body)
+                const data = JSON.parse(body)
                 data['fromCache'] = false
                 resolve(data)
             })
@@ -128,7 +128,7 @@ const OpenweathermapPollution = function() {
                     return
                 }
 
-                var headersText = ''
+                let headersText = ''
                 for (let i = 0; i < res.rawHeaders.length - 1; i+=2)
                 { headersText += `'${res.rawHeaders[i]}': '${res.rawHeaders[i+1]}'\n` }
                 fs.writeFileSync(Path.join(CONFIG.paths.base, './cache/weather/openweathermap-pollution-headers.txt'), headersText, { encoding: 'utf-8' })

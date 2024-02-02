@@ -1,67 +1,66 @@
-var menuList = new Array(
+/** @type {(string | number)[]} */
+const menuList = [
     "Startpage", 0, 0, 'Startpage',
     "---", 0, 0, "---",
     "Account", 0, 1, "Account",
     "Account", 0, 2, "User",
     "Applications", 0, 2, 'Applications',
-);
+]
 
-var map = new Array();
+var map = []
 
 function menuInit() {
-    for (var n = 0; n < menuList.length; n += 4) {
+    for (let n = 0; n < menuList.length; n += 4) {
         menuList[n + 1] = 1
     }
         
-    n = menuList.length - 4;
-    var url = "";
-    var level = 0;
+    let n = menuList.length - 4
+    let url = ""
+    let level = 0
     while (n >= 0) {
-        if (menuList[n + 1] == 1 && menuList[n + 2] > 0) {
-            url = menuList[n];
-            level = menuList[n + 2];
+        if (menuList[n + 1] == 1 && (/**@type {number}*/(menuList[n + 2])) > 0) {
+            url = /**@type {string}*/(menuList[n])
+            level = /**@type {number}*/(menuList[n + 2])
+        } else if ((/**@type {number}*/(menuList[n + 2])) > 0 && (/**@type {number}*/(menuList[n + 2])) < level) {
+            menuList[n] = url
+            menuList[n + 1] = 1
+            level = /**@type {number}*/(menuList[n + 2])
         }
-        else if (menuList[n + 2] > 0 && menuList[n + 2] < level) {
-            menuList[n] = url;
-            menuList[n + 1] = 1;
-            level = menuList[n + 2];
-        }
-        n -= 4;
+        n -= 4
     }
 }
 
 function menuDisplay() {
-    var i = 0;
-    var className;
-    for (var n = 0; n < menuList.length; n += 4) {
+    let i = 0
+    let className
+    let display
+    for (let n = 0; n < menuList.length; n += 4) {
         if (menuList[n + 1] != 1) {
-            continue;
+            continue
         }
         if (menuList[n + 2] == 0) {
-            className = "dot1";
-            display = "block";
-        }
-        else if ((menuList[n + 2] > 0) && (menuList[n + 4 + 2] > menuList[n + 2])) {
-            className = "plus";
+            className = "dot1"
+            display = "block"
+        } else if (((/**@type {number}*/(menuList[n + 2])) > 0) && (menuList[n + 4 + 2] > menuList[n + 2])) {
+            className = "plus"
             if (menuList[n + 2] == 1) {
-                display = "block";
+                display = "block"
+            } else {
+                display = "none"
             }
-            else {
-                display = "none";
-            }
+        } else {
+            className = "dot2"
+            display = "none"
         }
-        else {
-            className = "dot2";
-            display = "none";
-        }
-        var power = (menuList[n + 2] > 0) ? (menuList[n + 2] - 1) : 0;
+        
+        const power = ((/**@type{number}*/(menuList[n + 2])) > 0) ? ((/**@type{number}*/(menuList[n + 2])) - 1) : 0
         
         if (menuList[n] === '---') {
             const newOL = document.createElement('hr')
             newOL.id = `hr${i}`
             document.getElementsByTagName('menu')[0].appendChild(newOL)
         } else {
-            const haveIcon = ['Applications','Moderating','User','Startpage','Account'].includes(menuList[n])
+            const haveIcon = ['Applications','Moderating','User','Startpage','Account'].includes(menuList[n].toString())
 
             const newOL = document.createElement('ol')
             newOL.id = `ol${i}`
@@ -85,11 +84,11 @@ function menuDisplay() {
             newA.className = 'L1'
             newA.setAttribute('data', `${i}-${n}`)
             newA.onclick = (e) => {
-                /** @type {HTMLAnchorElement} */
+                /** @ts-ignore @type {HTMLAnchorElement} */
                 const target = e.target
-                doClick(Number.parseInt(target.getAttribute('data').split('-')[0]), Number.parseInt(menuList[target.getAttribute('data').split('-')[1]]))
+                doClick(Number.parseInt(target.getAttribute('data').split('-')[0]), Number.parseInt(menuList[target.getAttribute('data').split('-')[1]]).toString())
             }
-            newA.innerText = menuList[n + 3]
+            newA.textContent = menuList[n + 3].toString()
             newOL.appendChild(newA)
 
             if (menuList[n] === 'log-error') {
@@ -102,17 +101,14 @@ function menuDisplay() {
 
         //added by zqq,07.11.1
         //map.push(menuList[n+2]);
-        map[map.length] = menuList[n + 2];
-        i++;
+        map[map.length] = menuList[n + 2]
+        i++
     }
-
-
 }
-
 
 function UnselectAll() {
     const l = menuList.length / 4 // document.getElementsByTagName('ol').length
-    for (var i = 0; i < l; i++) {
+    for (let i = 0; i < l; i++) {
         try {
             document.getElementById('ol' + i).classList.remove('selected')
         } catch (ex) {
@@ -123,7 +119,7 @@ function UnselectAll() {
 
 function collapseAll() {
     const l = menuList.length / 4 //document.getElementsByTagName('ol').length
-    for (var i = 0; i < l; i++) {
+    for (let i = 0; i < l; i++) {
         try {
             if (map[i] > 1) {
                 document.getElementById('ol' + i).style.display = "none";
@@ -135,15 +131,15 @@ function collapseAll() {
             continue
         }
     }
-    for (var i = 0; i < document.links.length; i++) {
+    for (let i = 0; i < document.links.length; i++) {
         document.links[i].className = "L1";
     }
 }
 
 function expandBranch(n) {
-    var branch;
-    var l = 0;
-    var index;
+    let branch;
+    let l = 0;
+    let index;
     while (l != 1) {
         branch = document.getElementById('ol' + n);
         l = map[n];
@@ -195,40 +191,9 @@ function doClick(n, menuName) {
         expandBranch(n);
     }
 
-    if (!UrlExists(document.getElementById('a' + n).href)) {
-        parent.window.frames["mainFrame"].src = ""
-        parent.window.frames["mainFrame"].document.body.innerHTML = Page404
-    }
-
     if (map[n] == 1) {
         document.getElementById('ol' + (n + 1)).classList.add('selected')
     } else {
         document.getElementById('ol' + n).classList.add('selected')
-    }
-}
-
-const Page404 =
-    `<table id="autoWidth" style="width: 100%;">` +
-    `    <tbody>` +
-    `        <tr>` +
-    `           <td class="h1" colspan="3">` +
-    `               The server is down` +
-    `           </td>` +
-    `        </tr>` +
-    `    </tbody>` +
-    `</table>`
-
-function UrlExists(url) {
-    try {
-        var http = new XMLHttpRequest();
-        http.open('HEAD', url, false);
-        http.send();
-        if (http.status != 404) {
-            return true;
-        } else {
-            return false;
-        }
-    } catch (error) {
-        return false;
     }
 }

@@ -26,9 +26,8 @@ commandMusic.addSubcommand(commandMusicSub2)
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: commandMusic,
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
-    Execute: async function(interaction, ephemeral, sender) {
+	Command: commandMusic,
+    OnCommand: async function(interaction, ephemeral, sender) {
         if (interaction.guild) {
             if (interaction.options.getSubcommand() == 'play') {
                 await sender.MusicPlayer.CommandMusic(interaction, interaction.options.getString('url'))

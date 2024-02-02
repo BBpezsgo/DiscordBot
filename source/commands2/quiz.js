@@ -56,9 +56,8 @@ const CommandInformations = new Discord.SlashCommandBuilder()
 
 /** @type {import("./base").Command} */
 const Command = {
-	Data: CommandInformations,
-    /** @param {Discord.ChatInputCommandInteraction} interaction */
-    Execute: async function(interaction, ephemeral, sender) {
+	Command: CommandInformations,
+    OnCommand: async function(interaction, ephemeral, sender) {
         await interaction.deferReply({
             ephemeral
         })

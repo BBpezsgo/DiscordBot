@@ -86,7 +86,7 @@ function GetEmbed(weatherData, isCache) {
     for (let i = 0; i < 5; i++) {
         const currentWeatherItem = weatherData.list[i]
 
-        var stringBuilder = ''
+        let stringBuilder = ''
 
         stringBuilder += `${EmojiPrefix}${weatherTempIcon(currentWeatherItem.main.temp)} ${currentWeatherItem.main.temp} C°\n`
         stringBuilder += `${EmojiPrefix}${weatherHumidityIcon(currentWeatherItem.main.humidity)} ${currentWeatherItem.main.humidity}% páratartalom\n`
@@ -234,13 +234,6 @@ function GetAlertEmbed(alerts) {
 async function SendReport(channel, statesManager) {
     statesManager.WeatherReport.Text = 'Send loading message...'
 
-    const loadingEmbed = new Discord.EmbedBuilder()
-        .setColor(Color.Highlight)
-        .setAuthor({ name: 'Békéscsaba', url: 'https://openweathermap.org/city/' + CityBekescsaba.ID, iconURL: 'https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_32x32.png' })
-        .setTitle('Napi időjárás jelentés betöltése...')
-
-    const loadingMessage = await channel.send({ embeds: [loadingEmbed] })
-
     statesManager.WeatherReport.Text = 'Get weather data...'
     Openweathermap.OpenweathermapForecast()
         .then(async result => {
@@ -261,8 +254,6 @@ async function SendReport(channel, statesManager) {
 
             const embed = GetEmbed(result, result.fromCache)
             const alertEmbed = GetAlertEmbed(alerts)
-            statesManager.WeatherReport.Text = 'Delete loading message...'
-            await loadingMessage.delete()
             statesManager.WeatherReport.Text = 'Send report message...'
             if (alertEmbed) {
                 await channel.send({ content: '<@&978665941753806888>', embeds: [ embed, alertEmbed ] })
@@ -274,7 +265,7 @@ async function SendReport(channel, statesManager) {
         .catch(async error => {
             LogError(error)
             statesManager.WeatherReport.Text = 'Get weather is failed!'
-            await loadingMessage.edit({ content: '> \\❗ ' + error })
+            await channel.send({ content: '> \\❗ ' + error })
         })
 }
 

@@ -33,7 +33,7 @@
     </style>
 </head>
 
-<body onload="LoadHelp(window); resize(this);" onresize="resize(this);" marginwidth="0" marginheight="0">
+<body>
    	<button class="show-hide-part-button" onclick="parent.ToggleHelpPanel(this)">&lt;</button>
 
     <h1>Moderating</h1>
@@ -135,7 +135,7 @@
                         console.warn(JSON.stringify(res, null, ' '))
                         if (errorLabelID !== undefined) {
                             const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
+                            let details = ''
                             if (res.rawError.errors !== undefined) {
                                 details = `: ${res.rawError.errors.user_id._errors[0].message}`
                             }
@@ -166,7 +166,7 @@
                         console.log('404')
                         if (errorLabelID !== undefined) {
                             const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
+                            let details = ''
                             errorLabel.innerHTML = 
                             `
                             <b>HTTP ${'POST'} <a href='${url}' target='_blank'>${url}</a>:</b><br>
@@ -183,7 +183,7 @@
                         console.warn(JSON.stringify(res, null, ' '))
                         if (errorLabelID !== undefined) {
                             const errorLabel = document.getElementById(errorLabelID)
-                            var details = ''
+                            let details = ''
                             if (res.rawError.errors !== undefined) {
                                 details = `: ${res.rawError.errors.user_id._errors[0].message}`
                             }

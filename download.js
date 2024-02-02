@@ -1,7 +1,7 @@
 const spinner = ['─', '\\', '|', '/']
-var spinnerIndex = 0
+let spinnerIndex = 0
 /** @type {string[]} */
-var logs = []
+let logs = []
 
 const useDefaultLogSystem = false
 
@@ -152,7 +152,7 @@ const file = fs.createWriteStream(fileName)
 
 Log(`%TASK% Request sent`)
 const requestedAt = Date.now()
-var showRequestEllapsed = true
+let showRequestEllapsed = true
 
 /** @param {number} ms Milliseconds */
 function GetTime(ms) {
@@ -166,7 +166,7 @@ function GetTime(ms) {
 }
 
 const requestEllapsedTimer = setInterval(() => {
-    var j = -1
+    let j = -1
     for (let i = 0; i < logs.length; i++) {
         const log = logs[i]
         if (log.includes(' Request sent')) {
@@ -185,7 +185,7 @@ const request = https.get(url, function (res) {
     showRequestEllapsed = false
     Log(`  Got a response: ${res.statusCode} ${res.statusMessage}`)
 
-    var cur = 0
+    let cur = 0
     if (fs.existsSync('./DiscordBot-Main/full-bytes.json')) { fs.writeFileSync('./full-bytes.json', fs.readFileSync('./DiscordBot-Main/full-bytes.json', { encoding: 'utf-8' }), { encoding: 'utf-8' }) }
     /** @type {number} */
     const full = JSON.parse(fs.readFileSync('./full-bytes.json', "utf-8"))

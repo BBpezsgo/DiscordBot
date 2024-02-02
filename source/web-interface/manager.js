@@ -17,7 +17,6 @@ const {
     MFALevel
 } = require('../functions/enums')
 const { GetTime, GetDate } = require('../functions/utils')
-const { HbLog, HbStart } = require('./log')
 const archivePath = 'D:/Mappa/Discord/DiscordOldData/'
 const Key = require('../key')
 /** @type {import('../config').Config} */
@@ -98,8 +97,6 @@ class WebInterfaceManager {
             Requests: []
         }
 
-        if (clientType != 'MOBILE') { HbStart() }
-
         this.app = express()
         this.app.engine('hbs', ExpressHandlebars.engine({
             extname: '.hbs',
@@ -134,10 +131,6 @@ class WebInterfaceManager {
 
             if (login && password && login === auth.login && password === auth.password) {
                 return next()
-            }
-
-            if (this.ClientType != 'MOBILE') {
-                HbLog({ IP: req.ip, type: 'NORMAL', message: 'Failed to log in with username "' + login + '" and password "' + password + '"' })
             }
 
             res.set('WWW-Authenticate', 'Basic realm="401"')
@@ -207,9 +200,6 @@ class WebInterfaceManager {
             this.statesManager.WebInterface[this.ID].IsDone = true
             // @ts-ignore
             this.statesManager.WebInterface[this.ID].URL = 'http://' + this.server.address().address + ":" + this.server.address().port
-            if (this.ClientType != 'MOBILE') {
-                HbLog({ type: 'NORMAL', message: 'Listening on ' + ip + ':' + port })
-            }
         }
 
         this.server = this.app.listen(port, ip, this.OnStartListen)
@@ -279,15 +269,8 @@ class WebInterfaceManager {
             } else {
                 this.statesManager.WebInterface[this.ID].Error = err.message
             }
-            if (this.ClientType != 'MOBILE') {
-                HbLog({ type: 'ERROR', message: err.message, helperMessage: 'Server error: ' + err.message })
-            }
         })
         this.server.on('clientError', (err, socket) => {
-            if (this.ClientType != 'MOBILE') {
-                HbLog({ type: 'CLIENT_ERROR', message: err.message, helperMessage: 'Client error: ' + err.message })
-            }
-
             // @ts-ignore
             if (err.code === 'ECONNRESET' || !socket.writable) {
                 return
@@ -297,14 +280,8 @@ class WebInterfaceManager {
         this.server.on('close', () => {
             this.statesManager.WebInterface[this.ID].IsDone = false
             this.statesManager.WebInterface[this.ID].URL = ''
-            if (this.ClientType != 'MOBILE') {
-                HbLog({ type: 'NORMAL', message: 'Server closed' })
-            }
         })
         this.server.on('connect', (req, socket, head) => {
-            if (this.ClientType != 'MOBILE') {
-                HbLog({ IP: req.socket.remoteAddress, type: 'CONNECT', url: req.url, method: req.method, helperMessage: 'Someone wanted to connect' })
-            }
         })
         this.server.on('connection', (socket) => {
             this.statesManager.WebInterface[this.ID].Clients.push(socket)
@@ -312,14 +289,8 @@ class WebInterfaceManager {
         })
         this.server.on('request', (req, res) => {
             this.statesManager.WebInterface[this.ID].Requests.push(10)
-            if (this.ClientType != 'MOBILE') {
-                HbLog({ IP: req.socket.remoteAddress, type: 'REQUIEST', url: req.url, method: req.method, helperMessage: 'Someone requiested' })
-            }
         })
         this.server.on('upgrade', (req, socket, head) => {
-            if (this.ClientType != 'MOBILE') {
-                HbLog({ IP: req.socket.remoteAddress, type: 'NORMAL', message: 'Upgrade', helperMessage: 'Someone upgraded' })
-            }
         })
         this.server.on('listening', () => {
             const webserverAddress = this.server.address()

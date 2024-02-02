@@ -55,9 +55,8 @@ class MusicPlayer {
     }
     
     /**
-     * @param {Discord.CommandInteraction<Discord.CacheType>} command
-     * @param {boolean} privateCommand
-     * @returns {boolean}
+     * @param {Discord.CommandInteraction<'cached'>} command
+     * @returns {Promise<boolean>}
      */
     async PlayAudio(command) {
         const link = this.musicArray[this.musicArray.length - 1]
@@ -68,7 +67,7 @@ class MusicPlayer {
         const stream = ytdl(link, { filter: 'audioonly' })
         const player = createAudioPlayer()
 
-        /** @type {Discord.VoiceChannel} */
+        /** @type {Discord.VoiceBasedChannel} */
         const voiceChannel = await this.UserVoice(command.guildId, command.user.id)
         const connection = joinVoiceChannel({
             channelId: voiceChannel.id,
@@ -118,8 +117,7 @@ class MusicPlayer {
     }
     
     /**
-     * @param {Discord.CommandInteraction<Discord.CacheType>} command
-     * @param {boolean} privateCommand
+     * @param {Discord.CommandInteraction<'cached'>} command
      * @param {string} link
      */
     async CommandMusic(command, link) {
@@ -140,8 +138,7 @@ class MusicPlayer {
     }
 
     /**
-     * @param {Discord.CommandInteraction<Discord.CacheType>} command
-     * @param {boolean} privateCommand
+     * @param {Discord.CommandInteraction<'cached'>} command
      */
     async CommandMusicList(command) {
         if (this.musicArray.length === 0 && this.statesManager.Ytdl.IsPlaying === false) {
@@ -162,7 +159,7 @@ class MusicPlayer {
         }
     }
 
-    /**@param {Discord.CommandInteraction<Discord.CacheType>} command @param {boolean} privateCommand */
+    /**@param {Discord.CommandInteraction<'cached'>} command */
     async CommandSkip(command) {
         const userVoice = await this.UserVoice(command.guildId, command.user.id)
         if (userVoice != null) {

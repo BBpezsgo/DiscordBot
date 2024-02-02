@@ -31,7 +31,7 @@ async function CreateNews(message) {
         const info = await ytdl.getInfo(message.content)
         const vidInfo = info.videoDetails
 
-        var channelIconUrl = undefined
+        let channelIconUrl = undefined
         if (info.videoDetails.author.thumbnails.length > 0) {
             channelIconUrl = info.videoDetails.author.thumbnails[0].url
         }
@@ -58,10 +58,10 @@ async function CreateNews(message) {
     if (message.author.id == '802864588877856789') { // Crossout
         embed.setAuthor({ name: 'Crossout', iconURL: message.author.displayAvatarURL(), url: 'https://crossout.net/en/#/' })
         
-        var NewsContent = message.content.trim()
+        let NewsContent = message.content.trim()
         
         /** @type {null | string} */
-        var NewsType = null
+        let NewsType = null
         if (NewsContent.startsWith('@')) {
             NewsType = NewsContent.split('\n')[0].trim().substring(1).trim()
             NewsContent = NewsContent.substring(NewsType.length + 1).trim()
@@ -367,7 +367,7 @@ class NewsManager {
 
     /** @param {Discord.Message} message */
     static SaveRawNewsMessage(message, sendedMessageID) {
-        var data = {
+        const data = {
             applicationId: message.applicationId,
             activity: message.activity,
             attachments: message.attachments.toJSON()[0],
@@ -392,7 +392,7 @@ class NewsManager {
         }
     
         const d = new Date(Date.now())
-        var id = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${message.id}`
+        const id = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${message.id}`
         if (fs.existsSync(Path.join(CONFIG.paths.base, './news-archive/')) !== true) {
             fs.mkdirSync(Path.join(CONFIG.paths.base, './news-archive/'))
         }
