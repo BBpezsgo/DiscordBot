@@ -154,7 +154,9 @@ class DatabaseManager {
         if (!this.dataBusinesses[user.id].username) {
             this.dataBusinesses[user.id].username = user.username
         }
+        // @ts-ignore
         if (!this.dataBusinesses[user.id].businessIndex) {
+            // @ts-ignore
             this.dataBusinesses[user.id].businessIndex = 0
         }
 

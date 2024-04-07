@@ -77,7 +77,7 @@ function UserJson(user, database = null) {
 }
 
 /**
- * @param {HarBrowser.User} user
+ * @param {HarBrowser.CollectedUser} user
  * @param {DatabaseManager?} database
  */
 function UserJsonHar(user, database = null) {

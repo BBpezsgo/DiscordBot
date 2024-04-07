@@ -4,7 +4,7 @@
  */
 function GetData(url, callback)
 {
-    var xmlHttp = new XMLHttpRequest()
+    const xmlHttp = new XMLHttpRequest()
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
             callback(xmlHttp.responseText);

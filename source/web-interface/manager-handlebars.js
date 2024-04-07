@@ -459,7 +459,7 @@ class WebInterfaceHandlebarsManager {
             })
             
             const harGuilds = HarBrowser.Guilds()
-            for (const harGuildId in harGuilds) {
+            for (const harGuildId of harGuilds) {
 
                 let added = false
                 for (const addedGuild of guilds) {
@@ -471,7 +471,7 @@ class WebInterfaceHandlebarsManager {
 
                 if (added) { continue }
 
-                const harGuild = harGuilds[harGuildId]
+                const harGuild = HarBrowser.Guild(harGuildId)
                 
                 guilds.push({
                     id: harGuild.id,
@@ -1087,7 +1087,7 @@ class WebInterfaceHandlebarsManager {
             if (this.client.guilds.cache.has(serverId)) {
                 this.moderatingSearchedServerId = serverId
                 this.RenderPage_ModeratingGuildSearch(req, res, '')
-            } else if (HarBrowser.Guilds()[serverId]) {
+            } else if (HarBrowser.Guild(serverId)) {
                 this.moderatingSearchedServerId = serverId
                 this.RenderPage_ModeratingGuildSearch(req, res, '')
             } else {
@@ -1146,6 +1146,13 @@ class WebInterfaceHandlebarsManager {
                 }
             }
 
+            if (HarBrowser.DMChannel(id)) {
+                this.viewUserMessagedId = id
+                this.RenderPage_DirectMessages(req, res, '')
+
+                return
+            }
+
             this.RenderPage_DirectMessages(req, res, `User \"${id}\" not found`)
         })
 
@@ -1194,6 +1201,9 @@ class WebInterfaceHandlebarsManager {
             const channelId = req.body.id
 
             if (this.client.channels.cache.has(channelId)) {
+                this.moderatingSearchedChannelId = channelId
+                this.RenderPage_Moderating(req, res)
+            } else if (HarBrowser.Channel(channelId)) {
                 this.moderatingSearchedChannelId = channelId
                 this.RenderPage_Moderating(req, res)
             } else {
@@ -1472,6 +1482,7 @@ class WebInterfaceHandlebarsManager {
             }
 
             try {
+                // @ts-ignore
                 userDatabase.businessIndex = this.database.dataBusinesses[userId].businessIndex
                 // @ts-ignore
                 userDatabase.businessName = this.database.dataBusinesses[userId].businessName
@@ -1588,28 +1599,115 @@ class WebInterfaceHandlebarsManager {
         res.render(`view/ModeratingError`, { servers: Utils.ServersCache(this.client), searchError: searchError })
     }
 
-    RenderPage_DirectMessages(req, res, errorMessage) {
+    async RenderPage_DirectMessages(req, res, errorMessage) {
         if (this.viewUserMessagedId.length > 0) {
             const user = this.client.users.cache.get(this.viewUserMessagedId)
+            const archivedUser = ArchiveBrowser.User(this.viewUserMessagedId)
+            const harDmChannel = HarBrowser.DMChannel(this.viewUserMessagedId)
+            const harUser = HarBrowser.User(this.viewUserMessagedId)
+
+            /** @type {{ id: undefined | string; name: '?' | string; createdAt: undefined | string; userId: string; userAvatar: undefined | string; }} */
+            let channelJson = {
+                id: undefined,
+                name: '?',
+                createdAt: undefined,
+                userId: this.viewUserMessagedId,
+                userAvatar: undefined,
+            }
+
+            /** @type {{ id: string; createdAtTimestamp: number }[]} */
+            const messages = []
+
+            if (harUser) {
+                if (harUser.profile) {
+                    if ('user' in harUser.profile) {
+                        channelJson.name = harUser.profile.user.global_name
+                        channelJson.userAvatar = `https://cdn.discordapp.com/avatars/${harUser.profile.user.id}/${harUser.profile.user.avatar}.webp?size=32`
+                    }
+                }
+            }
+
+            if (harDmChannel && harDmChannel.messages) {
+                for (const message of harDmChannel.messages) {
+                    messages.push({
+                        ...message,
+                        createdAtTimestamp: Date.parse(message.timestamp),
+                        id: message.id,
+                    })
+                }
+            }
+
+            if (archivedUser) {
+                channelJson.name = archivedUser.nickname
+                channelJson.userAvatar = `https://cdn.discordapp.com/avatars/${archivedUser.id}/${archivedUser.user.avatar}.webp?size=32`
+            
+                const archivedChannels = await ArchiveBrowser.Messages()
+                for (const archivedChannel of archivedChannels) {
+                    if (!archivedChannel.recipients)
+                    { continue }
+                    if (!archivedChannel.recipients.includes(archivedUser.id))
+                    { continue }
+    
+                    console.log(`[ArchiveBrowser]: DM channel found`, archivedChannel)
+    
+                    let channelJson = archivedChannel ? {
+                        id: archivedChannel.id,
+                        name: archivedUser.nickname,
+                        archived: true,
+                    } : {
+                        name: archivedUser.nickname,
+                        archived: true,
+                    }
+    
+                    const archivedAccount = ArchiveBrowser.Account()
+                    
+                    for (const message of archivedChannel.messages) {
+                        
+                        const attachmentsResult = []
+                        if (message.attachment) {
+                            attachmentsResult.push({
+                                contentType: message.attachment.contentType,
+                                url: message.attachment.url,
+                                raw: message.attachment.raw,
+                            })
+                        }
+    
+                        messages.push({
+                            // @ts-ignore
+                            content: Utils.GetHandlebarsMessage(this.client, message.content),
+                            reactions: [],
+                            attachments: attachmentsResult,
+                            embeds: [],
+                            id: message.id,
+                            cleanContent: message.content,
+                            createdAt: message.date,
+                            createdAtTimestamp: Date.parse(message.date),
+                            author: {
+                                id: archivedAccount.id,
+                                discriminator: archivedAccount.discriminator,
+                                username: archivedAccount.username,
+                                flags: archivedAccount.flags,
+                                avatarData: archivedAccount.avatarData,
+                            },
+                            partial: true,
+                            type: MessageType.Default,
+                            types: {
+                                Default: true,
+                            },
+                        })
+                    }
+                }
+            }
 
             if (user) {
-                const c = user.dmChannel
-                let channelJson = c ? {
-                    id: c.id,
-                    name: user.username,
-                    createdAt: GetDate(c.createdAt),
-                } : {
-                    name: user.username,
-                }
-                
-
-                /** @type {{id:string;createdAtTimestamp:number}[]} */
-                const messages = []
+                channelJson.name = user.username
+                channelJson.userAvatar = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=32`
 
                 if (user.dmChannel) {
-                    const cTxt = c
+                    channelJson.id = user.dmChannel.id
+                    channelJson.createdAt = GetDate(user.dmChannel.createdAt)
 
-                    cTxt.messages.cache.forEach((message) => {
+                    user.dmChannel.messages.cache.forEach((message) => {
                         const attachments = message.attachments.toJSON()
                         const attachmentsResult = []
                         for (const attachment of attachments) {
@@ -1707,90 +1805,13 @@ class WebInterfaceHandlebarsManager {
                             author: Utils.UserJson(message.author, this.database)
                         })
                     })
-
-                    messages.sort((a, b) => a.createdAtTimestamp - b.createdAtTimestamp)
                 }
-
-                res.render(`view/UserMessages`, { users: Utils.UsersCache(this.client), channel: channelJson, messages, errorMessage })
-                return
             }
 
-            console.log(`[ArchiveBrowser]: Search user ${this.viewUserMessagedId} ...`)
-            const archivedUsers = ArchiveBrowser.Users()
-            for (const archivedUser of archivedUsers) {
-                if (archivedUser.id !== this.viewUserMessagedId)
-                { continue }
+            messages.sort((a, b) => a.createdAtTimestamp - b.createdAtTimestamp)
 
-                console.log(`[ArchiveBrowser]: User ${this.viewUserMessagedId} found`, archivedUser)
-                
-                console.log(`[ArchiveBrowser]: Search DM channel ...`)
-
-                ArchiveBrowser.Messages()
-                    .then(/** @param {ArchiveBrowser.ArchivedMessageChannel3[]} archivedChannels */ archivedChannels => {
-                        for (const  archivedChannel of archivedChannels) {
-                            if (!archivedChannel.recipients)
-                            { continue }
-                            if (!archivedChannel.recipients.includes(archivedUser.id))
-                            { continue }
-
-                            console.log(`[ArchiveBrowser]: DM channel found`, archivedChannel)
-
-                            let channelJson = archivedChannel ? {
-                                id: archivedChannel.id,
-                                name: archivedUser.nickname,
-                                archived: true,
-                            } : {
-                                name: archivedUser.nickname,
-                                archived: true,
-                            }
-
-                            const archivedAccount = ArchiveBrowser.Account()
-                            
-                            /** @type {{id:string;createdAtTimestamp:number}[]} */
-                            const messages = []
-
-                            for (const message of archivedChannel.messages) {
-                                
-                                const attachmentsResult = []
-                                if (message.attachment) {
-                                    attachmentsResult.push({
-                                        contentType: message.attachment.contentType,
-                                        url: message.attachment.url,
-                                        raw: message.attachment.raw,
-                                    })
-                                }
-
-                                messages.push({
-                                    // @ts-ignore
-                                    content: Utils.GetHandlebarsMessage(this.client, message.content),
-                                    reactions: [],
-                                    attachments: attachmentsResult,
-                                    embeds: [],
-                                    id: message.id,
-                                    cleanContent: message.content,
-                                    createdAt: message.date,
-                                    createdAtTimestamp: Date.parse(message.date),
-                                    author: {
-                                        id: archivedAccount.id,
-                                        discriminator: archivedAccount.discriminator,
-                                        username: archivedAccount.username,
-                                        flags: archivedAccount.flags,
-                                        avatarData: archivedAccount.avatarData,
-                                    },
-                                })
-                            }
-
-                            messages.sort((a, b) => a.createdAtTimestamp - b.createdAtTimestamp)
-
-                            res.render(`view/UserMessages`, { users: Utils.UsersCache(this.client), channel: channelJson, messages, errorMessage })
-
-                            return
-                        }
-                    })
-                    .catch(LogError)
-
-                return
-            }
+            res.render(`view/UserMessages`, { users: Utils.UsersCache(this.client), channel: channelJson, messages, errorMessage })
+            return
         }
 
         res.render(`view/CacheUsers`, { users: Utils.UsersCache(this.client), errorMessage })
@@ -1802,79 +1823,132 @@ class WebInterfaceHandlebarsManager {
             return
         }
 
-        const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
+        /**
+         * @type {HarBrowser.CollectedGuild | Discord.Guild}
+         */
+        let g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
 
         if (!g) {
-            this.RenderPage_ModeratingError(req, res, 'No server selected')
+            g = HarBrowser.Guild(this.moderatingSearchedServerId)
+        }
+
+        if (!g) {
+            this.RenderPage_ModeratingError(req, res, `Server ${this.moderatingSearchedServerId} not found`)
             return
         }
 
         if (this.moderatingSearchedChannelId.length > 0) {
-            /** @type {Discord.GuildBasedChannel} */
-            const c = g.channels.cache.get(this.moderatingSearchedChannelId)
-    
-            if (c) {
-                await this.RenderPage_Moderating(req, res)
-                return
+            if (g.channels instanceof Discord.GuildChannelManager) {
+                const c = g.channels.cache.get(this.moderatingSearchedChannelId)
+        
+                if (c) {
+                    await this.RenderPage_Moderating(req, res)
+                    return
+                }
+            } else {
+                const c = g.channels[this.moderatingSearchedChannelId]
+        
+                if (c) {
+                    await this.RenderPage_Moderating(req, res)
+                    return
+                }
             }
         }
 
-        const guild = {
-            iconUrlSmall: g.iconURL({ size: 32 }),
-            iconUrlLarge: g.iconURL({ size: 128 }),
-
-            name: g.name,
-            id: g.id,
-
-            createdAt: GetDate(g.createdAt),
-            joinedAt: GetDate(g.joinedAt),
-
-            memberCount: g.memberCount,
-            nsfwLevel: NsfwLevel[g.nsfwLevel],
-            mfaLevel: MFALevel[g.mfaLevel],
-            verificationLevel: g.verificationLevel,
-
-            available: g.available,
-            large: g.large,
-
-            membersNotFetched: g.memberCount - g.members.cache.size,
-            membersNotVisible: null,
-        }
-
+        let guild = { }
         const emojis = []
-        g.emojis.cache.forEach((emoji) => {
-            emojis.push({
-                animated: emoji.animated,
-                author: emoji.author,
-                available: emoji.available,
-                deletable: emoji.deletable,
-                id: emoji.id,
-                identifier: emoji.identifier,
-                managed: emoji.managed,
-                name: emoji.name,
-                requiresColons: emoji.requiresColons,
-                roles: emoji.roles,
-                url: emoji.url,
-                createdAt: GetDate(emoji.createdAt)
-            })
-        })
-        
         const members = []
-        g.members.cache.forEach((member) => {
-            members.push({
-                id: member.id,
-                nickname: member.nickname,
-                displayName: member.displayName,
-                avatarUrlSmall: member.displayAvatarURL({ size: 16 }),
-                avatarUrlBig: member.displayAvatarURL({ size: 128 }),
-                bannable: member.bannable,
-                kickable: member.kickable,
-                manageable: member.manageable,
-                moderatable: member.moderatable,
-                isOwner: member.id === g.ownerId,
-                user: Utils.UserJson(member.user, this.database),
+        let groups = []
+        let singleChannels = []
+
+        if (g instanceof Discord.Guild) {
+            guild = {
+                iconUrlSmall: g.iconURL({ size: 32 }),
+                iconUrlLarge: g.iconURL({ size: 128 }),
+    
+                name: g.name,
+                id: g.id,
+    
+                createdAt: GetDate(g.createdAt),
+                joinedAt: GetDate(g.joinedAt),
+    
+                memberCount: g.memberCount,
+                nsfwLevel: NsfwLevel[g.nsfwLevel],
+                mfaLevel: MFALevel[g.mfaLevel],
+                verificationLevel: g.verificationLevel,
+    
+                available: g.available,
+                large: g.large,
+    
+                membersNotFetched: g.memberCount - g.members.cache.size,
+                membersNotVisible: null,
+            }
+
+            groups = Utils.ChannelsInGuild(g).groups
+            singleChannels = Utils.ChannelsInGuild(g).singleChannels
+                
+            g.emojis.cache.forEach((emoji) => {
+                emojis.push({
+                    animated: emoji.animated,
+                    author: emoji.author,
+                    available: emoji.available,
+                    deletable: emoji.deletable,
+                    id: emoji.id,
+                    identifier: emoji.identifier,
+                    managed: emoji.managed,
+                    name: emoji.name,
+                    requiresColons: emoji.requiresColons,
+                    roles: emoji.roles,
+                    url: emoji.url,
+                    createdAt: GetDate(emoji.createdAt)
+                })
             })
-        })
+            
+            g.members.cache.forEach((member) => {
+                members.push({
+                    id: member.id,
+                    nickname: member.nickname,
+                    displayName: member.displayName,
+                    avatarUrlSmall: member.displayAvatarURL({ size: 16 }),
+                    avatarUrlBig: member.displayAvatarURL({ size: 128 }),
+                    bannable: member.bannable,
+                    kickable: member.kickable,
+                    manageable: member.manageable,
+                    moderatable: member.moderatable,
+                    isOwner: member.id === ((g instanceof Discord.Guild) ? g.ownerId : 'bruh'),
+                    user: Utils.UserJson(member.user, this.database),
+                })
+            })
+        } else {
+            guild = {
+                iconUrlSmall: `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=32`,
+                iconUrlLarge: `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.webp?size=128`,
+    
+                name: g.name,
+                id: g.id,
+    
+                memberCount: g.memberCount,
+                nsfwLevel: NsfwLevel[g.nsfw_level],
+                mfaLevel: MFALevel[0],
+                verificationLevel: g.verification_level,
+    
+                available: false,
+                large: false,
+    
+                membersNotFetched: g.memberCount,
+                membersNotVisible: null,
+            }
+
+            if (g.channels) {
+                for (const id in g.channels) {
+                    singleChannels.push({
+                        id: g.channels[id].id,
+                        name: g.channels[id].name,
+                        typeUrl: { 0: 'text', 1: 1, 2: 2 }[g.channels[id].type]
+                    })
+                }
+            }
+        }
 
         const membersSaved = CacheManager.GetMembers(this.client, guild.id)
         
@@ -1899,7 +1973,7 @@ class WebInterfaceHandlebarsManager {
                     kickable: memberSaved.kickable,
                     manageable: memberSaved.manageable,
                     moderatable: memberSaved.moderatable,*/
-                    isOwner: memberSaved.id === g.ownerId,
+                    isOwner: memberSaved.id === ((g instanceof Discord.Guild) ? g.ownerId : 'bruh'),
                     // user: Utils.UserJson(memberSaved.user),
                     cache: true
                 })
@@ -1908,7 +1982,7 @@ class WebInterfaceHandlebarsManager {
 
         guild.membersNotVisible = g.memberCount - members.length
 
-        res.render(`view/ModeratingGuildSearch`, { server: guild, members: members, groups: Utils.ChannelsInGuild(g).groups, singleChannels: Utils.ChannelsInGuild(g).singleChannels, searchError: searchError, emojis: emojis })
+        res.render(`view/ModeratingGuildSearch`, { server: guild, members: members, groups: groups, singleChannels: singleChannels, searchError: searchError, emojis: emojis })
     }
     
     async RenderPage_Moderating(req, res) {
@@ -1917,13 +1991,55 @@ class WebInterfaceHandlebarsManager {
             return
         }
 
-        const aaaah = (new DiscordUtils.Guild(this.moderatingSearchedServerId, this.client)).Load()
-
-        const g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
+        /**
+         * @type {HarBrowser.CollectedGuild | Discord.Guild}
+         */
+        let g = this.client.guilds.cache.get(this.moderatingSearchedServerId)
 
         if (!g) {
-            this.RenderPage_ModeratingError(req, res, 'No server selected')
+            g = HarBrowser.Guild(this.moderatingSearchedServerId)
+        }
+
+        if (!g) {
+            this.RenderPage_ModeratingError(req, res, `Server ${this.moderatingSearchedServerId} not found`)
             return
+        }
+
+        let guild = { }
+
+        if (g instanceof Discord.Guild) {
+            guild = {
+                iconUrlSmall: g.iconURL({ size: 32 }),
+                iconUrlLarge: g.iconURL({ size: 128 }),
+    
+                name: g.name,
+                id: g.id,
+    
+                createdAt: GetDate(g.createdAt),
+                joinedAt: GetDate(g.joinedAt),
+    
+                memberCount: g.memberCount,
+                nsfwLevel: g.nsfwLevel,
+                mfaLevel: g.mfaLevel,
+                verificationLevel: g.verificationLevel,
+                splash: g.splash,
+    
+                available: g.available,
+                large: g.large,
+            }    
+        } else {
+            guild = {
+                iconUrlSmall: g.icon,
+                iconUrlLarge: g.icon,
+
+                name: g.name,
+                id: g.id,
+    
+                memberCount: g.memberCount,
+                nsfwLevel: g.nsfw_level,
+                verificationLevel: g.verification_level,
+                splash: g.splash,
+            }    
         }
 
         if (this.moderatingSearchedChannelId.length === 0) {
@@ -1931,98 +2047,86 @@ class WebInterfaceHandlebarsManager {
             return
         }
 
-        /** @type {Discord.GuildBasedChannel} */
-        const c = g.channels.cache.get(this.moderatingSearchedChannelId)
+        let channel = { }
+
+        /** @type {Discord.GuildBasedChannel | HarBrowser.CollectedChannel} */
+        let c
+        if (g instanceof Discord.Guild) {
+            c = g.channels.cache.get(this.moderatingSearchedChannelId)
+
+            channel = {
+                id: c.id,
+                // @ts-ignore
+                archived: c.archived,
+                // @ts-ignore
+                archivedAt: GetDate(c.archivedAt),
+                createdAt: GetDate(c.createdAt),
+                // @ts-ignore
+                deletable: c.deletable,
+                // @ts-ignore
+                full: c.full,
+                // @ts-ignore
+                invitable: c.invitable,
+                // @ts-ignore
+                joinable: c.joinable,
+                // @ts-ignore
+                locked: c.locked,
+                manageable: c.manageable,
+                // @ts-ignore
+                memberCount: c.memberCount,
+                // @ts-ignore
+                messageCount: c.messageCount,
+                name: c.name,
+                // @ts-ignore
+                nsfw: c.nsfw,
+                // @ts-ignore
+                sendable: c.sendable,
+                // @ts-ignore
+                speakable: c.speakable,
+                // @ts-ignore
+                topic: c.topic,
+                type: c.type,
+                // @ts-ignore
+                unarchivable: c.unarchivable,
+                // @ts-ignore
+                userLimit: c.userLimit,
+                // @ts-ignore
+                videoQualityMode: c.videoQualityMode,
+                viewable: c.viewable,
+            }
+        } else {
+            c = HarBrowser.Channel(this.moderatingSearchedChannelId)
+
+            channel = {
+                id: c.id,
+                name: c.name,
+                type: c.type,
+            }
+        }
 
         if (!c) {
             this.RenderPage_ModeratingGuildSearch(req, res, 'No channel selected')
             return
         }
 
-        const guild = {
-            iconUrlSmall: g.iconURL({ size: 32 }),
-            iconUrlLarge: g.iconURL({ size: 128 }),
-
-            name: (g.name),
-            id: g.id,
-
-            createdAt: GetDate(g.createdAt),
-            joinedAt: GetDate(g.joinedAt),
-
-            memberCount: g.memberCount,
-            nsfwLevel: g.nsfwLevel,
-            // nameAcronym: g.nameAcronym,
-            mfaLevel: g.mfaLevel,
-            verificationLevel: g.verificationLevel,
-            splash: g.splash,
-
-            available: g.available,
-            large: g.large,
-            // partnered: g.partnered,
-            // verified: g.verified,
-        }
-
-        const channel = {
-            id: c.id,
-            // @ts-ignore
-            archived: c.archived,
-            // @ts-ignore
-            archivedAt: GetDate(c.archivedAt),
-            createdAt: GetDate(c.createdAt),
-            // @ts-ignore
-            deletable: c.deletable,
-            // @ts-ignore
-            full: c.full,
-            // @ts-ignore
-            invitable: c.invitable,
-            // @ts-ignore
-            joinable: c.joinable,
-            // @ts-ignore
-            locked: c.locked,
-            manageable: c.manageable,
-            // @ts-ignore
-            memberCount: c.memberCount,
-            // @ts-ignore
-            messageCount: c.messageCount,
-            name: c.name,
-            // @ts-ignore
-            nsfw: c.nsfw,
-            // @ts-ignore
-            sendable: c.sendable,
-            // @ts-ignore
-            speakable: c.speakable,
-            // @ts-ignore
-            topic: c.topic,
-            type: c.type,
-            // @ts-ignore
-            unarchivable: c.unarchivable,
-            // @ts-ignore
-            userLimit: c.userLimit,
-            // @ts-ignore
-            videoQualityMode: c.videoQualityMode,
-            viewable: c.viewable,
-        }
-
         const members = []
 
-        /** @type {Discord.BaseGuildTextChannel} */
-        // @ts-ignore
-        const __c = c
-        __c.members.forEach(member => {
-            members.push({
-                displayHexColor: member.displayHexColor,
-                displayName: member.displayName,
-                status: member.presence?.status,
-                ...Utils.UserJson(member.user),
+        if (c instanceof Discord.GuildChannel) {
+            c.members.forEach(member => {
+                members.push({
+                    displayHexColor: member.displayHexColor,
+                    displayName: member.displayName,
+                    status: member.presence?.status,
+                    ...Utils.UserJson(member.user),
+                })
             })
-        })
+        }
 
         /** @type {{id:string;createdAtTimestamp:number}[]} */
         const messages = []
 
-        const harMessages = HarBrowser.Load()?.channels[c.id]?.messages
-        if (harMessages) {
-            for (const message of harMessages) {
+        if (!(c instanceof Discord.BaseChannel)) {
+            for (const message of c.messages) {
                 let memberAdded = false
                 for (const member of members) {
                     if (member.id == message.author.id) {
@@ -2035,50 +2139,54 @@ class WebInterfaceHandlebarsManager {
                     members.push(Utils.UserJsonHar(message.author))
                 }
 
-                const attachments = message.attachments
                 const attachmentsResult = []
-                for (const attachment of attachments) {
-                    attachmentsResult.push({
-                        name: attachment.filename,
-                        height: attachment.height,
-                        width: attachment.width,
-                        id: attachment.id,
-                        spoiler: false,
-                        url: attachment.url,
-                    })
+                if (message.attachments) {
+                    for (const attachment of message.attachments) {
+                        attachmentsResult.push({
+                            name: attachment.filename,
+                            height: attachment.height,
+                            width: attachment.width,
+                            id: attachment.id,
+                            spoiler: false,
+                            url: attachment.url,
+                        })
+                    }
                 }
 
-                const reactions = message.reactions
                 const reactionsResult = []
-                for (const reaction of reactions) {
-                    reactionsResult.push({
-                        count: reaction.count,
-                        name: reaction.emoji.name,
-                        me: reaction.me,
-                    })
+                if (message.reactions) {
+                    for (const reaction of message.reactions) {
+                        reactionsResult.push({
+                            count: reaction.count,
+                            name: reaction.emoji.name,
+                            me: reaction.me,
+                        })
+                    }
                 }
 
                 const embedsResult = []
-                for (const embed of message.embeds) {
-                    embedsResult.push({
-                        color: embed.color,
-                        author: embed.author,
-                        description: Utils.GetHandlebarsMessage(this.client, embed.description, this.moderatingSearchedServerId),
-                        // @ts-ignore
-                        footer: embed.footer,
-                        // @ts-ignore
-                        image: embed.image,
-                        thumbnail: embed.thumbnail,
-                        url: embed.url,
-                        title: Utils.GetHandlebarsMessage(this.client, embed.title, this.moderatingSearchedServerId),
-                        fields: embed.fields.map(field => {
-                            return {
-                                name: Utils.GetHandlebarsMessage(this.client, field.name, this.moderatingSearchedServerId),
-                                value: Utils.GetHandlebarsMessage(this.client, field.value, this.moderatingSearchedServerId),
-                                inline: field.inline,
-                            }
-                        }),
-                    })
+                if (message.embeds) {
+                    for (const embed of message.embeds) {
+                        embedsResult.push({
+                            color: embed.color,
+                            author: embed.author,
+                            description: Utils.GetHandlebarsMessage(this.client, embed.description, this.moderatingSearchedServerId),
+                            // @ts-ignore
+                            footer: embed.footer,
+                            // @ts-ignore
+                            image: embed.image,
+                            thumbnail: embed.thumbnail,
+                            url: embed.url,
+                            title: Utils.GetHandlebarsMessage(this.client, embed.title, this.moderatingSearchedServerId),
+                            fields: embed.fields?.map(field => {
+                                return {
+                                    name: Utils.GetHandlebarsMessage(this.client, field.name, this.moderatingSearchedServerId),
+                                    value: Utils.GetHandlebarsMessage(this.client, field.value, this.moderatingSearchedServerId),
+                                    inline: field.inline,
+                                }
+                            }) ?? [],
+                        })
+                    }
                 }
 
                 messages.push({
@@ -2120,46 +2228,7 @@ class WebInterfaceHandlebarsManager {
                     author: Utils.UserJsonHar(message.author, this.database)
                 })
             }
-        }
-
-        const archidedChannels = (await ArchiveBrowser.Messages())
-        if (archidedChannels) {
-            const archivedAccount = ArchiveBrowser.Account()
-            for (const archidedChannel of archidedChannels) {
-                if (archidedChannel.id !== c.id) { continue }
-                for (const message of archidedChannel.messages) {    
-                    const attachmentsResult = []
-                    if (message.attachment) {
-                        attachmentsResult.push({
-                            contentType: message.attachment.contentType,
-                            spoiler: false,
-                            url: message.attachment.url,
-                        })
-                    }
-            
-                    messages.push({
-                        // @ts-ignore
-                        content: Utils.GetHandlebarsMessage(this.client, message.content, this.moderatingSearchedServerId),
-                        reactions: [],
-                        attachments: attachmentsResult,
-                        embeds: [],
-                        id: message.id,
-                        cleanContent: message.content,
-                        tts: false,
-                        createdAt: GetDate(new Date(message.date)),
-                        createdAtTimestamp: (new Date(message.date)).getTime(),
-                        pinned: false,
-                        type: MessageType.Default,
-                        types: {
-                            Default: true,
-                        },
-                        author: Utils.UserJsonArchived(archivedAccount, this.database)
-                    })
-                }
-            }
-        }
-
-        if (c.type === Discord.ChannelType.GuildText) {
+        } else if (c.type === Discord.ChannelType.GuildText) {
             const cTxt = c
 
             cTxt.messages.cache.forEach((message) => {
@@ -2281,8 +2350,60 @@ class WebInterfaceHandlebarsManager {
             messages.sort((a, b) => { return a.createdAtTimestamp - b.createdAtTimestamp })
         }
 
-        const channelGroups = Utils.ChannelsInGuild(g).groups
-        const singleChannels = Utils.ChannelsInGuild(g).singleChannels
+        const archidedChannels = (await ArchiveBrowser.Messages())
+        if (archidedChannels) {
+            const archivedAccount = ArchiveBrowser.Account()
+            for (const archidedChannel of archidedChannels) {
+                if (archidedChannel.id !== c.id) { continue }
+                for (const message of archidedChannel.messages) {    
+                    const attachmentsResult = []
+                    if (message.attachment) {
+                        attachmentsResult.push({
+                            contentType: message.attachment.contentType,
+                            spoiler: false,
+                            url: message.attachment.url,
+                        })
+                    }
+            
+                    messages.push({
+                        // @ts-ignore
+                        content: Utils.GetHandlebarsMessage(this.client, message.content, this.moderatingSearchedServerId),
+                        reactions: [],
+                        attachments: attachmentsResult,
+                        embeds: [],
+                        id: message.id,
+                        cleanContent: message.content,
+                        tts: false,
+                        createdAt: GetDate(new Date(message.date)),
+                        createdAtTimestamp: (new Date(message.date)).getTime(),
+                        pinned: false,
+                        type: MessageType.Default,
+                        types: {
+                            Default: true,
+                        },
+                        author: Utils.UserJsonArchived(archivedAccount, this.database)
+                    })
+                }
+            }
+        }
+
+        let channelGroups = []
+        let singleChannels = []
+
+        if (g instanceof Discord.Guild) {
+            channelGroups = Utils.ChannelsInGuild(g).groups
+            singleChannels = Utils.ChannelsInGuild(g).singleChannels
+        } else {
+            if (g.channels) {
+                for (const id in g.channels) {
+                    singleChannels.push({
+                        id: g.channels[id].id,
+                        name: g.channels[id].name,
+                        typeUrl: { 0: 'text', 1: 1, 2: 2 }[g.channels[id].type]
+                    })
+                }
+            }
+        }
 
         for (let i = 0; i < channelGroups.length; i++)
         { if (channel.id === channelGroups[i].id) { channelGroups[i].selected = true; break } }
@@ -2297,6 +2418,12 @@ class WebInterfaceHandlebarsManager {
         const guildCommands = this.client.guilds.cache.get('737954264386764812').commands
         const globalCommands = this.client.application.commands
         const commands = []
+        const icons = {
+            1: 'command',
+            2: 'context-menu',
+            3: 'context-menu',
+        }
+
         guildCommands.cache.forEach(command => {
             const newCommand = {
                 id: command.id,
@@ -2307,8 +2434,10 @@ class WebInterfaceHandlebarsManager {
                 version: command.version,
                 haveOptions: false,
                 global: false,
-                options: []
+                options: [],
+                icon: icons[command.type],
             }
+
             command.options.forEach(option => {
                 newCommand.haveOptions = true
                 newCommand.options.push({
@@ -2329,7 +2458,8 @@ class WebInterfaceHandlebarsManager {
                 version: command.version,
                 haveOptions: false,
                 global: true,
-                options: []
+                options: [],
+                icon: icons[command.type],
             }
             command.options.forEach(option => {
                 newCommand.haveOptions = true

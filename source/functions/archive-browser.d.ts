@@ -111,6 +111,7 @@ export type ArchivedUser = {
 }
 
 export function Users(): ArchivedUser[]
+export function User(id: string): ArchivedUser | null
 export function README(): string
 export function Servers(): Promise<Dictionary<ArchivedGuild>>
 export function Messages(): Promise<ArchivedMessageChannel[]>

@@ -3,7 +3,7 @@ export type Message = {
     type: number
     content: string
     channel_id: string
-    author: User
+    author: CollectedUser
     attachments: Attachment[]
     embeds: Embed[]
     mentions: Mention[]
@@ -120,7 +120,7 @@ export type Embed = BaseEmbed & ({
     type: 'rich'
 })
 
-export type User = {
+export type CollectedUser = {
     id: string
     username: string
     global_name: unknown | null
@@ -174,28 +174,38 @@ export type Invitation = {
 
 export type CollectedGuild = {
     id: string
-    name: string
+    name?: string
     splash?: unknown
     banner?: unknown
-    description: null | string
-    icon: string
-    features: string[]
-    verification_level: number
-    vanity_url_code: null | unknown
-    premium_subscription_count: number
-    nsfw: string
-    nsfw_level: number | null
-    memberCount: number
-    channels: {
+    description?: string
+    icon?: string
+    features?: string[]
+    verification_level?: number
+    vanity_url_code?: unknown
+    premium_subscription_count?: number
+    nsfw?: string
+    nsfw_level?: number
+    memberCount?: number
+    channels?: {
         [key: string]: {
             id: string
             name: string
             type: number
         }
     }
+    entitlements?: {
+
+    },
+    'scheduled-events'?: {
+
+    },
+    integrations?: {
+        message: string
+        code: number
+    }
 }
 
-export type Channel = {
+export type CollectedChannel = {
     messages: Message[],
     id: string,
     guild_id?: string,
@@ -203,11 +213,73 @@ export type Channel = {
     type?: number
 }
 
-export function Load(): {
-    channels: { [key: string]: Channel }
-    invitations: Invitation[]
+export type CollectedUser2 = {
+    profile: {
+        user: {
+            id: string
+            username: string
+            global_name: string
+            avatar: string
+            avatar_decoration_data: null
+            discriminator: string
+            public_flags: number
+            flags: number
+            banner: null
+            banner_color: string
+            accent_color: number
+            bio: string
+        },
+        connected_accounts: {
+            type: string
+            id: string
+            name: string
+            verified: boolean
+            metadata: any
+        }[]
+        premium_since: null
+        premium_type: null
+        premium_guild_since: null
+        profile_themes_experiment_bucket: number
+        user_profile: {
+            bio: string
+            accent_color: number
+            pronouns: string
+        },
+        badges: {
+            id: string
+            description: string
+            icon: string
+            link?: string
+        }[]
+        guild_badges: any[],
+        mutual_guilds: any[],
+        legacy_username: string
+    } | {
+        message: string
+        code: number
+    }
 }
 
-export function Guilds(cache: boolean = true): { [key: string]: CollectedGuild }
+export type CollectedMe = any
 
-export function Invitations(cache: boolean = true): Invitation[]
+export function Load(): {
+    channels: { [key: string]: CollectedChannel }
+    invitations: CollectedInvitation[]
+    users: {
+        "@me": CollectedMe,
+        [id: string]: CollectedUser2
+    }
+    guilds: { [key: string]: CollectedGuild }
+}
+
+export function Guilds(): string[]
+export function Guild(id: string): null | CollectedGuild
+
+export function Channels(): string[]
+export function Channel(id: string): null | CollectedChannel
+export function DMChannel(userId: string): null | CollectedChannel
+
+export function Invitations(cache: boolean = true): CollectedInvitation[]
+
+export function Users(): string[]
+export function User(id: string): CollectedUser2

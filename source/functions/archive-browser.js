@@ -201,6 +201,18 @@ function Users() {
     return users
 }
 
+function User(id) {
+    const accountData = JSON.parse(fs.readFileSync(ARCHIVE_PATH + 'account/user.json', 'utf-8'))
+
+    for (const relationship of accountData.relationships) {
+        if (relationship.id === id) {
+            return relationship
+        }
+    }
+
+    return null
+}
+
 async function Servers() {
     const guilds = Guilds()
     const messageChannels = await Messages()
@@ -235,12 +247,10 @@ async function Servers() {
                     messages: messageChannel.messages,
                 })
             }
-        } else {
-
         }
     }
 
     return guilds
 }
 
-module.exports = { README, Servers, Messages, Account, Users }
+module.exports = { README, Servers, Messages, Account, Users, User }

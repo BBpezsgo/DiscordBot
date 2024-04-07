@@ -441,6 +441,10 @@ input[type="buttonBigL"]:disabled {
 	user-select: none;
 }
 
+.miniicon > svg {
+	height: 16px;
+}
+
 .show-hide-part-button {
     position: fixed;
     top: 0px;

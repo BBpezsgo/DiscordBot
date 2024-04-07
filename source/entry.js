@@ -1,3 +1,6 @@
+// require('./functions/har-discord-browser').Guilds()
+// process.exit()
+
 Error.stackTraceLimit = 128
 console.log('[Script]: Loaded')
 

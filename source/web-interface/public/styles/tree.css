@@ -1,5 +1,5 @@
-.caret,
-.caret-all {
+.caret:not(.caret-show-false),
+.caret-all:not(.caret-show-false) {
 	cursor: pointer;
 	-webkit-user-select: none;
 	/* Safari 3.1+ */
@@ -11,21 +11,22 @@
 	width: 20px;
 }
 
-.caret::before {
+.caret:not(.caret-show-false)::before {
 	content: url('/images/expand.png');
 	color: black;
 	display: inline-block;
+	transform: translateY(3px);
 }
 
-.caret-down::before {
+.caret-down:not(.caret-show-false)::before {
 	content: url('/images/collapse.png') !important;
 }
 
-.caret-up::before {
+.caret-up:not(.caret-show-false)::before {
 	content: url('/images/expand.png') !important;
 }
 
-.caret-all::before {
+.caret-all:not(.caret-show-false)::before {
 	content: url('/images/both.png');
 	color: black;
 	display: inline-block;

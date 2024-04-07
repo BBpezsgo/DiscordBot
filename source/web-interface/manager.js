@@ -59,6 +59,16 @@ const HandlebarsHelpers = {
     },
     'json': function(/** @type {Handlebars.HelperOptions} */ context) {
         return JSON.stringify(context)
+    },
+    "svg": function(/** @type {Handlebars.HelperOptions} */ context) {
+        if (typeof context === 'string') {
+            const _path = Path.join(CONFIG.paths.webInterface, 'public', 'images', context + '.svg')
+            if (fs.existsSync(_path)) {
+                return fs.readFileSync(_path, 'utf8')
+            }
+        } else {
+            return null
+        }
     }
 }
 
@@ -1049,8 +1059,8 @@ class WebInterfaceManager {
             const channelId = req.body.id ?? req.query.id
 
             const guilds = HarBrowser.Guilds()
-            for (const id in guilds) {
-                const guild = guilds[id]
+            for (const id of guilds) {
+                const guild = HarBrowser.Guild(id)
                 for (const _channelId in guild.channels) {
                     const channel = guild.channels[_channelId]
                     

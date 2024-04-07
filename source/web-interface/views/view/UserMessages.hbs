@@ -50,7 +50,7 @@
     </style>
 </head>
 
-<body>
+<body class="ctxpanel">
 	<div id="context-menubar">
         <div id="server-panel">
             <style>
@@ -232,35 +232,40 @@
     </style>
 	<div id="content">
         <div id="channel-panel">
+            
             <form action="/dcbot/view/UserMessages/Back" method="post"
-                style="display: inline-block; margin-right: 20px;"
+                style="display: inline-block; margin: 0px 20px 0px 10px; position: relative; top: -6px"
                 onsubmit="this.style.pointerEvents='none'; this.style.opacity='20%'; setTimeout(() => {Reload()}, 1000);">
                 <input type="submit" value="" class="btn-tool btn-tool-back">
             </form>
 
-            <h1 style="display:inline-block">{{channel.name}}</h1>
-            {{#if channel.archived}}
-            {{else}}
-            {{#if channel.id}}
-            <form action="/UserMessages/Delete" method="post" style="margin: 0; display: inline-block;"
-                onsubmit="
-                    event.preventDefault()
-                    Post('/UserMessages/Delete', event, Reload, 'delete-dm-error')
-                ">
-                <input type="submit" value="Delete DM">
-            </form>
-            {{else}}
-            <form action="/UserMessages/Create" method="post" style="margin: 0; display: inline-block;"
-                onsubmit="
-                    event.preventDefault()
-                    Post('/UserMessages/Create', event, Reload, 'create-dm-error')
-                ">
-                <input type="submit" value="Create DM">
-            </form>
-            {{/if}}
+            <img src="{{channel.userAvatar}}" width="32" height="32" title="Avatar" style="border-radius: 16px; position: relative; top: 7px;">
+            <h1 style="display:inline-block">
+                {{channel.name}}
+            </h1>
+
+            <div style="float: right; margin: 12px;">
+                {{#if channel.id}}
+                <form action="/UserMessages/Delete" method="post" style="margin: 0; display: inline-block;"
+                    onsubmit="
+                        event.preventDefault()
+                        Post('/UserMessages/Delete', event, Reload, 'delete-dm-error')
+                    ">
+                    <input type="submit" value="Delete DM">
+                </form>
+                {{else}}
+                <form action="/UserMessages/Create" method="post" style="margin: 0; display: inline-block;"
+                    onsubmit="
+                        event.preventDefault()
+                        Post('/UserMessages/Create', event, Reload, 'create-dm-error')
+                    ">
+                    <input type="submit" value="Create DM">
+                </form>
+                {{/if}}
+            </div>
+
             <p style="color: #b32d2d;" id="create-dm-error"></p>
             <p style="color: #b32d2d;" id="delete-dm-error"></p>
-            {{/if}}
         </div>
 
         <!--

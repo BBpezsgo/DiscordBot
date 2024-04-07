@@ -278,6 +278,7 @@ class LogManager {
     }
 
     Destroy() {
+        // @ts-ignore
         clearTimeout(this.timer)
     }
 
@@ -336,6 +337,7 @@ class LogManager {
                 const dfdfdf = new Date(0)
                 dfdfdf.setSeconds(this.bot.uptime / 1000)
                 dfdfdf.setHours(dfdfdf.getHours() - 1)
+                // @ts-ignore
                 if (dfdfdf !== '0:00:00') txt += FixedWidth('│' + FixedWidth('Uptime:', 20) + GetTime(dfdfdf), window.width) + '\n'
                 if (this.bot.ws.ping.toString() !== 'NaN') txt += FixedWidth('│' + FixedWidth('Ping:', 20) + (this.bot.ws.ping.toString().replace('NaN', '-')) + ' ms', window.width) + '\n'
                 txt += FixedWidth('│' + FixedWidth('WS State:', 20) + StateText(WsStatus[this.bot.ws.status]), window.width) + '\n'
