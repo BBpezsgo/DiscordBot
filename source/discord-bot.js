@@ -1,4 +1,3 @@
-// @ts-ignore
 const Discord = require('discord.js')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
@@ -144,7 +143,6 @@ module.exports = class DiscordBot {
     GetCommandByName(commandName) {
         for (const command of this.Commands) {
             if (command.Command && command.Command.name === commandName) {
-                // @ts-ignore
                 return command
             }
         }

@@ -186,30 +186,24 @@ const request = https.get(url, function (res) {
     Log(`  Got a response: ${res.statusCode} ${res.statusMessage}`)
 
     let cur = 0
-    if (fs.existsSync('./DiscordBot-Main/full-bytes.json')) { fs.writeFileSync('./full-bytes.json', fs.readFileSync('./DiscordBot-Main/full-bytes.json', { encoding: 'utf-8' }), { encoding: 'utf-8' }) }
-    /** @type {number} */
-    const full = JSON.parse(fs.readFileSync('./full-bytes.json', "utf-8"))
 
     res.on('data', function (chunk) {
         cur += chunk.length
 
         if (logs.length > 0) {
             if (logs[logs.length - 1].includes(' Downloading ')) {
-                logs[logs.length - 1] = `%TASK% Downloading ${Math.min(Math.round(cur/full*100), 100)}% (${GetDataSize(cur)})`
+                logs[logs.length - 1] = `%TASK% Downloading (${GetDataSize(cur)})`
             } else {
-                Log(`%TASK% Downloading ${Math.min(Math.round(cur/full*100), 100)}% (${GetDataSize(cur)})`)
+                Log(`%TASK% Downloading (${GetDataSize(cur)})`)
             }
         } else {
-            Log(`%TASK% Downloading ${Math.min(Math.round(cur/full*100), 100)}% (${GetDataSize(cur)})`)
+            Log(`%TASK% Downloading (${GetDataSize(cur)})`)
         }
         RefreshScreen()
     })
 
     res.on('end', function () {
         Log(`  Downloaded ${cur} bytes`)
-        if (fs.existsSync('./full-bytes.json')) {
-            fs.writeFileSync('./full-bytes.json', cur.toString(), { encoding: 'utf-8' })
-        }
         Log('%TASK% Waiting 1s before unzip')
 
         setTimeout(async () => {

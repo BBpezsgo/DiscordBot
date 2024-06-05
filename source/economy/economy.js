@@ -3,7 +3,6 @@
 const Discord = require('discord.js')
 const fs = require('fs')
 /** @type {import('../config').Config} */
-// @ts-ignore
 const CONFIG = require('../config.json')
 const Path = require('path')
 

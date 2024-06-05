@@ -112,36 +112,4 @@ const WsStatus = [
     'RESUMING'
 ]
 
-const WsStatusText = [
-    'Ready',
-    'Connecting...',
-    'Reconnecting...',
-    'Idle',
-    'Nearly',
-    'Disconnected',
-    'Waiting for guilds...',
-    'Identifying...',
-    'Resuming...'
-]
-
-const NsfwLevel = {
-    0: 'Default',
-    1: 'Explicit',
-    2: 'Safe',
-    3: 'Age restricted',
-}
-
-const MFALevel = {
-    0: 'None',
-    1: 'Elevated',
-}
-
-const VerificationLevel = {
-    NONE: 'None',
-    LOW: 'Low',
-    MEDIUM: 'Medium',
-    HIGH: 'High',
-    VERY_HIGH: 'Very high',
-}
-
-module.exports = { VerificationLevel, MFALevel, NsfwLevel, WsStatusText, WsStatus, INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, ColorRoles, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId, CliColor }
+module.exports = { WsStatus, INFO, ERROR, WARNING, SHARD, DEBUG, DONE, Color, ColorRoles, activitiesDesktop, activitiesMobile, usersWithTax, ChannelId, CliColor }
