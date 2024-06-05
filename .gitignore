@@ -7,12 +7,10 @@ package-lock.json
 Start.lnk
 file.zip
 DiscordBot-main/
-source/web-interface/old/
-source/web-interface/old-2/
+source/web-interface
 source/node.error.log
 source/node.stderr.log
 source/log/
-source/web-interface/log/
 source/exitdata.txt
 source/FLR.json
 source/GST.json

@@ -10,7 +10,6 @@ export type Config = {
     }
     paths: {
         base: string
-        webInterface: string
     }
     firebase: import('firebase/app').FirebaseOptions
 }

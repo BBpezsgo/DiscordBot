@@ -1,3 +1,4 @@
+// @ts-ignore
 const Discord = require('discord.js')
 /** @type {import('./config').Config} */
 const CONFIG = require('./config.json')
@@ -20,19 +21,76 @@ const { calculateAddXp } = require('./economy/xpFunctions')
 
 module.exports = class DiscordBot {
     /**
+     * @type {Array<import("./commands2/base").Command>}
+     */
+    Commands
+    /**
+     * @readonly
+     * @type {'DESKTOP' | 'MOBILE'}
+     */
+    Platform
+    /**
+     * @readonly
+     * @type {StatesManager}
+     */
+    StatesManager
+    /**
+     * @type {boolean}
+     */
+    IsStopped
+    /**
+     * @readonly
+     * @type {Discord.Client<boolean>}
+     */
+    Client
+    /**
+     * @readonly
+     * @type {LogManager}
+     */
+    LogManager
+
+    /**
+     * @readonly
+     * @type {string}
+     */
+    ID
+
+    /**
+     * @readonly
+     * @type {Array<string>}
+     */
+    ListOfHelpRequiestUsers
+
+    /**
+     * @readonly
+     * @type {DatabaseManager}
+     */
+    Database
+    /**
+     * @readonly
+     * @type {import('./functions/news')}
+     */
+    NewsManager
+    /**
+     * @readonly
+     * @type {import('./economy/economy').Economy}
+     */
+    Economy
+    /**
+     * @readonly
+     * @type {import('./commands/music/functions')}
+     */
+    MusicPlayer
+
+    /**
      * @param {'DESKTOP' | 'MOBILE'} platform
      */
     constructor(platform) {
         try {
-            /** @type {import("./commands2/base").Command[]} */
             this.Commands = []
-            /** @type {'DESKTOP' | 'MOBILE'} */
             this.Platform = platform
-            /** @type {StatesManager} */
             this.StatesManager = new StatesManager()
-            /** @type {boolean} */
             this.IsStopped = true
-            /** @type {Discord.Client<boolean>} */
             this.Client = new Discord.Client({
                 intents:
                 [
@@ -53,18 +111,14 @@ module.exports = class DiscordBot {
                     ]
                 }
             })
-            /** @type {LogManager} */
             this.LogManager = new LogManager(this.Client, this.StatesManager)
 
             this.SetupListeners()
 
-            /** @type {string} */
             this.ID = '738030244367433770'
 
-            /** @type {string[]} */
             this.ListOfHelpRequiestUsers = []
 
-            /** @type {DatabaseManager | null} */
             this.Database = new DatabaseManager(Path.join(CONFIG.paths.base, './database/'), Path.join(CONFIG.paths.base, './database-copy/'), this.StatesManager)
 
             const NewsManager = require('./functions/news')
@@ -78,6 +132,7 @@ module.exports = class DiscordBot {
 
             this.StatesManager.botLoaded = true
         } catch (error) {
+            console.error(error)
             LogError(error)
         }
     }
@@ -88,7 +143,7 @@ module.exports = class DiscordBot {
      */
     GetCommandByName(commandName) {
         for (const command of this.Commands) {
-            if (command.Command && command.OnCommand && command.Command.name === commandName) {
+            if (command.Command && command.Command.name === commandName) {
                 // @ts-ignore
                 return command
             }
@@ -137,7 +192,7 @@ module.exports = class DiscordBot {
 
         this.Client.on(Discord.Events.ShardReady, (shardID) => {
             const mainGuild = this.Client.guilds.cache.get('737954264386764812')
-            const quizChannel = mainGuild.channels.cache.get('799340273431478303')
+            const quizChannel = mainGuild?.channels.cache.get('799340273431478303')
             if (quizChannel && quizChannel.isTextBased()) {
                 quizChannel.messages.fetch()
             }
@@ -185,6 +240,7 @@ module.exports = class DiscordBot {
                     this.OnMessage(fetchedMessage)
                 })
                 .catch(error => {
+                    console.error(error)
                     LogError(error)
                     this.OnMessage(message)
                 })
@@ -202,15 +258,9 @@ module.exports = class DiscordBot {
     
         const lastDay = this.Database.dataBot.day
     
-        try {
-            // require('./functions/commands')
-        } catch (error) {
-            console.error(error)
-        }
-    
         setInterval(() => {
             const index = Math.floor(Math.random() * (activitiesDesktop.length - 1))
-            this.Client.user.setActivity(activitiesDesktop[index])
+            this.Client.user?.setActivity(activitiesDesktop[index])
         }, 10000)
     
         require('./functions/dailyWeatherReport').TrySendWeatherReport(this.StatesManager, this.Client, ChannelId.ProcessedNews)
@@ -219,12 +269,12 @@ module.exports = class DiscordBot {
     
         require('./economy/tax').Taxation(this.Database, lastDay)
     
-        this.Database.SaveDatabase()
+        this.Database?.SaveDatabase()
         
-        await this.NewsManager.OnStart(this.Client)
+        await this.NewsManager?.OnStart(this.Client)
     
         setInterval(() => {
-            this.NewsManager.TryProcessNext(this.Client)
+            this.NewsManager?.TryProcessNext(this.Client)
         }, 2000)
     
         try {
@@ -233,7 +283,7 @@ module.exports = class DiscordBot {
             channelsWithSettings.forEach(channelWithSettings => {
                 this.Client.channels.fetch(channelWithSettings)
                     .then((chn) => {
-                        if (chn.isTextBased()) chn.messages.fetch({ limit: 10 })
+                        if (chn?.isTextBased()) chn.messages.fetch({ limit: 10 })
                             .then(async (messages) => {
                                 messages.forEach(message => {
                                     AutoReact(message)
@@ -242,6 +292,7 @@ module.exports = class DiscordBot {
                     })
             })
         } catch (err) {
+            console.error(err)
             LogError(err)
         }
 
@@ -262,6 +313,7 @@ module.exports = class DiscordBot {
                 const command = require(filePath)
                 this.Commands.push(command)
             } catch (error) {
+                console.error(error)
                 LogError(error)
             }
         }
@@ -294,11 +346,13 @@ module.exports = class DiscordBot {
             if (require('./commands/redditsave').OnButtonClick(interaction)) return
             
             try {
-                if (interaction.user.username !== interaction.message.embeds[0].author.name) {
+                if (interaction.user.username !== interaction.message.embeds[0].author?.name) {
                     interaction.reply({ content: '> \\❗ **Ez nem a tied!**', ephemeral: true })
                     return
                 }
-            } catch (error) { }
+            } catch (error) {
+                console.error(error)
+            }
 
             for (const command of this.Commands) {
                 if (command.OnButton) {
@@ -343,13 +397,17 @@ module.exports = class DiscordBot {
                 let newColorRoleId = ''
     
                 try {
-                    const memberRoles = interaction.member.roles
+                    const memberRoles = interaction.member?.roles
+                    if (!memberRoles) {
+                        interaction.channel?.send({ content: '> \\❗ **Error: Bruh**' })
+                        return
+                    }
                     if (Array.isArray(memberRoles)) {
-                        interaction.channel.send({ content: '> \\❗ **Error: Bruh**' })
+                        interaction.channel?.send({ content: '> \\❗ **Error: Bruh**' })
                         return
                     }
                     if (!(interaction.member instanceof Discord.GuildMember)) {
-                        interaction.channel.send({ content: '> \\❗ **Error: Bruh**' })
+                        interaction.channel?.send({ content: '> \\❗ **Error: Bruh**' })
                         return
                     }
                     if (selectedIndex == 'szavazas') {
@@ -429,7 +487,8 @@ module.exports = class DiscordBot {
                     await interaction.member.fetch()
                     await interaction.update(CommandSettings(this.Database, interaction.member, privateCommand))
                 } catch (error) {
-                    interaction.channel.send({ content: '> \\❗ **Error: ' + error + '**' })
+                    console.error(error)
+                    interaction.channel?.send({ content: '> \\❗ **Error: ' + error + '**' })
                 }
     
                 return
@@ -510,14 +569,14 @@ module.exports = class DiscordBot {
     
         if (thisIsPrivateMessage) {
             this.Database.SaveUserToMemoryAll(sender, sender.username)
-        } else {
+        } else if (message.member) {
             this.Database.SaveUserToMemoryAll(sender, message.member.displayName.toString())
         }
     
-        if (message.content.length > 2) {
-            if (thisIsPrivateMessage === false) {
-                this.Economy.AddScore(message.member, calculateAddXp(message).total)
-            }
+        if (message.content.length > 2 &&
+            thisIsPrivateMessage === false &&
+            message.member) {
+            this.Economy.AddScore(message.member, calculateAddXp(message).total)
         }
     
         /*
@@ -553,6 +612,7 @@ module.exports = class DiscordBot {
             try {
                 await commandHandler.OnCommand(command, privateCommand, this)
             } catch (error) {
+                console.error(error)
                 LogError(error)
                 await command.reply({
                     content: `> \\❌ **Error:** ${error}`,
