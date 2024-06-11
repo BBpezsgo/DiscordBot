@@ -61,6 +61,7 @@ function DownloadAndOverride(url) {
 
 /**
  * @param {string | https.RequestOptions | URL} url
+ * @returns {Promise<void>}
  */
 function DownloadAndSaveAsync(url) {
     return new Promise(resolve => {
@@ -110,6 +111,7 @@ function Load(url) {
 
 /**
  * @param {Discord.Client} client
+ * @returns {Promise<void>}
  */
 function DownloadEverything(client) {
     return new Promise(resolve => {

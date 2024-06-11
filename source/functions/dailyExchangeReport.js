@@ -75,6 +75,7 @@ async function GetOldReport(statesManager, channel) {
     for (let i = 0; i < messages.size; i++) {
         statesManager.ExchangeReport.Text = `Search old Exchange report message (Loop messages ${i}/${messages.size})...`
         const msg = messages.at(i)
+        if (!msg) { continue }
         try {
             const message = await msg.fetch()
             if (message.embeds.length == 1) {

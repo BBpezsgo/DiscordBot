@@ -3,15 +3,6 @@
 const { DiscordAPIError } = require("discord.js")
 
 /**
- * @param {object} obj
- */
-function GetClassName(obj) {
-    const funcNameRegex = /function (.{1,})\(/
-    const results = funcNameRegex.exec(obj.constructor.toString())
-    return (results && results.length > 1) ? results[1] : ''
-}
-
-/**
  * @param {any} error
  * @param {{ key: string, value: any }[]} parameters
  */

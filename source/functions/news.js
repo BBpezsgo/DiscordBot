@@ -32,15 +32,20 @@ async function CreateNews(message) {
         const vidInfo = info.videoDetails
 
         let channelIconUrl = undefined
-        if (info.videoDetails.author.thumbnails.length > 0) {
+        if (info.videoDetails.author.thumbnails &&
+            info.videoDetails.author.thumbnails.length > 0) {
             channelIconUrl = info.videoDetails.author.thumbnails[0].url
         }
 
         const embed = new Discord.EmbedBuilder()
-            .setAuthor({ name: info.videoDetails.author.name, url: info.videoDetails.author.channel_url, iconURL: channelIconUrl })
+            .setAuthor({
+                name: info.videoDetails.author.name,
+                url: info.videoDetails.author.channel_url,
+                iconURL: channelIconUrl
+            })
             .setTitle(vidInfo.title)
             .setURL(vidInfo.video_url)
-            .setDescription((vidInfo.description.length>150)?(vidInfo.description.substring(0, 150 - 3) + '...'):(vidInfo.description))
+            .setDescription((vidInfo.description.length > 150) ? (vidInfo.description.substring(0, 150 - 3) + '...') : (vidInfo.description))
             .setImage(`https://i.ytimg.com/vi/${vidInfo.videoId}/maxresdefault.jpg`)
             .setColor('#ff0000')
             .setTimestamp(Date.parse(vidInfo.uploadDate))
@@ -211,7 +216,7 @@ async function CreateNews(message) {
             }
         }
         if (message.attachments.size > 0) {
-            embed.setImage(message.attachments.at(0).url)
+            embed.setImage(message.attachments.first().url)
         }
     }
 

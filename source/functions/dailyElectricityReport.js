@@ -71,6 +71,7 @@ async function GetOldReport(statesManager, channel) {
     for (let i = 0; i < messages.size; i++) {
         statesManager.MVMReport.Text = `Search old MVM report message (Loop messages ${i}/${messages.size})...`
         const msg = messages.at(i)
+        if (!msg) { continue }
         const message = await msg.fetch()
         if (message.embeds.length == 1) {
             if (message.embeds[0].title == 'Tervezett áramszünetek') {
@@ -131,14 +132,14 @@ async function TrySendMVMReport(statesManager, client, channelID) {
     statesManager.MVMReport.Text = 'Search old MVM report message...'
     const oldReport = await GetOldReport(statesManager, channel)
 
-    if (oldReport === null || oldReport === undefined) {
+    if (!oldReport) {
+        await SendReport(channel, statesManager)
+    } else {
         if (new Date(oldReport.createdTimestamp).getDate() != new Date(Date.now()).getDate()) {
+            statesManager.MVMReport.Text = 'Delete old MVM report message...'
+            await oldReport.delete()
             await SendReport(channel, statesManager)
         }
-    } else {
-        statesManager.MVMReport.Text = 'Delete old MVM report message...'
-        await oldReport.delete()
-        await SendReport(channel, statesManager)
     }
 
     statesManager.MVMReport.Text = ''

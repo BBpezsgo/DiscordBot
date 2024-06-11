@@ -1,5 +1,6 @@
 Error.stackTraceLimit = 128
 console.log('[Script]: Loaded')
+const discordAppInterface = require('discord-app-interface')
 
 process.title = "Discord BOT"
 
@@ -19,7 +20,7 @@ ConsoleUtilities.on('onKeyDown', key => {
 })
 ConsoleUtilities.Listen()
 
-console.log('[Script]: Create BOT instance ...')
+console.log('[Script]: Instantiating app ...')
 
 const DiscordBot = new(require('./discord-bot'))('DESKTOP')
 
@@ -33,5 +34,8 @@ if (!DiscordBot.Database?.LoadDatabase()) {
     console.log('[Script]: ' + CliColor.FgRed + "Can't read database!" + CliColor.FgDefault)
     setTimeout(() => { process.exit(-1) }, 2000)
 } else {
+    discordAppInterface({
+        discordClient: DiscordBot.Client,
+    })
     DiscordBot.Login()
 }

@@ -139,7 +139,7 @@ function GetEmbed(weatherData, isCache) {
 
 /**
  * @param {{alerts:Met.MET.ResultCounty,day:'today'|'tomorrow'}[]} alerts
- * @returns {Discord.EmbedBuilder}
+ * @returns {Discord.EmbedBuilder | null}
  */
 function GetAlertEmbed(alerts) {
     if (alerts.length <= 0) { return null }
@@ -279,6 +279,7 @@ async function GetOldDailyWeatherReport(statesManager, channel) {
     for (let i = 0; i < messages.size; i++) {
         statesManager.WeatherReport.Text = `Search old weather report message (Loop messages ${i}/${messages.size})...`
         const msg = messages.at(i)
+        if (!msg) { continue }
         try {
             const message = await msg.fetch()
             if (message.embeds.length > 0) {

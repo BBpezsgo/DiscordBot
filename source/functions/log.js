@@ -148,16 +148,22 @@ function StateTextBot(state) {
     return Capitalize(state)
 }
 
-/** @param {string} text */
+/**
+ * @param {string} text
+ */
 function RemoveColors(text) {
     return text.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '')
 }
 
-/** @param {string} text @param {number} width @param {number} marginLeft */
-function FixedWidth(text, width, marginLeft = undefined) {
+/**
+ * @param {string} text
+ * @param {number} width
+ * @param {number | null} marginLeft
+ */
+function FixedWidth(text, width, marginLeft = null) {
     let txt = text + ''
     const textLength = RemoveColors(txt).length
-    if (marginLeft !== undefined) {
+    if (marginLeft !== null) {
         if (textLength + marginLeft > width) {
             txt = txt.substring(0, width - 3 - marginLeft) + '...'
         }
@@ -193,7 +199,7 @@ class LogManager {
         /** @type {string}*/
         this.loadingOverride = ''
 
-        /** @type {NodeJS.Timer} */
+        /** @type {NodeJS.Timer | null} */
         this.timer = null
 
         /** @type {number} */
@@ -335,7 +341,7 @@ class LogManager {
                 txt += FixedWidth('┌──── Client', window.width)
                 if (this.bot.readyAt) txt += FixedWidth('│' + FixedWidth('Ready at:', 20) + GetTime(this.bot.readyAt), window.width) + '\n'
                 const dfdfdf = new Date(0)
-                dfdfdf.setSeconds(this.bot.uptime / 1000)
+                dfdfdf.setSeconds((this.bot.uptime ?? 0) / 1000)
                 dfdfdf.setHours(dfdfdf.getHours() - 1)
                 // @ts-ignore
                 if (dfdfdf !== '0:00:00') txt += FixedWidth('│' + FixedWidth('Uptime:', 20) + GetTime(dfdfdf), window.width) + '\n'
